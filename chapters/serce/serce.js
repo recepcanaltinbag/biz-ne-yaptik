@@ -1413,7 +1413,7 @@
       <p class="verdict">Düşürdüğün serçe: <b>${k}</b>. Gerçekte bu sayı yüz milyonlarcaydı.${game.food.some(f => f < 70) ? ` Şişirilmiş raporlar yüzünden köylünün payı bir yıl normalin <b>%${Math.min(...game.food)}</b> düzeyine düştü. Gerçek kıtlığı en çok bu büyüttü.` : ''}</p>
       <canvas class="rchart" id="rchart"></canvas>
       <div class="legend"><span style="--c:var(--bird)">Serçe</span><span style="--c:var(--bug)">Böcek</span><span style="--c:var(--grain)">Tahıl</span><span style="--c:#9aa59a">Tarihteki serçe (kesikli)</span></div>
-      <div class="rbtns"><button class="hbtn" id="r-again">↺ Tekrar oyna</button><button class="hbtn" id="r-next">Kendin dene →</button></div>`;
+      <div class="rbtns"><button class="hbtn" id="r-again">↺ Tekrar oyna</button><button class="hbtn" id="r-next">Kendin dene →</button><a class="hbtn" href="../../#bolumler">☰ Tüm bölümler</a></div>`;
     $('r-again').onclick = () => { resetGame(); goTo(slideOf('game')); };
     $('r-next').onclick = () => goTo(slideOf('sandbox'));
     requestAnimationFrame(drawResultChart);

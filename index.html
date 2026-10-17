@@ -8,8 +8,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Inter:wght@400;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/css/badges.css?v=261017151239">
-<link rel="stylesheet" href="assets/css/style.css?v=261017151239">
+<link rel="stylesheet" href="assets/css/badges.css?v=261017153756">
+<link rel="stylesheet" href="assets/css/style.css?v=261017153756">
 </head>
 <body>
 
@@ -62,10 +62,10 @@
     </details>
   </div>
 </footer>
-<script src="assets/js/stats.js?v=261017151239"></script>
-<script src="assets/js/badges.js?v=261017151239"></script>
-<script src="assets/js/toon.js?v=261017151239"></script>
-<script src="assets/js/chapters.js?v=261017151239"></script>
+<script src="assets/js/stats.js?v=261017153756"></script>
+<script src="assets/js/badges.js?v=261017153756"></script>
+<script src="assets/js/toon.js?v=261017153756"></script>
+<script src="assets/js/chapters.js?v=261017153756"></script>
 <script>
 (() => {
   const B = window.Badges; if (!B) return;
@@ -79,22 +79,27 @@
     const tip = !on && !d.hidden;
     return `<div class="bp-card ${on ? 'on' : ''} ${d.hidden ? 'secret' : ''}" title="${on ? d.fact.replace(/"/g, '&quot;') : ''}"><div class="bp-ic">${B.medal(d, on)}</div><div><div class="bp-n">${title}</div><div class="bp-s${tip ? ' hint' : ''}">${tip ? `<span class="hint-k">👁 ipucu</span><span class="hint-t">${sub}</span>` : sub}</div></div></div>`;
   };
-  let openId = null;
+  let openId = null, openSeason = null;
   function render() {
     const [g, n] = B.count(); document.getElementById('badge-count').textContent = g + '/' + n;
     const got = B.DEFS.filter(d => B.has(d.id)).sort((a, b) => (B.date(b.id) || '').localeCompare(B.date(a.id) || ''));
     if (openId === null) openId = got.length ? got[0].ch : (SEAS[0] && SEAS[0].ch[0].id);
     const recent = got.length ? `<div class="bp-recent"><span>Son kazanılanlar</span>${got.slice(0, 5).map(d => `<span class="bp-mini" title="${d.name}">${B.medal(d, true)}</span>`).join('')}<b>${g}/${n}</b></div>` : `<p class="bp-empty">Henüz rozetin yok. Bir bölüm oyna, ilkini kazan!</p>`;
-    document.getElementById('badge-groups').innerHTML = recent + SEAS.map(se => `<div class="bp-season">${se.icon} Sezon ${se.i + 1} · ${se.title}</div>` + se.ch.map(c => {
+    if (openSeason === null) { const se = SEAS.find(x => x.ch.some(c => c.id === openId)); openSeason = se ? se.i : (SEAS[0] ? SEAS[0].i : -1); }
+    document.getElementById('badge-groups').innerHTML = recent + SEAS.map(se => {
+      const sg = se.ch.reduce((a, c) => a + B.count(c.id)[0], 0), sn = se.ch.reduce((a, c) => a + B.count(c.id)[1], 0), so = se.i === openSeason;
+      return `<button class="bp-season ${so ? 'open' : ''}" data-se="${se.i}" aria-expanded="${so}"><span>${se.icon} Sezon ${se.i + 1} · ${se.title}</span><b>${sg}/${sn}</b><i>▾</i></button>` + (so ? se.ch.map(c => {
       const [gg, nn] = B.count(c.id), isOpen = c.id === openId;
       const minis = B.list(c.id).filter(d => B.has(d.id)).map(d => `<span class="bp-mini">${B.medal(d, true)}</span>`).join('');
       return `<section class="bp-group ${isOpen ? 'open' : ''}" data-ch="${c.id}">
         <button class="bp-row" aria-expanded="${isOpen}"><span class="bp-cn">${c.name}</span><span class="bp-minis">${minis}</span><span class="bp-prog"><i style="width:${nn ? gg / nn * 100 : 0}%"></i></span><span class="bp-cnt">${gg}/${nn}</span><span class="bp-car">▾</span></button>
         ${isOpen ? `<div class="bp-grid">${B.list(c.id).map(card).join('')}</div><a class="bp-go" href="${c.href}">▶ Bölüme git</a>` : ''}
       </section>`;
-    }).join('')).join('');
+    }).join('') : '');
+    }).join('');
     const root = document.getElementById('badge-groups');
     B.paint(root);
+    root.querySelectorAll('.bp-season').forEach(b => b.onclick = e => { e.stopPropagation(); const i = Number(b.dataset.se); openSeason = openSeason === i ? -1 : i; render(); });
     root.querySelectorAll('.bp-row').forEach(r => r.onclick = e => { e.stopPropagation(); const id = r.parentElement.dataset.ch; openId = openId === id ? '' : id; render(); });
     root.querySelectorAll('.hint').forEach(h => h.onclick = e => { e.stopPropagation(); h.classList.toggle('show'); });
   }

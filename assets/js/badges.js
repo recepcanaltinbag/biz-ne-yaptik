@@ -38,13 +38,30 @@
       fact: 'Kurbağalar zaman zaman araçlara ve yüklere saklanarak yeni bölgelere taşındı.' },
     { id: 'kurbaga-bacak', ch: 'kurbaga', icon: '🦵', name: 'Uzun bacaklar', hidden: true,
       fact: 'Yayılma cephesindeki kurbağaların bacakları, arkadakilere göre belirgin şekilde daha uzun.' },
+    // --- Çöle Dönen Deniz ---
+    { id: 'aral-deniz', ch: 'aral', icon: '🌊', name: 'Deniz yaşıyor', hint: 'Martılar hâlâ dalgaya konabilsin.',
+      fact: '1960\'ta Aral 68.000 km² idi: Van Gölü\'nün 18 katı.' },
+    { id: 'aral-balik', ch: 'aral', icon: '🐟', name: 'Balıkçının dostu', hint: 'Konserve fabrikasının bacası hiç sönmesin.',
+      fact: '1960\'ta Aral\'da yılda 40.000 tonu aşkın balık tutuluyordu.' },
+    { id: 'aral-plan', ch: 'aral', icon: '🔧', name: 'Hem pamuk hem deniz', hint: 'Her damlayı iki kez düşün.',
+      fact: 'Bazı tahminlere göre Orta Asya\'da sulama suyunun yarısı tarlaya ulaşmadan kayboluyordu.' },
+    { id: 'aral-kokaral', ch: 'aral', icon: '🧱', name: 'Kuzey\'in umudu', hint: 'Küçük bir set, büyük bir umut.',
+      fact: 'Kokaral seti 2005\'te bitti. Kuzey Aral\'ın tuzu azaldı, balıklar geri döndü.' },
+    { id: 'aral-deve', ch: 'aral', icon: '🐫', name: 'Çölün gemisi', hidden: true,
+      fact: 'Aralkum, dünyanın en genç çöllerinden biri: yarım asırdan kısa sürede oluştu.' },
+    { id: 'aral-gemi', ch: 'aral', icon: '⚓', name: 'Gemi mezarlığı', hidden: true,
+      fact: 'Moynak\'taki gemiler bir zamanlar limanda yüzüyordu. Bugün en yakın su onlarca kilometre ötede.' },
+    { id: 'aral-tuz', ch: 'aral', icon: '🧂', name: 'Son balık', hidden: true,
+      fact: '2010\'larda Güney Aral\'ın suyu okyanustan üç kat daha tuzluydu.' },
+    { id: 'aral-sibirya', ch: 'aral', icon: '🗺️', name: 'Hayal projesi', hidden: true,
+      fact: 'Sibirya nehirlerini Orta Asya\'ya çevirme projesi 1986\'da iptal edildi.' },
   ];
 
   // rozet madalyonları: bölüm fotoğrafından (çizgi film filtresiyle) rozete özel bir kesit + renkli çerçeve + simge
   // fotoğraflar sitede barındırılır; yol, bu betiğin adresine göre çözülür (ana sayfa ve bölüm sayfaları için aynı)
   const BASE = new URL('../img/cards/', (document.currentScript && document.currentScript.src) || location.href).href;
-  const IMG = { S: BASE + 'kill-bird-and-insect.jpg', K: BASE + 'cane-toad-bufo-marinus.jpg' };
-  const ART = {"serce-dost": ["S", "50% 12%", 230, "#7fb069"], "serce-durust": ["S", "25% 55%", 260, "#e0b04a"], "serce-vicdan": ["S", "75% 35%", 250, "#6aa6c9"], "serce-bolluk": ["S", "50% 92%", 220, "#d9a441"], "serce-gozluk": ["S", "85% 8%", 300, "#f08a4b"], "serce-defter": ["S", "15% 30%", 280, "#9a7bd1"], "serce-rock": ["S", "60% 65%", 320, "#d0587e"], "serce-rekor": ["S", "35% 85%", 300, "#8a6fd8"], "kurbaga-yok": ["K", "30% 40%", 260, "#c96a5a"], "kurbaga-kakadu": ["K", "70% 55%", 240, "#7fb069"], "kurbaga-hedef": ["K", "50% 30%", 300, "#e0b04a"], "kurbaga-bilim": ["K", "20% 70%", 280, "#6aa6c9"], "kurbaga-tasmanya": ["K", "85% 20%", 320, "#5f9fb5"], "kurbaga-gemi": ["K", "10% 15%", 300, "#7d74d4"], "kurbaga-otostop": ["K", "60% 85%", 280, "#c98a4b"], "kurbaga-bacak": ["K", "90% 80%", 260, "#a46fd0"]};
+  const IMG = { S: BASE + 'kill-bird-and-insect.jpg', K: BASE + 'cane-toad-bufo-marinus.jpg', A: BASE + 'moynaq-aral-sea-6226807306.jpg' };
+  const ART = {"serce-dost": ["S", "50% 12%", 230, "#7fb069"], "serce-durust": ["S", "25% 55%", 260, "#e0b04a"], "serce-vicdan": ["S", "75% 35%", 250, "#6aa6c9"], "serce-bolluk": ["S", "50% 92%", 220, "#d9a441"], "serce-gozluk": ["S", "85% 8%", 300, "#f08a4b"], "serce-defter": ["S", "15% 30%", 280, "#9a7bd1"], "serce-rock": ["S", "60% 65%", 320, "#d0587e"], "serce-rekor": ["S", "35% 85%", 300, "#8a6fd8"], "kurbaga-yok": ["K", "30% 40%", 260, "#c96a5a"], "kurbaga-kakadu": ["K", "70% 55%", 240, "#7fb069"], "kurbaga-hedef": ["K", "50% 30%", 300, "#e0b04a"], "kurbaga-bilim": ["K", "20% 70%", 280, "#6aa6c9"], "kurbaga-tasmanya": ["K", "85% 20%", 320, "#5f9fb5"], "kurbaga-gemi": ["K", "10% 15%", 300, "#7d74d4"], "kurbaga-otostop": ["K", "60% 85%", 280, "#c98a4b"], "kurbaga-bacak": ["K", "90% 80%", 260, "#a46fd0"], "aral-deniz": ["A", "80% 30%", 230, "#5b93b8"], "aral-balik": ["A", "20% 50%", 260, "#6d8fa0"], "aral-plan": ["A", "50% 80%", 240, "#7fb069"], "aral-kokaral": ["A", "65% 20%", 280, "#e0b04a"], "aral-deve": ["A", "35% 70%", 300, "#c49a6c"], "aral-gemi": ["A", "50% 50%", 320, "#8a6fd8"], "aral-tuz": ["A", "10% 85%", 300, "#b9a98a"], "aral-sibirya": ["A", "90% 60%", 280, "#a46fd0"]};
   function medal(def, on) {
     const [im, pos, zoom, ring] = ART[def.id] || ['S', '50% 50%', 200, '#e0b04a'];
     const ic = on ? def.icon : def.hidden ? '?' : '🔒';

@@ -385,12 +385,12 @@
         if (st.fenced[c]) { ctx.strokeStyle = 'rgba(138,90,58,.75)'; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.arc(x, y, Math.max(2.6, cs * 0.24), 0, 6.283); ctx.stroke(); }
       }
     }
-    // yerli avcılar
+    // yerli yırtıcılar
     ctx.textAlign = 'center';
     for (const s of SITES) {
       const [x, y] = P(s.lon, s.lat); s.x = x; s.y = y - 10 * U;
       const health = sitePred(st, s);
-      // yerli avcı: emoji değil, çizilmiş ve hareket eden bir hayvan
+      // yerli yırtıcı: emoji değil, çizilmiş ve hareket eden bir hayvan
       const dead = health < 0.45, S = 1.05 * U * zs;
       ctx.fillStyle = 'rgba(0,0,0,.12)'; ctx.beginPath(); ctx.ellipse(x, y + 2 * S, 18 * S, 4 * S, 0, 0, 6.283); ctx.fill();
       ctx.globalAlpha = dead ? 0.55 : 1;
@@ -870,7 +870,7 @@
         site.hit = true;
         if (!game.focus || performance.now() > game.focus.until) focus(site.lon, site.lat, 2.2, 4200);
         say(site, st.p.teach >= 0.25 ? 'Iyy! Bu kurbağanın tadı\nberbat. Bir daha asla!' : 'Bu da ne? Lezzetli\ngörünüyor...');
-        once('site-' + site.name, () => toast(site.ic, site.name, st.p.teach >= 0.25 ? 'Eğitilmiş avcılar kurbağalardan uzak duruyor. Kayıplar beklenenden az.' : 'Kurbağayı yiyen avcılar zehirlenip ölüyor. Bazı bölgelerde sayıları %90\'dan fazla azalabiliyor.', st.p.teach >= 0.25 ? 'good' : 'bad'));
+        once('site-' + site.name, () => toast(site.ic, site.name, st.p.teach >= 0.25 ? 'Eğitilmiş yırtıcılar kurbağalardan uzak duruyor. Kayıplar beklenenden az.' : 'Kurbağayı yiyen yırtıcılar zehirlenip ölüyor. Bazı bölgelerde sayıları %90\'dan fazla azalabiliyor.', st.p.teach >= 0.25 ? 'good' : 'bad'));
       }
     }
     const MS = [
@@ -943,7 +943,7 @@
     if (!last || game.state !== 'end') { $('result').innerHTML = '<h2>Önce oyunu bitir</h2><button class="hbtn">← Oyuna dön</button>'; $('result').querySelector('button').onclick = () => goTo(slideOf('game')); return; }
     let title, text;
     if (game.noToads) { title = 'Kurbağasız Avustralya'; text = 'Uyarıyı dinledin. Kamış böceği birkaç yıl sonra kimyasallarla kontrol altına alındı; kurbağaya hiç gerek yokmuş. Kuzey kedileri, goannalar ve timsahlar bu kararı hiç bilmeyecek.'; }
-    else if (last.pred >= 0.45 || last.areaPct <= H_END.areaPct * 0.8) { title = 'Fark yarattın'; text = 'Kurbağaları durduramadın, kimse durduramazdı. Ama doğru araçlara bütçe ayırarak yerli avcıların çoğunu korudun. Salmak bir günde oldu, telafisi bir asır sürüyor.'; }
+    else if (last.pred >= 0.45 || last.areaPct <= H_END.areaPct * 0.8) { title = 'Fark yarattın'; text = 'Kurbağaları durduramadın, kimse durduramazdı. Ama doğru araçlara bütçe ayırarak yerli yırtıcıların çoğunu korudun. Salmak bir günde oldu, telafisi bir asır sürüyor.'; }
     else { title = 'Kıtayı kurbağalara verdin'; text = 'Tarih tekrarlandı: 102 kurbağa, 200 milyonu aşan bir ordu oldu. Kamış böceği ise hiç umursamadı.'; }
     const pct = v => `%${Math.round(v * 100)}`;
     $('result').innerHTML = `
@@ -954,11 +954,11 @@
       <div class="rgrid">
         <div><div class="y">Yayıldığı alan</div><div class="v">%${last.areaPct.toFixed(0)}</div><div class="h">tarihte: %${H_END.areaPct.toFixed(0)}</div></div>
         <div><div class="y">Kurbağa</div><div class="v">${game.noToads ? '0' : fmtToads(last.toads)}</div><div class="h">tarihte: ${fmtToads(H_END.toads)}</div></div>
-        <div><div class="y">Yerli avcılar</div><div class="v" style="color:${last.pred >= 0.45 ? 'var(--green)' : 'var(--danger)'}">${pct(last.pred)}</div><div class="h">tarihte: ${pct(H_END.pred)}</div></div>
+        <div><div class="y">Yerli yırtıcılar</div><div class="v" style="color:${last.pred >= 0.45 ? 'var(--green)' : 'var(--danger)'}">${pct(last.pred)}</div><div class="h">tarihte: ${pct(H_END.pred)}</div></div>
       </div>
       <canvas class="rchart" id="rchart"></canvas>
-      <div class="legend"><span style="--c:#8a7a3a">Alan</span><span style="--c:#4f7a4a">Yerli avcılar</span><span style="--c:#9aa59a">Tarihteki alan (kesikli)</span></div>
-      <div class="rbtns"><button class="hbtn" id="r-again">↺ Tekrar oyna</button><button class="hbtn" id="r-next">Kendin dene →</button></div>`;
+      <div class="legend"><span style="--c:#8a7a3a">Alan</span><span style="--c:#4f7a4a">Yerli yırtıcılar</span><span style="--c:#9aa59a">Tarihteki alan (kesikli)</span></div>
+      <div class="rbtns"><button class="hbtn" id="r-again">↺ Tekrar oyna</button><button class="hbtn" id="r-next">Kendin dene →</button><a class="hbtn" href="../../#bolumler">☰ Tüm bölümler</a></div>`;
     $('r-again').onclick = () => { resetGame(); goTo(slideOf('game')); };
     $('r-next').onclick = () => goTo(slideOf('sandbox'));
     requestAnimationFrame(drawResultChart);
@@ -1134,7 +1134,7 @@
     ambientChat(now); gagTick(now);
     if (mode === 'game' && ++tick % 4 === 0) updatePanel();
 
-    // arka plan: yerli avcılar azaldıkça kırmızıya kayar
+    // arka plan: yerli yırtıcılar azaldıkça kırmızıya kayar
     const s = st && (mode === 'sandbox' ? sb.hist : game.hist).slice(-1)[0];
     const target = s ? smooth(0.95, 0.35, s.pred) * 0.9 + smooth(5, 35, s.areaPct) * 0.25 : 0;
     badness = lerp(badness, clamp(target), 0.02);

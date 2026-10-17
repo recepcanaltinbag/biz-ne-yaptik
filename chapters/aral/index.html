@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Çöle Dönen Deniz</title>
+<meta name="description" content="1960 Aral Gölü: nehirlerin suyunu pamuğa çevirirsen ne olur? Oynanabilir bir ekoloji hikâyesi.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/css/badges.css?v=261017153756">
+<link rel="stylesheet" href="../../assets/css/chapter.css?v=261017153756">
+<style>
+  .sl.locked span { color: var(--ink-soft); }
+  #m-a { background: #5b93b8; } #m-sal { background: #d8d2c0; } #m-fish { background: #6d8fa0; } #m-c { background: #e6e0d2; }
+  #m-c { background: #b9a98a; }
+  .chip.quota .lbl b { font-weight: 400; color: var(--ink); }
+</style>
+</head>
+<body class="dock">
+<script>if (/[?&]layout=klasik\b/.test(location.search)) document.body.classList.remove("dock");</script>
+<canvas id="world" aria-hidden="true"></canvas>
+
+<header class="bar">
+  <a class="bar-home" href="../../">← Biz Ne Yaptık?</a>
+  <button class="bar-btn" id="sound" aria-label="Sesi aç/kapat">🔊 <span>Ses</span></button>
+</header>
+
+<div class="slides">
+
+  <section class="slide" data-mode="title">
+    <div class="center-col"><div class="glass">
+      <div class="kicker">Biz Ne Yaptık? · Bölüm 3</div>
+      <h1 class="title">Çöle Dönen Deniz</h1>
+      <p class="sub">Aral Gölü, 1960 · oynama süresi ~5 dakika</p>
+      <button class="hbtn big" data-next>Başla →</button>
+    </div></div>
+  </section>
+
+  <section class="slide" data-mode="game">
+    <div class="narr game-intro" id="g-intro">
+      <p>Sen Orta Asya'nın su planlamacısısın. Pamuğu çiftçiler toplar, balığı balıkçılar tutar. <b>Suyun nereye gideceğine sen karar verirsin.</b></p>
+      <p class="try">👉 Kaydırıcıyla nehrin ne kadarını tarlaya çevireceğini seç. Moskova seni izliyor.</p>
+    </div>
+    <div class="topbox">
+      <div class="yearbar" aria-live="polite"><div class="yb-year" id="yb-year">1960</div><div class="yb-sub" id="yb-sub">6. Beş Yıllık Plan</div><div class="yb-track"><i id="yb-fill"></i></div><span class="yb-harvest" id="yb-harvest"></span><span class="yb-speed" id="yb-speed" role="group" aria-label="Hız"><button type="button" data-s="1" class="on">1×</button><button type="button" data-s="2">2×</button><button type="button" data-s="4">4×</button></span></div>
+      <div id="toasts" aria-live="polite"></div>
+    </div>
+    <aside class="gpanel" aria-label="Su planlama masası">
+      <button class="gp-toggle" type="button" aria-expanded="false">⋯ Daha fazla</button>
+      <div class="gp-hud">
+      <div class="gp-top">
+        <div class="chip date" id="g-date">1960</div>
+        <div class="chip quota" id="g-plan"><span class="lbl">Plan</span> <b id="pl-n">1,0×</b>/<span id="pl-t">1,3×</span> <span class="track"><i id="pl-bar"></i></span></div>
+      </div>
+      <div class="gp-meters">
+        <div class="mrow"><span>🌊<em> Göl alanı</em></span><span class="track"><i id="m-a"></i></span></div>
+        <div class="mrow"><span>🧂<em> Tuzluluk</em></span><span class="track"><i id="m-sal"></i></span></div>
+        <div class="mrow"><span>🐟<em> Balık</em></span><span class="track"><i id="m-fish"></i></span></div>
+        <div class="mrow"><span>☁️<em> Pamuk</em></span><span class="track"><i id="m-c"></i></span></div>
+        <div class="mrow trust"><span>🏛️<em id="trust-lbl"> Moskova'nın güveni</em></span><span class="track"><i id="m-trust"></i></span></div>
+      </div>
+      </div>
+      <label class="sl big" id="w-w"><span>🌱 Pamuğa giden su <b id="o-w">%20</b></span><input type="range" id="g-w" min="0" max="100" step="5" value="20"></label>
+      <label class="sl big locked" id="w-fix"><span>🔧 Kanal onarımı <b id="o-fix">🔒 1970'te açılır</b></span><input type="range" id="g-fix" min="0" max="100" step="10" value="0" disabled></label>
+      <div class="sb-ctrl gp-extra">
+        <button class="hbtn sm" id="g-pause">❚❚ Durdur</button>
+        <button class="hbtn sm" id="g-speed">1×</button>
+      </div>
+    </aside>
+    <div class="harvest" id="harvest" hidden></div>
+    <div class="modal" id="modal" hidden></div>
+  </section>
+
+  <section class="slide scroll" data-mode="result">
+    <div class="result" id="result"></div>
+  </section>
+
+  <section class="slide" data-mode="sandbox">
+    <aside class="sb-panel">
+      <h2>Simülasyon laboratuvarı</h2>
+      <p class="small">1960'tan 2060'a kadar göl her yıl senin kurallarına göre değişir.</p>
+      <div class="presets">
+        <button class="pbtn" data-preset="history">Tarihteki gibi</button>
+        <button class="pbtn" data-preset="none">1960'taki gibi</button>
+        <button class="pbtn" data-preset="smart">Verimli sulama</button>
+        <button class="pbtn" data-preset="hot">Sıcak gelecek</button>
+      </div>
+      <label class="sl"><span>🌱 Pamuğa giden su <b id="o-pw"></b></span><input type="range" id="p-w" min="0" max="100" value="20"></label>
+      <label class="sl"><span>🔧 Kanal onarımı <b id="o-pfix"></b></span><input type="range" id="p-fix" min="0" max="100" value="0"></label>
+      <label class="sl"><span>☀️ Isınma (buharlaşma) <b id="o-pwarm"></b></span><input type="range" id="p-warm" min="100" max="130" value="100"></label>
+      <label class="sl"><span>🧱 Kokaral seti (kuzey göl) <b id="o-pdam"></b></span><input type="range" id="p-dam" min="0" max="1" step="1" value="0"></label>
+      <canvas id="sb-chart" class="sb-chart"></canvas>
+      <div class="legend"><span style="--c:#5b93b8">Göl alanı</span><span style="--c:#b9a98a">Tuz</span><span style="--c:#6d8fa0">Balık</span><span style="--c:#c29a2e">Pamuk</span></div>
+      <div class="sb-stats"><span id="sb-year">1960</span><span id="sb-harvest">Göl: %100</span></div>
+      <div class="sb-ctrl">
+        <button class="hbtn sm" id="sb-play">❚❚ Durdur</button>
+        <button class="hbtn sm" id="sb-speed">1×</button>
+        <button class="hbtn sm" id="sb-reset">↺ Sıfırla</button>
+      </div>
+      <button class="hbtn" data-next>Gerçekte ne oldu? →</button>
+    </aside>
+  </section>
+
+  <section class="slide scroll" data-mode="facts">
+    <article class="paper">
+      <h2>Gerçekte ne oldu?</h2>
+      <ul class="facts">
+        <li><b>1960</b> Aral, dünyanın 4. büyük gölüydü (68.000 km², Van Gölü'nün 18 katı). Moynak'ta yılda 40.000 tonu aşkın balık tutuluyordu.</li>
+        <li><b>Sonra</b> Sovyet planlamacıları gölü besleyen <b>Amu Derya</b> ve <b>Siri Derya</b> nehirlerinin suyunu pamuğa çevirdi. 1980'lerde kurak yıllarda göle hiç su ulaşmadı. 2010'a kadar göl alanının %80'ini, hacminin %90'ını kaybetti. Tuz litrede 10 gramdan 100 gramın üstüne çıktı (okyanus suyunda 35 gram kadar), yerli balıkların hepsi öldü.</li>
+        <li><b>Bugün</b> Kuruyan tabanda yeni bir çöl var: <i>Aralkum</i>. Buradan kalkan tuz ve ilaç tozu solunum hastalıklarını artırdı. 2005'te <b>Kokaral Barajı</b> kuzeydeki küçük gölü ayırdı: su yükseldi, tuz azaldı, balıklar ve balıkçılar geri döndü.</li>
+      </ul>
+      <div class="callout"><b>Ama tek bir kötü adam yoktu.</b> Planlamacılar gölün küçüleceğini 1960'larda biliyordu, ama pamuğu daha değerli buldu. Pamuk milyonlarca insana iş de verdi. Asıl sorun, kaybolan gölün bedelinin hiçbir planda yazmamasıydı.</div>
+      <button class="hbtn" data-next>Peki ne öğrendik? →</button>
+    </article>
+  </section>
+
+  <section class="slide scroll" data-mode="lessons">
+    <article class="paper">
+      <h2>Ne öğrendik?</h2>
+      <div class="lessons"><div class="lcard"><h3>💧 Su bir yerden eksilir</h3><p>Tarlaya giden her damla, aşağıdaki gölün payından gelir.</p></div><div class="lcard"><h3>🎯 Tek hedef körleştirir</h3><p>Plan yalnız pamuğu saydı; balığı, tozu, sağlığı saymadı.</p></div><div class="lcard"><h3>🔧 En ucuz su, boşa gitmeyen sudur</h3><p>Sızdıran kanalı onarmak yeni nehir aramaktan kolaydır.</p></div></div>
+      <h2>Sen ne yapabilirsin?</h2>
+      <ul class="todo"><li>🇹🇷 Türkiye'de de Akşehir, Eber ve Tuz Gölü küçülüyor. Yakınındaki gölün ve sulak alanın haberini takip et.</li><li>👕 Kıyafetini uzun kullan, ikinci el al: bir kilo pamuklu kumaş için ortalama 10.000 litre kadar su harcanıyor.</li><li>🚰 Evdeki sızıntıyı onar, bahçeyi akşam ve damla damla sula.</li></ul>
+      <details class="sources-fold"><summary>Kaynaklar ve model hakkında</summary><ul class="sources">
+        <li>P. Micklin, "The Aral Sea Disaster", <i>Annual Review of Earth and Planetary Sciences</i> 35 (2007).</li>
+        <li>B. Gaybullaev ve ark., "Changes in water volume of the Aral Sea after 1960", <i>Applied Water Science</i> 2 (2012).</li>
+        <li>A. K. Chapagain ve ark., "The water footprint of cotton consumption", <i>Ecological Economics</i> 60 (2006).</li>
+        <li><a href="https://earthobservatory.nasa.gov/world-of-change/AralSea" target="_blank" rel="noopener">NASA Earth Observatory: World of Change, Aral Sea</a> ve <a href="https://en.wikipedia.org/wiki/North_Aral_Sea" target="_blank" rel="noopener">North Aral Sea</a> (Wikipedia, kaynakçasıyla).</li>
+      </ul><p class="small">Model yıllık su dengesine dayanır: göle gelen nehir suyu − alanla orantılı buharlaşma. Hacim–alan ilişkisi ve tuz, 1960–2010 ölçümlerine göre ayarlandı; sayılar temsilidir.</p></details>
+      <div class="end-nav">
+        <a class="hbtn" href="../../#bolumler">← Tüm bölümler</a>
+        <button class="hbtn" data-goto="game">↺ Tekrar oyna</button>
+      </div>
+    </article>
+  </section>
+</div>
+
+<nav class="dots" id="dots" aria-label="Bölüm adımları"></nav>
+
+<script src="../../assets/js/stats.js?v=261017153756"></script>
+<script src="../../assets/js/badges.js?v=261017153756"></script>
+<script src="../../assets/js/toon.js?v=261017153756"></script>
+<script src="model.js?v=261017153756"></script>
+<script src="aral.js?v=261017153756"></script>
+<script>/* gpToggle */document.querySelectorAll(".gp-toggle").forEach(b=>b.onclick=()=>{const p=b.closest(".gpanel");const o=p.classList.toggle("open");b.setAttribute("aria-expanded",o);b.textContent=o?"✕ Kapat":"⋯ Daha fazla";window.dispatchEvent(new Event("panel"));});</script>
+</body>
+</html>

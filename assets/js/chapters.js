@@ -8,7 +8,7 @@ window.SEASONS = [
       img: 'assets/img/cards/cane-toad-bufo-marinus.jpg', credit: 'Charles J. Sharp, CC BY-SA 4.0', src: 'File:Cane_toad_(Bufo_marinus).jpg' },
     { year: '1859', title: '24 Tavşanlık Felaket', status: 'soon', text: 'Bir çiftlik sahibi avlanmak için 24 tavşan salıyor. Yarım asır geçmeden yüz milyonlarca tavşan kıtanın otlarını kemiriyor.',
       img: 'assets/img/cards/csiro-scienceimage-2232-releasing-the-myxoma-virus-for-rabbi.jpg', credit: 'CSIRO Arşivi, CC BY 3.0', src: 'File:CSIRO_ScienceImage_2232_Releasing_the_Myxoma_Virus_for_Rabbits.jpg' },
-    { year: '1954', title: 'Gölün Yeni Patronu', status: 'soon', text: 'Victoria Gölü\'ne iri ve lezzetli bir avcı balık bırakılıyor. Göldeki yüzlerce yerli balık türünün çoğu ortadan kayboluyor.',
+    { year: '1954', title: 'Gölün Yeni Patronu', status: 'soon', text: 'Victoria Gölü\'ne iri ve lezzetli bir yırtıcı balık bırakılıyor. Göldeki yüzlerce yerli balık türünün çoğu ortadan kayboluyor.',
       img: 'assets/img/cards/fishing-on-lake-victoria-06.jpg', credit: 'Jöseph Ashaba, CC BY-SA 4.0', src: 'File:Fishing_on_lake_Victoria_06.jpg' },
     { year: '1932', title: 'Ordu Emulara Yenildi', status: 'soon', text: 'Batı Avustralya\'da 20.000 kadar emu buğday tarlalarına iniyor. Ordu makineli tüfeklerle "savaş" açıyor. Kazanan emular oluyor.',
       img: 'assets/img/cards/emu-1-tidbinbilla.jpg', pos: '50% 30%', credit: 'JJ Harrison, CC BY-SA 4.0', src: 'File:Emu_1_-_Tidbinbilla.jpg' },
@@ -22,7 +22,7 @@ window.SEASONS = [
       img: 'assets/img/cards/hyacinth-menace-lake-victoria.jpg', credit: 'Mwe17, CC BY-SA 4.0', src: 'File:Hyacinth_menace_Lake_Victoria.jpg' },
   ]},
   { icon: '🌊', title: 'Su Her Şeyi Hatırlar', desc: 'Su her şeyi taşır: atığı da, sonuçlarını da.', chapters: [
-    { year: '1960', title: 'Çöle Dönen Deniz', status: 'soon', text: 'Aral Gölü\'nün suyu pamuğa gidiyor. Dünyanın dördüncü büyük gölünden geriye bir çöl ve paslı gemiler kalıyor.',
+    { year: '1960', title: 'Çöle Dönen Deniz', status: 'live', href: 'chapters/aral/', text: 'Aral Gölü\'nün suyu pamuğa gidiyor. Dünyanın dördüncü büyük gölünden geriye bir çöl ve paslı gemiler kalıyor.',
       img: 'assets/img/cards/moynaq-aral-sea-6226807306.jpg', credit: 'Arian Zwegers, CC BY 2.0', src: 'File:Moynaq,_Aral_Sea_(6226807306).jpg' },
     { year: '1969', title: 'Nehir Alev Aldı!', status: 'soon', text: 'Cleveland\'da bir nehir alev alıyor. Nehir yağ ve atıkla o kadar dolu ki bu ilk yangını bile değil.',
       img: 'assets/img/cards/harshaw-chemical-company-discharges-waste-water-into-the-cuy.jpg', credit: 'F. J. Aleksandrowicz / NARA, kamu malı', src: 'File:HARSHAW_CHEMICAL_COMPANY_DISCHARGES_WASTE_WATER_INTO_THE_CUYAHOGA_RIVER_-_NARA_-_550193.jpg' },

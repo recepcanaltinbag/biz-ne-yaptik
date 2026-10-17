@@ -12,7 +12,7 @@ Durum: ✅ hazır · 🔜 sırada · 📝 plan
 | ✅ Serçelere Savaş | Çin, Dört Zararlı Kampanyası (1958) | Dokun, tencere çal; kota baskısı; serçe ↔ böcek ↔ tahıl |
 | ✅ Kurtarıcı Kurbağa | Avustralya, kamış kurbağası (1935) | Kurbağa sal, haritada istilanın yayılışını izle; karantina hatları çek |
 | 📝 24 Tavşanlık Felaket | Avustralya, 1859'da salınan tavşanlar | Üstel büyüme; çit ve hastalıkla (miksomatozis) kontrol, direnç gelişimi |
-| 📝 Gölün Yeni Patronu | Victoria Gölü, 1950'ler | Avcı balığı ekle, yerli türlerin (çiklitler) kayboluşunu izle |
+| 📝 Gölün Yeni Patronu | Victoria Gölü, 1950'ler | Yırtıcı balığı ekle, yerli türlerin (çiklitler) kayboluşunu izle |
 | 📝 Ordu Emulara Yenildi | Batı Avustralya, Emu Savaşı (1932) | Asker ve mermi bütçesi; emular dağılır. Asıl çözüm (çit, tarım politikası) sonradan açılır |
 | 📝 Kaplumbağanın Yemeğini Kim Yedi? | Galápagos, keçiler (1959 → Isabela Projesi) | Birkaç keçi üstel çoğalır, bitki örtüsü ve kaplumbağalar azalır; geri toplama maliyeti |
 | 📝 Tarzan'ın Maymunları | Florida, Silver Springs (1938) | Adaya bırakılan maymunlar yüzerek kaçar; turist besleme kuralı ↔ nüfus; B virüsü riski. Mit kutusu: Tarzan filmi |
@@ -22,7 +22,7 @@ Durum: ✅ hazır · 🔜 sırada · 📝 plan
 ## Sezon 2 · Su
 | Bölüm | Olay | Oyun fikri |
 |---|---|---|
-| 📝 Çöle Dönen Deniz | Aral Gölü, 1960– | Pamuk sulama kaydırıcısı ↔ göl seviyesi, tuzlanma, balıkçılık |
+| ✅ Çöle Dönen Deniz | Aral Gölü, 1960– | Pamuk sulama kaydırıcısı ↔ göl seviyesi, tuzlanma, balıkçılık |
 | 📝 Nehir Alev Aldı! | Cuyahoga, 1969 → ABD Temiz Su Yasası | Fabrika deşarjı kaydırıcısı; nehir alev alır; kamuoyu baskısı |
 | 📝 Nehirden Tabağa | Trakya, sanayi atıkları ve sulama | Atık su → sulama → toprak ve ürün; arıtma tesisi maliyeti ile verim kaybı |
 | 📝 Marmara Nefes Alamıyor | Marmara, 2021 | Azot/fosfor yükü + sıcaklık → müsilaj; kaynakta arıtma kararları |

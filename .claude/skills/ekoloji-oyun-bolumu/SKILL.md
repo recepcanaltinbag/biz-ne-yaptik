@@ -24,6 +24,8 @@ Bu kurallar kullanıcının geri bildirimleriyle tek tek oturtuldu. Yeni bölüm
 - **Çocuk dili, ama bilimden kopmadan:** cümleler kısa ve anlaşılır olsun. Ama doğru sayılar (ör. 102 kurbağa, 200 milyon, 1,2 milyon km²) ve önemli bilimsel terimler kalsın; terimler parantez içinde ya da tek cümleyle açıklansın ("derisindeki zehir (*bufotoksin*)", "en hızlıların öne geçip çiftleşmesi (*mekânsal ayıklanma*)"). Sadeleştirirken bilgi kaybetme.
 - **Bir bölüm, bir mekanizma.** Konuları karıştırma: serçe bölümünde ilaç/pestisit yok (o "Kuşlar Neden Sustu?" bölümünün konusu). Tarihte olmayan aracı oyuna koyma.
 - **Doğal Türkçe yaz, çeviri kokmasın.** İngilizceden kalıp aktarma: "birkaç on yılda" (*within a few decades*) yerine "onlarca yılda", "yarım asırda" ya da somut sayı ("70 yıl kadar içinde"). "On yıllarca" yerine "onlarca yıl". Edilgen ve uzun isim tamlamalarından kaçın. Yıl ve özel adlara eki kesmeyle ekle (1889'da, Pekin'in); JS dizesi içinde kesmeyi kaçır (`\'`). Yayından önce bütün görünen metni bir kez "bir Türk çocuğu böyle konuşur mu?" diye oku.
+- **Terimleri Türkçe karşılığıyla doğru çevir:** *predator* "yırtıcı" (ya da "yırtıcı hayvan") olur, "avcı" değil. "Avcı" insan avcısını çağrıştırır. *Predatory fish* da "yırtıcı balık" olur. Doğrudan çeviri yapmadan önce kelimenin Türkçede hangi anlamı çağrıştırdığını düşün.
+- **Sayının kaynağını kontrol et:** çok paylaşılan bir istatistik bilimsel olmayabilir. Örneğin "bir tişört 2.700 litre su" bir pazarlama kampanyasından çıkmıştır. Onun yerine hakemli bir çalışma kullan (Chapagain ve ark. 2006: bir kilo pamuklu kumaş için ortalama 10.000 litre kadar su).
 - **Konuşma balonları da bilimle tutarlı olsun:** bir bireyin bacağı "uzamaz", uzun bacak kuşaklar içinde cephede seçilir. Balon esprili olabilir ama yanlış bilgi vermesin.
 - Olgular doğrulanmış olsun. Tartışmalı rakamlar aralıkla verilsin, belirsiz iddialar "belgelenmiş değil" diye işaretlensin. Gerekiyorsa "asıl sebep bu değildi" diye dürüst bir not düş.
 - "Gerçekte ne oldu?" kısa olsun: **üç madde** (yıl / sonra / bugün) ve **bir "ama" kutusu**. Uzun paragraf yazma. Madde etiketi solda, metindeki diğer kalın ifadeler satır içinde kalsın (ızgara hücresine bölünmesin).
@@ -36,6 +38,7 @@ Bu kurallar kullanıcının geri bildirimleriyle tek tek oturtuldu. Yeni bölüm
 1. Başlık slaytı → **doğrudan oyun.** Ayrı tanıtım slaytı yok.
 2. Olaylar oyun akarken **hikâye kartlarıyla** anlatılır. İlk bir iki kart oyunu durdurur ("Devam →"), gerisi akarken gelir.
 3. Sonuç (sen ve tarih karşılaştırması, grafik) → Laboratuvar (kaydırıcılı serbest simülasyon) → Gerçekte ne oldu → Dersler ve kaynaklar.
+   - Sonuç ekranında üç düğme olur: "↺ Tekrar oyna", "Kendin dene →" ve "☰ Tüm bölümler" (ana sayfaya, `../../#bolumler`). Rozet için tekrar oynayan, bölümden çıkmak isteyen oyuncu buradan geri döner.
 - Oyun toplamda **3–4 dakika** sürsün. Sıkıcı dönemler hızlı geçsin, önemli anlarda kısa durulsun.
 - Hikâyenin ölçeği değişince **sahne değiştir** (ör. kamış tarlası → Avustralya haritası) ve geçişi bir kartla anlat.
 
@@ -46,8 +49,8 @@ Bu kurallar kullanıcının geri bildirimleriyle tek tek oturtuldu. Yeni bölüm
 - **Rehber ipucu (coach):** kaydırıcı nabız gibi parlar, üstünde "👉 Kaydır: …" balonu çıkar. İlk ipucu oyuncu dokunana kadar kalır, diğerleri ~14 sn kalır. Kritik anlarda (ör. güven düşünce) yeniden gösterilir. Yalnız anlamlıysa göster: kaydırıcı zaten yüksekken "artır" deme.
 - İkilemleri **oyun içi bir karakterle karar kartına** dönüştür. Örnek: hasattan sonra devlet yetkilisi gelir ve sorar; seçenekler "Gerçeği yaz / Biraz yuvarla / Rekor yaz!". Kaydırıcı kalabalığından iyidir.
 - Bir **baskı ölçeği** kullan (Pekin'in güveni gibi). Ölçek sıfırlanınca kontrol oyuncudan alınır, böylece sistemle ilgili ders oyunun içinde yaşanır.
-- Hedef bir eşikse göstergeye **sınır çizgisi** çiz ve güncel yüzdeyi yaz (ör. yerli avcılar çubuğunda %45 çizgisi).
-- Net bir **hedef** cümlesi koy ("2025'e kadar yerli avcıları %45'in üstünde tut"). Ortak bütçe ödünleşim yaratır.
+- Hedef bir eşikse göstergeye **sınır çizgisi** çiz ve güncel yüzdeyi yaz (ör. yerli yırtıcılar çubuğunda %45 çizgisi).
+- Net bir **hedef** cümlesi koy ("2025'e kadar yerli yırtıcıları %45'in üstünde tut"). Ortak bütçe ödünleşim yaratır.
 - **Etkiler abartılı ve gözle görülür olsun** (simülasyon oyunu, kullanıcı abartı istedi): zincirleme sonuç (serçe azalınca böcek patlaması) dramatik ve okunur olmalı; göstergeler ve sahne bunu açıkça yansıtmalı.
 - **Hile kontrolü:** her aracın gerçekçi bir bedeli olsun. "Hep maksimum" stratejisi kazanmamalı. Node ile senaryo tablosu çıkarıp kontrol et.
 
@@ -62,6 +65,8 @@ Bu kurallar kullanıcının geri bildirimleriyle tek tek oturtuldu. Yeni bölüm
 - Kart açıkken zaman ×1,5 yavaşlar, sırada kart varken ×0,9, ekranda hiçbir şey yokken ×0,42 hızlanır (kullanıcı boş anlarda daha hızlı istedi). İlk aylar biraz daha yavaş akar.
 - Yılın yanında **[1×][2×][4×]** üç düğmeli hız seçici bulunur. Hız yalnız bir olayın **başında bir kez** (hasat, dönüm noktası) 1×'e döner. Küçük haberler, hikâye kartları ve olayın devamındaki ardışık kartlar hızı sıfırlamaz; oyuncunun seçtiği hız korunur. Bunu bir testle doğrula: 2×'e bas, kartlar gelsin, hız 2× kalmalı.
 - Hasat, dönüm noktası ve karar kartları **kendiliğinden kapanmaz**; oyuncu dokunur ya da "Devam →" der.
+- **Zaman birimi yılsa (ör. Aral, 1960–2010) yıla bağlı kartlar kuyruğa girmez.** Kart kuyruğundaki 9 sn'lik boşluk birkaç yıla denk gelir, "1991" kartı 1994'te çıkar. Bu yüzden dönüm noktası kartları `milestone()` ile hemen açılır ve zamanı durdurur. Küçük haberler kuyrukta kalır. Açılış hikâyesi bitene kadar (`game.story`) yıl ilerlemez.
+- **Karar kartları sıraya girer (`choiceQ`).** Aynı yıl iki karar gelirse (plan değerlendirmesi ve Sibirya projesi gibi) ikincisi birincinin üstüne yazılmasın. Testte bu durumu ayrıca dene.
 - Kart başlıklarında yılı tekrar etme, yıl zaten üstte görünüyor.
 
 ## Düzen ("dock")
@@ -127,6 +132,7 @@ Bu kurallar kullanıcının geri bildirimleriyle tek tek oturtuldu. Yeni bölüm
 - Açılır paneller (sezon, rozet) `position: fixed` olur, biri açılınca öteki kapanır. Dışarı tıklayınca ve Esc ile kapanırlar. Telefonda rozet paneli alttan çıkan sayfa olur, sezon menüsü tam genişlikte açılır.
 - Telefonda üst menü tek satır kalmalı (`white-space: nowrap`, çok dar ekranda "Rozetler" kelimesi gizlenir). 375 px'de `scrollWidth == innerWidth` olduğunu ölç.
 - **Rozet paneli büyümeye hazır (akordeon):** bölümler `window.SEASONS`'tan gelir ve sezon başlıklarıyla gruplanır. Her bölüm tek satırdır: ad, kazanılan rozetlerin minik madalyonları, ilerleme çubuğu, g/n. Satıra dokununca yalnız o bölümün 8 kartı açılır, aynı anda tek bölüm açık kalır. Varsayılan olarak son rozetin kazanıldığı bölüm açılır. En üstte "Son kazanılanlar" şeridi durur. Yeni bölüm için panel koduna dokunulmaz.
+  - Sezonlar da açılır kapanır: sezon başlığı düğmedir ve sezonun toplam g/n'sini gösterir. Varsayılan olarak son rozetin kazanıldığı sezon açılır.
 - **İstatistik paneli:** `Stat.get(path, start)` GoatCounter'ın açık sayaç arayüzünü okur (`TOTAL`, `basla-<bölüm>`, `bitti-<bölüm>`, `rozet-<id>`; dönem `week`/`month`). 404 sıfır, hata `null` döner. Gizli rozetler oyuncu kazanmadıkça istatistikte de "???" görünür.
 
 ## Tekrar oynama
@@ -139,9 +145,12 @@ Bu kurallar kullanıcının geri bildirimleriyle tek tek oturtuldu. Yeni bölüm
 ## Görsel ve ses
 - Palet: doğal yeşil (`#e9f0de`). Ekosistem bozuldukça arka plan `#f4dbd1` tonuna kayar. Yazıların arkasında yarı saydam beyaz zemin olur.
 - Fotoğraflar Wikimedia Commons'tan (kamu malı veya CC) alınır, atıflı kullanılır ve `toon.js` ile işlenir. Fotoğraf seçerken kırpma ve içerik uyumuna dikkat et (ör. morina bölümünde balık görseli olsun).
+- **Fotoğraflar sitede barındırılır** (`assets/img/cards/`, 960 px). Wikimedia'dan doğrudan bağlanırsa kısa sürede çok istek gelince 429 hatası verip görselleri kesiyor. Commons API'siyle (`prop=imageinfo&iiurlwidth=960`) adres ve lisans alınır, istekler arasında 2–3 sn beklenir, dosya `curl` ya da Python ile indirilir. Kaynak ve lisans `chapters.js` içindeki `credit` ve `src` alanlarında kalır. Büyük push'tan önce `git config http.postBuffer 157286400` ayarlanır.
+
 - Ses Web Audio ile sentezlenir (ortam, cıvıltı, koro, tık). "Ses" düğmesiyle kapatılabilir.
 
 ## Model
+- **Su dengesi örneği (Aral):** her yıl `V += gelen − buharlaşma`. Buharlaşma alanla orantılıdır, alan da `A = A0·(V/V0)^0.6` ile hesaplanır. Tuz sabit kalır, yani `tuz = S0·V0/V`. Hacim–alan üssünü ve tarihî su çekme yolunu (`histW`) 1960, 1989 ve 2010 ölçümlerine göre node ile ayarla. Ardından bir senaryo tablosu çıkar (hiç sulama yok / sabit / hep maksimum / tarih / akıllı). Akıllı yol en az iki rozet kazandırmalı, hep-maksimum yolu ise kazandırmamalı.
 - Basit ve açıklanabilir bir model yaz. Zamanlamayı **tarihî noktalara göre ayarla** (ör. kurbağada Darwin 2005, Batı Avustralya 2009) ve bunu node ile doğrula.
 - Bir `HISTORY` senaryosu tut. Sonuç ekranı ve grafik oyuncunun sonucunu tarihle karşılaştırsın.
 - Laboratuvar daha uzun zaman ufku ve ek "ya olsaydı?" kaydırıcıları sunsun (ör. ısınma, evrim).
