@@ -314,3 +314,40 @@ input[type=range]::-moz-range-thumb { width: 24px; height: 24px; border-radius: 
   .gp-stats { gap: 4px; }
   .gp-stats b { font-size: 1.05rem; }
 }
+
+/* Telefon: kartlar ve yazılar sahneyi kapatmasın */
+@media (max-width: 760px) {
+  .toast { font-size: .98rem; line-height: 1.28; padding: 8px 10px; gap: 8px; grid-template-columns: 34px 1fr; border-width: 2px; box-shadow: 0 3px 0 var(--ink); border-radius: 12px; }
+  .toast .ic { width: 34px; height: 34px; font-size: 1.1rem; }
+  .toast .from { font-size: .62rem; letter-spacing: .1em; }
+  .toast .x { display: none; }
+  .toast .go { font-size: 1rem; padding: 2px 12px; margin-top: 6px; }
+  .toast.story { grid-template-columns: 54px 1fr; }
+  .toast.story img { width: 54px; height: 70px; border-radius: 8px; }
+  .toast.pause { border-width: 2px; }
+  .yearbar { top: 44px; padding: 0 14px 6px; min-width: 130px; border-radius: 14px; }
+  .yb-year { font-size: 1.7rem; }
+  .yb-sub { font-size: .85rem; margin-top: -4px; }
+  .yb-track { height: 4px; margin-top: 3px; }
+  .slide[data-mode="game"] #toasts, .slide[data-mode="game"] .game-intro:not(.gone) ~ #toasts { top: 104px; }
+  .bar { padding: 10px 14px; }
+  .bar-home, .bar-btn { font-size: 1rem; }
+  .harvest .k { font-size: 1.1rem; }
+  .harvest .n { font-size: 4.2rem; }
+  .harvest .s { font-size: 1rem; }
+  .harvest > div { padding: 12px 24px 14px; }
+  .card { padding: 16px; }
+  .card h2 { font-size: 1.5rem; }
+  .card p { font-size: 1.02rem; margin-bottom: 10px; }
+  .opt { font-size: 1.05rem; padding: 6px 12px; }
+  .opt small { font-size: .85rem; }
+}
+/* çok küçük ekranlar */
+@media (max-width: 380px), (max-height: 680px) and (max-width: 760px) {
+  .toast { font-size: .92rem; }
+  .gpanel { max-height: 42vh; padding: 8px 10px 6px; gap: 4px; }
+  .gpanel .sl.big span { font-size: .92rem; }
+  .gpanel input[type=range] { height: 26px; }
+  .gp-top .chip { font-size: .85rem; }
+  .title { font-size: 2.6rem; }
+}
