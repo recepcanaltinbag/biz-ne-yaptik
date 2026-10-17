@@ -38,7 +38,7 @@ Bu kurallar kullanıcının geri bildirimleriyle tek tek oturtuldu. Yeni bölüm
 - **Karakterler eylemi kendileri yapar** (köylüler tencere çalar, yetkili gelir, gönüllüler toplar). Oyuncu **politikayı** kaydırıcılarla yönetir. Doğrudan dokunarak öldürme ya da refleks isteyen mekanik kullanma; "zorladı, içine çekmedi" geri bildirimi geldi.
 - En fazla **1–3 kaydırıcı.** Başlangıç değeri sıfır olmasın (ör. %10), sahne ilk saniyede canlı görünsün.
 - Seçenekleri **kademeli aç.** Kilitli araç "🔒 1980'de açılır" diye görünür (telefonda gizli). Açılınca durduran bir kartla tanıtılır ve ardından rehber ipucu gösterilir.
-- **Rehber ipucu (coach):** yalnız anlamlıysa göster (kaydırıcı zaten yüksekken "artır" deme). kaydırıcı nabız gibi parlar, üstünde "👉 Kaydır: …" balonu çıkar. İlk ipucu oyuncu dokunana kadar kalır, diğerleri ~14 sn kalır. Kritik anlarda (ör. güven düşünce) yeniden gösterilir.
+- **Rehber ipucu (coach):** kaydırıcı nabız gibi parlar, üstünde "👉 Kaydır: …" balonu çıkar. İlk ipucu oyuncu dokunana kadar kalır, diğerleri ~14 sn kalır. Kritik anlarda (ör. güven düşünce) yeniden gösterilir. Yalnız anlamlıysa göster: kaydırıcı zaten yüksekken "artır" deme.
 - İkilemleri **oyun içi bir karakterle karar kartına** dönüştür. Örnek: hasattan sonra devlet yetkilisi gelir ve sorar; seçenekler "Gerçeği yaz / Biraz yuvarla / Rekor yaz!". Kaydırıcı kalabalığından iyidir.
 - Bir **baskı ölçeği** kullan (Pekin'in güveni gibi). Ölçek sıfırlanınca kontrol oyuncudan alınır, böylece sistemle ilgili ders oyunun içinde yaşanır.
 - Net bir **hedef** cümlesi koy ("2025'e kadar yerli avcıları %45'in üstünde tut"). Ortak bütçe ödünleşim yaratır.
@@ -54,7 +54,7 @@ Bu kurallar kullanıcının geri bildirimleriyle tek tek oturtuldu. Yeni bölüm
   - kuyruk 6'yı aşarsa en eski küçük haber atılır.
 - Bir kartın ekranda kalma süresi = 4,5 sn + metin uzunluğu × 65 ms (en fazla 16 sn).
 - Kart açıkken zaman ×1,5 yavaşlar, ekranda hiçbir şey yokken ×0,55 hızlanır. İlk aylar biraz daha yavaş akar.
-- Yılın yanında **⏩ 1×/2×/4×** düğmesi bulunur. Yeni bir olay, hasat ya da dönüm noktası gelince hız 1×'e döner.
+- Yılın yanında **[1×][2×][4×]** üç düğmeli hız seçici bulunur. Yeni bir olay, hasat ya da dönüm noktası gelince hız 1×'e döner.
 - Kart başlıklarında yılı tekrar etme, yıl zaten üstte görünüyor.
 
 ## Düzen ("dock")
