@@ -64,7 +64,7 @@ Bu kurallar kullanıcının geri bildirimleriyle tek tek oturtuldu. Yeni bölüm
 - **Alt:** yalnız kaydırıcılar, ayrı beyaz kartlarda. Sahne (toprak, başaklar) ekranın en altına kadar uzanır, kontroller sahnenin üzerinde yüzer.
 - **Orta:** durduran hikâye kartları, hasat kartı (başaklar ve "normal yıl" çizgili çubuk) ve karar kartları. Bu katmanlar `z-index` ile haber kutusunun üstünde durmalı.
 - **Her ekran pencereye sığmalı** (bilgisayar ve telefon). Sonuç ekranı gibi kartlarda ölçüleri `vh` ile ölçekle (`clamp(…, 5vh, …)`), kısa ekranlarda (`max-height: 720px`) açıklama ve lejantı gizle. 1024×768, 1440×900, 375×812 ve 360×640'ta `scrollHeight <= innerHeight` olduğunu JS ile ölçerek doğrula. Uzun metin sayfaları kendi içinde kayar.
-- **Bilgisayarda üst şerit yatay:** solda yıl, ay, zaman çizgisi, son sonuç ve hız düğmeleri; hemen sağında haberler. Telefonda yıl ve haber alt alta, HUD'un sağında durur.
+- **Bilgisayarda yıl ekranın tam ortasında** (merkezini JS ile ölçerek doğrula). Yılın altında ay, zaman çizgisi, son sonuç ve hız düğmeleri; haberler hemen sağında. Telefonda yıl ve haber alt alta, HUD'un sağında durur.
 - `position: fixed` kartın atalarında `transform` ya da `backdrop-filter` olmasın, yoksa kart ekran yerine kutuya göre konumlanır.
 - Telefonda: kilitli araçlar ve durdur düğmesi gizli, yazılar küçük. 375×812 ve 360×640'ta mutlaka bak.
 

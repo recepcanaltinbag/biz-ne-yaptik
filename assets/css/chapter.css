@@ -635,3 +635,14 @@ input[type=range]::-moz-range-thumb { width: 24px; height: 24px; border-radius: 
   .dock .slide[data-mode="game"] .topbox #toasts { flex: 1 1 auto; min-width: 0; padding-top: 6px; }
   .dock .slide[data-mode="game"] .topbox .toast:not(.pause):first-child { margin-top: 0; }
 }
+/* Bilgisayar: yıl ekranın tam ortasında, haberler hemen sağında */
+@media (min-width: 761px) {
+  .dock .slide[data-mode="game"] .topbox { left: 0; right: 0; max-width: none; margin: 0; display: block; height: 0; }
+  .dock .slide[data-mode="game"] .topbox .yearbar {
+    position: absolute !important; left: 50% !important; top: 0 !important; transform: translateX(-50%) !important; width: 220px;
+  }
+  .dock .slide[data-mode="game"] .topbox #toasts {
+    position: absolute !important; top: 0 !important; left: calc(50% + 126px) !important; right: 24px !important;
+    max-width: 440px; width: auto !important; padding-top: 6px;
+  }
+}
