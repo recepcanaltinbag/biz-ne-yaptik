@@ -715,3 +715,41 @@ input[type=range]::-moz-range-thumb { width: 24px; height: 24px; border-radius: 
   .callout { font-size: .82rem; }
   .facts li { font-size: .86rem; }
 }
+/* hedef çizgisi: yerli avcılar %45 */
+.track.goal { position: relative; overflow: visible; }
+.track.goal .goalmark { position: absolute; left: 45%; top: -5px; bottom: -5px; width: 3px; border-radius: 2px; background: var(--ink); }
+.track.goal .goalmark::after { content: "hedef"; position: absolute; top: -15px; left: 50%; transform: translateX(-50%); font: .7rem var(--hand); color: var(--ink-soft); white-space: nowrap; }
+.mrow.pred #v-pred { font-weight: 400; font-family: var(--hand); }
+.dock .gp-hud .mrow.pred { grid-template-columns: 1fr 110px; margin-top: 10px; }
+@media (max-width: 760px) { .dock .gp-hud .mrow.pred { grid-template-columns: 22px minmax(0,1fr); } .mrow.pred #v-pred { display: none; } }
+/* haber şeridindeki fotoğraflı kart: görsel yazının üstüne binmesin */
+.dock .slide[data-mode="game"] .topbox .toast.story:not(.pause) { grid-template-columns: 62px 1fr; align-items: center; }
+.dock .slide[data-mode="game"] .topbox .toast.story:not(.pause) img { width: 62px; height: 78px; border-radius: 8px; }
+@media (max-width: 760px) {
+  .dock .slide[data-mode="game"] .topbox .toast.story:not(.pause) { grid-template-columns: 44px 1fr; }
+  .dock .slide[data-mode="game"] .topbox .toast.story:not(.pause) img { width: 44px; height: 56px; }
+}
+@media (max-width: 760px) and (max-height: 700px) {
+  .facts { gap: 3px; }
+  .facts li { font-size: .78rem; line-height: 1.35; }
+  .facts li b:first-child { font-size: .95rem; }
+  .callout { font-size: .74rem; line-height: 1.35; padding: 6px 8px; margin: .4em 0 .5em; }
+  .paper h2 { font-size: 1.2rem; }
+  .slide.scroll { padding-top: 40px; padding-bottom: 34px; }
+}
+/* hedef: büyük ve göze çarpan */
+.goal { font-size: 1.15rem !important; color: var(--ink) !important; background: rgba(255,255,255,.75); border: 2px solid var(--green); border-left-width: 6px !important; border-radius: 12px; padding: 6px 10px !important; text-shadow: none; }
+.dock .gp-hud .goal { font-size: 1.15rem !important; pointer-events: none; }
+/* bütçe: her aracın payı renkli bölümlerle */
+.budget { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.budget .bbar { display: flex; width: 220px; height: 22px; border-radius: 99px; background: repeating-linear-gradient(45deg, #ece6d8, #ece6d8 6px, #f6f1e6 6px, #f6f1e6 12px); border: 2px solid var(--ink); overflow: hidden; }
+.budget .bbar i { display: grid; place-items: center; height: 100%; width: 0; font-style: normal; font-size: .8rem; transition: width .25s; overflow: hidden; }
+.budget .b-collect { background: #7aa7d6; } .budget .b-teach { background: #8cc084; } .budget .b-fence { background: #c49a6c; }
+#w-collect { border-left: 6px solid #7aa7d6 !important; } #w-teach { border-left: 6px solid #8cc084 !important; } #w-fence { border-left: 6px solid #c49a6c !important; }
+@media (max-width: 760px) { .budget .bbar { width: 120px; height: 16px; } .budget .bl { display: none; } }
+/* ipucu balonu bütçe çubuğunun ve komşu kartların üstüne binmesin: kartın içinde, üst kenarda */
+.dock .slide[data-mode="game"] .gpanel .coach-tip { bottom: calc(100% + 6px); font-size: .95rem; padding: 2px 10px; }
+/* bütçe çubuğu kaydırıcıların altında kendi satırında: ipuçları üstüne binmez */
+.dock .slide[data-mode="game"] .gpanel .budget { order: 20; flex-basis: 100%; justify-content: center; background: none; border: 0; padding: 0; }
+.dock .slide[data-mode="game"] .gpanel .budget .bbar { background-color: #fff; }
+.dock .slide[data-mode="game"] .gpanel .sb-ctrl { order: 10; }

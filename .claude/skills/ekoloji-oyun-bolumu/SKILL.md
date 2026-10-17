@@ -21,6 +21,7 @@ Bu kurallar kullanıcının geri bildirimleriyle tek tek oturtuldu. Yeni bölüm
 
 ## Ton ve içerik
 - Bir çocuğun anlayacağı kadar basit, bilimi hafife almayan; hafif alaycı ama ciddi. Ağır siyasi jargon kullanma ("sağcı sapma" gibi ifadeler fazla bulundu).
+- **Çocuk dili, ama bilimden kopmadan:** cümleler kısa ve anlaşılır olsun. Ama doğru sayılar (ör. 102 kurbağa, 200 milyon, 1,2 milyon km²) ve önemli bilimsel terimler kalsın; terimler parantez içinde ya da tek cümleyle açıklansın ("derisindeki zehir (*bufotoksin*)", "en hızlıların öne geçip çiftleşmesi (*mekânsal ayıklanma*)"). Sadeleştirirken bilgi kaybetme.
 - **Bir bölüm, bir mekanizma.** Konuları karıştırma: serçe bölümünde ilaç/pestisit yok (o "Kuşlar Neden Sustu?" bölümünün konusu). Tarihte olmayan aracı oyuna koyma.
 - Olgular doğrulanmış olsun. Tartışmalı rakamlar aralıkla verilsin, belirsiz iddialar "belgelenmiş değil" diye işaretlensin. Gerekiyorsa "asıl sebep bu değildi" diye dürüst bir not düş.
 - "Gerçekte ne oldu?" kısa olsun: **üç madde** (yıl / sonra / bugün) ve **bir "ama" kutusu**. Uzun paragraf yazma. Madde etiketi solda, metindeki diğer kalın ifadeler satır içinde kalsın (ızgara hücresine bölünmesin).
@@ -43,6 +44,7 @@ Bu kurallar kullanıcının geri bildirimleriyle tek tek oturtuldu. Yeni bölüm
 - **Rehber ipucu (coach):** kaydırıcı nabız gibi parlar, üstünde "👉 Kaydır: …" balonu çıkar. İlk ipucu oyuncu dokunana kadar kalır, diğerleri ~14 sn kalır. Kritik anlarda (ör. güven düşünce) yeniden gösterilir. Yalnız anlamlıysa göster: kaydırıcı zaten yüksekken "artır" deme.
 - İkilemleri **oyun içi bir karakterle karar kartına** dönüştür. Örnek: hasattan sonra devlet yetkilisi gelir ve sorar; seçenekler "Gerçeği yaz / Biraz yuvarla / Rekor yaz!". Kaydırıcı kalabalığından iyidir.
 - Bir **baskı ölçeği** kullan (Pekin'in güveni gibi). Ölçek sıfırlanınca kontrol oyuncudan alınır, böylece sistemle ilgili ders oyunun içinde yaşanır.
+- Hedef bir eşikse göstergeye **sınır çizgisi** çiz ve güncel yüzdeyi yaz (ör. yerli avcılar çubuğunda %45 çizgisi).
 - Net bir **hedef** cümlesi koy ("2025'e kadar yerli avcıları %45'in üstünde tut"). Ortak bütçe ödünleşim yaratır.
 - **Etkiler abartılı ve gözle görülür olsun** (simülasyon oyunu, kullanıcı abartı istedi): zincirleme sonuç (serçe azalınca böcek patlaması) dramatik ve okunur olmalı; göstergeler ve sahne bunu açıkça yansıtmalı.
 - **Hile kontrolü:** her aracın gerçekçi bir bedeli olsun. "Hep maksimum" stratejisi kazanmamalı. Node ile senaryo tablosu çıkarıp kontrol et.
@@ -56,7 +58,7 @@ Bu kurallar kullanıcının geri bildirimleriyle tek tek oturtuldu. Yeni bölüm
   - kuyruk 6'yı aşarsa en eski küçük haber atılır.
 - Bir kartın ekranda kalma süresi = 4,5 sn + metin uzunluğu × 65 ms (en fazla 16 sn).
 - Kart açıkken zaman ×1,5 yavaşlar, sırada kart varken ×0,9, ekranda hiçbir şey yokken ×0,42 hızlanır (kullanıcı boş anlarda daha hızlı istedi). İlk aylar biraz daha yavaş akar.
-- Yılın yanında **[1×][2×][4×]** üç düğmeli hız seçici bulunur. Yeni bir olay, hasat ya da dönüm noktası gelince hız 1×'e döner.
+- Yılın yanında **[1×][2×][4×]** üç düğmeli hız seçici bulunur. Hız yalnız bir olayın **başında bir kez** (hasat, dönüm noktası) 1×'e döner. Küçük haberler, hikâye kartları ve olayın devamındaki ardışık kartlar hızı sıfırlamaz; oyuncunun seçtiği hız korunur. Bunu bir testle doğrula: 2×'e bas, kartlar gelsin, hız 2× kalmalı.
 - Hasat, dönüm noktası ve karar kartları **kendiliğinden kapanmaz**; oyuncu dokunur ya da "Devam →" der.
 - Kart başlıklarında yılı tekrar etme, yıl zaten üstte görünüyor.
 
@@ -80,6 +82,7 @@ Bu kurallar kullanıcının geri bildirimleriyle tek tek oturtuldu. Yeni bölüm
 - **Kalıcı duygusal öğe:** sahnede sürekli duran ve politikaya tepki veren küçük bir hikâye (ör. ağaçtaki yuva: kampanya yüksekken anne konamaz, yavrular "Anne, yemek yok mu?" der; serçe tükenince yuva sessizleşir).
 - **Abartı ödüllendirilsin:** oyuncu bir kaydırıcıyı uca götürünce ona özel, büyük bir sahne gelsin (ör. %70 üstü seferberlikte 5 kişilik tencere rock grubu).
 - **Karakterler ışınlanmaz.** Sahnede bir yer (ev, iskele, kapı) olsun. Kaydırıcı artınca karakterler oradan yürüyerek gelir, azalınca yürüyerek geri döner. Arada vardiya değişimi gibi küçük döngüler olsun ("Vardiya bitti, ben yatıyorum!").
+- **Harita sahnelerinde kamera:** yumuşak yakınlaşma ve uzaklaşma kullan. Kamera cepheyi takip eder, olay olunca oraya odaklanır, sonda bütün alanı gösterir. Simgeler yakınlıkla `1/√z` ölçeklensin, baloncuk ve dokunma koordinatları kamera dönüşümüne çevrilsin.
 - **Hikâyenin ilk cümlesi sahnede canlansın.** Kart "gemiyle geldi" diyorsa gemi gerçekten yanaşsın, kasalar insin. Kartta anlatılan her şey mümkünse sahnede de görünsün.
 - **Hareket akıcı olsun:** kuşlarda rastgele titreme yok; yavaş dönen yön (wander), seyir hızına yumuşak yaklaşma, ivme sınırı, dönüşte yatma, tırmanırken hızlı çırpma ve alçalırken süzülme. İnsanlar birbirinin içinden geçmez, gruplar yan yana yürür. Figür çevirirken yalnız yatay ölçekle (`scale(dir * s, s)`), dikeyi asla ters çevirme.
 

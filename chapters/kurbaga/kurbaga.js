@@ -79,17 +79,42 @@
   }
 
   let proj = { s: 1, ox: 0, oy: 0 };
+  // harita kamerası: odak noktası (taban projeksiyon pikseli) ve yakınlık; hedefe yumuşakça yaklaşır
+  const cam = { fx: 0, fy: 0, z: 1, init: false }, camT = { fx: 0, fy: 0, z: 1 };
+  function camCenter() { const r = mapRect(); return [r.x + r.w / 2, r.y + r.h / 2]; }
+  const toScreen = (x, y) => { const [cx, cy] = camCenter(); return [cx + (x - cam.fx) * cam.z, cy + (y - cam.fy) * cam.z]; };
+  const toBase = (x, y) => { const [cx, cy] = camCenter(); return [cam.fx + (x - cx) / cam.z, cam.fy + (y - cy) / cam.z]; };
+  function camTarget(st, now) {
+    const [cx, cy] = camCenter();
+    if (mode !== 'game' || game.phase !== 'map' || game.state === 'end') return { fx: cx, fy: cy, z: 1 };
+    if (game.focus && now < game.focus.until) { const [fx, fy] = P(game.focus.lon, game.focus.lat); return { fx, fy, z: game.focus.z }; }
+    const b = game.bbox;
+    if (!b) { const [fx, fy] = P(147, -20); return { fx, fy, z: 2.6 }; }
+    // kurbağaların yayıldığı alanı ve cepheyi çerçevele
+    const r = mapRect(), [x0, y0] = P(b.minLon, b.maxLat), [x1, y1] = P(b.maxLon, b.minLat);
+    const z = clamp(Math.min(r.w / ((x1 - x0) * 1.35 + 60), r.h / ((y1 - y0) * 1.35 + 60)), 1, 2.6);
+    let fx = (x0 + x1) / 2, fy = (y0 + y1) / 2;
+    if (b.west) { const [wx, wy] = P(b.west[0], b.west[1]); fx = lerp(fx, wx, 0.25); fy = lerp(fy, wy, 0.2); }
+    return { fx, fy, z };
+  }
+  function updateCam(st, now, dt) {
+    const t = camTarget(st, now);
+    if (!cam.init) { Object.assign(cam, t); cam.init = true; }
+    const k = 1 - Math.pow(0.965, dt / 16.67);
+    cam.fx = lerp(cam.fx, t.fx, k); cam.fy = lerp(cam.fy, t.fy, k); cam.z = lerp(cam.z, t.z, k * 0.8);
+  }
+  function focus(lon, lat, z = 2.3, ms = 5000) { game.focus = { lon, lat, z, until: performance.now() + ms / FAST }; }
   function mapRect() {
     if (mobile) {
       const pnl = document.querySelector('.slide.active .gpanel, .slide.active .sb-panel');
       const bottom = pnl ? pnl.getBoundingClientRect().top - 8 : H * 0.56;
-      return { x: 8, y: 150, w: W - 16, h: Math.max(120, bottom - 150) };
+      return { x: 4, y: 130, w: W - 8, h: Math.max(120, bottom - 130) };
     }
     const right = mode === 'sandbox' ? 380 : 366;
     if (mode === 'game' && document.body.classList.contains('dock')) {
       const pnl = document.querySelector('.slide.active .gpanel');
       const bottom = pnl ? pnl.getBoundingClientRect().top - 10 : H - 60;
-      return { x: 24, y: 178, w: W - 48, h: Math.max(160, bottom - 178) };
+      return { x: 12, y: 150, w: W - 24, h: Math.max(160, bottom - 150) };
     }
     const top = mode === 'game' ? 150 : 64;
     return { x: 24, y: top, w: W - right - 48, h: H - top - 52 };
@@ -119,7 +144,8 @@
     const key = [W, H, mode, proj.s.toFixed(2), proj.oy.toFixed(0), st ? st.p.warm : 0, st ? Math.round(st.p.fence * 10) : 0].join('|');
     if (key === landKey) return;
     landKey = key;
-    land.width = W * DPR; land.height = H * DPR; lctx.setTransform(DPR, 0, 0, DPR, 0, 0); lctx.clearRect(0, 0, W, H);
+    const LQ = Math.min(DPR * 2, Math.sqrt(9e6 / (W * H))); // yakınlaşınca da keskin kalsın (bellek sınırlı)
+    land.width = W * LQ; land.height = H * LQ; lctx.setTransform(LQ, 0, 0, LQ, 0, 0); lctx.clearRect(0, 0, W, H);
     const path = poly => { lctx.beginPath(); poly.forEach(([lo, la], i) => { const [x, y] = P(lo, la); i ? lctx.lineTo(x, y) : lctx.moveTo(x, y); }); lctx.closePath(); };
     lctx.save();
     lctx.shadowColor = 'rgba(43,58,46,.18)'; lctx.shadowOffsetY = 5;
@@ -224,9 +250,9 @@
   // Hawaii'den gelen gemi: oyun başında yanaşır, kasaları indirir
   function drawShip(t, seaW, gt) {
     if (!ship.t0) ship.t0 = t;
-    const q = smooth(0, 1, (t - ship.t0) / 5200);
+    const q = smooth(0, 1, (t - ship.t0) / 3800);
     const x = lerp(-260 * U, seaW - 175 * U, q), y = gt + 6 * U + Math.sin(t * 0.0025) * 2.5 * U, s = U * (mobile ? 0.8 : 1);
-    if (q >= 1 && !ship.docked) { ship.docked = true; horn(); }
+    if (q >= 1 && !ship.docked) { ship.docked = true; horn(); if (ship.onDock) { const f = ship.onDock; ship.onDock = null; f(); } }
     ctx.save(); ctx.translate(x, y); ctx.scale(s, s);
     ctx.fillStyle = '#b04a3a'; ctx.beginPath(); ctx.moveTo(-10, -18); ctx.lineTo(170, -18); ctx.lineTo(150, 6); ctx.lineTo(10, 6); ctx.closePath(); ctx.fill(); // gövde
     ctx.fillStyle = '#2b3a2e'; ctx.fillRect(-6, -22, 172, 5);
@@ -303,9 +329,10 @@
       if (Math.abs(td.tx - td.x) < 4) td.tx = rnd(seaW + 20, W - (mobile || document.body.classList.contains('dock') ? 20 : 380));
       td.x += Math.sign(td.tx - td.x) * 0.5 * U * f;
       td.hop = Math.max(0, Math.sin(t * 0.006 + td.ph * 3)) * 6 * U;
-      if (!td.jump && Math.random() < 0.0006 * f) td.jump = 1;
+      if (!td.jump && Math.random() < 0.0016 * f) { td.jump = 1; td.jh = rnd(80, 140); }
       if (td.jump) { td.jump += 0.03 * f; if (td.jump > 2) td.jump = 0; }
-      const jy = td.jump ? Math.sin((td.jump - 1) * Math.PI) * 50 * U : 0;
+      // böceğe yetişmeye çalışır ama kamışın tepesine hiç ulaşamaz
+      const jy = td.jump ? Math.sin((td.jump - 1) * Math.PI) * Math.min((td.jh || 100) * U, sh * 0.62) : 0;
       td.sx = td.x; td.sy = td.y - td.hop - Math.max(0, jy);
       drawToad(td.sx, td.sy, td.s * U, t, td.ph, td.tx > td.x ? 1 : -1);
     }
@@ -318,6 +345,13 @@
   let sprites = [], volunteers = [];
   function refreshFront(st) {
     const front = [];
+    let minLon = 999, maxLon = -999, minLat = 999, maxLat = -999, west = null;
+    for (const c of M.G.cells) if (st.d[c] > 0.03) {
+      const lo = M.G.lon[c], la = M.G.lat[c];
+      minLon = Math.min(minLon, lo); maxLon = Math.max(maxLon, lo); minLat = Math.min(minLat, la); maxLat = Math.max(maxLat, la);
+      if (la > -22 && (!west || lo < west[0])) west = [lo, la];
+    }
+    if (st === game.st) game.bbox = maxLon > 0 ? { minLon, maxLon, minLat, maxLat, west } : null;
     for (const c of M.G.cells) {
       if (st.d[c] <= 0) continue;
       const i = c % M.NX, j = (c / M.NX) | 0;
@@ -332,6 +366,7 @@
   }
   function drawMap(st, t, dt) {
     buildLand(st);
+    const zs = 1 / Math.sqrt(cam.z); // yakınlaşınca simgeler aşırı büyümesin
     ctx.drawImage(land, 0, 0, W, H);
     const cs = M.CELL * proj.s;
     for (const c of M.G.cells) {
@@ -354,26 +389,30 @@
     for (const s of SITES) {
       const [x, y] = P(s.lon, s.lat); s.x = x; s.y = y - 10 * U;
       const health = sitePred(st, s);
-      ctx.fillStyle = health < 0.45 ? 'rgba(244,214,204,.95)' : 'rgba(255,255,255,.92)';
-      ctx.strokeStyle = rgb(INK, 0.6); ctx.lineWidth = 1.5;
-      ctx.beginPath(); ctx.arc(x, y - 8 * U, 15 * U, 0, 6.283); ctx.fill(); ctx.stroke();
-      ctx.globalAlpha = 0.4 + 0.6 * health;
-      ctx.font = `${20 * U}px serif`; ctx.textBaseline = 'middle'; ctx.fillText(s.ic, x, y - 7 * U); ctx.textBaseline = 'alphabetic';
+      // yerli avcı: emoji değil, çizilmiş ve hareket eden bir hayvan
+      const dead = health < 0.45, S = 1.05 * U * zs;
+      ctx.fillStyle = 'rgba(0,0,0,.12)'; ctx.beginPath(); ctx.ellipse(x, y + 2 * S, 18 * S, 4 * S, 0, 0, 6.283); ctx.fill();
+      ctx.globalAlpha = dead ? 0.55 : 1;
+      if (s.ic === '🦎') drawGoanna(x, y - 4 * S, S, 1, dead, t);
+      else if (s.ic === '🐊') drawCroc(x, y - 3 * S, S, dead, t);
+      else if (s.ic === '🐍') drawSnake(x, y - 3 * S, S, dead, t);
+      else drawQuoll(x - 4 * S, y + 2 * S, S, 1, t, null, dead);
       ctx.globalAlpha = 1;
-      if (health < 0.45) { ctx.font = `${14 * U}px serif`; ctx.fillText('☠️', x + 14 * U, y - 12 * U); }
+      if (dead) { ctx.fillStyle = rgb([192, 80, 58]); ctx.font = `${13 * S}px "Patrick Hand"`; ctx.textAlign = 'center'; ctx.fillText('✕', x + 16 * S, y - 16 * S); }
     }
+    drawFamily(st, t);
     // ön cephede zıplayan kurbağalar
     for (const sp of sprites) {
       const [x, y] = P(M.G.lon[sp.c] + sp.dx, M.G.lat[sp.c] + sp.dy);
       const hop = Math.max(0, Math.sin(t * 0.007 + sp.ph * 4)) * 5 * U;
       sp.x = x; sp.y = y - hop - 10 * U;
-      drawToad(x, y - hop, 0.75 * U, t, sp.ph, Math.sin(sp.ph) > 0 ? -1 : 1);
+      drawToad(x, y - hop * zs, 0.75 * U * zs, t, sp.ph, Math.sin(sp.ph) > 0 ? -1 : 1);
     }
     // gönüllüler fenerle kurbağa topluyor
     for (const v of volunteers) {
       const [x, y] = P(M.G.lon[v.c] + 0.25, M.G.lat[v.c] - 0.25);
       v.x = x; v.y = y - 30 * U;
-      drawPerson(x, y, 0.75 * U, '#5b7f5a', t, v.ph, 'bucket');
+      drawPerson(x, y, 0.75 * U * zs, '#5b7f5a', t, v.ph, 'bucket');
       if (t > v.next) { v.next = t + rnd(1200, 2600); floats.push({ x: x + 10 * U, y: y - 30 * U, text: '−1', life: 1 }); if (Math.random() < 0.3) blip(700); }
     }
   }
@@ -383,6 +422,78 @@
     return n ? sum / n : 1;
   }
 
+
+
+  // ---- harita karakterleri: goanna, kuzey kedisi, araba, bulut ----
+  function drawGoanna(x, y, s, dir, dead, t) {
+    ctx.save(); ctx.translate(x, y); ctx.scale(dir * s, s); if (dead) ctx.rotate(Math.PI);
+    ctx.fillStyle = '#7d7a3a';
+    ctx.beginPath(); ctx.ellipse(0, 0, 14, 5, 0, 0, 6.283); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(15, -1, 6, 4, 0, 0, 6.283); ctx.fill();
+    ctx.strokeStyle = '#7d7a3a'; ctx.lineWidth = 3; ctx.lineCap = 'round';
+    const w = dead ? 0 : Math.sin(t * 0.02) * 3;
+    ctx.beginPath(); ctx.moveTo(-12, 0); ctx.quadraticCurveTo(-24, 2 + w, -32, -2); ctx.stroke();
+    ctx.lineWidth = 2; [[-6, 1], [6, 1]].forEach(([lx, k]) => { ctx.beginPath(); ctx.moveTo(lx, 3); ctx.lineTo(lx + w, 8); ctx.moveTo(lx, -3); ctx.lineTo(lx - w, -8); ctx.stroke(); });
+    ctx.fillStyle = '#e8dcb0'; [-8, -2, 4].forEach(sx => { ctx.beginPath(); ctx.arc(sx, -1, 1.2, 0, 6.283); ctx.fill(); });
+    ctx.fillStyle = rgb(INK); ctx.beginPath(); ctx.arc(17, -2.5, 1.2, 0, 6.283); ctx.fill();
+    if (!dead && Math.sin(t * 0.012) > 0.7) { ctx.strokeStyle = '#d96a6a'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(21, -1); ctx.lineTo(26, -1); ctx.moveTo(26, -1); ctx.lineTo(28, -3); ctx.moveTo(26, -1); ctx.lineTo(28, 1); ctx.stroke(); }
+    ctx.restore();
+  }
+  function drawQuoll(x, y, s, dir, t, mood, dead) {
+    ctx.save(); ctx.translate(x, y); ctx.scale(dir * s, s); if (dead) { ctx.rotate(Math.PI / 2); ctx.translate(-6, -6); }
+    ctx.fillStyle = '#9a6a3c'; ctx.beginPath(); ctx.ellipse(0, -6, 11, 7, 0, 0, 6.283); ctx.fill();
+    ctx.beginPath(); ctx.arc(10, -10, 5.5, 0, 6.283); ctx.fill();
+    ctx.beginPath(); ctx.arc(9, -15, 2, 0, 6.283); ctx.arc(13, -15, 2, 0, 6.283); ctx.fill();
+    const wag = dead ? 0 : Math.sin(t * 0.008) * 4;
+    ctx.strokeStyle = '#9a6a3c'; ctx.lineWidth = 3; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(-10, -6); ctx.quadraticCurveTo(-20, -10 + wag, -22, -2 + wag); ctx.stroke();
+    ctx.fillStyle = '#f3ecd8'; [[-5, -8], [0, -4], [4, -9], [-3, -11]].forEach(([a, b]) => { ctx.beginPath(); ctx.arc(a, b, 1.3, 0, 6.283); ctx.fill(); });
+    ctx.fillStyle = rgb(INK); ctx.beginPath(); ctx.arc(12, -11, 1.1, 0, 6.283); ctx.fill();
+    if (mood === 'bleh') { ctx.fillStyle = '#d96a6a'; ctx.fillRect(15, -9, 4, 2); }
+    ctx.restore();
+  }
+
+  function drawCroc(x, y, s, dead, t) {
+    ctx.save(); ctx.translate(x, y); ctx.scale(s, s); if (dead) ctx.rotate(Math.PI);
+    const jaw = dead ? 0 : Math.max(0, Math.sin(t * 0.004)) * 0.35;
+    ctx.fillStyle = '#5f7a3a';
+    ctx.beginPath(); ctx.ellipse(-2, 0, 16, 5, 0, 0, 6.283); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(-16, -1); ctx.lineTo(-30, 1); ctx.lineTo(-16, 3); ctx.fill(); // kuyruk
+    ctx.save(); ctx.translate(12, -1); ctx.rotate(-jaw); ctx.fillRect(0, -3, 14, 3); ctx.restore(); // üst çene
+    ctx.fillRect(12, 0, 14, 3); // alt çene
+    ctx.fillStyle = '#f3ecd8'; if (jaw > 0.05) for (let k = 0; k < 4; k++) ctx.fillRect(14 + k * 3, -1, 1.2, 1.6);
+    ctx.fillStyle = '#4a6230'; [-8, -2, 4].forEach(bx => { ctx.beginPath(); ctx.arc(bx, -4, 1.6, 0, 6.283); ctx.fill(); });
+    ctx.fillStyle = rgb(INK); ctx.beginPath(); ctx.arc(11, -4, 1.2, 0, 6.283); ctx.fill();
+    ctx.restore();
+  }
+  function drawSnake(x, y, s, dead, t) {
+    ctx.save(); ctx.translate(x, y); ctx.scale(s, s);
+    ctx.strokeStyle = '#3d3a32'; ctx.lineWidth = 4.5; ctx.lineCap = 'round';
+    ctx.beginPath();
+    for (let k = 0; k <= 12; k++) { const px = -18 + k * 3, py = dead ? 0 : Math.sin(k * 0.8 + t * 0.006) * 4; k ? ctx.lineTo(px, py) : ctx.moveTo(px, py); }
+    ctx.stroke();
+    ctx.strokeStyle = '#c0503a'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(-14, 1); ctx.lineTo(10, 1); ctx.stroke(); // kırmızı karın çizgisi
+    const hy = dead ? 0 : Math.sin(12 * 0.8 + t * 0.006) * 4;
+    ctx.fillStyle = '#3d3a32'; ctx.beginPath(); ctx.ellipse(19, hy, 4.5, 3.4, 0, 0, 6.283); ctx.fill();
+    if (!dead && Math.sin(t * 0.01) > 0.6) { ctx.strokeStyle = '#c0503a'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(23, hy); ctx.lineTo(27, hy - 1); ctx.moveTo(27, hy - 1); ctx.lineTo(29, hy - 3); ctx.moveTo(27, hy - 1); ctx.lineTo(29, hy + 1); ctx.stroke(); }
+    ctx.fillStyle = '#f3ecd8'; ctx.beginPath(); ctx.arc(20, hy - 1, 1, 0, 6.283); ctx.fill();
+    ctx.restore();
+  }
+
+  // Kakadu'da bir kuzey kedisi ailesi: kurbağa gelince anne ya yer ve kaybolur ya da (eğitimliyse) yemez
+  const family = { lastSay: 0 };
+  function drawFamily(st, t) {
+    const site = SITES[0]; if (!site.x) return;
+    const zs = 1 / Math.sqrt(cam.z), s = 0.9 * U * zs, x = site.x + 26 * U * zs, y = site.y + 26 * U * zs;
+    const invaded = sitePred(st, site) < 0.75, trained = st.p.teach > 0.3;
+    const momGone = invaded && !trained;
+    if (!momGone) drawQuoll(x, y, s, -1, t, invaded && trained ? 'bleh' : null);
+    drawQuoll(x + 16 * s, y + 6 * s, s * 0.55, -1, t); drawQuoll(x + 26 * s, y + 4 * s, s * 0.5, 1, t);
+    family.x = x; family.y = y - 18 * s;
+    if (mode === 'game' && invaded && t - family.lastSay > 20000 && !bubbles.length && game.state === 'play') {
+      family.lastSay = t;
+      say(family, momGone ? pick(['Anne? Neredesin?', 'Annem o kurbağayı\nyedi ve...']) : pick(['Iyy! Bu kurbağayı\nasla yemem!', 'Öğrendik:\nkurbağa yok!']));
+    }
+  }
 
   // ---- mizahi küçük sahneler (tarla ve harita) ----
   const gags = [];
@@ -395,7 +506,12 @@
     nextGag = t + rnd(16000, 26000);
     const opts = [];
     if (game.phase === 'field') { if (scientists.length) opts.push('toadhat'); if (fieldToads.length) opts.push('jumpfail', 'jumpfail'); }
-    else { opts.push('truck', 'truck', 'chorus'); if (volunteers.length) opts.push('volunteer'); }
+    else {
+      opts.push('truck', 'chorus', 'goanna', 'goanna', 'parade', 'rain', 'farmer');
+      if (game.st.year >= 1985) opts.push('legs', 'legs');
+      if (volunteers.length) opts.push('volunteer');
+      if (game.st.p.fence > 0) opts.push('fence', 'fence');
+    }
     if (!opts.length) return;
     const kind = pick(opts);
     if (kind === 'toadhat') { const p = pick(scientists); p.toadHat = t + 6500; say({ get x() { return p.x; }, get y() { return p.y - 70 * U; } }, pick(['Kafamda bir şey\nmi var?', 'Bu deney planda\nyoktu...'])); }
@@ -406,6 +522,13 @@
     }
     if (kind === 'truck') gags.push({ kind, t0: t, dur: 11000 });
     if (kind === 'chorus' && sprites.length) { gags.push({ kind, t0: t, dur: 6000 }); const sp = pick(sprites); say(sp, pick(['Gece konseri!\nVrrrrr!', 'Hep bir ağızdan:\nVRRRR!'])); trill(); }
+    if (['goanna', 'legs', 'parade', 'rain', 'farmer', 'fence'].includes(kind)) {
+      const sp = sprites.length ? pick(sprites) : null;
+      const anchor = kind === 'farmer' ? { lon: 146.2, lat: -18.6 } : kind === 'parade' ? pick([{ lon: 130.85, lat: -12.6 }, { lon: 152.6, lat: -27.3 }, { lon: 145.8, lat: -17.0 }])
+        : kind === 'rain' ? { lon: game.bbox && game.bbox.west ? game.bbox.west[0] + 2 : 140, lat: -14 } : sp ? { lon: M.G.lon[sp.c], lat: M.G.lat[sp.c] } : { lon: 140, lat: -18 };
+      if (kind === 'fence') { const dams = M.G.cells.filter(c => game.st.fenced[c]); if (dams.length) { const c = pick(dams); anchor.lon = M.G.lon[c]; anchor.lat = M.G.lat[c]; } }
+      gags.push({ kind, t0: t, dur: kind === 'rain' ? 9000 : 8000, ...anchor, trained: game.st.p.teach > 0.3 });
+    }
     if (kind === 'volunteer') { const v = pick(volunteers); say(v, pick(['Bu gece bin kurbağa\ntopladık... yarın iki bin!', 'Kovam doldu,\nkurbağa bitmedi.'])); }
   }
   function drawGagsMap(t) {
@@ -425,6 +548,51 @@
         drawToad(x - 4 * dir * s, y - 18 * s, 0.6 * U, t, 0, dir);
         g.x = x; g.y = y - 30 * U;
         if (!g.said && p > 0.08) { g.said = 1; say(g, pick(['Batıya bedava\nyolculuk!', 'Otostop çekmek\nyürümekten iyi!'])); }
+      }
+      if (['goanna', 'legs', 'parade', 'rain', 'farmer', 'fence'].includes(g.kind)) {
+        const [ax, ay] = P(g.lon, g.lat), zs = 1 / Math.sqrt(cam.z), S = U * zs;
+        g.x = ax; g.y = ay - 34 * S;
+        if (g.kind === 'goanna') {
+          // goanna kurbağaya yaklaşır: eğitimliyse vazgeçer, değilse zehirlenir
+          const tx = ax + 4 * S, gx = lerp(ax - 60 * S, tx - 14 * S, Math.min(1, p * 2.2));
+          const ate = !g.trained && p > 0.5, away = g.trained && p > 0.5;
+          if (!ate) drawToad(tx, ay, 0.7 * S, t, 0, -1);
+          drawGoanna(away ? lerp(gx, gx - 70 * S, (p - 0.5) * 2) : gx, ay - 2 * S, 0.9 * S, away ? -1 : 1, ate && p > 0.62, t);
+          if (p > 0.5 && !g.said) { g.said = 1; say(g, g.trained ? pick(['Iyy! Tadı berbat,\nyemem!', 'Bu kurbağa?\nAsla!']) : pick(['Bu kurbağa...\nzehirliymiş.', 'Ah! Midem...'])); }
+        }
+        if (g.kind === 'legs') {
+          drawToad(ax, ay, 0.8 * S, t, 0, 1);
+          drawPerson(ax + 22 * S, ay + 2 * S, 0.8 * S, '#f4f4f0', t, 0);
+          ctx.strokeStyle = '#d9b45a'; ctx.lineWidth = 3 * S; ctx.beginPath(); ctx.moveTo(ax - 10 * S, ay + 4 * S); ctx.lineTo(ax + 12 * S, ay + 4 * S); ctx.stroke();
+          if (!g.said && p > 0.15) { g.said = 1; say(g, pick(['Bacaklar yine\nuzamış!', 'Öndekiler en uzun\nbacaklılar. Evrim!'])); }
+        }
+        if (g.kind === 'parade') {
+          ctx.strokeStyle = 'rgba(80,80,80,.7)'; ctx.lineWidth = 6 * S; ctx.beginPath(); ctx.moveTo(ax - 50 * S, ay); ctx.lineTo(ax + 50 * S, ay); ctx.stroke();
+          ctx.setLineDash([5 * S, 6 * S]); ctx.strokeStyle = '#f3ecd8'; ctx.lineWidth = 1.2 * S; ctx.beginPath(); ctx.moveTo(ax - 50 * S, ay); ctx.lineTo(ax + 50 * S, ay); ctx.stroke(); ctx.setLineDash([]);
+          for (let k = 0; k < 7; k++) { const q = ((p * 1.4 + k * 0.12) % 1); drawToad(ax - 6 * S + k * 2 * S, lerp(ay + 22 * S, ay - 22 * S, q) - Math.abs(Math.sin(t * 0.01 + k)) * 3 * S, 0.5 * S, t, k, 1); }
+          ctx.fillStyle = '#5b8fc0'; ctx.fillRect(ax - 46 * S, ay - 7 * S, 20 * S, 8 * S); ctx.fillStyle = '#9cc8d8'; ctx.fillRect(ax - 40 * S, ay - 11 * S, 10 * S, 5 * S);
+          if (!g.said && p > 0.2) { g.said = 1; say({ x: ax - 36 * S, y: ay - 16 * S }, pick(['Kurbağa trafiği!\nBekliyoruz...', 'Her akşam aynı\ngeçit töreni!'])); }
+        }
+        if (g.kind === 'rain') {
+          const cx = ax + Math.sin(p * 3) * 30 * S, cy = ay - 40 * S;
+          ctx.fillStyle = 'rgba(120,130,140,.85)'; [[0, 0, 16], [14, 3, 12], [-14, 4, 11]].forEach(([dx, dy, r]) => { ctx.beginPath(); ctx.arc(cx + dx * S, cy + dy * S, r * S, 0, 6.283); ctx.fill(); });
+          ctx.strokeStyle = 'rgba(90,140,200,.8)'; ctx.lineWidth = 1.4;
+          for (let k = 0; k < 9; k++) { const rx = cx + (k - 4) * 4 * S, ry = cy + 12 * S + ((t * 0.12 + k * 7) % (22 * S)); ctx.beginPath(); ctx.moveTo(rx, ry); ctx.lineTo(rx - 1, ry + 4 * S); ctx.stroke(); }
+          if (Math.random() < 0.08) floats.push({ x: cx + rnd(-16, 16) * S, y: ay + 6 * S, text: '•', life: 0.9 });
+          g.y = cy - 10 * S;
+          if (!g.said && p > 0.2) { g.said = 1; say(g, pick(['Yağmur!\nYumurta zamanı!', 'Muson geldi,\nhavuzlar doldu!'])); }
+        }
+        if (g.kind === 'farmer') {
+          drawPerson(ax, ay, 0.9 * S, '#4f6f8f', t, 0);
+          drawBeetle(ax + 16 * S, ay - 20 * S, 0.8 * S, t, 0);
+          if (!g.said && p > 0.15) { g.said = 1; say(g, pick(['Böcek hâlâ kamışımda!\nKurbağalar nerede?', 'Kurbağa geldi,\nböcek gitmedi.'])); }
+        }
+        if (g.kind === 'fence') {
+          drawPerson(ax - 10 * S, ay, 0.8 * S, '#8a5a3a', t, 0);
+          const a = Math.sin(t * 0.03); ctx.strokeStyle = '#6b4a2b'; ctx.lineWidth = 2 * S; ctx.beginPath(); ctx.moveTo(ax - 4 * S, ay - 18 * S); ctx.lineTo(ax + 4 * S, ay - 18 * S - a * 8 * S); ctx.stroke();
+          if (a > 0.95) floats.push({ x: ax + 8 * S, y: ay - 26 * S, text: 'tak', life: 0.8 });
+          if (!g.said && p > 0.2) { g.said = 1; say(g, pick(['Bu gölete kurbağa\ngiremez artık!', 'Çölü kurumuş tutalım,\nkurbağa geçemesin.'])); }
+        }
       }
       if (g.kind === 'chorus' && Math.random() < 0.15 && sprites.length) { const sp = pick(sprites); floats.push({ x: sp.x, y: sp.y - 10 * U, text: pick(['♪', 'vrr']), life: 1 }); }
     }
@@ -479,7 +647,7 @@
   setInterval(pumpToasts, 300);
   function showToast(ic, from, text, tone = '', opt = {}) {
     const box = $('toasts');
-    if (game.speed > 1) setSpeed(1); // olay geldi: normal hıza dön
+    // hikâye kartları zamanı zaten durdurur; seçilen hız korunur
     const el = document.createElement('div');
     el.className = 'toast ' + tone + (opt.img ? ' story' : '');
     el.innerHTML = (opt.img ? `<img src="${opt.img}" alt="">` : `<div class="ic">${ic}</div>`) +
@@ -510,7 +678,7 @@
   function resetGame() {
     Object.assign(game, {
       started: false, state: 'intro', phase: 'field', released: false, refused: 0, noToads: false,
-      st: M.newState(), frac: 0, speed: 1, paused: false, reading: 0, fired: new Set(), hist: [], fade: 0, unlocked: {},
+      st: M.newState(), frac: 0, bbox: null, focus: null, speed: 1, paused: false, reading: 0, fired: new Set(), hist: [], fade: 0, unlocked: {},
     });
     Object.values(sliders).forEach(s => { s.value = 0; s.disabled = true; });
     document.querySelectorAll('.coach').forEach(uncoach);
@@ -543,9 +711,10 @@
     keys.forEach(k => {
       const v = Number(sliders[k].value); used += v;
       game.st.p[k] = v / 100;
-      if (game.unlocked[k]) $('o-' + k).textContent = '%' + v;
+      if (game.unlocked[k]) $('o-' + k).textContent = v + ' puan';
+      const seg = document.querySelector('.bbar .b-' + k); if (seg) { seg.style.width = v + '%'; seg.textContent = v >= 14 ? { collect: '🪣', teach: '🎓', fence: '🚧' }[k] : ''; }
     });
-    $('g-budget').textContent = `${100 - used} puan kaldı`;
+    $('g-budget').textContent = `${100 - used} puan boşta`;
   }
   Object.entries(sliders).forEach(([k, el]) => el.addEventListener('input', () => { initAudio(); readPolicy(k); refreshFront(game.st); }));
   $('g-pause').onclick = () => { game.paused = !game.paused; $('g-pause').textContent = game.paused ? '▶ Devam' : '❚❚ Durdur'; };
@@ -595,16 +764,13 @@
   function enterGame() {
     if (game.started) return;
     game.started = true; game.state = 'intro'; ship.t0 = 0; ship.docked = false;
-    const seq = [
-      ['🇦🇺', 'Queensland, Avustralya', 'Şeker kamışı tarlalarını <b>kamış böceği</b> kemiriyor. Yetişkinler yaprakları, larvalar kökleri yiyor.', '', { pause: true }],
-      ['', 'Çözüm Hawaii\'den geliyor', 'Gemiyle 102 <b>kamış kurbağası</b> geldi. Plan basit: kurbağa böceği yer. Öyle değil mi?', '', { img: TOAD_IMG, pause: true }],
-    ];
-    const show = i => {
-      if (mode !== 'game') return;
-      if (i >= seq.length) return askRelease();
-      toast(...seq[i].slice(0, 4), { ...seq[i][4], then: () => show(i + 1) });
+    // giriş oyun içi akıştan farklı: kart sırasını beklemez, gemi hemen gelir
+    setTimeout(() => { if (mode === 'game') showToast('🇦🇺', 'Queensland, Avustralya · 1935', 'Şeker kamışını <b>kamış böceği</b> kemiriyor. Çözüm Hawaii\'den gemiyle geliyor: <b>102 kamış kurbağası</b>.', '', { img: TOAD_IMG, ms: 9000 }); }, 300);
+    ship.onDock = () => {
+      if (mode !== 'game' || game.state !== 'intro') return;
+      say(ship, 'Düüüt! Hawaii\'den\n102 kurbağa geldi!');
+      setTimeout(() => { if (mode === 'game' && game.state === 'intro') askRelease(); }, 1600);
     };
-    setTimeout(() => show(0), 500);
   }
 
   function askRelease() {
@@ -684,6 +850,7 @@
       if (site.hit) continue;
       if (sitePred(st, site) < 0.75) {
         site.hit = true;
+        if (!game.focus || performance.now() > game.focus.until) focus(site.lon, site.lat, 2.2, 4200);
         say(site, st.p.teach > 0.3 ? 'Iyy! Bu kurbağanın tadı\nberbat. Bir daha asla!' : 'Bu da ne? Lezzetli\ngörünüyor...');
         once('site-' + site.name, () => toast(site.ic, site.name, st.p.teach > 0.3 ? 'Eğitilmiş avcılar kurbağalardan uzak duruyor. Kayıplar beklenenden az.' : 'Kurbağayı yiyen avcılar zehirlenip ölüyor. Bazı bölgelerde nüfus %90\'ın üzerinde düşebiliyor.', st.p.teach > 0.3 ? 'good' : 'bad'));
       }
@@ -694,13 +861,15 @@
       ['darwin', 'Darwin', 'Kurbağalar kuzeyin başkenti Darwin\'e ulaştı.', 2005],
       ['wa', 'Batı Avustralya', 'Kurbağalar Batı Avustralya\'ya girdi. Önlerinde Kimberley var.', 2009],
     ];
-    for (const [k, title, text, hy] of MS) if (st.firsts[k] && !game.fired.has('ms-' + k)) { game.fired.add('ms-' + k); milestone(st.firsts[k], title, text, hy); break; }
+    const FOCUS = { nsw: [153, -28.6], nt: [137.6, -17.5], darwin: [130.85, -12.45], wa: [128.6, -15.8] };
+    for (const [k, title, text, hy] of MS) if (st.firsts[k] && !game.fired.has('ms-' + k)) { game.fired.add('ms-' + k); focus(...FOCUS[k], 2.4, 6500); milestone(st.firsts[k], title, text, hy); break; }
     if (y % 2 === 0) refreshFront(st);
     if (y >= 2025) return endGame();
     updatePanel();
   }
 
   function toMap() {
+    cam.init = false; game.focus = null;
     game.phase = 'map'; game.fade = 1; landKey = '';
     refreshFront(game.st);
     $('g-phase').textContent = 'Avustralya';
@@ -733,6 +902,7 @@
     $('s-toads').textContent = game.noToads ? '0' : game.phase === 'field' ? fmtToads(Math.min(fieldCount, 5e6)) : fmtToads(Math.max(s.toads, fieldCount > 5e6 ? 5e6 : fieldCount));
     $('s-area').textContent = '%' + s.areaPct.toFixed(1);
     $('m-pred').style.width = s.pred * 100 + '%';
+    $('v-pred').textContent = '%' + Math.round(s.pred * 100); $('v-pred').style.color = s.pred < 0.45 ? 'var(--danger)' : 'var(--green)';
     $('m-pred').style.background = s.pred < 0.45 ? 'var(--danger)' : 'var(--green)';
   }
 
@@ -863,7 +1033,9 @@
     initAudio();
     if (mode !== 'game' && mode !== 'sandbox' && mode !== 'title') return;
     const cs = candidates(); let best = null, bd = Infinity; // en yakın karakter, mesafe sınırı yok
-    for (const c of cs) { const d = Math.hypot(c[0] - e.clientX, c[1] - e.clientY); if (d < bd) { bd = d; best = c; } }
+    const onMap = mode === 'sandbox' || mode === 'result' || (mode === 'game' && game.phase === 'map');
+    const [px, py] = onMap ? toBase(e.clientX, e.clientY) : [e.clientX, e.clientY];
+    for (const c of cs) { const d = Math.hypot(c[0] - px, c[1] - py); if (d < bd) { bd = d; best = c; } }
     if (best) talk(best);
   });
   let nextChat = 0;
@@ -887,7 +1059,13 @@
     if (mode === 'game' || mode === 'result') st = game.st;
     if (mode === 'sandbox') st = sb.st;
     const showMap = st && (mode === 'sandbox' || mode === 'result' || game.phase === 'map');
-    if (showMap) { drawMap(st, now, dt); if (mode === 'game') drawGagsMap(now); }
+    if (showMap) {
+      updateCam(st, now, dt);
+      const [ccx, ccy] = camCenter();
+      ctx.save(); ctx.translate(ccx, ccy); ctx.scale(cam.z, cam.z); ctx.translate(-cam.fx, -cam.fy);
+      drawMap(st, now, dt); if (mode === 'game') drawGagsMap(now);
+      ctx.restore();
+    }
     else {
       const crowd = mode === 'game' && game.released ? Math.min(70, 8 + Math.floor((game.st.year - 1935 + game.frac) * 20)) : mode === 'title' ? 6 : 0;
       drawField(now, dt, crowd);
@@ -896,13 +1074,14 @@
     for (let i = floats.length - 1; i >= 0; i--) {
       const f = floats[i]; f.life -= 0.015 * (dt / 16); f.y -= 0.4 * U * (dt / 16);
       if (f.life <= 0) { floats.splice(i, 1); continue; }
-      ctx.fillStyle = rgb(INK, f.life); ctx.font = `${18 * U}px "Patrick Hand"`; ctx.textAlign = 'center'; ctx.fillText(f.text, f.x, f.y);
+      const [fx, fy] = showMap ? toScreen(f.x, f.y) : [f.x, f.y];
+      ctx.fillStyle = rgb(INK, f.life); ctx.font = `${18 * U}px "Patrick Hand"`; ctx.textAlign = 'center'; ctx.fillText(f.text, fx, fy);
     }
     for (let i = bubbles.length - 1; i >= 0; i--) {
       const bb = bubbles[i]; bb.life -= 0.0035 * (dt / 16);
       if (bb.obj) { bb.x = bb.obj.x; bb.y = bb.obj.y; }
       if (bb.life <= 0) { bubbles.splice(i, 1); continue; }
-      drawBubble(bb);
+      if (showMap) { const [sx, sy] = toScreen(bb.x, bb.y); drawBubble({ ...bb, x: sx, y: sy }); } else drawBubble(bb);
     }
     ambientChat(now); gagTick(now);
     if (mode === 'game' && ++tick % 4 === 0) updatePanel();
@@ -921,6 +1100,6 @@
 
   window.addEventListener('resize', () => { resize(); buildField(); });
   resize(); buildField(); resetGame(); goTo(0);
-  if (/[?&]debug\b/.test(location.search)) window.__dbg = { game, sb, fieldToads, get mode() { return mode; }, go: m => { maxSeen = slides.length; goTo(slideOf(m)); } };
+  if (/[?&]debug\b/.test(location.search)) window.__dbg = { game, sb, fieldToads, gags, cam, get mode() { return mode; }, gag: () => { nextGag = 1; }, go: m => { maxSeen = slides.length; goTo(slideOf(m)); } };
   requestAnimationFrame(frame);
 })();

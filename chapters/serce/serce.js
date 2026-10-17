@@ -1029,7 +1029,7 @@
   setInterval(pumpToasts, 300);
   function showToast(ic, from, text, tone = '', opt = {}) {
     const box = $('toasts');
-    if (game.speed > 1) setSpeed(1); // olay geldi: normal hıza dön
+    // hikâye kartları zamanı zaten durdurur; seçilen hız korunur
     const el = document.createElement('div');
     el.className = 'toast ' + tone + (opt.img ? ' story' : '');
     el.innerHTML = (opt.img ? `<img src="${opt.img}" alt="">` : `<div class="ic">${ic}</div>`) +
