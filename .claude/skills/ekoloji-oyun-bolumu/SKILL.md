@@ -64,6 +64,12 @@ Bu kurallar kullanıcının geri bildirimleriyle tek tek oturtuldu. Yeni bölüm
   - Aral: nehrin bölüşümü, kuşbakışı harita ve uydu görüntüsü.
   - DDT: **nereye** ilaçlanacağı (tarla, bahçe, bataklık). Her yerin bedeli farklı, zehrin nereye gittiğini oyuncu seçer.
   - Bölümü tasarlarken "bu konunun kendine has ikilemi ne, bunu oyuncunun eline nasıl veririm?" diye sor.
+- **Az yazı (kullanıcı Aral için "çok yazı var, görev anlaşılmıyor" dedi):**
+  - Kart metni en fazla iki kısa cümle olur (~90 karakter).
+  - Açılışta en fazla 2 durduran kart ve 1 kısa hedef kartı bulunur.
+  - "Kaydırıcı ne yapar" açıklaması kartla değil, sahnede bir okla verilir (ör. Aral'daki vana oku).
+  - Sahne etiketleri kademeli açılır: başta yalnız temel ikilem görünür, diğerleri değer önemli olunca çıkar.
+  - Görev kartı her madde için tek satırdır.
 - **Bilgiyi yazıyla değil sahnede göster.** Önemli sayılar sahnedeki ilgili nesnenin yanında küçük etiketlerle (`tag()`) durur. Örnekler: "Tarlaya %X · Göle %Y", "Kıyı 30 km uzaklaştı" oku, "Tuz 16 g/L (okyanus 35)", "Av 39.000 ton/yıl", "Kabuk %12 ince", besin zinciri şeridi. Bir kart bir yerden bahsediyorsa o yer sahnede halkayla parlar (`pulseAt`). Kullanıcı "çoğu bilgiyi anlamıyorum, ne oluyor göremiyorum" dedi.
 - **Ölçek değiştir:** yerel sahnenin yanında geniş bir bakış olsun (kurbağada harita, Aral'da kuşbakışı havza). Önemli anlarda kendiliğinden ona geçilsin, düğmeyle de açılabilsin. Geçiş yakınlaşma ve uzaklaşmayla yumuşak olsun.
 - **Görev kartı:** oyun başlamadan `Mission.show()` ile "Sen / Kontrolün / Hedefin / Dikkat" kartı gösterilir (sayfa başına bir kez). HUD'da sürekli bir "🎯 Hedef" satırı bulunur. Kullanıcı "oyuna girerken ne görevi olduğu anlaşılmıyor" dedi.

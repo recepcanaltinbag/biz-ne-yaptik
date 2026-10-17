@@ -1,7 +1,7 @@
 // Bölüm 3 — Çöle Dönen Deniz (Aral Gölü, 1960–2010)
 (() => {
   'use strict';
-  const MISSION = {"title": "Çöle Dönen Deniz · Aral, 1960", "role": "Orta Asya'nın su planlamacısısın. Pamuğu çiftçiler toplar, balığı balıkçılar tutar.", "control": "🌱 <b class=\"inl\">Pamuğa giden su</b>: nehrin ne kadarının tarlaya gideceğini seçersin, gerisi göle akar. 1970'te 🔧 kanal onarımı açılır.", "goal": "2010'a kadar Moskova'nın pamuk planını tuttur <b class=\"inl\">ve</b> gölü yaşat.", "watch": "Her beş yılda bir planlamacı gelip hesap soracak. Sağ alttaki uydu görüntüsünde gölün şeklini izle."};
+  const MISSION = {"title": "Çöle Dönen Deniz · Aral, 1960", "role": "Orta Asya'nın su planlamacısısın.", "control": "🌱 Tek kaydırıcı: nehir suyunun ne kadarı <b class=\"inl\">tarlaya</b> gitsin? Kalanı <b class=\"inl\">göle</b> akar.", "goal": "Moskova'nın pamuk planını tuttur, ama gölü de yaşat.", "watch": "Göl her yıl buharlaşır. Gelen su azsa küçülür."};
   const M = window.AralModel;
   const $ = id => document.getElementById(id);
   const { clamp, smooth } = M;
@@ -461,8 +461,17 @@
     ctx.fillStyle = o.color || rgb(PAL.ink); ctx.textBaseline = 'middle'; ctx.textAlign = 'left';
     ctx.fillText(text, bx + 6 * U, by + h / 2 + 1); ctx.textBaseline = 'alphabetic'; ctx.globalAlpha = 1;
   }
+  function drawValveHint(G, t) {
+    if (mode !== 'game' || gs.y > M.Y0 + 4 || game.touched) return;
+    const x = G.xi, y = riverY(G.xi, G), bob = Math.sin(t * 0.006) * 5 * U;
+    ctx.strokeStyle = '#c0503a'; ctx.lineWidth = 3 * U; ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(x + 46 * U, y - 64 * U + bob); ctx.quadraticCurveTo(x + 30 * U, y - 30 * U + bob, x + 6 * U, y - 12 * U + bob); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x + 6 * U, y - 12 * U + bob); ctx.lineTo(x + 16 * U, y - 14 * U + bob); ctx.moveTo(x + 6 * U, y - 12 * U + bob); ctx.lineTo(x + 9 * U, y - 22 * U + bob); ctx.stroke();
+    tag(x + 60 * U, y - 66 * U + bob, 'Su burada ikiye ayrılıyor: kaydırıcı bu vanayı açar', { fs: 13, color: '#a0402a' });
+  }
   function drawLabels(G, t) {
     if (mode !== 'game' && mode !== 'sandbox') return;
+    drawValveHint(G, t);
     const small = mobile;
     // nehrin bölündüğü yer: suyun yüzde kaçı nereye
     const wPct = Math.round(vis.w * 100);
@@ -477,15 +486,16 @@
       ctx.beginPath(); ctx.moveTo(G.shore0 + 4 * U, ay); ctx.lineTo(G.shoreX - 4 * U, ay); ctx.stroke();
       ctx.beginPath(); ctx.moveTo(G.shoreX - 10 * U, ay - 5 * U); ctx.lineTo(G.shoreX - 3 * U, ay); ctx.lineTo(G.shoreX - 10 * U, ay + 5 * U); ctx.stroke();
       tag((G.shore0 + G.shoreX) / 2, ay - 6 * U, `Kıyı ${Math.round(km)} km uzaklaştı`, { fs: small ? 11 : 13, color: '#a0402a' });
-      if (!small) tag(G.shore0, G.water0 - 36 * U, '1960 kıyısı', { fs: 11, a: 0.8 });
+
     }
     // gölün tuzu: okyanusla karşılaştırma
+    const showSal = vis.sal > 11.5 || mode === 'sandbox', showFish = vis.F < 0.95 || mode === 'sandbox';
     const salTxt = vis.sal > 35 ? `🧂 Tuz ${Math.round(vis.sal)} g/L · okyanustan tuzlu!` : `🧂 Tuz ${Math.round(vis.sal)} g/L (okyanus 35)`;
-    tag(Math.max(G.shoreX + 70 * U, G.x1 * 0.8), G.waterY + 44 * U, salTxt, { fs: small ? 11 : 13, color: vis.sal > 25 ? '#a0402a' : rgb(PAL.ink) });
+    if (showSal) tag(Math.max(G.shoreX + 70 * U, G.x1 * 0.8), G.waterY + 44 * U, salTxt, { fs: small ? 11 : 13, color: vis.sal > 25 ? '#a0402a' : rgb(PAL.ink) });
     // fabrika: yıllık balık avı; tarla: pamuk
     const fx = G.x1 * 0.43, ty = G.gt + G.gh * 0.1;
     const tons = Math.round(vis.F * 43) * 1000;
-    tag(fx + 17 * U, ty - 46 * U, vis.F < 0.05 ? '🐟 Av: 0 ton' : `🐟 Av: ${tons.toLocaleString('tr-TR')} ton/yıl`, { fs: small ? 11 : 12, color: vis.F < 0.3 ? '#a0402a' : rgb(PAL.ink) });
+    if (showFish) tag(fx + 17 * U, ty - 46 * U, vis.F < 0.05 ? '🐟 Av: 0 ton' : `🐟 Av: ${tons.toLocaleString('tr-TR')} ton/yıl`, { fs: small ? 11 : 12, color: vis.F < 0.3 ? '#a0402a' : rgb(PAL.ink) });
     tag(G.x1 * 0.33, G.gt + G.gh * 0.36, `☁️ Pamuk ${fmtX(vis.C)}`, { fs: small ? 11 : 13 });
     if (vis.soil < 0.92) tag(G.x1 * 0.33, G.gt + G.gh * 0.94, `Toprak tuzlanıyor: verim %${Math.round(vis.soil * 100)}`, { fs: small ? 10 : 12, color: '#a0402a' });
   }
@@ -800,7 +810,7 @@
       started: false, paused: false, state: 'play', frac: 0, fired: new Set(), hist: [], speed: 1, touched: false, reading: 0,
       story: false, endAfter: false, w: 0.2, fix: 0, trust: 70, reviews: [], replaced: false, inspected: false, siberia: false, dam: false, saved: false, truck: false, unlockedFix: false,
     });
-    gW.value = 20; gW.disabled = false; gFix.value = 0; gFix.disabled = true; $('w-fix').classList.add('locked'); $('o-fix').textContent = "🔒 1970'te açılır";
+    gW.value = 20; gW.disabled = false; gFix.value = 0; gFix.disabled = true; $('w-fix').classList.add('locked'); $('o-fix').textContent = "🔒 1967'de açılır";
     document.querySelectorAll('.coach').forEach(uncoach);
     readGameSliders();
     $('g-pause').textContent = '❚❚ Durdur'; setSpeed(1);
@@ -842,10 +852,9 @@
 
   const MOYNAQ = '../../assets/img/cards/moynaq-aral-sea-6226807306.jpg';
   const STORY = [
-    ['🌊', 'Aral Gölü · 1960', 'Aral, dünyanın <b>4. büyük gölü</b>. Kıyıdaki Moynak kasabasında binlerce balıkçı yaşıyor, konserve fabrikası gece gündüz çalışıyor.', '', { pause: true }],
-    ['🏛️', 'Moskova', 'Sovyetler Birliği <b>"beyaz altın"</b> istiyor: pamuk. Pamuk için su lazım. Suyu da gölü besleyen iki nehir getiriyor: <b>Amu Derya</b> ve <b>Siri Derya</b>.', '', { pause: true }],
-    ['💧', 'Senin işin', 'Kaydırıcı, nehir suyunun ne kadarının tarlalara gideceğini belirler. Gerisi göle akar. Göl, yaz sıcağında her yıl kocaman bir su buharlaştırır.', '', { ms: 9000 }],
-    ['📋', 'Moskova', 'Yedi Yıllık Plan: 1965\'e kadar pamuğu <b>%30 artır</b>. Plan hedefi sol üstte.', 'warn', { ms: 9000 }],
+    ['🌊', 'Aral Gölü · 1960', 'Dünyanın <b>4. büyük gölü</b>. Kıyıda balıkçı kasabası Moynak.', '', { pause: true }],
+    ['🏛️', 'Moskova', 'Pamuk istiyoruz! Pamuk için su lazım: suyu gölü besleyen nehirden alacaksın.', '', { pause: true }],
+    ['📋', 'Plan', '1965 hedefi: pamuk <b>1,3×</b>. Hedef sol üstte.', 'warn', { ms: 7000 }],
   ];
   function enterGame() {
     game.paused = false; $('g-pause').textContent = '❚❚ Durdur';
@@ -905,26 +914,26 @@
     if (!game.replaced) {
       const building = game.fix > 0 && gs.eff < 0.5 + 0.35 * game.fix - 0.02;
       game.trust = clamp(game.trust + (h.C / tgt - 0.95) * 20 - (building ? 4 * game.fix : 0), 0, 100);
-      if (building) once('build', () => toast('🔧', 'Moskova', 'Kanal onarımına para gidiyor. "Bu para neden pamuğa değil boruya?" diye soruyorlar.', 'warn'));
+      if (building) once('build', () => toast('🔧', 'Moskova', 'Onarım sürüyor, pamuk biraz düştü. "Para neden boruya?" diyorlar.', 'warn'));
     }
     const km = M.shoreKm(h.A);
     $('yb-harvest').textContent = `🌊 %${Math.round(h.A / M.A0 * 100)}`;
     $('yb-harvest').style.color = h.A / M.A0 > 0.7 ? 'var(--green)' : h.A / M.A0 > 0.4 ? 'var(--grain)' : 'var(--danger)';
 
-    if (game.w > 0.3 && y >= 1962) once('canal', () => toast('🚜', 'Kanal inşaatı', 'Çölün içinden yüzlerce kilometrelik kanallar kazılıyor. Çoğu toprak kanal: suyun büyük kısmı tarlaya varmadan sızıyor ya da buharlaşıyor.'));
-    if (km > 8) once('km8', () => { const G = geo(); pulseAt(() => [(geo().shore0 + geo().shoreX) / 2, geo().water0 + geo().gh * 0.3]); toast('⚓', 'Moynak', 'Kıyı limandan uzaklaşmaya başladı. Balıkçılar teknelerini denize indirmek için kanal kazıyor. Ok, kıyının ne kadar gittiğini gösteriyor.', 'warn'); });
-    if (h.sal > 14) once('sal14', () => { pulseAt(() => [Math.max(geo().shoreX + 70 * U, geo().x1 * 0.8), geo().waterY + 34 * U]); toast('🔬', 'Biyolog', 'Göl tuzlanıyor. Su azalınca tuz aynı kalıyor, yani daha yoğunlaşıyor. Yerli balıklar zorlanıyor.', 'warn'); });
-    if (h.F < 0.5) once('f50', () => { pulseAt(() => [geo().x1 * 0.43 + 17 * U, geo().gt + geo().gh * 0.1 - 20 * U]); toast('🐟', 'Konserve fabrikası', 'Balık yarı yarıya azaldı. Fabrika yarım vardiya çalışıyor.', 'warn'); });
-    if (h.F < 0.1) once('f10', () => toast('🚂', 'Moynak', 'Fabrika artık balığı Hazar\'dan ve Baltık\'tan getiriyor. Balık 2.000 km yol geliyor, konserve Moynak\'ta yapılıyor.', 'bad'));
-    if (h.dust > 0.25) once('dust', () => { pulseAt(() => [geo().x1 * 0.33, geo().gt + geo().gh * 0.5], '#c0503a'); toast('🌪️', 'Tuz fırtınası', 'Kuruyan göl tabanından tuz ve tarım ilacı tozu kalkıyor. Tarlalara ve evlere yağıyor. Pamuk verimi düşüyor, insanlar hastalanıyor.', 'bad'); });
+    if (game.w > 0.3 && y >= 1962) once('canal', () => toast('🚜', 'Kanal inşaatı', 'Yeni kanallar kazılıyor. Çoğu toprak: suyun yarısı yolda sızıyor.'));
+    if (km > 8) once('km8', () => { const G = geo(); pulseAt(() => [(geo().shore0 + geo().shoreX) / 2, geo().water0 + geo().gh * 0.3]); toast('⚓', 'Moynak', 'Kıyı limandan uzaklaşıyor. Kırmızı ok ne kadar gittiğini gösteriyor.', 'warn'); });
+    if (h.sal > 14) once('sal14', () => { pulseAt(() => [Math.max(geo().shoreX + 70 * U, geo().x1 * 0.8), geo().waterY + 34 * U]); toast('🔬', 'Biyolog', 'Su azalınca tuz yoğunlaşıyor. Balıklar zorlanıyor.', 'warn'); });
+    if (h.F < 0.5) once('f50', () => { pulseAt(() => [geo().x1 * 0.43 + 17 * U, geo().gt + geo().gh * 0.1 - 20 * U]); toast('🐟', 'Konserve fabrikası', 'Balık yarıya indi. Fabrika yarım gün çalışıyor.', 'warn'); });
+    if (h.F < 0.1) once('f10', () => toast('🚂', 'Moynak', 'Gölde balık kalmadı. Fabrika balığı 2.000 km öteden getiriyor.', 'bad'));
+    if (h.dust > 0.25) once('dust', () => { pulseAt(() => [geo().x1 * 0.33, geo().gt + geo().gh * 0.5], '#c0503a'); toast('🌪️', 'Tuz fırtınası', 'Kuruyan tabandan tuzlu toz kalkıyor. Tarla ve insanlar zarar görüyor.', 'bad'); });
     if (h.Vn !== null) once('split', () => { setView('map', 8000); milestone('🛰️', 'Uydu görüntüsü', 'Göl ikiye ayrıldı: kuzeyde Küçük Aral, güneyde Büyük Aral. Haritada gör.', 'bad'); });
-    if (h.A / M.A0 > 0.85 && y >= 1980) once('alive', () => toast('🌊', 'Moynak', 'Komşu havzalardaki göller küçülürken Aral hâlâ dalgalı. Balıkçılar şaşkın ve mutlu.', 'good'));
-    if (game.saved && h.saln < 15) once('north', () => { toast('🐟', 'Kuzey Aral', 'Kuzey Aral\'da tuz azaldı. Sazan ve çapak balıkları geri döndü, balıkçılar ağ atıyor.', 'good'); });
+    if (h.A / M.A0 > 0.85 && y >= 1980) once('alive', () => toast('🌊', 'Moynak', 'Aral hâlâ dalgalı. Balıkçılar mutlu.', 'good'));
+    if (game.saved && h.saln < 15) once('north', () => { toast('🐟', 'Kuzey Aral', 'Kuzey Aral\'da tuz azaldı, balıklar geri döndü!', 'good'); });
 
     // kanal onarımı 1970'te açılır
     if (y === 1967 && !game.unlockedFix) {
       game.unlockedFix = true; gFix.disabled = false; $('w-fix').classList.remove('locked'); readGameSliders(); if (game.speed > 1) setSpeed(1);
-      milestone('🔧', 'Su mühendisi', 'Kanalları betonla kaplasak ve tarlayı damla damla sulasak, <b>aynı pamuğu çok daha az suyla</b> yetiştirebiliriz. Ama yılların işi, para ister.', '', () => { if (Number(gFix.value) < 50) coach(gFix, '👉 Kaydır: kanalları onar'); });
+      milestone('🔧', 'Su mühendisi', 'Yeni araç: <b>kanal onarımı</b>. Aynı pamuk, daha az su. Ama birkaç yıl pamuk düşer.', '', () => { if (Number(gFix.value) < 50) coach(gFix, '👉 Kaydır: kanalları onar'); });
     }
     // Sibirya projesi: hayal mi, çözüm mü?
     if (y === 1975) {
@@ -934,8 +943,8 @@
         { label: 'Gelecek suya güvenmem', sub: 'Bugünkü suyu idareli kullan', fn: () => { toast('🤔', 'Moskova', 'Planlamacı omuz silkti: "Sen bilirsin."'); coach(gW, '👉 İstersen suyu azalt', 9000); } },
       ]);
     }
-    if (y === 1986) milestone('📜', 'Moskova', '1986: Sibirya nehirlerini çevirme projesi <b>iptal edildi</b>. Çok pahalı, çok riskli. Aral\'a dışarıdan su gelmeyecek.', game.siberia ? 'bad' : '');
-    if (y === 1991) { $('trust-lbl').textContent = ' Hükümetin güveni'; milestone('🗺️', 'Haber', 'Sovyetler Birliği dağıldı. Göl artık Kazakistan ile Özbekistan\'ın, havza ise beş ülkenin ortak sorunu. Pamuk yine ana gelir.', ''); }
+    if (y === 1986) milestone('📜', 'Moskova', 'Sibirya projesi <b>iptal edildi</b>. Aral\'a dışarıdan su gelmeyecek.', game.siberia ? 'bad' : '');
+    if (y === 1991) { $('trust-lbl').textContent = ' Hükümetin güveni'; milestone('🗺️', 'Haber', 'Sovyetler Birliği dağıldı. Göl artık birkaç ülkenin ortak sorunu.', ''); }
     // Kokaral seti: kuzeydeki küçük gölü kurtarmak
     if (y === 2003 && h.Vn !== null) {
       setView('map', 9000);
