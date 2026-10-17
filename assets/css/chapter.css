@@ -759,3 +759,17 @@ input[type=range]::-moz-range-thumb { width: 24px; height: 24px; border-radius: 
 .replay-nav span { width: 100%; text-align: center; opacity: .7; }
 .replay-nav button { font: inherit; border: 1px solid rgba(43,58,46,.25); background: rgba(255,255,255,.6); color: inherit; border-radius: 99px; padding: 4px 11px; cursor: pointer; }
 .replay-nav button:hover { background: #fff; }
+
+/* görev kartı: oyuna girerken rol, kontrol ve hedef */
+.card.mission { max-width: 520px; }
+.card.mission h2 { margin: 2px 0 10px; }
+.mlist { list-style: none; padding: 0; margin: 0 0 14px; display: grid; gap: 8px; }
+.mlist li { display: grid; grid-template-columns: 34px 1fr; gap: 10px; align-items: start; background: rgba(255,255,255,.7); border: 2px solid var(--line); border-radius: 12px; padding: 7px 10px; font-size: .98rem; line-height: 1.35; }
+.mlist .mi { font-size: 1.35rem; line-height: 1.2; text-align: center; }
+.mlist b { display: block; font-family: var(--hand); font-weight: 400; font-size: 1.12rem; color: var(--ink); }
+.mlist b.inl { display: inline; font: inherit; font-weight: 600; }
+.card.mission .go-m { width: 100%; }
+/* sol üstte sürekli duran hedef satırı */
+.goal { font-family: var(--hand); font-size: 1.05rem; color: var(--ink-soft); border-left: 4px solid var(--green); padding-left: 10px; margin: 2px 0 0; }
+@media (max-width: 760px) { .mlist li { font-size: .9rem; padding: 6px 8px; } .mlist b { font-size: 1.02rem; } .goal { font-size: .9rem; } }
+@media (max-height: 640px) { .mlist { gap: 5px; } .mlist li { padding: 4px 8px; } }

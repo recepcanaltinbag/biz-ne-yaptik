@@ -55,13 +55,30 @@
       fact: '2010\'larda Güney Aral\'ın suyu okyanustan üç kat daha tuzluydu.' },
     { id: 'aral-sibirya', ch: 'aral', icon: '🗺️', name: 'Hayal projesi', hidden: true,
       fact: 'Sibirya nehirlerini Orta Asya\'ya çevirme projesi 1986\'da iptal edildi.' },
+    // --- Kuşlar Neden Sustu? ---
+    { id: 'ddt-kartal', ch: 'ddt', icon: '🦅', name: 'Kartallar uçuyor', hint: 'Gökyüzünün kralları tahttan inmesin.',
+      fact: 'ABD\'de 1963\'te 417 kel kartal çifti kalmıştı; 2020\'de 71.000\'den fazla çift vardı.' },
+    { id: 'ddt-carson', ch: 'ddt', icon: '📖', name: 'Carson\'ı dinle', hint: 'Bazen bir kitap bir fabrikadan güçlüdür.',
+      fact: 'Rachel Carson\'ın Sessiz Bahar\'ı 1962\'de çıktı ve ABD\'de çevre hareketini başlattı.' },
+    { id: 'ddt-hasat', ch: 'ddt', icon: '🐞', name: 'İlaçsız bolluk', hint: 'Uğur böceği de bir çiftçidir.',
+      fact: 'Bir uğur böceği hayatı boyunca binlerce yaprak biti yiyebilir.' },
+    { id: 'ddt-erken', ch: 'ddt', icon: '⏳', name: 'Yasayı bekleme', hint: 'Bazı kararlar yasayı beklemez.',
+      fact: 'ABD 1972\'de, Türkiye 1980\'lerde DDT\'yi tarımda yasakladı.' },
+    { id: 'ddt-afis', ch: 'ddt', icon: '📰', name: 'Eski reklam', hidden: true,
+      fact: '1947\'de bir dergi reklamı "DDT benim için iyidir!" diyordu.' },
+    { id: 'ddt-yumurta', ch: 'ddt', icon: '🥚', name: 'İnce kabuk', hidden: true,
+      fact: 'Ratcliffe 1967\'de yırtıcı kuş yumurtalarının 1947\'den sonra belirgin biçimde inceldiğini gösterdi.' },
+    { id: 'ddt-sinek', ch: 'ddt', icon: '🦟', name: 'Dirençli sinek', hidden: true,
+      fact: 'DDT\'ye dirençli karasinekler daha 1940\'ların sonunda görülmüştü.' },
+    { id: 'ddt-kamyon', ch: 'ddt', icon: '🚚', name: 'Sis kamyonu', hidden: true,
+      fact: '1940\'lar ve 50\'lerde çocuklar sokaklarda ilaç sisi püskürten kamyonların arkasından koşardı.' },
   ];
 
   // rozet madalyonları: bölüm fotoğrafından (çizgi film filtresiyle) rozete özel bir kesit + renkli çerçeve + simge
   // fotoğraflar sitede barındırılır; yol, bu betiğin adresine göre çözülür (ana sayfa ve bölüm sayfaları için aynı)
   const BASE = new URL('../img/cards/', (document.currentScript && document.currentScript.src) || location.href).href;
-  const IMG = { S: BASE + 'kill-bird-and-insect.jpg', K: BASE + 'cane-toad-bufo-marinus.jpg', A: BASE + 'moynaq-aral-sea-6226807306.jpg' };
-  const ART = {"serce-dost": ["S", "50% 12%", 230, "#7fb069"], "serce-durust": ["S", "25% 55%", 260, "#e0b04a"], "serce-vicdan": ["S", "75% 35%", 250, "#6aa6c9"], "serce-bolluk": ["S", "50% 92%", 220, "#d9a441"], "serce-gozluk": ["S", "85% 8%", 300, "#f08a4b"], "serce-defter": ["S", "15% 30%", 280, "#9a7bd1"], "serce-rock": ["S", "60% 65%", 320, "#d0587e"], "serce-rekor": ["S", "35% 85%", 300, "#8a6fd8"], "kurbaga-yok": ["K", "30% 40%", 260, "#c96a5a"], "kurbaga-kakadu": ["K", "70% 55%", 240, "#7fb069"], "kurbaga-hedef": ["K", "50% 30%", 300, "#e0b04a"], "kurbaga-bilim": ["K", "20% 70%", 280, "#6aa6c9"], "kurbaga-tasmanya": ["K", "85% 20%", 320, "#5f9fb5"], "kurbaga-gemi": ["K", "10% 15%", 300, "#7d74d4"], "kurbaga-otostop": ["K", "60% 85%", 280, "#c98a4b"], "kurbaga-bacak": ["K", "90% 80%", 260, "#a46fd0"], "aral-deniz": ["A", "80% 30%", 230, "#5b93b8"], "aral-balik": ["A", "20% 50%", 260, "#6d8fa0"], "aral-plan": ["A", "50% 80%", 240, "#7fb069"], "aral-kokaral": ["A", "65% 20%", 280, "#e0b04a"], "aral-deve": ["A", "35% 70%", 300, "#c49a6c"], "aral-gemi": ["A", "50% 50%", 320, "#8a6fd8"], "aral-tuz": ["A", "10% 85%", 300, "#b9a98a"], "aral-sibirya": ["A", "90% 60%", 280, "#a46fd0"]};
+  const IMG = { S: BASE + 'kill-bird-and-insect.jpg', K: BASE + 'cane-toad-bufo-marinus.jpg', A: BASE + 'moynaq-aral-sea-6226807306.jpg', D: BASE + 'statelibqld-2-162299-cloud-spraying-for-mosquitos-at-norman-.jpg' };
+  const ART = {"serce-dost": ["S", "50% 12%", 230, "#7fb069"], "serce-durust": ["S", "25% 55%", 260, "#e0b04a"], "serce-vicdan": ["S", "75% 35%", 250, "#6aa6c9"], "serce-bolluk": ["S", "50% 92%", 220, "#d9a441"], "serce-gozluk": ["S", "85% 8%", 300, "#f08a4b"], "serce-defter": ["S", "15% 30%", 280, "#9a7bd1"], "serce-rock": ["S", "60% 65%", 320, "#d0587e"], "serce-rekor": ["S", "35% 85%", 300, "#8a6fd8"], "kurbaga-yok": ["K", "30% 40%", 260, "#c96a5a"], "kurbaga-kakadu": ["K", "70% 55%", 240, "#7fb069"], "kurbaga-hedef": ["K", "50% 30%", 300, "#e0b04a"], "kurbaga-bilim": ["K", "20% 70%", 280, "#6aa6c9"], "kurbaga-tasmanya": ["K", "85% 20%", 320, "#5f9fb5"], "kurbaga-gemi": ["K", "10% 15%", 300, "#7d74d4"], "kurbaga-otostop": ["K", "60% 85%", 280, "#c98a4b"], "kurbaga-bacak": ["K", "90% 80%", 260, "#a46fd0"], "aral-deniz": ["A", "80% 30%", 230, "#5b93b8"], "aral-balik": ["A", "20% 50%", 260, "#6d8fa0"], "aral-plan": ["A", "50% 80%", 240, "#7fb069"], "aral-kokaral": ["A", "65% 20%", 280, "#e0b04a"], "aral-deve": ["A", "35% 70%", 300, "#c49a6c"], "aral-gemi": ["A", "50% 50%", 320, "#8a6fd8"], "aral-tuz": ["A", "10% 85%", 300, "#b9a98a"], "aral-sibirya": ["A", "90% 60%", 280, "#a46fd0"], "ddt-kartal": ["D", "70% 30%", 240, "#7a5a3a"], "ddt-carson": ["D", "20% 60%", 260, "#5a7a5a"], "ddt-hasat": ["D", "50% 85%", 230, "#c0302a"], "ddt-erken": ["D", "85% 70%", 280, "#e0b04a"], "ddt-afis": ["D", "30% 20%", 300, "#c0503a"], "ddt-yumurta": ["D", "60% 50%", 320, "#d8d2c0"], "ddt-sinek": ["D", "10% 40%", 300, "#8a6fd8"], "ddt-kamyon": ["D", "90% 15%", 280, "#3a6a4a"]};
   function medal(def, on) {
     const [im, pos, zoom, ring] = ART[def.id] || ['S', '50% 50%', 200, '#e0b04a'];
     const ic = on ? def.icon : def.hidden ? '?' : '🔒';

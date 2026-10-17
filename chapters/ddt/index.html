@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Kuşlar Neden Sustu?</title>
+<meta name="description" content="1946 ABD: DDT ile böcekleri yok edersen ne olur? Zehrin besin zincirinde tırmanışını oynayarak gör.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/css/badges.css?v=261017160521">
+<link rel="stylesheet" href="../../assets/css/chapter.css?v=261017160521">
+<style>
+  .sl.locked span { color: var(--ink-soft); }
+  #m-p { background: var(--bug); } #m-y { background: var(--grain); } #m-n { background: #c0503a; } #m-b { background: #7a5a3a; } #m-s { background: #9c6b47; }
+  .chain { font-family: var(--hand); font-size: 1.02rem; display: flex; flex-wrap: wrap; align-items: center; gap: 4px; background: rgba(255,255,255,.55); border-radius: 12px; padding: 3px 8px; }
+  .chain b { font-weight: 400; } .chain i { font-style: normal; color: var(--ink-soft); }
+  .chain.hot { box-shadow: 0 0 0 3px #e0b04a; }
+  .chain .bird { color: var(--danger); }
+  .zones { display: flex; flex-wrap: wrap; align-items: center; gap: 5px; background: var(--paper); border: 2px solid var(--ink); border-radius: 14px; padding: 6px 8px; font-family: var(--hand); font-size: 1rem; }
+  .zones span { color: var(--ink-soft); margin-right: 2px; }
+  .zones button { font: inherit; border: 2px solid var(--line); background: #f4f1e6; color: var(--ink-soft); border-radius: 99px; padding: 1px 9px; cursor: pointer; text-decoration: line-through; }
+  .zones button.on { background: #fff3cf; border-color: #e0b04a; color: var(--ink); text-decoration: none; }
+  .zones.locked { opacity: .5; pointer-events: none; }
+  @media (max-width: 760px) { .zones { font-size: .85rem; padding: 4px 6px; gap: 3px; } .zones span { display: none; } }
+  @media (max-width: 760px) { .chain { font-size: .86rem; padding: 2px 6px; gap: 2px; } }
+</style>
+</head>
+<body class="dock">
+<script>if (/[?&]layout=klasik\b/.test(location.search)) document.body.classList.remove("dock");</script>
+<canvas id="world" aria-hidden="true"></canvas>
+
+<header class="bar">
+  <a class="bar-home" href="../../">← Biz Ne Yaptık?</a>
+  <button class="bar-btn" id="sound" aria-label="Sesi aç/kapat">🔊 <span>Ses</span></button>
+</header>
+
+<div class="slides">
+
+  <section class="slide" data-mode="title">
+    <div class="center-col"><div class="glass">
+      <div class="kicker">Biz Ne Yaptık? · Bölüm 4</div>
+      <h1 class="title">Kuşlar Neden Sustu?</h1>
+      <p class="sub">ABD, 1946 · oynama süresi ~5 dakika</p>
+      <button class="hbtn big" data-next>Başla →</button>
+    </div></div>
+  </section>
+
+  <section class="slide" data-mode="game">
+    <div class="narr game-intro" id="g-intro">
+      <p>Sen bir kıyı ilçesinin tarım müdürüsün. Uçaklar ilacı sıkar, çiftçiler hasadı toplar. <b>Ne kadar ilaçlanacağına sen karar verirsin.</b></p>
+      <p class="try">👉 Kaydırıcıyla ilaçlamayı ayarla. Böcekleri, ürünü ve gökyüzünü izle.</p>
+    </div>
+    <div class="topbox">
+      <div class="yearbar" aria-live="polite"><div class="yb-year" id="yb-year">1946</div><div class="yb-sub" id="yb-sub">Savaş sonrası</div><div class="yb-track"><i id="yb-fill"></i></div><span class="yb-harvest" id="yb-harvest"></span><span class="yb-speed" id="yb-speed" role="group" aria-label="Hız"><button type="button" data-s="1" class="on">1×</button><button type="button" data-s="2">2×</button><button type="button" data-s="4">4×</button></span></div>
+      <div id="toasts" aria-live="polite"></div>
+    </div>
+    <aside class="gpanel" aria-label="Tarım müdürlüğü masası">
+      <button class="gp-toggle" type="button" aria-expanded="false">⋯ Daha fazla</button>
+      <div class="gp-hud">
+      <div class="gp-top">
+        <div class="chip date" id="g-date">1946</div>
+        <div class="chain" id="chain" title="Besin zincirinde DDT (ppm)"><span>💧<b id="c-w">0</b></span><i>→</i><span>🦐<b id="c-p">0</b></span><i>→</i><span>🐟<b id="c-f">0</b></span><i>→</i><span class="bird">🦅<b id="c-b">0</b></span><i>ppm</i></div>
+      </div>
+      <p class="goal gp-extra">🎯 <b>Hedef:</b> ürünü koru, kartalları kaybetme.</p>
+      <div class="gp-meters">
+        <div class="mrow"><span>🐛<em> Zararlı böcek</em></span><span class="track"><i id="m-p"></i></span></div>
+        <div class="mrow"><span>🌽<em> Ürün</em></span><span class="track"><i id="m-y"></i></span></div>
+        <div class="mrow"><span>🐞<em> Faydalı böcek</em></span><span class="track"><i id="m-n"></i></span></div>
+        <div class="mrow"><span>🦅<em> Kartal</em></span><span class="track"><i id="m-b"></i></span></div>
+        <div class="mrow"><span>🐦<em> Ötücü kuş</em></span><span class="track"><i id="m-s"></i></span></div>
+        <div class="mrow trust"><span>👨‍🌾<em> Çiftçilerin desteği</em></span><span class="track"><i id="m-trust"></i></span></div>
+      </div>
+      </div>
+      <label class="sl big" id="w-s"><span>✈️ DDT ilaçlaması <b id="o-s">%10</b></span><input type="range" id="g-s" min="0" max="100" step="5" value="10"></label>
+      <div class="zones" id="zones" role="group" aria-label="Nereye ilaçlansın"><span>Nereye?</span><button type="button" data-z="f" class="on">🌽 Tarla</button><button type="button" data-z="g" class="on">🏡 Bahçeler</button><button type="button" data-z="m" class="on">🌾 Bataklık</button></div>
+      <label class="sl big locked" id="w-ipm"><span>🐞 Doğal mücadele <b id="o-ipm">🔒 1962'de açılır</b></span><input type="range" id="g-ipm" min="0" max="100" step="10" value="0" disabled></label>
+      <div class="sb-ctrl gp-extra">
+        <button class="hbtn sm" id="g-pause">❚❚ Durdur</button>
+        <button class="hbtn sm" id="g-speed">1×</button>
+      </div>
+    </aside>
+    <div class="harvest" id="harvest" hidden></div>
+    <div class="modal" id="modal" hidden></div>
+  </section>
+
+  <section class="slide scroll" data-mode="result">
+    <div class="result" id="result"></div>
+  </section>
+
+  <section class="slide" data-mode="sandbox">
+    <aside class="sb-panel">
+      <h2>Simülasyon laboratuvarı</h2>
+      <p class="small">1946'dan 2000'e kadar ilçe her yıl senin kurallarına göre değişir.</p>
+      <div class="presets">
+        <button class="pbtn" data-preset="history">Tarihteki gibi</button>
+        <button class="pbtn" data-preset="none">Hiç ilaç yok</button>
+        <button class="pbtn" data-preset="smart">Doğayla çalış</button>
+        <button class="pbtn" data-preset="heavy">Hep tam gaz</button>
+      </div>
+      <label class="sl"><span>✈️ DDT ilaçlaması <b id="o-ps"></b></span><input type="range" id="p-s" min="0" max="100" value="0"></label>
+      <label class="sl"><span>🐞 Doğal mücadele <b id="o-pipm"></b></span><input type="range" id="p-ipm" min="0" max="100" value="0"></label>
+      <label class="sl"><span>🧬 Direnç gelişme hızı <b id="o-pres"></b></span><input type="range" id="p-res" min="50" max="150" value="100"></label>
+      <canvas id="sb-chart" class="sb-chart"></canvas>
+      <div class="legend"><span style="--c:#b5543c">Zararlı</span><span style="--c:#c29a2e">Ürün</span><span style="--c:#7a5a3a">Kartal</span><span style="--c:#9c6b47">Ötücü kuş</span></div>
+      <div class="sb-stats"><span id="sb-year">1946</span><span id="sb-harvest">Kuşta DDT: 0 ppm</span></div>
+      <div class="sb-ctrl">
+        <button class="hbtn sm" id="sb-play">❚❚ Durdur</button>
+        <button class="hbtn sm" id="sb-speed">1×</button>
+        <button class="hbtn sm" id="sb-reset">↺ Sıfırla</button>
+      </div>
+      <button class="hbtn" data-next>Gerçekte ne oldu? →</button>
+    </aside>
+  </section>
+
+  <section class="slide scroll" data-mode="facts">
+    <article class="paper">
+      <h2>Gerçekte ne oldu?</h2>
+      <ul class="facts">
+        <li><b>1946</b> Savaşta askerleri tifüs ve sıtmadan koruyan DDT çiftçilere satılmaya başladı. Bulan Paul Müller 1948'de Nobel aldı. Uçaklar tarlaları, bahçeleri, bataklıkları ilaçladı.</li>
+        <li><b>Sonra</b> DDT suda çözünmez, yağda birikir. Her basamakta katlanır (<i>biyolojik birikim</i>): bir bataklıkta planktonda 0,04 ppm, martıda 75 ppm ölçüldü. Yırtıcı kuşların yumurta kabukları %15–20 inceldi, yumurtalar kuluçkada kırıldı. ABD'de 1963'te yalnız <b>417 kel kartal çifti</b> kaldı. Böcekler ise ilaca direnç kazandı.</li>
+        <li><b>Bugün</b> 1962'de Rachel Carson'ın <i>Sessiz Bahar</i>'ı yayımlandı. ABD 1972'de, Türkiye 1980'lerde DDT'yi tarımda yasakladı. Kartallar döndü: 2020'de ABD'de 71.000'den fazla çift vardı.</li>
+      </ul>
+      <div class="callout"><b>Ama DDT her yerde yasak değil.</b> 2001 Stockholm Sözleşmesi tarımda yasakladı, ama sıtmayla savaşta evlerin içine dikkatlice püskürtülmesine hâlâ izin veriyor. Sorun maddenin kendisinden çok, gökyüzünden her yere bol bol serpilmesiydi.</div>
+      <button class="hbtn" data-next>Peki ne öğrendik? →</button>
+    </article>
+  </section>
+
+  <section class="slide scroll" data-mode="lessons">
+    <article class="paper">
+      <h2>Ne öğrendik?</h2>
+      <div class="lessons"><div class="lcard"><h3>🧬 Zehir yukarı tırmanır</h3><p>Suda neredeyse yok gibiyken zincirin tepesinde binlerce kat birikir.</p></div><div class="lcard"><h3>🐛 Böcek alışır</h3><p>Her sıkışta dirençliler kalır; çiftçi daha çok sıkar ve çark döner.</p></div><div class="lcard"><h3>📖 Tek bir ses yeter</h3><p>Bir biyoloğun kitabı bir ülkenin yasasını değiştirdi.</p></div></div>
+      <h2>Sen ne yapabilirsin?</h2>
+      <ul class="todo"><li>🇹🇷 Söke Ovası'nda yasaktan yıllar sonra bile toprakta DDT kalıntısı bulundu. Zehir yavaş gider; meyve ve sebzeyi iyice yıka.</li><li>🐞 Bahçende ilaç yerine uğur böceği, kuş evi ve çiçek şeridi kullan.</li><li>📚 <i>Sessiz Bahar</i>'ı oku; Türkçe çevirisi var.</li></ul>
+      <details class="sources-fold"><summary>Kaynaklar ve model hakkında</summary><ul class="sources">
+        <li>Rachel Carson, <i>Silent Spring</i>, Houghton Mifflin, 1962.</li>
+        <li>G. M. Woodwell, C. F. Wurster, P. A. Isaacson, "DDT residues in an East Coast estuary", <i>Science</i> 156 (1967).</li>
+        <li>D. A. Ratcliffe, "Decrease in eggshell weight in certain birds of prey", <i>Nature</i> 215 (1967).</li>
+        <li><a href="https://www.epa.gov/archive/epa/aboutepa/ddt-ban-takes-effect.html" target="_blank" rel="noopener">EPA: DDT Ban Takes Effect (1972)</a> ve ABD Balık ve Yaban Hayatı Servisi, <i>Bald Eagle Population Report</i> (2020).</li>
+        <li>"Review on DDT and its residues in Turkey's wetlands", <i>Journal of Environmental Biology</i> 28 (2007).</li>
+      </ul><p class="small">Model basit bir zararlı–faydalı böcek dengesine, direnç birikimine ve besin zincirinde katlanan DDT'ye dayanır; sayılar temsilidir.</p></details>
+      <div class="end-nav">
+        <a class="hbtn" href="../../#bolumler">← Tüm bölümler</a>
+        <button class="hbtn" data-goto="game">↺ Tekrar oyna</button>
+      </div>
+    </article>
+  </section>
+</div>
+
+<nav class="dots" id="dots" aria-label="Bölüm adımları"></nav>
+
+<script src="../../assets/js/stats.js?v=261017160521"></script>
+<script src="../../assets/js/mission.js?v=261017160521"></script>
+<script src="../../assets/js/badges.js?v=261017160521"></script>
+<script src="../../assets/js/toon.js?v=261017160521"></script>
+<script src="model.js?v=261017160521"></script>
+<script src="ddt.js?v=261017160521"></script>
+<script>/* gpToggle */document.querySelectorAll(".gp-toggle").forEach(b=>b.onclick=()=>{const p=b.closest(".gpanel");const o=p.classList.toggle("open");b.setAttribute("aria-expanded",o);b.textContent=o?"✕ Kapat":"⋯ Daha fazla";window.dispatchEvent(new Event("panel"));});</script>
+</body>
+</html>

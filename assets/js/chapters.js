@@ -40,7 +40,7 @@ window.SEASONS = [
       img: 'assets/img/cards/lake-aksehir.jpg', credit: 'Kerem Ekmekçi, CC BY-SA 4.0', src: 'File:Lake_Akşehir.jpg' },
   ]},
   { icon: '🧪', title: 'Tarlada Kimya Dersi', desc: 'Daha çok ürün için her şey. Ya faturası?', chapters: [
-    { year: '1962', title: 'Kuşlar Neden Sustu?', status: 'soon', text: 'DDT mucize gibi görünüyor: sivrisinek ölüyor, ürün artıyor. Sonra kartalların yumurta kabukları incelmeye başlıyor.',
+    { year: '1962', title: 'Kuşlar Neden Sustu?', status: 'live', href: 'chapters/ddt/', text: 'DDT mucize gibi görünüyor: sivrisinek ölüyor, ürün artıyor. Sonra kartalların yumurta kabukları incelmeye başlıyor.',
       img: 'assets/img/cards/statelibqld-2-162299-cloud-spraying-for-mosquitos-at-norman-.jpg', credit: 'State Library of Queensland, kamu malı', src: 'File:StateLibQld_2_162299_Cloud_spraying_for_mosquitos_at_Norman_Park,_1947.jpg' },
     { year: '2018', title: 'Arılar Nerede?', status: 'soon', text: 'Tohumu ilaçla kaplamak pratik. Ama tarlayı ziyaret eden arılar da o ilaçtan payını alıyor.',
       img: 'assets/img/cards/european-honey-bee-extracts-nectar.jpg', credit: 'John Severns, kamu malı', src: 'File:European_honey_bee_extracts_nectar.jpg' },

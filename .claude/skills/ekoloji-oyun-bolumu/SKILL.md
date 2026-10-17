@@ -42,6 +42,17 @@ Bu kurallar kullanıcının geri bildirimleriyle tek tek oturtuldu. Yeni bölüm
 - Oyun toplamda **3–4 dakika** sürsün. Sıkıcı dönemler hızlı geçsin, önemli anlarda kısa durulsun.
 - Hikâyenin ölçeği değişince **sahne değiştir** (ör. kamış tarlası → Avustralya haritası) ve geçişi bir kartla anlat.
 
+## Bölüme özgü mekanik ve görsel anlatım (kullanıcının özellikle istediği)
+- **Her bölüm konusuna özgü yaratıcı bir mekanik içersin.** Yalnız "bir kaydırıcı + kartlar" yetmez. Örnekler:
+  - Kurbağa: harita kamerası ve yayılma cephesi.
+  - Aral: nehrin bölüşümü, kuşbakışı harita ve uydu görüntüsü.
+  - DDT: **nereye** ilaçlanacağı (tarla, bahçe, bataklık). Her yerin bedeli farklı, zehrin nereye gittiğini oyuncu seçer.
+  - Bölümü tasarlarken "bu konunun kendine has ikilemi ne, bunu oyuncunun eline nasıl veririm?" diye sor.
+- **Bilgiyi yazıyla değil sahnede göster.** Önemli sayılar sahnedeki ilgili nesnenin yanında küçük etiketlerle (`tag()`) durur. Örnekler: "Tarlaya %X · Göle %Y", "Kıyı 30 km uzaklaştı" oku, "Tuz 16 g/L (okyanus 35)", "Av 39.000 ton/yıl", "Kabuk %12 ince", besin zinciri şeridi. Bir kart bir yerden bahsediyorsa o yer sahnede halkayla parlar (`pulseAt`). Kullanıcı "çoğu bilgiyi anlamıyorum, ne oluyor göremiyorum" dedi.
+- **Ölçek değiştir:** yerel sahnenin yanında geniş bir bakış olsun (kurbağada harita, Aral'da kuşbakışı havza). Önemli anlarda kendiliğinden ona geçilsin, düğmeyle de açılabilsin. Geçiş yakınlaşma ve uzaklaşmayla yumuşak olsun.
+- **Görev kartı:** oyun başlamadan `Mission.show()` ile "Sen / Kontrolün / Hedefin / Dikkat" kartı gösterilir (sayfa başına bir kez). HUD'da sürekli bir "🎯 Hedef" satırı bulunur. Kullanıcı "oyuna girerken ne görevi olduğu anlaşılmıyor" dedi.
+- **Dokunma testi:** her karakter için baloncuğun izleyeceği nesnede `x` ve `y` olmalı. Nesneyi `{ get x(), get y() }` ile sar, yoksa baloncuk NaN olur ve karakter "konuşmaz" (Aral'daki işçi hatası).
+
 ## Oyuncunun rolü
 - **Karakterler eylemi kendileri yapar** (köylüler tencere çalar, yetkili gelir, gönüllüler toplar). Oyuncu **politikayı** kaydırıcılarla yönetir. Doğrudan dokunarak öldürme ya da refleks isteyen mekanik kullanma; "zorladı, içine çekmedi" geri bildirimi geldi.
 - En fazla **1–3 kaydırıcı.** Başlangıç değeri sıfır olmasın (ör. %10), sahne ilk saniyede canlı görünsün.
@@ -55,6 +66,7 @@ Bu kurallar kullanıcının geri bildirimleriyle tek tek oturtuldu. Yeni bölüm
 - **Hile kontrolü:** her aracın gerçekçi bir bedeli olsun. "Hep maksimum" stratejisi kazanmamalı. Node ile senaryo tablosu çıkarıp kontrol et.
 
 ## Tempo (bildirimler)
+- Akış hızı: kullanıcı biraz (yaklaşık %10) daha yavaş istedi. Boştayken çarpan ~0,47, kuyrukta kart varken 0,95, kart açıkken 1,5. Ay birimi ~5,2 sn (sıcak ay), yıl birimi ~4,75 sn.
 - Kartlar kuyruğa girer:
   - iki kart arası en az **9 sn**;
   - bir kart kapandıktan sonra en az **5 sn**;

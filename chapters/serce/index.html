@@ -8,8 +8,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Inter:wght@400;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../../assets/css/badges.css?v=261017153756">
-<link rel="stylesheet" href="../../assets/css/chapter.css?v=261017153756">
+<link rel="stylesheet" href="../../assets/css/badges.css?v=261017160521">
+<link rel="stylesheet" href="../../assets/css/chapter.css?v=261017160521">
 </head>
 <body class="dock">
 <script>if (/[?&]layout=klasik\b/.test(location.search)) document.body.classList.remove("dock");</script>
@@ -49,6 +49,7 @@
         <div class="chip date" id="g-date">Mart 1958</div>
         <div class="chip quota" id="g-quota"><span class="lbl">Kota</span> <b id="q-n">0</b>/<span id="q-t">25</span> <span class="track"><i id="q-bar"></i></span></div>
       </div>
+      <p class="goal gp-extra">🎯 <b>Hedef:</b> 3 hasatta tahılı koru, Pekin'i kızdırma.</p>
       <div class="gp-meters">
         <div class="mrow"><span>🐦<em> Serçe</em></span><span class="track"><i id="m-s"></i></span></div>
         <div class="mrow"><span>🦗<em> Böcek</em></span><span class="track"><i id="m-p"></i></span></div>
@@ -139,10 +140,11 @@
 
 <nav class="dots" id="dots" aria-label="Bölüm adımları"></nav>
 
-<script src="../../assets/js/stats.js?v=261017153756"></script>
-<script src="../../assets/js/badges.js?v=261017153756"></script>
-<script src="../../assets/js/toon.js?v=261017153756"></script>
-<script src="serce.js?v=261017153756"></script>
+<script src="../../assets/js/stats.js?v=261017160521"></script>
+<script src="../../assets/js/mission.js?v=261017160521"></script>
+<script src="../../assets/js/badges.js?v=261017160521"></script>
+<script src="../../assets/js/toon.js?v=261017160521"></script>
+<script src="serce.js?v=261017160521"></script>
 <script>/* gpToggle */document.querySelectorAll(".gp-toggle").forEach(b=>b.onclick=()=>{const p=b.closest(".gpanel");const o=p.classList.toggle("open");b.setAttribute("aria-expanded",o);b.textContent=o?"✕ Kapat":"⋯ Daha fazla";window.dispatchEvent(new Event("panel"));});</script>
 </body>
 </html>

@@ -34,7 +34,7 @@ Durum: ✅ hazır · 🔜 sırada · 📝 plan
 ## Sezon 3 · Tarladaki kimya
 | Bölüm | Olay | Oyun fikri |
 |---|---|---|
-| 📝 Kuşlar Neden Sustu? | DDT, yırtıcı kuş yumurtaları, R. Carson (1962) | İlaç sık; konsantrasyon besin zincirinde katlanır |
+| ✅ Kuşlar Neden Sustu? | DDT, yırtıcı kuş yumurtaları, R. Carson (1962) | İlaç sık; konsantrasyon besin zincirinde katlanır |
 | 📝 Arılar Nerede? | Neonikotinoidler, AB kısıtlaması (2018) | İlaç ↔ tozlaşma ↔ meyve verimi |
 | 📝 Boğulan Körfez | Meksika Körfezi, gübre akışı | Gübre dozu → nehir ağzında oksijensiz alan büyür |
 | 📝 Toprak Gökyüzüne Uçtu | ABD Büyük Ovalar, 1930'lar | Çayırı sür, kuraklık gelir, toprak uçar; nadas ve rüzgâr perdesi |

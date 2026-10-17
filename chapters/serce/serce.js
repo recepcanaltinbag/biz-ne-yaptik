@@ -1,6 +1,7 @@
 // Bölüm 1 — Serçelere Savaş (Çin, 1958–1961)
 (() => {
   'use strict';
+  const MISSION = {"title": "Serçelere Savaş · Çin, 1958", "role": "Çin'in Tarım Bakanısın. Köylüler tencere çalar, memurlar rapor yazar.", "control": "📣 <b class=\"inl\">Tencere seferberliği</b> kaydırıcısı: ne kadar çok tencere, o kadar az serçe.", "goal": "Üç hasat boyunca köylüyü doyur: tahılı koru ama Pekin'in güvenini de kaybetme.", "watch": "Her hasattan sonra yetkili gelip rapor isteyecek. Ne yazacağına sen karar vereceksin."};
 
   const $ = id => document.getElementById(id);
   const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
@@ -1083,7 +1084,7 @@
   // OYUN
   // =====================================================================
   const FAST = /[?&]hizli\b/.test(location.search) ? 8 : 1; // test için: ?hizli
-  const MONTH_WARM = 4700 / FAST, MONTH_COLD = 2300 / FAST;
+  const MONTH_WARM = 5200 / FAST, MONTH_COLD = 2550 / FAST;
   let gs = newState();
   const game = {};
   const gK = $('g-k');
@@ -1163,7 +1164,9 @@
         toast(ic, from, text, tone, { ...opt, then: opt.pause ? () => show(i + 1) : undefined });
         if (!opt.pause) setTimeout(() => show(i + 1), 9000 / Math.max(1, FAST / 2));
       };
-      setTimeout(() => show(0), 500);
+      game.reading++;
+      const start = () => { game.reading = Math.max(0, game.reading - 1); setTimeout(() => show(0), 300); };
+      if (window.Mission && !window.__mSeen && (window.__mSeen = 1)) window.Mission.show($('modal'), MISSION, start); else start();
     }
   }
 
@@ -1200,7 +1203,7 @@
     if (mode !== 'game' || game.paused || game.reading || game.state !== 'play' || gs.m >= TOTAL) return;
     // kart okunurken zaman yavaşlar; yapılacak bir şey yokken hızlanır
     const visible = $('toasts').querySelector('.toast:not(.out)');
-    const pace = visible ? 1.5 : toastQueue.length ? 0.9 : 0.42;
+    const pace = visible ? 1.5 : toastQueue.length ? 0.95 : 0.47;
     game.frac += dt / (monthDur() * pace);
     if (game.frac >= 1) { game.frac -= 1; monthTick(); }
   }

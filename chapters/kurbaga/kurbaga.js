@@ -1,6 +1,7 @@
 // Bölüm 2 — Kurtarıcı Kurbağa (Avustralya, 1935–2025)
 (() => {
   'use strict';
+  const MISSION = {"title": "Kurtarıcı Kurbağa · Avustralya, 1935", "role": "Queensland'de tarım danışmanısın. Kamış böceği şeker kamışını yiyor.", "control": "Önce kurbağaları salıp salmama kararı. Sonra yıllar içinde açılan araçlar: 🪣 toplama, 🎓 öğretmen kurbağa, 🚧 çit. Hepsi 100 puanlık ortak bütçeden.", "goal": "2025'e kadar yerli yırtıcıları (kuzey kedisi, goanna, yılan) <b class=\"inl\">%45'in üstünde</b> tut.", "watch": "Kurbağa bir kez salınırsa geri toplanamaz. Haritada yayılışı izle."};
   const M = window.ToadModel;
   const $ = id => document.getElementById(id);
   const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
@@ -43,12 +44,18 @@
       o.connect(am); am.connect(chorus); chorus.connect(master); o.start(); lfo.start();
     } catch (e) { AC = null; }
   }
+  // yumuşak, alçak bir "vıraak": iki kısa vurgu, süzgeçten geçmiş, kulak tırmalamaz
   function trill() {
     if (!AC) return;
-    const t = AC.currentTime, o = AC.createOscillator(), e = AC.createGain();
-    o.type = 'triangle'; o.frequency.value = rnd(560, 680); o.connect(e); e.connect(master);
-    for (let k = 0; k < 14; k++) { e.gain.setValueAtTime(0.05, t + k * 0.045); e.gain.setValueAtTime(0.0, t + k * 0.045 + 0.025); }
-    o.start(t); o.stop(t + 0.7);
+    const t0 = AC.currentTime, f0 = rnd(150, 190);
+    [0, 0.2].forEach((dt, k) => {
+      const t = t0 + dt, o = AC.createOscillator(), lp = AC.createBiquadFilter(), e = AC.createGain();
+      o.type = 'sawtooth'; o.frequency.setValueAtTime(f0 * (k ? 0.9 : 1), t); o.frequency.exponentialRampToValueAtTime(f0 * 0.75, t + 0.16);
+      lp.type = 'lowpass'; lp.frequency.value = 650; lp.Q.value = 2;
+      o.connect(lp); lp.connect(e); e.connect(master);
+      e.gain.setValueAtTime(0, t); e.gain.linearRampToValueAtTime(0.03, t + 0.03); e.gain.exponentialRampToValueAtTime(0.0001, t + 0.17);
+      o.start(t); o.stop(t + 0.2);
+    });
   }
   function blip(f = 880) {
     if (!AC) return;
@@ -780,7 +787,9 @@
 
   function enterGame() {
     if (game.started) return;
-    game.started = true; game.state = 'intro'; ship.t0 = 0; ship.docked = false;
+    game.started = true; game.state = 'mission';
+    const go = () => {
+    game.state = 'intro'; ship.t0 = 0; ship.docked = false;
     // giriş oyun içi akıştan farklı: kart sırasını beklemez, gemi hemen gelir
     setTimeout(() => { if (mode === 'game') showToast('🇦🇺', 'Queensland, Avustralya · 1935', 'Şeker kamışını <b>kamış böceği</b> kemiriyor. Çözüm Hawaii\'den gemiyle geliyor: <b>102 kamış kurbağası</b>.', '', { img: TOAD_IMG, ms: 9000 }); }, 300);
     ship.onDock = () => {
@@ -788,6 +797,8 @@
       say(ship, 'Düüüt! Hawaii\'den\n102 kurbağa geldi!');
       setTimeout(() => { if (mode === 'game' && game.state === 'intro') askRelease(); }, 1600);
     };
+    };
+    if (window.Mission && !window.__mSeen && (window.__mSeen = 1)) window.Mission.show($('modal'), MISSION, go); else go();
   }
 
   function askRelease() {
@@ -817,10 +828,11 @@
 
   function yearDur() {
     const y = game.st.year;
-    let ms = game.phase === 'field' ? 6500 : y < 1975 ? 900 : 1700;
+    // yayılma hızlandıktan sonra (1975+) yıllar daha yavaş aksın: oyuncu cepheyi takip edebilsin
+    let ms = game.phase === 'field' ? 6500 : y < 1975 ? 1050 : 2300;
     if (game.noToads) ms = 900;
     // kart okunurken zaman yavaşlar; yapılacak bir şey yokken hızlanır
-    ms *= $('toasts').querySelector('.toast:not(.out)') ? 1.5 : toastQueue.length ? 0.9 : 0.48;
+    ms *= ($('toasts').querySelector('.toast:not(.out)') ? 1.5 : toastQueue.length ? 0.95 : 0.53) * 1.08;
     return ms / game.speed / FAST;
   }
 
