@@ -98,7 +98,7 @@
   const target = { A: 1, sal: 10, F: 1, C: 1, w: 0.2, dust: 0, soil: 1, Vn: 0 };
   const bubbles = [], floats = [], pickers = [], boats = [], gulls = [], fishJumps = [], dust = [], gags = [];
   const clouds = Array.from({ length: 3 }, () => ({ x: rnd(0, 1), y: rnd(0.08, 0.22), s: rnd(0.7, 1.2), v: rnd(0.000006, 0.000012) }));
-  const SHIPS = [0.655, 0.725, 0.8, 0.885].map((f, i) => ({ f, i, x: 0, y: 0, tilt: 0, stuck: 0, said: 0 }));
+  const SHIPS = [0.69, 0.75, 0.82, 0.895].map((f, i) => ({ f, i, x: 0, y: 0, tilt: 0, stuck: 0, said: 0 }));
   const camel = { x: 0, dir: 1, on: 0, ph: 0, sx: 0, sy: 0 };
   const elder = { x: 0, y: 0 }, kid = { x: 0, y: 0 }, puddle = { x: 0, y: 0, on: 0 };
   const tapCount = (key, win = 3500) => { const n = performance.now(); const c = tapCount.m[key] || { n: 0, t: 0 }; c.n = n - c.t < win ? c.n + 1 : 1; c.t = n; tapCount.m[key] = c; return c.n; };
@@ -123,6 +123,7 @@
     const w = Math.max(...lines.map(l => ctx.measureText(l).width)) + pad * 2, h = lines.length * fs * 1.15 + pad * 1.4;
     const bx = bb.obj ? bb.obj.x : bb.x, by = bb.obj ? bb.obj.y : bb.y;
     let x = clamp(bx - w / 2, 8, W - w - 8), y = Math.max(52, by - h - 22 * U);
+    if (window.SceneUtils && mode === 'game') ({ x, y } = window.SceneUtils.avoidHud(x, y, w, h));
     ctx.globalAlpha = clamp(bb.life * 3);
     ctx.fillStyle = '#fff'; ctx.strokeStyle = rgb(PAL.ink); ctx.lineWidth = 2;
     ctx.beginPath(); ctx.roundRect ? ctx.roundRect(x, y, w, h, 12) : ctx.rect(x, y, w, h); ctx.fill(); ctx.stroke();
@@ -428,11 +429,12 @@
     // etiketler
     const lbl = (p, text, o) => tag(X(p), Y(p), text, o);
     lbl([0.47, 0.95], '⚓ Moynak', { fs: 12 }); lbl([0.66, 0.08], '⚓ Aralsk', { fs: 12 });
-    lbl([0.8, 0.99], 'Amu Derya', { fs: 11, a: 0.85 }); lbl([0.86, 0.2], 'Siri Derya', { fs: 11, a: 0.85 });
-    if (vis.w > 0.35) lbl([0.22, 1.0], 'Karakum Kanalı', { fs: 11, a: 0.85 });
+    lbl([0.9, 0.84], 'Amu Derya', { fs: 11, a: 0.85 }); lbl([0.86, 0.2], 'Siri Derya', { fs: 11, a: 0.85 });
+    if (vis.w > 0.35) lbl([0.12, 0.93], 'Karakum Kanalı', { fs: 11, a: 0.85 });
     if (a < 0.75) lbl([0.62, 0.62], `🏜️ Aralkum çölü`, { fs: 13, color: '#8a6a44' });
     if (game.dam) { ctx.strokeStyle = '#6a5440'; ctx.lineWidth = 4 * U; ctx.beginPath(); ctx.moveTo(X([0.53, 0]), Y([0, 0.27])); ctx.lineTo(X([0.58, 0]), Y([0, 0.31])); ctx.stroke(); lbl([0.5, 0.36], '🧱 Kokaral seti', { fs: 11 }); }
-    lbl([0.5, 0.05], `Göl: 1960'ın %${Math.round(a * 100)}'i · tuz ${Math.round(vis.sal)} g/L`, { fs: 13, color: a < 0.4 ? '#a0402a' : rgb(PAL.ink) });
+    lbl([0.5, 1.0], `Göl: 1960'ın %${Math.round(a * 100)}'i · tuz ${Math.round(vis.sal)} g/L`, { fs: 13, color: a < 0.4 ? '#a0402a' : rgb(PAL.ink) });
+    if (view.user) lbl([0.14, 0.05], '🏘️ dokun: kıyıya dön', { fs: 11, a: 0.85 });
     // toz bulutları kuruyan doğu tabanından güneybatıya
     if (vis.dust > 0.1) for (let i = 0; i < 6; i++) { const ph = (t * 0.00005 + i / 6) % 1; ctx.fillStyle = `rgba(240,232,212,${(1 - ph) * vis.dust * 0.8})`; ctx.beginPath(); ctx.arc(X([0.66 - ph * 0.3, 0]), Y([0, 0.5 + ph * 0.25 + (i % 2) * 0.05]), (10 + ph * 26) * U, 0, 6.283); ctx.fill(); }
     // balıkçı tekneleri: suda küçük beyaz noktalar
@@ -447,10 +449,11 @@
   const pulses = [];
   const pulseAt = (getPos, col = '#e0b04a') => pulses.push({ getPos, t0: performance.now(), col });
   function tag(x, y, text, o = {}) {
-    const fs = (o.fs || 13) * U;
+    const fs = Math.max(11, (o.fs || 13) * U);
     ctx.font = `${fs}px "Patrick Hand"`;
     const w = ctx.measureText(text).width + 12 * U, h = fs + 8 * U;
-    const bx = clamp(x - w / 2, 4, lay.x1 * W - w - 4), by = y - h;
+    let bx = clamp(x - w / 2, 4, lay.x1 * W - w - 4), by = y - h;
+    if (window.SceneUtils && mode === 'game') ({ x: bx, y: by } = window.SceneUtils.avoidHud(bx, by, w, h));
     ctx.globalAlpha = o.a === undefined ? 0.95 : o.a;
     ctx.fillStyle = o.bg || 'rgba(255,255,255,.88)'; ctx.strokeStyle = o.border || 'rgba(43,58,46,.35)'; ctx.lineWidth = 1.2;
     ctx.beginPath(); ctx.roundRect ? ctx.roundRect(bx, by, w, h, h / 2) : ctx.rect(bx, by, w, h); ctx.fill(); ctx.stroke();
@@ -514,7 +517,7 @@
     poly(SAT_N, 0.28, 0.16, kN, rgb(PAL.water));
     if (!split) { const [ax, ay] = P([0.3, 0.27], 0, 0, 1); ctx.fillStyle = water; ctx.fillRect(ax - 4 * U, ay - 3 * U, 10 * U, 8 * U); }
     ctx.fillStyle = rgb(PAL.ink, 0.75); ctx.font = `${11 * U}px "Patrick Hand"`; ctx.textAlign = 'center';
-    ctx.fillText(`🛰️ Uydudan · %${Math.round(a * 100)}`, x + w / 2, y + h + 13 * U); ctx.textAlign = 'left';
+    ctx.fillText(`🛰️ %${Math.round(a * 100)} · dokun: büyüt`, x + w / 2, y + h + 13 * U); ctx.textAlign = 'left';
     ctx.restore();
     drawSat.box = { x, y, w, h };
   }
@@ -739,12 +742,16 @@
   const toastQueue = [];
   let lastToastAt = -1e9;
   function toast(...args) {
+    args.born = gs ? gs.y : 0; // bayatlama için doğduğu yıl
     toastQueue.push(args);
     while (toastQueue.length > 6) { const k = toastQueue.findIndex(a => !(a[4] || {}).pause); if (k < 0) break; toastQueue.splice(k, 1); }
     pumpToasts();
   }
   function pumpToasts() {
     if (!toastQueue.length || mode !== 'game') return;
+    // iki yıldan eski küçük haberler atılır: 1949 olayı 1972'de çıkmasın
+    for (let i = toastQueue.length - 1; i >= 0; i--) { const a = toastQueue[i]; if (!(a[4] || {}).pause && a.born !== undefined && gs.y - a.born > 2) toastQueue.splice(i, 1); }
+    if (!toastQueue.length) return;
     const box = $('toasts'), visible = box.querySelectorAll('.toast:not(.out)').length;
     const k = toastQueue.findIndex(a => (a[4] || {}).pause);
     // yıla bağlı durduran kartlar beklemeden öne geçer (yıl birimi hızlı akar)
@@ -812,6 +819,7 @@
     initAudio(); readGameSliders();
     if (!game.touched) { game.touched = true; setTimeout(() => $('g-intro').classList.add('gone'), 2500); }
   }));
+  $('g-view').onclick = e => { e.stopPropagation(); initAudio(); setView(view.want === 'map' ? 'shore' : 'map'); };
   $('g-pause').onclick = () => { game.paused = !game.paused; $('g-pause').textContent = game.paused ? '▶ Devam' : '❚❚ Durdur'; };
   function setSpeed(v) {
     game.speed = v; $('g-speed').textContent = v + '×';
@@ -833,7 +841,7 @@
 
   const MOYNAQ = '../../assets/img/cards/moynaq-aral-sea-6226807306.jpg';
   const STORY = [
-    ['🇺🇿', 'Aral Gölü · 1960', 'Aral, dünyanın <b>4. büyük gölü</b>. Kıyıdaki Moynak kasabasında binlerce balıkçı yaşıyor, konserve fabrikası gece gündüz çalışıyor.', '', { pause: true }],
+    ['🌊', 'Aral Gölü · 1960', 'Aral, dünyanın <b>4. büyük gölü</b>. Kıyıdaki Moynak kasabasında binlerce balıkçı yaşıyor, konserve fabrikası gece gündüz çalışıyor.', '', { pause: true }],
     ['🏛️', 'Moskova', 'Sovyetler Birliği <b>"beyaz altın"</b> istiyor: pamuk. Pamuk için su lazım. Suyu da gölü besleyen iki nehir getiriyor: <b>Amu Derya</b> ve <b>Siri Derya</b>.', '', { pause: true }],
     ['💧', 'Senin işin', 'Kaydırıcı, nehir suyunun ne kadarının tarlalara gideceğini belirler. Gerisi göle akar. Göl, yaz sıcağında her yıl kocaman bir su buharlaştırır.', '', { ms: 9000 }],
     ['📋', 'Moskova', 'Yedi Yıllık Plan: 1965\'e kadar pamuğu <b>%30 artır</b>. Plan hedefi sol üstte.', 'warn', { ms: 9000 }],
@@ -846,7 +854,6 @@
       if (mode !== 'game') return;
       if (i >= STORY.length) { game.story = false; return game.w <= 0.3 ? coach(gW, '👉 Kaydır: tarlaya daha çok su', 0) : null; }
       const [ic, from, text, tone, opt] = STORY[i];
-      if (!opt.pause) game.story = false; // durduran kartlar bitince zaman akmaya başlar
       toast(ic, from, text, tone, { ...opt, then: opt.pause ? () => show(i + 1) : undefined });
       if (!opt.pause) setTimeout(() => show(i + 1), 6500 / Math.max(1, FAST / 2));
     };
@@ -909,12 +916,12 @@
     if (h.F < 0.5) once('f50', () => { pulseAt(() => [geo().x1 * 0.43 + 17 * U, geo().gt + geo().gh * 0.1 - 20 * U]); toast('🐟', 'Konserve fabrikası', 'Balık yarı yarıya azaldı. Fabrika yarım vardiya çalışıyor.', 'warn'); });
     if (h.F < 0.1) once('f10', () => toast('🚂', 'Moynak', 'Fabrika artık balığı Hazar\'dan ve Baltık\'tan getiriyor. Balık 2.000 km yol geliyor, konserve Moynak\'ta yapılıyor.', 'bad'));
     if (h.dust > 0.25) once('dust', () => { pulseAt(() => [geo().x1 * 0.33, geo().gt + geo().gh * 0.5], '#c0503a'); toast('🌪️', 'Tuz fırtınası', 'Kuruyan göl tabanından tuz ve tarım ilacı tozu kalkıyor. Tarlalara ve evlere yağıyor. Pamuk verimi düşüyor, insanlar hastalanıyor.', 'bad'); });
-    if (h.Vn !== null) once('split', () => { setView('map', 8000); pulseAt(() => drawSat.box ? [drawSat.box.x + drawSat.box.w * 0.3, drawSat.box.y + drawSat.box.h * 0.3] : [undefined]); toast('🛰️', 'Uydu görüntüsü', 'Göl ikiye ayrıldı: kuzeyde Küçük Aral, güneyde Büyük Aral. Haritada gör.', 'bad'); });
+    if (h.Vn !== null) once('split', () => { setView('map', 8000); milestone('🛰️', 'Uydu görüntüsü', 'Göl ikiye ayrıldı: kuzeyde Küçük Aral, güneyde Büyük Aral. Haritada gör.', 'bad'); });
     if (h.A / M.A0 > 0.85 && y >= 1980) once('alive', () => toast('🌊', 'Moynak', 'Komşu havzalardaki göller küçülürken Aral hâlâ dalgalı. Balıkçılar şaşkın ve mutlu.', 'good'));
     if (game.saved && h.saln < 15) once('north', () => { toast('🐟', 'Kuzey Aral', 'Kuzey Aral\'da tuz azaldı. Sazan ve çapak balıkları geri döndü, balıkçılar ağ atıyor.', 'good'); });
 
     // kanal onarımı 1970'te açılır
-    if (y === 1969 && !game.unlockedFix) {
+    if (y === 1967 && !game.unlockedFix) {
       game.unlockedFix = true; gFix.disabled = false; $('w-fix').classList.remove('locked'); readGameSliders(); if (game.speed > 1) setSpeed(1);
       milestone('🔧', 'Su mühendisi', 'Kanalları betonla kaplasak ve tarlayı damla damla sulasak, <b>aynı pamuğu çok daha az suyla</b> yetiştirebiliriz. Ama yılların işi, para ister.', '', () => coach(gFix, '👉 Kaydır: kanalları onar'));
     }
@@ -942,13 +949,15 @@
       const ok = h.C >= PLAN[y] - 0.02;
       game.reviews.push({ y, ok, C: h.C, t: PLAN[y] });
       comeOfficial('off', ok ? 'Plan tuttu mu?\nBakalım...' : 'Rakamlar nerede,\nyoldaş?');
-      const from = y <= 1990 ? 'Moskova\'dan planlamacı' : 'Taşkent\'ten bakan yardımcısı';
-      if (ok) choice(from, `${y}: plan tuttu`, `"Hedef ${fmtX(PLAN[y])} idi, sen <b>${fmtX(h.C)}</b> yaptın. Tebrikler, yoldaş!"`, [
+      const from = y <= 1990 ? 'Moskova\'dan planlamacı' : 'Taşkent\'ten bakan yardımcısı', hey = y <= 1990 ? 'yoldaş' : 'sayın planlamacı';
+      const nextY = Object.keys(PLAN).map(Number).find(k => k > y), nextT = nextY ? ` Sıradaki hedef: <b>${fmtX(PLAN[nextY])}</b> (${nextY}).` : '';
+      const alive = h.A / M.A0 < 0.85;
+      if (ok) choice(from, `${y}: plan tuttu`, `"Hedef ${fmtX(PLAN[y])} idi, sen <b>${fmtX(h.C)}</b> yaptın. Tebrikler, ${hey}!"${nextT}`, [
         { label: 'Teşekkürler', sub: 'Güven artar', fn: () => { game.trust = clamp(game.trust + 15, 0, 100); } },
       ]);
-      else choice(from, `${y}: plan tutmadı`, `"Hedef ${fmtX(PLAN[y])} idi, sen yalnız <b>${fmtX(h.C)}</b> yaptın. Tarlaya daha çok su ver!"`, [
+      else choice(from, `${y}: plan tutmadı`, `"Hedef ${fmtX(PLAN[y])} idi, sen yalnız <b>${fmtX(h.C)}</b> yaptın. Tarlaya daha çok su ver, ${hey}!"${nextT}`, [
         { label: 'Söz, suyu artıracağım', sub: 'Pamuğa giden su +%15', fn: () => { gW.value = Math.min(100, Number(gW.value) + 15); readGameSliders(); game.trust = clamp(game.trust - 5, 0, 100); } },
-        { label: 'Göl ölüyor, daha fazla veremem', sub: 'Güven çok düşer', fn: () => { game.trust = clamp(game.trust - 20, 0, 100); if (game.trust <= 0) inspector(); } },
+        { label: alive ? 'Göl ölüyor, daha fazla veremem' : 'Göle de su kalmalı', sub: 'Güven çok düşer', fn: () => { game.trust = clamp(game.trust - 20, 0, 100); if (game.trust <= 0) inspector(); } },
       ]);
     }
     if (game.trust < 30 && !game.replaced) once('warn-trust', () => { toast('📞', 'Moskova', 'Telefon çalıyor: "Pamuk planı ciddiye alınmıyor mu?"', 'warn'); if (game.w < 0.6) coach(gW, '👉 Moskova kızıyor: suyu artır'); });
@@ -992,9 +1001,9 @@
     const cAvg = game.hist.reduce((s, h) => s + h.C, 0) / game.hist.length, cH = HISTORY.hist.slice(0, game.hist.length).reduce((s, h) => s + h.C, 0) / game.hist.length;
     let title, text;
     if (game.replaced) { title = 'Görevden alındın'; text = 'Gölü savundun ve koltuğunu kaybettin. Tarihte de plana itiraz edenler kenara itildi. Doğruyu bilmek yetmiyor; sistemin de seni dinlemesi gerekiyor.'; }
-    else if (aY >= 60) { title = 'Deniz yaşıyor'; text = 'Hem pamuk yetiştirdin hem gölü korudun. Bunun sırrı suyu boşa harcamamaktı. Tarihte bu yol denenmedi.'; }
+    else if (aY >= 60) { title = last.F < 0.3 ? 'Göl yaşıyor, balık zor durumda' : 'Deniz yaşıyor'; text = last.F < 0.3 ? 'Gölü kurtardın ama tuz balıkları öldürdü. Biraz daha su göle gitseydi Moynak\'ın ağları da dolardı.' : 'Hem pamuk yetiştirdin hem gölü korudun. Bunun sırrı suyu boşa harcamamaktı. Tarihte bu yol denenmedi.'; }
     else if (aY >= 40) { title = 'Yarım bir deniz'; text = 'Göl küçüldü ama ölmedi. Moynak\'ta balıkçılar zor durumda, yine de dalga sesi duyuluyor.'; }
-    else { title = 'Gemiler kumda kaldı'; text = 'Pamuk planı tuttu, göl kayboldu. Tebrikler, tarihi başarıyla tekrarladın. Toz fırtınaları ve tuzlu toprak, kazandığın pamuğun bir kısmını geri aldı.'; }
+    else { const planOk = game.reviews.filter(r => r.ok).length >= game.reviews.length / 2; title = 'Gemiler kumda kaldı'; text = planOk ? 'Pamuk planı tuttu, göl kayboldu. Tebrikler, tarihi başarıyla tekrarladın. Toz fırtınaları ve tuzlu toprak, kazandığın pamuğun bir kısmını geri aldı.' : 'Göl kayboldu, pamuk planı da çoğu zaman tutmadı. Su ne tarlaya ne göle yetti.'; }
     if (game.saved) text += ' Kokaral setiyle kuzeydeki küçük gölü kurtardın.';
     const col = v => v >= 60 ? 'var(--green)' : v >= 40 ? 'var(--grain)' : 'var(--danger)';
     const yEnd = game.replaced ? gs.y - 1 : M.Y1;
@@ -1015,7 +1024,8 @@
     $('r-next').onclick = () => goTo(slideOf('sandbox'));
     requestAnimationFrame(drawResultChart);
   }
-  function lineChart(c, series, n) {
+  function lineChart(c, series, n, opts) {
+    if (window.SceneUtils) return window.SceneUtils.lineChart(c, series, n, opts || {}); // uç etiketleri ve yıl ekseni
     if (!c) return;
     const dpr = Math.min(2, window.devicePixelRatio || 1), w = c.clientWidth, h = c.clientHeight;
     if (!w) return;
@@ -1033,12 +1043,12 @@
     g.setLineDash([]);
   }
   const series = hist => [
-    { data: hist.map(d => d.C / 2.5), color: '#c29a2e' },
-    { data: hist.map(d => d.F), color: '#6d8fa0' },
-    { data: hist.map(d => d.sal / 120), color: '#b9a98a' },
-    { data: hist.map(d => d.A / M.A0), color: '#5b93b8' },
+    { data: hist.map(d => d.C / 2.5), color: '#c29a2e', label: 'Pamuk', fmt: v => (v * 2.5).toFixed(1).replace('.', ',') + '×' },
+    { data: hist.map(d => d.F), color: '#6d8fa0', label: 'Balık', fmt: v => '%' + Math.round(v * 100) },
+    { data: hist.map(d => d.sal / 120), color: '#b9a98a', label: 'Tuz', fmt: v => Math.round(v * 120) + ' g/L' },
+    { data: hist.map(d => d.A / M.A0), color: '#5b93b8', label: 'Göl', fmt: v => '%' + Math.round(v * 100) },
   ];
-  function drawResultChart() { lineChart($('rchart'), [{ data: HISTORY.hist.map(d => d.A / M.A0), color: '#9aa59a', dash: true }, ...series(game.hist)], TOTAL); }
+  function drawResultChart() { lineChart($('rchart'), [{ data: HISTORY.hist.map(d => d.A / M.A0), color: '#9aa59a', dash: true, label: 'Tarihte göl', fmt: v => '%' + Math.round(v * 100) }, ...series(game.hist)], TOTAL, { y0: M.Y0 }); }
 
   // =====================================================================
   // LABORATUVAR (1960–2060)
@@ -1080,7 +1090,7 @@
     $('sb-year').textContent = String(sb.st.hist.length ? h.y : 1960);
     $('sb-harvest').textContent = `Göl: %${h ? Math.round(h.A / M.A0 * 100) : 100} · Tuz: ${h ? Math.round(h.sal) : 10} g/L`;
   }
-  function drawSbChart() { lineChart($('sb-chart'), series(sb.st.hist), 101); }
+  function drawSbChart() { lineChart($('sb-chart'), series(sb.st.hist), 101, { y0: M.Y0, step: 20 }); }
 
   // =====================================================================
   // DOKUNMA
@@ -1088,6 +1098,9 @@
   cv.addEventListener('pointerdown', e => {
     initAudio();
     if (view.k > 0.5 && mode === 'game') { setView('shore'); return; }
+    // uydu görüntüsüne dokununca harita ekranı kaplar
+    const sbx = drawSat.box;
+    if (mode === 'game' && sbx && e.clientX > sbx.x && e.clientX < sbx.x + sbx.w && e.clientY > sbx.y && e.clientY < sbx.y + sbx.h + 20 * U) { setView('map'); blip(); return; }
     if (mode === 'game' || mode === 'sandbox' || mode === 'title') talkAt(e.clientX, e.clientY);
   });
 
@@ -1108,6 +1121,7 @@
     for (const key of Object.keys(target)) vis[key] = lerp(vis[key], target[key], key === 'w' ? k * 2 : k * 0.5);
     const health = 0.5 * vis.A + 0.3 * vis.F + 0.2 * (1 - vis.dust);
     vis.bad = lerp(vis.bad, smooth(0.15, 0.7, 1 - health), k * 0.5);
+    if (view.until && (game.reading || game.state === 'choice')) view.until += dt; // kart okunurken harita kapanmasın
     if (view.until && performance.now() > view.until && !view.user) setView('shore');
     if (mode !== 'game' && view.want === 'map' && mode !== 'result') setView('shore');
     view.k = lerp(view.k, view.want === 'map' && (mode === 'game' || mode === 'result') ? 1 : 0, 1 - Math.pow(0.9, dt / 16));
@@ -1116,7 +1130,8 @@
     render(now, dt);
 
     if (mode === 'game') {
-      const yy = String(Math.min(gs.y, M.Y1));
+      // yıl çubuğu son işlenen yılı gösterir; kartlar da o yıla aittir
+      const yy = String(Math.max(M.Y0, Math.min(gs.y - 1, M.Y1)));
       if ($('yb-year').textContent !== yy) { const el = $('yb-year'); el.textContent = yy; el.classList.remove('pulse'); void el.offsetWidth; el.classList.add('pulse'); }
       $('yb-sub').textContent = planName(Math.min(gs.y, M.Y1));
       $('g-date').textContent = yy;

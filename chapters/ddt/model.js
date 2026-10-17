@@ -16,14 +16,15 @@
 
   function newState() { return { y: Y0, P: 1.56, N: 1, R: 0, D: 0, B: 1, S: 1, Y: 1, hist: [] }; }
   const yieldOf = P => clamp(1.2 - 0.18 * P, 0, 1.25);
-  const Y_BASE = yieldOf(1.56); // 1946: ilaçsız ama doğal düşmanları sağlam bir tarla
+  // ürün, zararlının çok az olduğu bir tarlaya göre ölçülür: ilaçsız tarla ~%84 verir
+  const Y_BASE = yieldOf(0.6);
 
   function step(st, p = DEF) {
     const s = p.ban ? 0 : clamp(p.s || 0), ipm = clamp(p.ipm || 0), z = p.z || DEF.z;
     const sf = s * z.f, sg = s * z.g, sm = s * z.m;
     const kill = 0.85 * sf * (1 - st.R);
-    st.N = clamp(st.N + 0.35 * st.N * (1 - st.N) + 0.03 + 0.3 * ipm * (1 - st.N) - 0.7 * sf * st.N, 0.03, 1);
-    st.P = clamp(st.P + 0.9 * st.P * (1 - st.P / PK) - kill * st.P - 0.55 * st.N * st.P - 0.12 * ipm * st.P, 0.05, PK);
+    st.N = clamp(st.N + 0.35 * st.N * (1 - st.N) + 0.03 + 0.3 * ipm * (1 - st.N) - 0.45 * sf * st.N, 0.03, 1);
+    st.P = clamp(st.P + 0.9 * st.P * (1 - st.P / PK) - kill * st.P - 0.55 * st.N * st.P - 0.25 * ipm * st.P, 0.05, PK);
     st.R = clamp(st.R + 0.11 * Math.max(sf, sm) * (p.res || 1) * (1 - st.R) - 0.03 * st.R * (1 - Math.max(sf, sm)), 0, 0.7);
     // bataklığa sıkılan DDT besin zincirine en çok onu taşır
     st.D = Math.max(0, st.D + 0.35 * (0.25 * sf + 0.15 * sg + 0.6 * sm) - 0.09 * st.D);

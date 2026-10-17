@@ -8,14 +8,15 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Inter:wght@400;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../../assets/css/badges.css?v=261017161926">
-<link rel="stylesheet" href="../../assets/css/chapter.css?v=261017161926">
+<link rel="stylesheet" href="../../assets/css/badges.css?v=261017163734">
+<link rel="stylesheet" href="../../assets/css/chapter.css?v=261017163734">
 <style>
   .sl.locked span { color: var(--ink-soft); }
   #m-p { background: var(--bug); } #m-y { background: var(--grain); } #m-n { background: #c0503a; } #m-b { background: #7a5a3a; } #m-s { background: #9c6b47; }
   .chain { font-family: var(--hand); font-size: 1.02rem; display: flex; flex-wrap: wrap; align-items: center; gap: 4px; background: rgba(255,255,255,.55); border-radius: 12px; padding: 3px 8px; }
   .chain b { font-weight: 400; } .chain i { font-style: normal; color: var(--ink-soft); }
   .chain.hot { box-shadow: 0 0 0 3px #e0b04a; }
+  .chain { pointer-events: auto; cursor: pointer; } .chain:hover { background: #fff; } .chain::after { content: '🔍'; margin-left: 2px; font-size: .85em; }
   .chain .bird { color: var(--danger); }
   .zones { display: flex; flex-wrap: wrap; align-items: center; gap: 5px; background: var(--paper); border: 2px solid var(--ink); border-radius: 14px; padding: 6px 8px; font-family: var(--hand); font-size: 1rem; }
   .zones span { color: var(--ink-soft); margin-right: 2px; }
@@ -23,7 +24,7 @@
   .zones button.on { background: #fff3cf; border-color: #e0b04a; color: var(--ink); text-decoration: none; }
   .zones.locked { opacity: .5; pointer-events: none; }
   @media (max-width: 760px) { .zones { font-size: .85rem; padding: 4px 6px; gap: 3px; } .zones span { display: none; } }
-  @media (max-width: 760px) { .chain { font-size: .86rem; padding: 2px 6px; gap: 2px; } }
+  @media (max-width: 760px) { .chain { font-size: .9rem; padding: 2px 8px; gap: 2px; flex-wrap: nowrap; white-space: nowrap; } .chain > span:not(.bird), .chain > i:not(:last-child) { display: none; } }
 </style>
 </head>
 <body class="dock">
@@ -62,7 +63,7 @@
         <div class="chip date" id="g-date">1946</div>
         <div class="chain" id="chain" title="Besin zincirinde DDT (ppm)"><span>💧<b id="c-w">0</b></span><i>→</i><span>🦐<b id="c-p">0</b></span><i>→</i><span>🐟<b id="c-f">0</b></span><i>→</i><span class="bird">🦅<b id="c-b">0</b></span><i>ppm</i></div>
       </div>
-      <p class="goal gp-extra">🎯 <b>Hedef:</b> ürünü koru, kartalları kaybetme.</p>
+      <p class="goal gp-extra">🎯 <b>Hedef:</b> ürünü koru, kartalları ve ötücü kuşları kaybetme.</p>
       <div class="gp-meters">
         <div class="mrow"><span>🐛<em> Zararlı böcek</em></span><span class="track"><i id="m-p"></i></span></div>
         <div class="mrow"><span>🌽<em> Ürün</em></span><span class="track"><i id="m-y"></i></span></div>
@@ -149,12 +150,13 @@
 
 <nav class="dots" id="dots" aria-label="Bölüm adımları"></nav>
 
-<script src="../../assets/js/stats.js?v=261017161926"></script>
-<script src="../../assets/js/mission.js?v=261017161926"></script>
-<script src="../../assets/js/badges.js?v=261017161926"></script>
-<script src="../../assets/js/toon.js?v=261017161926"></script>
-<script src="model.js?v=261017161926"></script>
-<script src="ddt.js?v=261017161926"></script>
+<script src="../../assets/js/stats.js?v=261017163734"></script>
+<script src="../../assets/js/mission.js?v=261017163734"></script>
+<script src="../../assets/js/scene-utils.js?v=261017163734"></script>
+<script src="../../assets/js/badges.js?v=261017163734"></script>
+<script src="../../assets/js/toon.js?v=261017163734"></script>
+<script src="model.js?v=261017163734"></script>
+<script src="ddt.js?v=261017163734"></script>
 <script>/* gpToggle */document.querySelectorAll(".gp-toggle").forEach(b=>b.onclick=()=>{const p=b.closest(".gpanel");const o=p.classList.toggle("open");b.setAttribute("aria-expanded",o);b.textContent=o?"✕ Kapat":"⋯ Daha fazla";window.dispatchEvent(new Event("panel"));});</script>
 </body>
 </html>

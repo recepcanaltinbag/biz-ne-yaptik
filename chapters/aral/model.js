@@ -49,6 +49,8 @@
     const dry = clamp(1 - st.A / A0);
     st.soil = clamp(st.soil - 0.006 * smooth(0.45, 0.95, p.w) * (st.eff < 0.7 ? 1 : 0.4) - 0.012 * smooth(0.35, 0.8, dry) + 0.004);
     st.C = Math.pow(wd / NEED, 0.45) * (0.55 + 0.45 * st.soil);
+    // kanal onarımı sürerken kanallar kapanır, birkaç yıl pamuk düşer (onarımın bedeli)
+    st.C *= 1 - 0.22 * clamp((effT - st.eff) / 0.35);
     st.dust = smooth(0.3, 0.75, dry);
     st.hist.push({ y: st.y, V: st.V, A: st.A, sal: st.sal, F: st.F, C: st.C, soil: st.soil, dust: st.dust, Vn: st.Vn, saln: st.saln });
     st.y++;

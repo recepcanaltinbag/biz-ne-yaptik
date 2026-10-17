@@ -1,7 +1,7 @@
 // Bölüm 2 — Kurtarıcı Kurbağa (Avustralya, 1935–2025)
 (() => {
   'use strict';
-  const MISSION = {"title": "Kurtarıcı Kurbağa · Avustralya, 1935", "role": "Queensland'de tarım danışmanısın. Kamış böceği şeker kamışını yiyor.", "control": "Önce kurbağaları salıp salmama kararı. Sonra yıllar içinde açılan araçlar: 🪣 toplama, 🎓 öğretmen kurbağa, 🚧 çit. Hepsi 100 puanlık ortak bütçeden.", "goal": "2025'e kadar yerli yırtıcıları (kuzey kedisi, goanna, yılan) <b class=\"inl\">%45'in üstünde</b> tut.", "watch": "Kurbağa bir kez salınırsa geri toplanamaz. Haritada yayılışı izle."};
+  const MISSION = {"title": "Kurtarıcı Kurbağa · Avustralya, 1935", "role": "Queensland'de tarım danışmanısın. Kamış böceği şeker kamışını yiyor.", "control": "Önce kurbağaları salıp salmama kararı. Sonra yıllar içinde açılan araçlar: 🪣 toplama, 🎓 öğretmen kurbağa, 🚧 çit. Hepsi 100 puanlık ortak bütçeden.", "goal": "2025'e kadar yerli yırtıcıları (kuzey kedisi, goanna, yılan) <b class=\"inl\">%45'in üstünde</b> tut.", "watch": "Kurbağa bir kez salınırsa hepsini geri toplamak imkânsız. Haritada yayılışı izle."};
   const M = window.ToadModel;
   const $ = id => document.getElementById(id);
   const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
@@ -230,7 +230,8 @@
     ctx.font = `${fs}px "Patrick Hand"`;
     const lines = bb.text.split('\n');
     const w = Math.max(...lines.map(l => ctx.measureText(l).width)) + pad * 2, h = lines.length * fs * 1.15 + pad * 1.4;
-    const x = clamp(bb.x - w / 2, 8, W - w - 8), y = Math.max(56, bb.y - h - 18 * U);
+    let x = clamp(bb.x - w / 2, 8, W - w - 8), y = Math.max(56, bb.y - h - 18 * U);
+    if (window.SceneUtils && mode === 'game') ({ x, y } = window.SceneUtils.avoidHud(x, y, w, h));
     ctx.globalAlpha = clamp(bb.life * 3);
     ctx.fillStyle = '#fff'; ctx.strokeStyle = rgb(INK); ctx.lineWidth = 2;
     ctx.beginPath(); ctx.roundRect ? ctx.roundRect(x, y, w, h, 12) : ctx.rect(x, y, w, h); ctx.fill(); ctx.stroke();
@@ -652,6 +653,7 @@
   let lastToastAt = -1e9;
   function toast(...args) {
     const opt = args[4] || {};
+    args.born = game.st ? game.st.year : 0;
     toastQueue.push(args);
     // sıra uzarsa en eski küçük haberleri at; hikâye ve yeni araç kartları kalır
     while (toastQueue.length > 6) { const k = toastQueue.findIndex(a => !(a[4] || {}).pause); if (k < 0) break; toastQueue.splice(k, 1); }
@@ -659,6 +661,8 @@
   }
   function pumpToasts() {
     if (!toastQueue.length || mode !== 'game') return;
+    for (let i = toastQueue.length - 1; i >= 0; i--) { const a = toastQueue[i]; if (!(a[4] || {}).pause && a.born !== undefined && game.st && game.st.year - a.born > 3) toastQueue.splice(i, 1); }
+    if (!toastQueue.length) return;
     const box = $('toasts'), visible = box.querySelectorAll('.toast:not(.out)').length;
     const gap = 9000 / (typeof FAST === 'number' ? FAST : 1);
     if (visible >= (mobile ? 1 : 2) || performance.now() - lastToastAt < gap) return;
@@ -795,7 +799,8 @@
     ship.onDock = () => {
       if (mode !== 'game' || game.state !== 'intro') return;
       say(ship, 'Düüüt! Hawaii\'den\n102 kurbağa geldi!');
-      setTimeout(() => { if (mode === 'game' && game.state === 'intro') askRelease(); }, 1600);
+      const ask = () => { if (mode !== 'game' || game.state !== 'intro') return; if ($('toasts').querySelector('.toast:not(.out)')) return setTimeout(ask, 500); askRelease(); };
+      setTimeout(ask, 1600);
     };
     };
     if (window.Mission && !window.__mSeen && (window.__mSeen = 1)) window.Mission.show($('modal'), MISSION, go); else go();
@@ -959,7 +964,7 @@
     else { title = 'Kıtayı kurbağalara verdin'; text = 'Tarih tekrarlandı: 102 kurbağa, 200 milyonu aşan bir ordu oldu. Kamış böceği ise hiç umursamadı.'; }
     const pct = v => `%${Math.round(v * 100)}`;
     $('result').innerHTML = `
-      <div class="kicker">2025 · 90 yıl sonra</div>
+      <div class="kicker">${game.noToads ? game.st.year + ' · kurbağa salınmadı' : '2025 · 90 yıl sonra'}</div>
       <h2>${title}</h2>
       <p class="verdict">${text}</p>
       ${(window.Badges && window.Badges.session().length) ? `<div class="run-badges">${window.Badges.session().map(id => { const d = window.Badges.DEFS.find(x => x.id === id); return `<span class="${d.hidden ? 'secret' : ''}">${d.icon} ${d.name}</span>`; }).join('')}</div>` : ''}
@@ -975,7 +980,8 @@
     $('r-next').onclick = () => goTo(slideOf('sandbox'));
     requestAnimationFrame(drawResultChart);
   }
-  function lineChart(c, series, n) {
+  function lineChart(c, series, n, opts) {
+    if (window.SceneUtils) return window.SceneUtils.lineChart(c, series, n, opts || {}); // uç etiketleri ve yıl ekseni
     if (!c) return;
     const dpr = Math.min(2, window.devicePixelRatio || 1), w = c.clientWidth, h = c.clientHeight; if (!w) return;
     c.width = w * dpr; c.height = h * dpr;
@@ -990,10 +996,10 @@
   }
   function drawResultChart() {
     lineChart($('rchart'), [
-      { data: HISTORY.hist.map(h => h.areaPct / 40), color: '#9aa59a', dash: true },
-      { data: game.hist.map(h => h.pred), color: '#4f7a4a' },
-      { data: game.hist.map(h => h.areaPct / 40), color: '#8a7a3a' },
-    ], 90);
+      { data: HISTORY.hist.map(h => h.areaPct / 40), color: '#9aa59a', dash: true, label: 'Tarihte alan', fmt: v => '%' + Math.round(v * 40) },
+      { data: game.hist.map(h => h.pred), color: '#4f7a4a', label: 'Yırtıcılar', fmt: v => '%' + Math.round(v * 100) },
+      { data: game.hist.map(h => h.areaPct / 40), color: '#8a7a3a', label: 'Kurbağa alanı', fmt: v => '%' + Math.round(v * 40) },
+    ], 90, { y0: 1935, step: 20 });
   }
 
   // =====================================================================
@@ -1031,9 +1037,9 @@
   function sbStats() { const s = sb.hist[sb.hist.length - 1]; $('sb-year').textContent = sb.st ? sb.st.year : 1935; $('sb-area').textContent = `Alan: %${s ? s.areaPct.toFixed(1) : 0}`; }
   function drawSbChart() {
     lineChart($('sb-chart'), [
-      { data: sb.hist.map(h => h.pred), color: '#4f7a4a' },
-      { data: sb.hist.map(h => h.areaPct / 40), color: '#8a7a3a' },
-    ], 165);
+      { data: sb.hist.map(h => h.pred), color: '#4f7a4a', label: 'Yırtıcılar', fmt: v => '%' + Math.round(v * 100) },
+      { data: sb.hist.map(h => h.areaPct / 40), color: '#8a7a3a', label: 'Kurbağa alanı', fmt: v => '%' + Math.round(v * 40) },
+    ], 165, { y0: 1935, step: 40 });
   }
   sbParams();
 

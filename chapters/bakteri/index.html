@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Bakterilerin İntikamı</title>
+<meta name="description" content="1945: penisilin her derde deva. Antibiyotiği herkese verirsen ne olur? Doğal seçilimi mikroskopta oynayarak gör.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/css/badges.css?v=261017163734">
+<link rel="stylesheet" href="../../assets/css/chapter.css?v=261017163734">
+<style>
+  .sl.locked span { color: var(--ink-soft); }
+  #m-succ { background: var(--green); } #m-res { background: #c0503a; } #m-extra { background: #c29a2e; } #m-miss { background: #8a6fd8; }
+  .chip.drug { font-size: 1rem; }
+  .chip.drug b { font-weight: 400; }
+</style>
+</head>
+<body class="dock">
+<script>if (/[?&]layout=klasik\b/.test(location.search)) document.body.classList.remove("dock");</script>
+<canvas id="world" aria-hidden="true"></canvas>
+
+<header class="bar">
+  <a class="bar-home" href="../../">← Biz Ne Yaptık?</a>
+  <button class="bar-btn" id="sound" aria-label="Sesi aç/kapat">🔊 <span>Ses</span></button>
+</header>
+
+<div class="slides">
+
+  <section class="slide" data-mode="title">
+    <div class="center-col"><div class="glass">
+      <div class="kicker">Biz Ne Yaptık? · Bölüm 5</div>
+      <h1 class="title">Bakterilerin İntikamı</h1>
+      <p class="sub">1945–2015 · oynama süresi ~5 dakika</p>
+      <button class="hbtn big" data-next>Başla →</button>
+    </div></div>
+  </section>
+
+  <section class="slide" data-mode="game">
+    <div class="narr game-intro" id="g-intro">
+      <p>Sen kasabanın sağlık müdürüsün. Hastalar kapıya gelir, doktorlar reçete yazar. <b>Kurallar senin.</b></p>
+      <p class="try">👉 Reçete kaydırıcısını ayarla ve sağdaki mikroskobu izle: ilaç kimi öldürüyor, kim hayatta kalıyor?</p>
+    </div>
+    <div class="topbox">
+      <div class="yearbar" aria-live="polite"><div class="yb-year" id="yb-year">1945</div><div class="yb-sub" id="yb-sub">Mucize ilaç</div><div class="yb-track"><i id="yb-fill"></i></div><span class="yb-harvest" id="yb-harvest"></span><span class="yb-speed" id="yb-speed" role="group" aria-label="Hız"><button type="button" data-s="1" class="on">1×</button><button type="button" data-s="2">2×</button><button type="button" data-s="4">4×</button></span></div>
+      <div id="toasts" aria-live="polite"></div>
+    </div>
+    <aside class="gpanel" aria-label="Sağlık müdürlüğü masası">
+      <button class="gp-toggle" type="button" aria-expanded="false">⋯ Daha fazla</button>
+      <div class="gp-hud">
+      <div class="gp-top">
+        <div class="chip date" id="g-date">1945</div>
+        <div class="chip drug" id="g-drug">💊 <b id="d-name">Penisilin</b></div>
+      </div>
+      <p class="goal gp-extra">🎯 <b>Hedef:</b> 2015'te de ilaçlar işe yarasın.</p>
+      <div class="gp-meters">
+        <div class="mrow"><span>✅<em> Tedavi başarısı</em></span><span class="track"><i id="m-succ"></i></span></div>
+        <div class="mrow"><span>🦠<em> Direnç</em></span><span class="track"><i id="m-res"></i></span></div>
+        <div class="mrow"><span>🤧<em> Gereksiz reçete</em></span><span class="track"><i id="m-extra"></i></span></div>
+        <div class="mrow"><span>😷<em> Tedavisiz kalan</em></span><span class="track"><i id="m-miss"></i></span></div>
+        <div class="mrow trust"><span>🙂<em> Hasta memnuniyeti</em></span><span class="track"><i id="m-trust"></i></span></div>
+      </div>
+      </div>
+      <label class="sl big" id="w-p"><span>💊 Reçete kolaylığı <b id="o-p">%35</b></span><input type="range" id="g-p" min="0" max="100" step="5" value="35"></label>
+      <label class="sl big locked" id="w-h"><span>🧼 Hijyen ve aşı <b id="o-h">🔒 1961'de açılır</b></span><input type="range" id="g-h" min="0" max="100" step="10" value="0" disabled></label>
+      <div class="sb-ctrl gp-extra">
+        <button class="hbtn sm" id="g-pause">❚❚ Durdur</button>
+        <button class="hbtn sm" id="g-speed">1×</button>
+      </div>
+    </aside>
+    <div class="harvest" id="harvest" hidden></div>
+    <div class="modal" id="modal" hidden></div>
+  </section>
+
+  <section class="slide scroll" data-mode="result">
+    <div class="result" id="result"></div>
+  </section>
+
+  <section class="slide" data-mode="sandbox">
+    <aside class="sb-panel">
+      <h2>Simülasyon laboratuvarı</h2>
+      <p class="small">1945'ten 2015'e kadar kasaba her yıl senin kurallarına göre değişir.</p>
+      <div class="presets">
+        <button class="pbtn" data-preset="history">Tarihteki gibi</button>
+        <button class="pbtn" data-preset="all">Herkese ilaç</button>
+        <button class="pbtn" data-preset="smart">Akıllı kullanım</button>
+        <button class="pbtn" data-preset="strict">Çok sıkı</button>
+      </div>
+      <label class="sl"><span>💊 Reçete kolaylığı <b id="o-pp"></b></span><input type="range" id="p-p" min="0" max="100" value="30"></label>
+      <label class="sl"><span>🧼 Hijyen ve aşı <b id="o-ph"></b></span><input type="range" id="p-h" min="0" max="100" value="0"></label>
+      <label class="sl"><span>🔒 Yeni ilaçları yedekte tut <b id="o-pr"></b></span><input type="range" id="p-r" min="0" max="1" step="1" value="0"></label>
+      <canvas id="sb-chart" class="sb-chart"></canvas>
+      <div class="legend"><span style="--c:#4f7a4a">Tedavi başarısı</span><span style="--c:#c0503a">Direnç</span><span style="--c:#c29a2e">Gereksiz reçete</span></div>
+      <div class="sb-stats"><span id="sb-year">1945</span><span id="sb-harvest">Başarı: %100</span></div>
+      <div class="sb-ctrl">
+        <button class="hbtn sm" id="sb-play">❚❚ Durdur</button>
+        <button class="hbtn sm" id="sb-speed">1×</button>
+        <button class="hbtn sm" id="sb-reset">↺ Sıfırla</button>
+      </div>
+      <button class="hbtn" data-next>Gerçekte ne oldu? →</button>
+    </aside>
+  </section>
+
+  <section class="slide scroll" data-mode="facts">
+    <article class="paper">
+      <h2>Gerçekte ne oldu?</h2>
+      <ul class="facts">
+        <li><b>1945</b> Penisilin savaşta milyonlarca askeri kurtardı. Bulan Alexander Fleming, Nobel konuşmasında uyardı: ilacı az ve yanlış kullanan, mikroplarını dirençli yapar.</li>
+        <li><b>Sonra</b> Uyarı tuttu. Bir hastanede penisiline dirençli stafilokok 1946'da %14 iken 1950'de %59 oldu. 1959'da metisilin geldi; bir yıl sonra ona da dirençli bakteri (<i>MRSA</i>) bulundu. Her yeni ilaç bir süre kurtardı, sonra dirençle karşılaştı. 1980'lerin sonundan beri yeni antibiyotik sınıfı neredeyse hiç bulunamadı.</li>
+        <li><b>Bugün</b> 2019'da dünyada 1,27 milyon kişi doğrudan ilaca dirençli bakteriler yüzünden öldü. Türkiye 2013'te OECD'de en çok antibiyotik kullanan ülkeydi.</li>
+      </ul>
+      <div class="callout"><b>Ama antibiyotik kötü değil.</b> Milyonlarca hayat kurtardı, hâlâ kurtarıyor. Sorun gereksiz kullanım: soğuk algınlığı ve grip virüslerle olur, antibiyotik onlara hiç etki etmez. Ne kadar ve ne kadar süre kullanılacağına ise doktor karar verir.</div>
+      <button class="hbtn" data-next>Peki ne öğrendik? →</button>
+    </article>
+  </section>
+
+  <section class="slide scroll" data-mode="lessons">
+    <article class="paper">
+      <h2>Ne öğrendik?</h2>
+      <div class="lessons"><div class="lcard"><h3>🦠 Ölmeyen çoğalır</h3><p>İlaç duyarlıları öldürür, dirençliler kalır ve kasabaya yayılır.</p></div><div class="lcard"><h3>🤧 Gribe antibiyotik yaramaz</h3><p>Virüse verilen her kutu yalnızca bakterileri eğitir.</p></div><div class="lcard"><h3>🔒 Yeni ilaç bir yedek lastiktir</h3><p>Herkese dağıtılan son ilaç çabuk tükenir.</p></div></div>
+      <h2>Sen ne yapabilirsin?</h2>
+      <ul class="todo"><li>💊 Antibiyotiği yalnız doktor reçetesiyle kullan; kendi kendine, evde kalan kutudan başlama.</li><li>🧼 Ellerini yıka, aşılarını yaptır: hastalanmamak, ilaç kullanmamaktır.</li><li>♻️ Artan ilacı çöpe ya da lavaboya atma; eczanedeki ilaç toplama kutusuna ver.</li></ul>
+      <details class="sources-fold"><summary>Kaynaklar ve model hakkında</summary><ul class="sources">
+        <li>A. Fleming, "Penicillin", Nobel konuşması, 11 Aralık 1945.</li>
+        <li>M. P. Jevons, "Celbenin-resistant staphylococci", <i>British Medical Journal</i> (1961).</li>
+        <li>Antimicrobial Resistance Collaborators, "Global burden of bacterial antimicrobial resistance in 2019", <i>The Lancet</i> 399 (2022).</li>
+        <li>OECD, <i>Health at a Glance</i> (antibiyotik tüketimi göstergeleri).</li>
+        <li>T. P. Van Boeckel ve ark., "Global trends in antimicrobial resistance in animals in low- and middle-income countries", <i>Science</i> 365 (2019).</li>
+      </ul><p class="small">Model basit bir doğal seçilime dayanır: her ilacın direnci kullanıldıkça artar, kullanılmayınca yavaşça azalır. Sayılar temsilidir.</p></details>
+      <div class="end-nav">
+        <a class="hbtn" href="../../#bolumler">← Tüm bölümler</a>
+        <button class="hbtn" data-goto="game">↺ Tekrar oyna</button>
+      </div>
+    </article>
+  </section>
+</div>
+
+<nav class="dots" id="dots" aria-label="Bölüm adımları"></nav>
+
+<script src="../../assets/js/stats.js?v=261017163734"></script>
+<script src="../../assets/js/mission.js?v=261017163734"></script>
+<script src="../../assets/js/scene-utils.js?v=261017163734"></script>
+<script src="../../assets/js/badges.js?v=261017163734"></script>
+<script src="../../assets/js/toon.js?v=261017163734"></script>
+<script src="model.js?v=261017163734"></script>
+<script src="bakteri.js?v=261017163734"></script>
+<script>/* gpToggle */document.querySelectorAll(".gp-toggle").forEach(b=>b.onclick=()=>{const p=b.closest(".gpanel");const o=p.classList.toggle("open");b.setAttribute("aria-expanded",o);b.textContent=o?"✕ Kapat":"⋯ Daha fazla";window.dispatchEvent(new Event("panel"));});</script>
+</body>
+</html>

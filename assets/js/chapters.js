@@ -52,7 +52,7 @@ window.SEASONS = [
       img: 'assets/img/cards/birecikwaldrapp.jpg', credit: 'Kpisimon, CC BY-SA 3.0', src: 'File:BirecikWaldrapp.jpg' },
   ]},
   { icon: '🦠', title: 'Görünmez Düşmanlar', desc: 'En uzun süre kalanlar, gözle göremediklerimiz.', chapters: [
-    { year: '1945', title: 'Bakterilerin İntikamı', status: 'soon', text: 'Fleming uyarıyor: penisilini az ve yanlış kullanırsanız bakteriler direnç kazanır. Haklı çıkıyor. Evrimi petri kabında izle.',
+    { year: '1945', title: 'Bakterilerin İntikamı', status: 'live', href: 'chapters/bakteri/', text: 'Fleming uyarıyor: penisilini az ve yanlış kullanırsanız bakteriler direnç kazanır. Haklı çıkıyor. Evrimi petri kabında izle.',
       img: 'assets/img/cards/antibiotic-susceptibility-disk-diffusion.jpg', credit: 'Microrao, CC BY-SA 4.0', src: 'File:Antibiotic_susceptibility_disk_diffusion.jpg' },
     { year: '2015', title: 'İlaçla Büyüyen Tavuk', status: 'soon', text: 'Antibiyotiklerin büyük kısmı hasta insanlara değil, daha hızlı büyüsün diye çiftlik hayvanlarına gidiyor.',
       img: 'assets/img/cards/broiler-chicken-at-a-farm.jpg', pos: '50% 40%', credit: 'Umar2z, CC BY-SA 4.0', src: 'File:Broiler_Chicken_at_a_farm.jpg' },

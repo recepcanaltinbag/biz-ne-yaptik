@@ -271,6 +271,7 @@
     const lines = bb.text.split('\n');
     const w = Math.max(...lines.map(l => ctx.measureText(l).width)) + pad * 2, h = lines.length * fs * 1.15 + pad * 1.4;
     let x = clamp(bb.x - w / 2, 8, W - w - 8), y = bb.y - h - 22 * U;
+    if (window.SceneUtils && mode === 'game') ({ x, y } = window.SceneUtils.avoidHud(x, y, w, h));
     ctx.globalAlpha = clamp(bb.life * 3);
     ctx.fillStyle = '#fff'; ctx.strokeStyle = rgb(PAL.ink); ctx.lineWidth = 2;
     ctx.beginPath(); ctx.roundRect ? ctx.roundRect(x, y, w, h, 12) : ctx.rect(x, y, w, h); ctx.fill(); ctx.stroke();
@@ -1038,6 +1039,7 @@
   let lastToastAt = -1e9;
   function toast(...args) {
     const opt = args[4] || {};
+    args.born = gs ? gs.m : 0;
     toastQueue.push(args);
     // sıra uzarsa en eski küçük haberleri at; hikâye ve yeni araç kartları kalır
     while (toastQueue.length > 6) { const k = toastQueue.findIndex(a => !(a[4] || {}).pause); if (k < 0) break; toastQueue.splice(k, 1); }
@@ -1045,6 +1047,8 @@
   }
   function pumpToasts() {
     if (!toastQueue.length || mode !== 'game') return;
+    for (let i = toastQueue.length - 1; i >= 0; i--) { const a = toastQueue[i]; if (!(a[4] || {}).pause && a.born !== undefined && gs.m - a.born > 4) toastQueue.splice(i, 1); }
+    if (!toastQueue.length) return;
     const box = $('toasts'), visible = box.querySelectorAll('.toast:not(.out)').length;
     const gap = 9000 / (typeof FAST === 'number' ? FAST : 1);
     if (visible >= (mobile ? 1 : 2) || performance.now() - lastToastAt < gap) return;
@@ -1422,7 +1426,8 @@
     requestAnimationFrame(drawResultChart);
   }
 
-  function lineChart(c, series, months) {
+  function lineChart(c, series, months, opts) {
+    if (window.SceneUtils) return window.SceneUtils.lineChart(c, series, months, opts || {}); // uç etiketleri ve yıl ekseni
     if (!c) return;
     const dpr = Math.min(2, window.devicePixelRatio || 1), w = c.clientWidth, h = c.clientHeight;
     if (!w) return;
@@ -1441,11 +1446,11 @@
   }
   function drawResultChart() {
     lineChart($('rchart'), [
-      { data: HISTORY.hist.map(d => d.S), color: '#9aa59a', dash: true },
-      { data: game.hist.map(d => d.Fr), color: '#c29a2e' },
-      { data: game.hist.map(d => d.P / PK), color: '#b5543c' },
-      { data: game.hist.map(d => d.S), color: '#9c6b47' },
-    ], TOTAL);
+      { data: HISTORY.hist.map(d => d.S), color: '#9aa59a', dash: true, label: 'Tarihte serçe', fmt: v => '%' + Math.round(v * 100) },
+      { data: game.hist.map(d => d.Fr), color: '#c29a2e', label: 'Tahıl', fmt: v => '%' + Math.round(v * 100) },
+      { data: game.hist.map(d => d.P / PK), color: '#b5543c', label: 'Böcek', fmt: v => '%' + Math.round(v * 100) },
+      { data: game.hist.map(d => d.S), color: '#9c6b47', label: 'Serçe', fmt: v => '%' + Math.round(v * 100) },
+    ], TOTAL, { xLabel: i => calMonth(i) === 0 ? calYear(i) : null });
   }
 
   // =====================================================================
@@ -1493,9 +1498,9 @@
   }
   function drawSbChart() {
     lineChart($('sb-chart'), [
-      { data: sb.hist.map(d => d.Fr), color: '#c29a2e' },
-      { data: sb.hist.map(d => d.P / PK), color: '#b5543c' },
-      { data: sb.hist.map(d => d.S), color: '#9c6b47' },
+      { data: sb.hist.map(d => d.Fr), color: '#c29a2e', label: 'Tahıl', fmt: v => '%' + Math.round(v * 100) },
+      { data: sb.hist.map(d => d.P / PK), color: '#b5543c', label: 'Böcek', fmt: v => '%' + Math.round(v * 100) },
+      { data: sb.hist.map(d => d.S), color: '#9c6b47', label: 'Serçe', fmt: v => '%' + Math.round(v * 100) },
     ], 72);
   }
 

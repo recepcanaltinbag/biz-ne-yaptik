@@ -99,7 +99,7 @@
     const st = {
       year: 1935, p: { ...DEF, ...p }, rnd: rng(seed), acc: 0, released: false,
       d: new Float32Array(N), invaded: new Int16Array(N).fill(-1), pred: new Float32Array(N).fill(1),
-      fenced: new Uint8Array(N), hist: [], firsts: {},
+      fenced: new Uint8Array(N), hist: [], firsts: {}, trainK: 0,
     };
     st.fenceRoll = new Float32Array(N); for (const c of G.cells) st.fenceRoll[c] = st.rnd();
     return st;
@@ -138,6 +138,8 @@
           if (!src) continue;
           let prob = s * 0.9 * (1 - 0.55 * p.collect);
           if (G.moist[c] < 0.35) prob *= 0.35; // çöl koridorları yavaş
+          // çitle kapatılan su noktaları kurak kuşakta yayılmayı ciddi biçimde keser
+          if (G.moist[c] < 0.5) prob *= 1 - 0.65 * p.fence;
           if (st.rnd() < prob) add.push(c);
         }
         for (const c of add) { st.d[c] = 0.05; if (st.invaded[c] < 0) st.invaded[c] = y; }
@@ -150,12 +152,16 @@
         if (st.d[c] < 0.02) st.d[c] = 0;
       }
     }
-    // yerli avcılar: kurbağayı yiyen kuzey kedisi, goanna, timsah, yılan
+    // öğretmen kurbağa yavaş yayılır: yırtıcıların öğrenmesi yıllar alır
+    st.trainK += (p.teach - st.trainK) * 0.12;
+    // yerli yırtıcılar: kurbağayı yiyen kuzey kedisi, goanna, timsah, yılan
     for (const c of G.cells) {
       const base = suitOf(st, c) >= 0.22;
       if (!base) continue;
       if (st.d[c] > 0.12) {
-        const floor = 0.12 + 0.45 * p.teach + 0.3 * smooth(0, 45, y - st.invaded[c]);
+        // eğitim en çok cephenin önünde işe yarar: kurbağa gelmeden öğrenen yırtıcı hayatta kalır
+        const fresh = y - st.invaded[c] < 12 ? 1 : 0.35;
+        const floor = 0.12 + 0.62 * st.trainK * fresh + 0.3 * smooth(0, 45, y - st.invaded[c]);
         st.pred[c] += (Math.min(1, floor) - st.pred[c]) * 0.35;
       } else st.pred[c] += (1 - st.pred[c]) * 0.04;
     }

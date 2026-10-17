@@ -27,7 +27,7 @@
     { id: 'kurbaga-kakadu', ch: 'kurbaga', icon: '🐾', name: 'Kakadu\'nun koruyucusu', hint: 'Kuzeydeki küçük aile hikâyenin sonunu görsün.',
       fact: 'Kurbağalar gelmeden önce bazı kuzey kedileri kurbağasız adalara taşınarak korundu.' },
     { id: 'kurbaga-hedef', ch: 'kurbaga', icon: '🎯', name: 'Hedef tuttu', hint: 'Çizginin altına düşme.',
-      fact: 'Kurbağalar geldikten sonra bazı yılanlar yaklaşık 70 yılda kurbağadan kaçınmayı öğrendi ya da zehre karşı direnç kazandı.' },
+      fact: 'Kurbağa gelmeden önce "tat tiksinmesi" eğitimi alan kuzey kedileri kurbağaya daha az saldırdı ve daha uzun yaşadı.' },
     { id: 'kurbaga-bilim', ch: 'kurbaga', icon: '🧪', name: 'Bilime kulak ver', hint: 'Bilim insanını dinlemenin zamanı vardır.',
       fact: 'Biyolojik kontrol işe yarayabilir, ama önce yöntemin hedef türe gerçekten etki edip etmediği sınanmalı.' },
     { id: 'kurbaga-tasmanya', ch: 'kurbaga', icon: '🏝️', name: 'Soğuk ada', hidden: true,
@@ -46,7 +46,7 @@
     { id: 'aral-plan', ch: 'aral', icon: '🔧', name: 'Hem pamuk hem deniz', hint: 'Her damlayı iki kez düşün.',
       fact: 'Bazı tahminlere göre Orta Asya\'da sulama suyunun yarısı tarlaya ulaşmadan kayboluyordu.' },
     { id: 'aral-kokaral', ch: 'aral', icon: '🧱', name: 'Kuzey\'in umudu', hint: 'Küçük bir set, büyük bir umut.',
-      fact: 'Kokaral seti 2005\'te bitti. Kuzey Aral\'ın tuzu azaldı, balıklar geri döndü.' },
+      fact: 'Gerçekte Kokaral seti 2005\'te bitti; birkaç yılda Kuzey Aral\'ın tuzu azaldı ve balıklar geri döndü.' },
     { id: 'aral-deve', ch: 'aral', icon: '🐫', name: 'Çölün gemisi', hidden: true,
       fact: 'Aralkum, dünyanın en genç çöllerinden biri: yarım asırdan kısa sürede oluştu.' },
     { id: 'aral-gemi', ch: 'aral', icon: '⚓', name: 'Gemi mezarlığı', hidden: true,
@@ -72,13 +72,30 @@
       fact: 'DDT\'ye dirençli karasinekler daha 1940\'ların sonunda görülmüştü.' },
     { id: 'ddt-kamyon', ch: 'ddt', icon: '🚚', name: 'Sis kamyonu', hidden: true,
       fact: '1940\'lar ve 50\'lerde çocuklar sokaklarda ilaç sisi püskürten kamyonların arkasından koşardı.' },
+    // --- Bakterilerin İntikamı ---
+    { id: 'bak-basari', ch: 'bakteri', icon: '✅', name: 'Hâlâ işe yarıyor', hint: 'Son yılda da ilaçlar işini yapsın.',
+      fact: '2019\'da dünyada 1,27 milyon ölüm doğrudan ilaca dirençli bakterilere bağlandı.' },
+    { id: 'bak-yedek', ch: 'bakteri', icon: '🔒', name: 'Yedek lastik', hint: 'En iyi kılıç kınında saklanır.',
+      fact: 'Bazı antibiyotikler "son çare" olarak yalnız başka ilaç işe yaramadığında kullanılır.' },
+    { id: 'bak-dengeli', ch: 'bakteri', icon: '⚖️', name: 'Ne eksik ne fazla', hint: 'Ne eksik ne fazla.',
+      fact: 'Soğuk algınlığı ve grip virüslerle olur; antibiyotik onlara etki etmez.' },
+    { id: 'bak-fleming', ch: 'bakteri', icon: '🧪', name: 'Fleming\'i dinle', hint: 'Eczane tezgâhı her derde deva değildir.',
+      fact: 'Fleming 1945\'te, ilacı kendi kendine az kullananların mikroplarını dirençli yapacağını söyledi.' },
+    { id: 'bak-kuf', ch: 'bakteri', icon: '🍞', name: 'Küflü ekmek', hidden: true,
+      fact: 'Fleming 1928\'de, küf bulaşmış bir kapta bakterilerin öldüğünü fark etti: Penicillium.' },
+    { id: 'bak-mikroskop', ch: 'bakteri', icon: '🔬', name: 'Yakın bakış', hidden: true,
+      fact: 'Bazı bakteriler uygun koşulda yaklaşık 20 dakikada ikiye bölünebilir.' },
+    { id: 'bak-grip', ch: 'bakteri', icon: '🤧', name: 'Nezle virüsü', hidden: true,
+      fact: 'Antibiyotik virüsü öldürmez; ama vücuttaki bakterilere direnç kazandırabilir.' },
+    { id: 'bak-tavuk', ch: 'bakteri', icon: '🐔', name: 'Tavuk da alıyor', hidden: true,
+      fact: 'Dünyada satılan antimikrobiyallerin yaklaşık dörtte üçü çiftlik hayvanlarında kullanılıyor.' },
   ];
 
   // rozet madalyonları: bölüm fotoğrafından (çizgi film filtresiyle) rozete özel bir kesit + renkli çerçeve + simge
   // fotoğraflar sitede barındırılır; yol, bu betiğin adresine göre çözülür (ana sayfa ve bölüm sayfaları için aynı)
   const BASE = new URL('../img/cards/', (document.currentScript && document.currentScript.src) || location.href).href;
-  const IMG = { S: BASE + 'kill-bird-and-insect.jpg', K: BASE + 'cane-toad-bufo-marinus.jpg', A: BASE + 'moynaq-aral-sea-6226807306.jpg', D: BASE + 'statelibqld-2-162299-cloud-spraying-for-mosquitos-at-norman-.jpg' };
-  const ART = {"serce-dost": ["S", "50% 12%", 230, "#7fb069"], "serce-durust": ["S", "25% 55%", 260, "#e0b04a"], "serce-vicdan": ["S", "75% 35%", 250, "#6aa6c9"], "serce-bolluk": ["S", "50% 92%", 220, "#d9a441"], "serce-gozluk": ["S", "85% 8%", 300, "#f08a4b"], "serce-defter": ["S", "15% 30%", 280, "#9a7bd1"], "serce-rock": ["S", "60% 65%", 320, "#d0587e"], "serce-rekor": ["S", "35% 85%", 300, "#8a6fd8"], "kurbaga-yok": ["K", "30% 40%", 260, "#c96a5a"], "kurbaga-kakadu": ["K", "70% 55%", 240, "#7fb069"], "kurbaga-hedef": ["K", "50% 30%", 300, "#e0b04a"], "kurbaga-bilim": ["K", "20% 70%", 280, "#6aa6c9"], "kurbaga-tasmanya": ["K", "85% 20%", 320, "#5f9fb5"], "kurbaga-gemi": ["K", "10% 15%", 300, "#7d74d4"], "kurbaga-otostop": ["K", "60% 85%", 280, "#c98a4b"], "kurbaga-bacak": ["K", "90% 80%", 260, "#a46fd0"], "aral-deniz": ["A", "80% 30%", 230, "#5b93b8"], "aral-balik": ["A", "20% 50%", 260, "#6d8fa0"], "aral-plan": ["A", "50% 80%", 240, "#7fb069"], "aral-kokaral": ["A", "65% 20%", 280, "#e0b04a"], "aral-deve": ["A", "35% 70%", 300, "#c49a6c"], "aral-gemi": ["A", "50% 50%", 320, "#8a6fd8"], "aral-tuz": ["A", "10% 85%", 300, "#b9a98a"], "aral-sibirya": ["A", "90% 60%", 280, "#a46fd0"], "ddt-kartal": ["D", "70% 30%", 240, "#7a5a3a"], "ddt-carson": ["D", "20% 60%", 260, "#5a7a5a"], "ddt-hasat": ["D", "50% 85%", 230, "#c0302a"], "ddt-erken": ["D", "85% 70%", 280, "#e0b04a"], "ddt-afis": ["D", "30% 20%", 300, "#c0503a"], "ddt-yumurta": ["D", "60% 50%", 320, "#d8d2c0"], "ddt-sinek": ["D", "10% 40%", 300, "#8a6fd8"], "ddt-kamyon": ["D", "90% 15%", 280, "#3a6a4a"]};
+  const IMG = { S: BASE + 'kill-bird-and-insect.jpg', K: BASE + 'cane-toad-bufo-marinus.jpg', A: BASE + 'moynaq-aral-sea-6226807306.jpg', D: BASE + 'statelibqld-2-162299-cloud-spraying-for-mosquitos-at-norman-.jpg', B: BASE + 'antibiotic-susceptibility-disk-diffusion.jpg' };
+  const ART = {"serce-dost": ["S", "50% 12%", 230, "#7fb069"], "serce-durust": ["S", "25% 55%", 260, "#e0b04a"], "serce-vicdan": ["S", "75% 35%", 250, "#6aa6c9"], "serce-bolluk": ["S", "50% 92%", 220, "#d9a441"], "serce-gozluk": ["S", "85% 8%", 300, "#f08a4b"], "serce-defter": ["S", "15% 30%", 280, "#9a7bd1"], "serce-rock": ["S", "60% 65%", 320, "#d0587e"], "serce-rekor": ["S", "35% 85%", 300, "#8a6fd8"], "kurbaga-yok": ["K", "30% 40%", 260, "#c96a5a"], "kurbaga-kakadu": ["K", "70% 55%", 240, "#7fb069"], "kurbaga-hedef": ["K", "50% 30%", 300, "#e0b04a"], "kurbaga-bilim": ["K", "20% 70%", 280, "#6aa6c9"], "kurbaga-tasmanya": ["K", "85% 20%", 320, "#5f9fb5"], "kurbaga-gemi": ["K", "10% 15%", 300, "#7d74d4"], "kurbaga-otostop": ["K", "60% 85%", 280, "#c98a4b"], "kurbaga-bacak": ["K", "90% 80%", 260, "#a46fd0"], "aral-deniz": ["A", "80% 30%", 230, "#5b93b8"], "aral-balik": ["A", "20% 50%", 260, "#6d8fa0"], "aral-plan": ["A", "50% 80%", 240, "#7fb069"], "aral-kokaral": ["A", "65% 20%", 280, "#e0b04a"], "aral-deve": ["A", "35% 70%", 300, "#c49a6c"], "aral-gemi": ["A", "50% 50%", 320, "#8a6fd8"], "aral-tuz": ["A", "10% 85%", 300, "#b9a98a"], "aral-sibirya": ["A", "90% 60%", 280, "#a46fd0"], "ddt-kartal": ["D", "70% 30%", 240, "#7a5a3a"], "ddt-carson": ["D", "20% 60%", 260, "#5a7a5a"], "ddt-hasat": ["D", "50% 85%", 230, "#c0302a"], "ddt-erken": ["D", "85% 70%", 280, "#e0b04a"], "ddt-afis": ["D", "30% 20%", 300, "#c0503a"], "ddt-yumurta": ["D", "60% 50%", 320, "#d8d2c0"], "ddt-sinek": ["D", "10% 40%", 300, "#8a6fd8"], "ddt-kamyon": ["D", "90% 15%", 280, "#3a6a4a"], "bak-basari": ["B", "50% 50%", 230, "#4f7a4a"], "bak-yedek": ["B", "20% 30%", 260, "#5a6470"], "bak-dengeli": ["B", "80% 70%", 250, "#e0b04a"], "bak-fleming": ["B", "30% 80%", 280, "#3e9696"], "bak-kuf": ["B", "70% 20%", 300, "#7aa85a"], "bak-mikroskop": ["B", "50% 40%", 340, "#8a6fd8"], "bak-grip": ["B", "10% 60%", 300, "#7aa7d6"], "bak-tavuk": ["B", "90% 40%", 280, "#c0503a"]};
   function medal(def, on) {
     const [im, pos, zoom, ring] = ART[def.id] || ['S', '50% 50%', 200, '#e0b04a'];
     const ic = on ? def.icon : def.hidden ? '?' : '🔒';

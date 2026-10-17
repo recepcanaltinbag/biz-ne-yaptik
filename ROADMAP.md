@@ -43,7 +43,7 @@ Durum: ✅ hazır · 🔜 sırada · 📝 plan
 ## Sezon 4 · Görünmez düşmanlar
 | Bölüm | Olay | Oyun fikri |
 |---|---|---|
-| 📝 Bakterilerin İntikamı | Antibiyotik direnci (Fleming'in 1945 uyarısı) | Bakteri kolonisi: her doz dirençlileri seçer; yarım bırakılan tedavi |
+| ✅ Bakterilerin İntikamı | Antibiyotik direnci (Fleming'in 1945 uyarısı) | Bakteri kolonisi: her doz dirençlileri seçer; yarım bırakılan tedavi |
 | 📝 İlaçla Büyüyen Tavuk | Büyütme amaçlı kullanım, kolistin direnci (mcr-1, 2015) | Hayvan verimi ↔ direnç genlerinin yayılması |
 | 📝 Son Antibiyotik | Yeni antibiyotik sınıflarının azlığı | Ar-Ge hattı: binlerce adaydan biri; zaman, maliyet, düşük kâr |
 | 📝 Bir Mucit, İki Felaket | T. Midgley, C. Patterson; küresel yasak 2021 | Kurşun emisyonu ↔ kandaki kurşun; bilim ile sanayi lobisi |

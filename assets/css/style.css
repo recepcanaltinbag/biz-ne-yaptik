@@ -207,3 +207,12 @@ button.bp-season b { font: 600 .75rem var(--sans); color: var(--ink); letter-spa
 button.bp-season i { font-style: normal; transition: transform .2s; }
 button.bp-season.open i { transform: rotate(180deg); }
 button.bp-season:hover { background: #e3ecd5; }
+/* rozet madalyonunun üstüne gelince adı ve kısa bilgisi */
+.bp-mini { position: relative; }
+.bp-mini[data-tip]:hover::after, .bp-mini[data-tip]:focus::after {
+  content: attr(data-tip); position: absolute; z-index: 60; left: 50%; top: calc(100% + 8px); transform: translateX(-50%);
+  width: max-content; max-width: 230px; white-space: normal; background: #2b3a2e; color: #f3ecd8; font: .8rem/1.35 var(--sans);
+  padding: 7px 10px; border-radius: 10px; box-shadow: 0 6px 18px rgba(0,0,0,.2); pointer-events: none;
+}
+.bp-recent .bp-mini:first-of-type[data-tip]:hover::after { left: 0; transform: none; }
+.bp-minis { overflow: visible; }
