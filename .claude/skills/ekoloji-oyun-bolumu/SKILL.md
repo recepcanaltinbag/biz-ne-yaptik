@@ -19,6 +19,22 @@ Bu kurallar kullanıcının geri bildirimleriyle tek tek oturtuldu. Yeni bölüm
 - Her yayından önce bütün `?v=` sürüm parametrelerini artır (tarayıcı önbelleği yüzünden eski CSS ile yeni HTML karışınca sayfa "kayıyor"):
   `V=$(date +%Y%m%d%H%M) && sed -i '' -E "s#\?v=[0-9]+\"#?v=$V\"#g" index.html chapters/*/index.html`
 
+## Üretim süreci (yönetici rolü)
+- Ayrıntı: repo kökündeki `PROCESS.md`. Döngü şöyle işler:
+  1. seç (sezonlar sırayla);
+  2. araştır;
+  3. bölüme özgü mekaniği tasarla;
+  4. modeli kur ve ayarla;
+  5. yap;
+  6. kendi kontrol listeni uygula;
+  7. yayınla;
+  8. testçi oturumu aç (`tools/tester-brief.md`);
+  9. raporu ayıkla ve düzelt;
+  10. öğrendiğini skill'e yaz;
+  11. tekrarla.
+- Testçiler `start_session` ile ayrı oturum olarak açılır, her bölüme bir testçi (`use_worktree: false`, salt okur). Kodu yalnız yönetici oturumu değiştirir.
+- Bölümler arasında kullanıcıya onay sorulmaz. Kullanıcının araya giren geri bildirimi sıradaki işin önüne geçer.
+
 ## Ton ve içerik
 - Bir çocuğun anlayacağı kadar basit, bilimi hafife almayan; hafif alaycı ama ciddi. Ağır siyasi jargon kullanma ("sağcı sapma" gibi ifadeler fazla bulundu).
 - **Çocuk dili, ama bilimden kopmadan:** cümleler kısa ve anlaşılır olsun. Ama doğru sayılar (ör. 102 kurbağa, 200 milyon, 1,2 milyon km²) ve önemli bilimsel terimler kalsın; terimler parantez içinde ya da tek cümleyle açıklansın ("derisindeki zehir (*bufotoksin*)", "en hızlıların öne geçip çiftleşmesi (*mekânsal ayıklanma*)"). Sadeleştirirken bilgi kaybetme.
