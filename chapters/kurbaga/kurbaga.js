@@ -386,6 +386,7 @@
   setInterval(pumpToasts, 300);
   function showToast(ic, from, text, tone = '', opt = {}) {
     const box = $('toasts');
+    if (game.speed > 1) setSpeed(1); // olay geldi: normal hıza dön
     const el = document.createElement('div');
     el.className = 'toast ' + tone + (opt.img ? ' story' : '');
     el.innerHTML = (opt.img ? `<img src="${opt.img}" alt="">` : `<div class="ic">${ic}</div>`) +
@@ -421,7 +422,7 @@
     Object.values(sliders).forEach(s => { s.value = 0; s.disabled = true; });
     document.querySelectorAll('.coach').forEach(uncoach);
     ['collect', 'teach', 'fence'].forEach(k => { $('w-' + k).classList.add('locked'); $('o-' + k).textContent = '🔒 ' + UNLOCK[k] + "'de açılır"; });
-    $('g-pause').textContent = '❚❚ Durdur'; $('g-speed').textContent = '1×';
+    $('g-pause').textContent = '❚❚ Durdur'; if (typeof setSpeed === 'function') setSpeed(1);
     $('modal').hidden = true; $('milestone').hidden = true; $('toasts').innerHTML = ''; toastQueue.length = 0; lastToastAt = -1e9;
     fieldToads.length = 0; scientists.length = 0; bubbles.length = 0; sprites = []; volunteers = [];
     SITES.forEach(s => { s.hit = false; });
@@ -455,7 +456,15 @@
   }
   Object.entries(sliders).forEach(([k, el]) => el.addEventListener('input', () => { initAudio(); readPolicy(k); refreshFront(game.st); }));
   $('g-pause').onclick = () => { game.paused = !game.paused; $('g-pause').textContent = game.paused ? '▶ Devam' : '❚❚ Durdur'; };
-  $('g-speed').onclick = () => { game.speed = game.speed === 1 ? 2 : 1; $('g-speed').textContent = game.speed + '×'; };
+  // hız: 1× → 2× → 4×; yeni bir olay gelince kendiliğinden 1×'e döner
+  function setSpeed(v) {
+    game.speed = v;
+    $('g-speed').textContent = v + '×';
+    const b = $('yb-speed'); b.textContent = (v > 1 ? '⏩ ' : '⏩ ') + v + '×'; b.classList.toggle('on', v > 1);
+  }
+  const nextSpeed = () => setSpeed(game.speed === 1 ? 2 : game.speed === 2 ? 4 : 1);
+  $('g-speed').onclick = nextSpeed;
+  $('yb-speed').onclick = e => { e.stopPropagation(); initAudio(); nextSpeed(); };
 
   function choice(from, title, text, opts) {
     game.state = 'choice';
@@ -587,7 +596,7 @@
   }
 
   function milestone(year, title, text, histYear) {
-    game.state = 'milestone';
+    game.state = 'milestone'; if (game.speed > 1) setSpeed(1);
     const el = $('milestone');
     el.innerHTML = `<div><div class="k">${title}</div><div class="n">${year}</div><div class="s">${text}${histYear ? `<br>Tarihte: ${histYear}` : ''}</div><div class="tap">devam etmek için dokun</div></div>`;
     el.hidden = false; trill();

@@ -372,7 +372,7 @@
       }
     }
 
-    if (mode === 'game') { drawFarmers(t, dt, gt, gb, x1); drawCampaign(t, dt, gt, gb, x1); ambientChat(t); }
+    if (mode === 'game') { drawFarmers(t, dt, gt, gb, x1); drawCampaign(t, dt, gt, gb, x1); drawGags(t, dt, gt, gb, x1); drawOfficial(t, gt, gb, x1); ambientChat(t); }
 
     // serçeler
     updateBirds(t, dt, gt, gb, x1);
@@ -449,7 +449,8 @@
       const bob = Math.sin(t * 0.006 + fm.ph) * 1.5;
       ctx.fillStyle = '#4f6f8f'; ctx.beginPath(); ctx.roundRect ? ctx.roundRect(-7, -26 + bob, 14, 22, 6) : ctx.rect(-7, -26, 14, 22); ctx.fill();
       ctx.fillStyle = '#f2d2b0'; ctx.beginPath(); ctx.arc(0, -32 + bob, 7, 0, 6.283); ctx.fill();
-      ctx.fillStyle = '#d9b45a'; ctx.beginPath(); ctx.moveTo(-12, -35 + bob); ctx.lineTo(0, -45 + bob); ctx.lineTo(12, -35 + bob); ctx.closePath(); ctx.fill();
+      if (!(fm.hatGone > t)) { ctx.fillStyle = '#d9b45a'; ctx.beginPath(); ctx.moveTo(-12, -35 + bob); ctx.lineTo(0, -45 + bob); ctx.lineTo(12, -35 + bob); ctx.closePath(); ctx.fill(); }
+      if (fm.broom > t) { const a = Math.sin(t * 0.02) * 0.9; ctx.save(); ctx.translate(6, -18); ctx.rotate(a); ctx.strokeStyle = '#8a5a3a'; ctx.lineWidth = 2.6; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(20, 14); ctx.stroke(); ctx.strokeStyle = '#d9b45a'; ctx.lineWidth = 5; ctx.beginPath(); ctx.moveTo(18, 12); ctx.lineTo(26, 20); ctx.stroke(); ctx.restore(); }
       ctx.strokeStyle = '#6b4a2b'; ctx.lineWidth = 2.4;
       if (job === 'hoe') { const a = Math.sin(t * 0.006 + fm.ph); ctx.beginPath(); ctx.moveTo(4, -20); ctx.lineTo(18, -4 + a * 8); ctx.stroke(); ctx.beginPath(); ctx.moveTo(18, -4 + a * 8); ctx.lineTo(22, 0 + a * 8); ctx.stroke(); }
       if (job === 'reap') { const a = Math.sin(t * 0.01 + fm.ph) * 0.6; ctx.save(); ctx.translate(6, -16); ctx.rotate(a); ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(10, 0); ctx.stroke(); ctx.beginPath(); ctx.arc(14, -4, 6, -0.3, 2.6); ctx.stroke(); ctx.restore(); }
@@ -461,11 +462,14 @@
   const pick = a => a[Math.floor(Math.random() * a.length)];
   function lines(kind) {
     const pests = vis.P > 1.6, fewBirds = vis.S < 0.4, campaign = game.campaign && game.k > 0.2;
-    if (kind === 'bird') return pick(campaign ? ['Konacak yer yok!\nKanatlarım yandı!', 'Bu gürültü de ne?!', 'Hiç dinlenemiyorum...']
-      : fewBirds ? ['Arkadaşlarım nerede?', 'Burası çok sessiz...'] : ['Cik! Bugün yüzlerce\nböcek yakaladım.', 'Yavrularım böceğe bayılır!', 'Biraz tahıl, bol böcek.']);
-    if (kind === 'villager') return pick(fewBirds ? ['Kuş kalmadı ki\nneye vuruyoruz?', 'Kotayı nasıl dolduracağız?'] : ['Kolum koptu\nama kota kota!', 'Bang! Bang! Bang!', 'Komşu köy 2 katını yapmış!']);
-    if (kind === 'farmer') return pick(pests ? ['Yapraklar delik deşik...', 'Böcekler her yerde!\nNereden çıktılar?', 'Bu yıl ambar dolmaz.']
-      : fewBirds ? ['Serçe yok, şimdilik\ntahıl bize kalır.', 'Kuşlar gidince\nbiraz rahatladık mı?'] : ['Hava güzel,\nbaşaklar dolgun.', 'Serçeler biraz yer,\nama dert değil.']);
+    if (kind === 'bird') return pick(campaign ? ['Konacak yer yok!\nKanatlarım yandı!', 'Bu gürültü de ne?!', 'Tencere konseri mi var?', 'Ben sadece bir serçeyim!', 'Tahıl mı? Ben böcek\nyemeye gelmiştim!', 'Bir dakika otursam...']
+      : fewBirds ? ['Arkadaşlarım nerede?', 'Burası çok sessiz...', 'Son serçe ben miyim?']
+      : ['Cik! Bugün yüzlerce\nböcek yakaladım.', 'Yavrularım böceğe bayılır!', 'Bu çekirgeyi kim\nısmarladı? Ben!', 'Cik cik! Yavrular aç.', 'Biraz tahıl, bol böcek.']);
+    if (kind === 'villager') return pick(fewBirds ? ['Kuş kalmadı ki\nneye vuruyoruz?', 'Kotayı nasıl dolduracağız?', 'Komşunun kuşunu\nsayabilir miyiz?']
+      : ['Kolum koptu\nama kota kota!', 'Bang! Bang! Bang!', 'Komşu köy 2 katını yapmış!', 'Kulaklarım çınlıyor!', 'Annemin tenceresini\nödünç aldım.', 'Bu ritim fena değil,\ngrup mu kursak?', 'Kaşık eğildi, devam!']);
+    if (kind === 'farmer') return pick(pests ? ['Yapraklar delik deşik...', 'Böcekler her yerde!\nNereden çıktılar?', 'Bu yıl ambar dolmaz.', 'Çekirgeler tencereden\nkorkmuyor mu?!']
+      : fewBirds ? ['Serçe yok, şimdilik\ntahıl bize kalır.', 'Kuşlar gidince\nbiraz rahatladık mı?', 'Neden bu kadar\nsessiz burası?']
+      : ['Hava güzel,\nbaşaklar dolgun.', 'Serçeler biraz yer,\nama dert değil.', 'Serçeler bana yardım\nediyordu aslında.']);
   }
   function say(obj, kind, oy) {
     bubbles.length = Math.min(bubbles.length, 1);
@@ -484,7 +488,7 @@
   function ambientChat(t) {
     if (mode !== 'game' || game.state !== 'play' || game.paused) return;
     if (!nextChat) nextChat = t + 9000;
-    if (t < nextChat || bubbles.length) return;
+    if (t < nextChat || bubbles.length || gags.length) return;
     nextChat = t + rnd(9000, 16000);
     const opts = [];
     const alive = birds.filter(b => !b.fallen && !b.leave);
@@ -493,6 +497,95 @@
     farmers.forEach(fm => { if (fm.sx !== undefined) opts.push(() => say({ get x() { return fm.sx; }, get y() { return fm.sy; } }, 'farmer', 8 * U)); });
     if (opts.length) pick(opts)();
   }
+
+
+  // ---- ara sıra mizahi küçük sahneler ----
+  const gags = [];
+  let nextGag = 0;
+  function sayAt(getPos, text) { bubbles.length = 0; bubbles.push({ obj: { get x() { return getPos()[0]; }, get y() { return getPos()[1]; } }, x: 0, y: 0, text, life: 1 }); }
+  function drawKid(x, y, s, shirt, t, ph, aim) {
+    ctx.save(); ctx.translate(x, y); ctx.scale(s, s);
+    const run = Math.sin(t * 0.03 + ph);
+    ctx.strokeStyle = rgb(PAL.ink); ctx.lineWidth = 2.4; ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(-3, -6); ctx.lineTo(-5 - run * 4, 2); ctx.moveTo(3, -6); ctx.lineTo(5 + run * 4, 2); ctx.stroke();
+    ctx.fillStyle = shirt; ctx.beginPath(); ctx.roundRect ? ctx.roundRect(-6, -20, 12, 15, 5) : ctx.rect(-6, -20, 12, 15); ctx.fill();
+    ctx.fillStyle = '#f2d2b0'; ctx.beginPath(); ctx.arc(0, -25, 6, 0, 6.283); ctx.fill();
+    ctx.fillStyle = '#c0503a'; ctx.beginPath(); ctx.arc(0, -27, 6, Math.PI, 0); ctx.fill(); ctx.fillRect(0, -28, 9, 2.5);
+    if (aim) { ctx.strokeStyle = '#6b4a2b'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(6, -14); ctx.lineTo(12, -22); ctx.moveTo(12, -22); ctx.lineTo(10, -27); ctx.moveTo(12, -22); ctx.lineTo(15, -26); ctx.stroke(); }
+    ctx.restore();
+  }
+  function startGag(t, gt, gb, x1) {
+    const opts = [];
+    const fieldY = gt + (gb - gt) * 0.32;
+    if (game.campaign && game.k > 0.15) opts.push('kids', 'kids');
+    if (villagers.length) opts.push('pothead');
+    if (villagers.length >= 2) opts.push('sleepy');
+    if (farmers.some(f => f.sx !== undefined) && birds.some(b => !b.fallen)) opts.push('hat');
+    if (vis.P > 1.6 && farmers.some(f => f.sx !== undefined)) opts.push('broom');
+    if (!opts.length) return;
+    const kind = pick(opts);
+    if (kind === 'kids') {
+      const dir = Math.random() < 0.5 ? 1 : -1;
+      gags.push({ kind, t0: t, dur: 9000, dir, y: fieldY, x1, said: 0, peb: null });
+    } else if (kind === 'pothead') {
+      const v = pick(villagers); v.pothead = t + 6000; v.next = t + 6000;
+      clang(v.x); sayAt(() => [v.x, v.y - 50 * U], pick(['Kim söndürdü ışıkları?', 'Tencere nerede?\nAh, buldum.', 'Biraz fazla\nhevesliydim galiba.']));
+    } else if (kind === 'sleepy') {
+      const v = pick(villagers), o = villagers.find(w => w !== v) || v;
+      v.sleep = t + 7000;
+      sayAt(() => [o.x, o.y - 46 * U], pick(['Uyuma! Kota var!', 'Hey! Pekin\nseni izliyor!', 'Daha yeni başladık!']));
+    } else if (kind === 'hat') {
+      const f = farmers.find(fm => fm.sx !== undefined);
+      f.hatGone = t + 6500;
+      gags.push({ kind, t0: t, dur: 6500, f, sx: f.sx, sy: f.sy });
+      sayAt(() => [f.sx, f.sy], 'Hey! Şapkam!');
+    } else if (kind === 'broom') {
+      const f = farmers.find(fm => fm.sx !== undefined);
+      f.broom = t + 6000;
+      sayAt(() => [f.sx, f.sy], pick(['Kış kış! Bunlara\ntencere işlemiyor!', 'Bir serçe olsaydı\nşimdi...']));
+    }
+  }
+  function drawGags(t, dt, gt, gb, x1) {
+    if (mode !== 'game') return;
+    if (game.state === 'play' && !game.paused && !game.reading) {
+      if (!nextGag) nextGag = t + 14000;
+      if (t > nextGag && !gags.length) { nextGag = t + rnd(17000, 27000); startGag(t, gt, gb, x1); }
+    }
+    for (let i = gags.length - 1; i >= 0; i--) {
+      const g = gags[i], p = (t - g.t0) / g.dur;
+      if (p >= 1) { gags.splice(i, 1); continue; }
+      if (g.kind === 'kids') {
+        const X = q => g.dir > 0 ? lerp(-40, x1 + 40, q) : lerp(x1 + 40, -40, q);
+        const bx = X(p + 0.12), by = g.y - 70 * U + Math.sin(t * 0.01) * 10 * U;
+        drawBird({ x: bx, y: by, vx: g.dir, sz: 1, ph: 0, panic: 30, hits: 0, a: 1, fallen: false }, t);
+        const k1 = [X(p), g.y], k2 = [X(p - 0.05), g.y + 6 * U];
+        drawKid(k1[0], k1[1], 1.1 * U * g.dir, '#5b8fc0', t, 0, true);
+        drawKid(k2[0], k2[1], 1.1 * U * g.dir, '#d9b45a', t, 1.5, false);
+        g.k1 = k1; g.k2 = k2;
+        if (!g.said) { g.said = 1; sayAt(() => g.k1 ? [g.k1[0], g.k1[1] - 34 * U] : [0, 0], pick(['Bu sefer kesin\nvuracağım!', 'Kaçma serçe!', 'Bir puan bana!'])); }
+        if (p > 0.42 && !g.peb) g.peb = { t0: t, x0: k1[0], y0: k1[1] - 24 * U };
+        if (g.peb) {
+          const q = (t - g.peb.t0) / 900;
+          if (q < 1) {
+            // taş serçeye değil, arkadakine gider: yay çizerek geri döner
+            const tx = k2[0], ty = k2[1] - 26 * U;
+            const px = lerp(g.peb.x0, tx, q), py = lerp(g.peb.y0, ty, q) - Math.sin(q * Math.PI) * 60 * U;
+            ctx.fillStyle = '#7d7468'; ctx.beginPath(); ctx.arc(px, py, 3 * U, 0, 6.283); ctx.fill();
+          } else if (!g.hit) {
+            g.hit = 1; floats.push({ x: k2[0], y: k2[1] - 40 * U, text: 'tık!', life: 1 }); blipHit();
+            sayAt(() => g.k2 ? [g.k2[0], g.k2[1] - 34 * U] : [0, 0], pick(['Ayy! Bana değil!', 'Serçe orada,\nben burdayım!', 'Annemeee söylicem!']));
+          }
+        }
+      } else if (g.kind === 'hat') {
+        // serçe şapkayı kapıp gökyüzüne götürür
+        const hx = g.sx + (p * 220 - 40) * U, hy = g.sy - p * 140 * U - Math.sin(p * 9) * 8 * U;
+        drawBird({ x: hx, y: hy - 8 * U, vx: 1, sz: 1, ph: 0, panic: 0, hits: 0, a: 1, fallen: false }, t);
+        ctx.fillStyle = '#d9b45a'; ctx.beginPath(); ctx.moveTo(hx - 10 * U, hy + 4 * U); ctx.lineTo(hx, hy - 4 * U); ctx.lineTo(hx + 10 * U, hy + 4 * U); ctx.closePath(); ctx.fill();
+        if (p > 0.45 && !g.said) { g.said = 1; sayAt(() => [hx, hy], 'Cik! Yakıştı mı?'); }
+      }
+    }
+  }
+  function blipHit() { if (!AC) return; const t = AC.currentTime, o = AC.createOscillator(), e = AC.createGain(); o.frequency.setValueAtTime(900, t); o.frequency.exponentialRampToValueAtTime(400, t + 0.08); o.connect(e); e.connect(master); e.gain.setValueAtTime(0.06, t); e.gain.exponentialRampToValueAtTime(0.0001, t + 0.12); o.start(t); o.stop(t + 0.13); }
 
   // köylüler tencere çalar: kampanya kaydırıcısına bağlı
   function drawCampaign(t, dt, gt, gb, x1) {
@@ -507,19 +600,23 @@
       const slots = Math.max(want, 1);
       v.x = x1 * (0.08 + 0.84 * ((i + 0.5) / slots)) + Math.sin(v.ph) * 10 * U;
       v.y = gt + (gb - gt) * (i % 2 ? 0.2 : 0.08) + 34 * U;
-      const bang = Math.sin(t * 0.025 + v.ph) > 0.2;
+      const asleep = v.sleep > t, pothead = v.pothead > t;
+      const bang = !asleep && Math.sin(t * 0.025 + v.ph) > 0.2;
       const s = U * (1 + (i % 2) * 0.12);
-      ctx.save(); ctx.translate(v.x, v.y);
+      ctx.save(); ctx.translate(v.x, v.y); if (asleep) ctx.rotate(0.35);
       ctx.fillStyle = 'rgba(0,0,0,.12)'; ctx.beginPath(); ctx.ellipse(0, 2 * s, 12 * s, 3 * s, 0, 0, 6.283); ctx.fill();
       ctx.fillStyle = rgb(v.hue); ctx.beginPath(); ctx.roundRect ? ctx.roundRect(-8 * s, -26 * s, 16 * s, 24 * s, 7 * s) : ctx.rect(-8 * s, -26 * s, 16 * s, 24 * s); ctx.fill();
       ctx.fillStyle = '#f2d2b0'; ctx.beginPath(); ctx.arc(0, -33 * s, 8 * s, 0, 6.283); ctx.fill();
       ctx.fillStyle = rgb(PAL.ink); ctx.beginPath(); ctx.arc(-2.6 * s, -34 * s, 1.3 * s, 0, 6.283); ctx.arc(2.6 * s, -34 * s, 1.3 * s, 0, 6.283); ctx.fill();
       ctx.strokeStyle = rgb(PAL.ink); ctx.lineWidth = 1.6 * s; ctx.beginPath(); ctx.arc(0, -31 * s, 3 * s, 0.2, 2.9); ctx.stroke();
-      // tencere ve kaşık
-      ctx.fillStyle = '#8b9096'; ctx.beginPath(); ctx.ellipse(-13 * s, -20 * s, 7 * s, 4 * s, 0, 0, 6.283); ctx.fill();
+      // tencere ve kaşık (bazen kafada!)
+      ctx.fillStyle = '#8b9096';
+      if (pothead) { ctx.beginPath(); ctx.ellipse(0, -38 * s, 10 * s, 7 * s, 0, Math.PI, 0); ctx.fill(); ctx.fillRect(-10 * s, -38 * s, 20 * s, 4 * s); }
+      else { ctx.beginPath(); ctx.ellipse(-13 * s, -20 * s, 7 * s, 4 * s, 0, 0, 6.283); ctx.fill(); }
       ctx.strokeStyle = '#6b4a2b'; ctx.lineWidth = 2.4 * s; ctx.beginPath(); ctx.moveTo(8 * s, -18 * s); ctx.lineTo(-6 * s, bang ? -24 * s : -32 * s); ctx.stroke();
       ctx.restore();
-      if (t > v.next) {
+      if (asleep && Math.random() < 0.02) floats.push({ x: v.x + 10 * U, y: v.y - 46 * U, text: 'z', life: 1 });
+      if (t > v.next && !asleep) {
         v.next = t + rnd(500, 1300) / (0.4 + game.k);
         rings.push({ x: v.x - 13 * U, y: v.y - 20 * U, r: 4, life: 0.8, big: false });
         if (Math.random() < 0.25) clang(v.x);
@@ -673,6 +770,7 @@
   setInterval(pumpToasts, 300);
   function showToast(ic, from, text, tone = '', opt = {}) {
     const box = $('toasts');
+    if (game.speed > 1) setSpeed(1); // olay geldi: normal hıza dön
     const el = document.createElement('div');
     el.className = 'toast ' + tone + (opt.img ? ' story' : '');
     el.innerHTML = (opt.img ? `<img src="${opt.img}" alt="">` : `<div class="ic">${ic}</div>`) +
@@ -703,40 +801,45 @@
   const MONTH_WARM = 5200 / FAST, MONTH_COLD = 2600 / FAST;
   let gs = newState();
   const game = {};
-  const gK = $('g-k'), gSpray = $('g-lie');
+  const gK = $('g-k');
 
   function resetGame() {
     gs = newState();
     Object.assign(game, {
       started: false, paused: false, state: 'play', frac: 0, campaign: true, quota: 25, yearKills: 0, totalKills: 0,
       fired: new Set(), hist: [], stoppedBy: null, stoppedAt: undefined, sAtStop: 0,
-      k: 0, lie: 0, food: [], trust: 70, replaced: false, speed: 1, touched: false, reading: 0,
+      k: 0, lies: 0, food: [], trust: 70, replaced: false, speed: 1, touched: false, reading: 0,
     });
-    gK.value = 10; gSpray.value = 0; gK.disabled = false; gSpray.disabled = true;
-    gSpray.closest('.sl').classList.add('locked');
+    gK.value = 10; gK.disabled = false;
     document.querySelectorAll('.coach').forEach(uncoach);
     readGameSliders();
-    $('o-lie').textContent = '🔒 ilk hasattan sonra';
-    $('g-pause').textContent = '❚❚ Durdur'; $('g-speed').textContent = '1×';
+    $('g-pause').textContent = '❚❚ Durdur'; if (typeof setSpeed === 'function') setSpeed(1);
     $('modal').hidden = true; $('harvest').hidden = true; $('toasts').innerHTML = ''; toastQueue.length = 0; lastToastAt = -1e9;
     $('g-intro').classList.remove('gone');
     birds.forEach(b => { if (b.fallen) b.a = 0; });
-    villagers.length = 0;
+    villagers.length = 0; official = null; if (typeof gags !== 'undefined') { gags.length = 0; nextGag = 0; }
     renderQuota();
   }
 
   function readGameSliders() {
-    game.k = gK.value / 100; game.lie = gSpray.value / 100;
-    $('o-k').textContent = '%' + gK.value; if (!gSpray.disabled) $('o-lie').textContent = '%' + gSpray.value;
+    game.k = gK.value / 100;
+    $('o-k').textContent = '%' + gK.value;
   }
-  [gK, gSpray].forEach(el => el.addEventListener('input', () => {
+  [gK].forEach(el => el.addEventListener('input', () => {
     initAudio(); readGameSliders();
     if (!game.touched) { game.touched = true; setTimeout(() => $('g-intro').classList.add('gone'), 2500); }
-    if (el === gSpray && game.lie > 0) once('lie', () => toast('📝', 'Rapor masası', 'Hasadı olduğundan büyük yazıyorsun. Pekin sevinecek. Ama devlet tahılı bu rakama göre toplayacak.', 'warn'));
     if (el === gK && game.k > 0) once('start-k', () => toast('📣', 'Köy hoparlörü', 'Herkes tencere başına! Serçeler konamasın!'));
   }));
   $('g-pause').onclick = () => { game.paused = !game.paused; $('g-pause').textContent = game.paused ? '▶ Devam' : '❚❚ Durdur'; };
-  $('g-speed').onclick = () => { game.speed = game.speed === 1 ? 2 : 1; $('g-speed').textContent = game.speed + '×'; };
+  // hız: 1× → 2× → 4×; yeni bir olay gelince kendiliğinden 1×'e döner
+  function setSpeed(v) {
+    game.speed = v;
+    $('g-speed').textContent = v + '×';
+    const b = $('yb-speed'); b.textContent = (v > 1 ? '⏩ ' : '⏩ ') + v + '×'; b.classList.toggle('on', v > 1);
+  }
+  const nextSpeed = () => setSpeed(game.speed === 1 ? 2 : game.speed === 2 ? 4 : 1);
+  $('g-speed').onclick = nextSpeed;
+  $('yb-speed').onclick = e => { e.stopPropagation(); initAudio(); nextSpeed(); };
 
   // oyun akarken olayları adım adım anlatan kartlar
   const POSTER = 'https://upload.wikimedia.org/wikipedia/commons/6/6f/Kill_bird_and_insect.jpg';
@@ -830,9 +933,9 @@
 
     // Pekin'in güveni: kampanya kısıldıkça düşer
     if (game.campaign && !game.replaced) {
-      game.trust = clamp(game.trust + (game.k - 0.45) * 14 + game.lie * 7, 0, 100);
+      game.trust = clamp(game.trust + (game.k - 0.45) * 14, 0, 100);
       if (game.k < 0.3 && game.trust < 60) once('warn1-' + yearKey(), () => toast('📞', 'Parti sekreteri', 'Tencereler neden bu kadar sessiz? Komşu köyler kotayı çoktan doldurdu.', 'warn'));
-      if (game.trust < 40) once('coach-trust', () => coach(gSpray.disabled ? gK : gSpray, gSpray.disabled ? '👉 Pekin kızıyor: seferberliği artır' : '👉 Ya seferberliği artır ya raporu şişir'));
+      if (game.trust < 40) once('coach-trust', () => coach(gK, '👉 Pekin kızıyor: seferberliği artır'));
       if (game.trust < 25) once('warn2', () => toast('⚠️', 'Pekin', 'Hakkında "sağcı sapma" raporu yazıldı. Son uyarı.', 'bad'));
       if (game.trust <= 0) replaceMinister();
     }
@@ -862,7 +965,7 @@
   }
 
   function showHarvest(i) {
-    game.state = 'harvest';
+    game.state = 'harvest'; if (game.speed > 1) setSpeed(1);
     const v = hIdx(gs, i, BASE);
     const el = $('harvest');
     const col = v >= 90 ? 'var(--green)' : v >= 70 ? 'var(--grain)' : 'var(--danger)';
@@ -882,23 +985,70 @@
   }
 
   function afterHarvest(i, v) {
-    // devlet, raporlanan hasadın üçte birini alır; abartı arttıkça köylüye kalan azalır
-    const reported = v * (1 + game.lie), left = Math.max(0, v - 0.33 * reported), food = Math.round(left / 0.67);
+    game.state = 'visit';
+    official = { t0: performance.now(), leave: 0, say: pick(['Hasat ne kadar, yoldaş?', 'Rapor zamanı!\nNe yazalım?', 'Pekin rakam bekliyor.']) };
+    setTimeout(() => askReport(i, v), 1700);
+  }
+  function askReport(i, v) {
+    const m = $('modal');
+    m.innerHTML = `<div class="card"><div class="from">Devlet yetkilisi</div><h2>${1958 + i} hasadı: gerçekte %${v}</h2><p>Pekin'e giden rapora ne yazalım? Devlet, <b>raporlanan</b> hasadın üçte birini toplayacak.</p><div class="opts"></div></div>`;
+    const box = m.querySelector('.opts');
+    [
+      { label: `Gerçeği yaz (%${v})`, sub: v < 90 ? 'Dürüst ama Pekin pek sevinmez' : 'Dürüst ve güvenli', mult: 1, trust: v < 90 ? -15 : 5, reply: 'Hmm... Pekin\'e\nbunu mu yollayayım?' },
+      { label: `Biraz yuvarla (%${Math.round(v * 1.3)})`, sub: 'Herkes yapıyor, değil mi?', mult: 1.3, trust: 10, reply: 'Güzel, güzel.\nDaha iyi oldu.' },
+      { label: `Rekor yaz! (%${Math.round(v * 2)})`, sub: 'Pekin bayılır. Ambar boşalır.', mult: 2, trust: 25, reply: 'Harika! Pekin\'de\nbayram olacak!' },
+    ].forEach(o => {
+      const btn = document.createElement('button'); btn.className = 'opt';
+      btn.innerHTML = `${o.label}<small>${o.sub}</small>`;
+      btn.onclick = () => { m.hidden = true; settleReport(i, v, o); };
+      box.appendChild(btn);
+    });
+    m.hidden = false;
+  }
+  function settleReport(i, v, o) {
+    const reported = v * o.mult, left = Math.max(0, v - 0.33 * reported), food = Math.round(left / 0.67);
     game.food[i] = food;
+    if (o.mult > 1) game.lies++;
+    if (!game.replaced && game.campaign) game.trust = clamp(game.trust + o.trust, 0, 100);
+    if (official) { official.reply = o.reply; official.leave = performance.now() + 2600; }
     if (food < 60) toast('🍚', 'Köy ambarı', `Devlet raporlanan hasadın üçte birini aldı. Köylünün payı normalin %${food}'i. Kış zor geçecek.`, 'bad');
-    else if (game.lie > 0.2) toast('🍚', 'Köy ambarı', `Şişirilmiş rapor yüzünden fazla tahıl teslim edildi. Köylünün payı: normalin %${food}'i.`, 'warn');
+    else if (o.mult > 1) toast('🍚', 'Köy ambarı', `Şişirilmiş rapor yüzünden fazla tahıl teslim edildi. Köylünün payı: normalin %${food}'i.`, 'warn');
     if (gs.m >= TOTAL) return endGame();
     game.state = 'play';
     if (!game.campaign) return;
     const met = game.yearKills >= game.quota;
     if (!met && !game.replaced) { game.trust = clamp(game.trust - 20, 0, 100); if (game.trust <= 0) replaceMinister(); }
-    if (i === 0 && gSpray.disabled) {
-      gSpray.disabled = false; gSpray.closest('.sl').classList.remove('locked'); readGameSliders();
-      toast('📝', 'Yeni seçenek: Rapordaki abartı', 'Hasadı olduğundan büyük yazabilirsin. Pekin sevinir, güveni artar. Ama devlet tahılı bu rakama göre toplar ve köylüye daha az kalır.', '', { pause: true, then: () => coach(gSpray, '👉 İstersen dene: raporu şişir') });
-    }
     if (i === 0) toast('📻', 'Pekin', met ? 'Kooperatiflerden "rekor hasat" raporları yağıyor. 1959 kotası 40 serçe!' : 'Kotanın gerisinde kaldın. 1959 kotası yine de 40 serçe.', met ? '' : 'warn');
-    if (i === 1 && v < 85) toast('📝', 'Rapor', 'Ambarlar yarı boş ama Pekin\'e giden raporda "rekor hasat" yazıyor.', 'warn');
     game.quota = 40; game.yearKills = 0; renderQuota();
+  }
+
+  // devlet yetkilisi: takım elbise, dosya, kalem
+  let official = null;
+  function drawOfficial(t, gt, gb, x1) {
+    if (!official) return;
+    const now = performance.now(), e = now - official.t0;
+    const stopX = x1 * (mobile ? 0.78 : 0.85), startX = x1 + 50;
+    let x = e < 1500 ? lerp(startX, stopX, smooth(0, 1, e / 1500)) : stopX;
+    if (official.leave && now > official.leave) x = lerp(stopX, startX, smooth(0, 1, (now - official.leave) / 1500));
+    if (official.leave && now > official.leave + 1500) { official = null; return; }
+    const y = gt + (gb - gt) * 0.18 + 36 * U, s = 1.2 * U, walk = e < 1500 || (official.leave && now > official.leave);
+    official.x = x; official.y = y - 52 * U;
+    ctx.save(); ctx.translate(x, y); ctx.scale(s, s);
+    const st = walk ? Math.sin(t * 0.02) * 4 : 0;
+    ctx.fillStyle = 'rgba(0,0,0,.14)'; ctx.beginPath(); ctx.ellipse(0, 2, 12, 3, 0, 0, 6.283); ctx.fill();
+    ctx.strokeStyle = '#2f3b46'; ctx.lineWidth = 3.4; ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(-3, -6); ctx.lineTo(-4 - st, 2); ctx.moveTo(3, -6); ctx.lineTo(4 + st, 2); ctx.stroke();
+    ctx.fillStyle = '#4a5866'; ctx.beginPath(); ctx.roundRect ? ctx.roundRect(-9, -30, 18, 26, 5) : ctx.rect(-9, -30, 18, 26); ctx.fill();
+    ctx.fillStyle = '#3a4652'; for (let k = 0; k < 3; k++) { ctx.beginPath(); ctx.arc(0, -25 + k * 7, 1.2, 0, 6.283); ctx.fill(); }
+    ctx.fillStyle = '#f2d2b0'; ctx.beginPath(); ctx.arc(0, -37, 7.5, 0, 6.283); ctx.fill();
+    ctx.fillStyle = '#4a5866'; ctx.beginPath(); ctx.ellipse(0, -43, 9, 3.5, 0, 0, 6.283); ctx.fill(); ctx.fillRect(-6, -48, 12, 5); // kasket
+    ctx.fillStyle = '#c0503a'; ctx.beginPath(); ctx.arc(0, -46, 1.6, 0, 6.283); ctx.fill();
+    ctx.fillStyle = rgb(PAL.ink); ctx.beginPath(); ctx.arc(-2.6, -37, 1.2, 0, 6.283); ctx.arc(2.6, -37, 1.2, 0, 6.283); ctx.fill();
+    ctx.fillStyle = '#e8dcc0'; ctx.fillRect(-20, -26, 11, 14); ctx.strokeStyle = '#8a7a5a'; ctx.lineWidth = 1; ctx.strokeRect(-20, -26, 11, 14); // dosya
+    ctx.restore();
+    // konuşma
+    const text = official.reply || (e > 1300 ? official.say : null);
+    if (text && official.lastText !== text) { official.lastText = text; bubbles.length = 0; bubbles.push({ obj: official, x, y: official.y, text, life: 1 }); }
   }
 
   function endGame() {
@@ -919,7 +1069,7 @@
     else if (avg >= 93) { title = 'Erken durdun'; text = 'Kampanyaya katıldın ama ekosistemi kırmadan bıraktın. Bazen en iyi politika bir şey yapmamaktır, ama bunun için kimse heykel dikmez.'; }
     else if (avg >= 78) { title = 'Geç de olsa fark ettin'; text = 'Serçeler geri dönüyor ama acele etmiyorlar: yılda yalnızca bir iki kez kuluçkaya yatarlar. Bazı köyler yine de aç kaldı.'; }
     else { title = 'Serçelere karşı savaşı kazandın'; text = 'Çekirgeler de kazandı. Kaybeden sadece insanlar oldu. Tebrikler, tarihi başarıyla tekrarladın.'; }
-    if (game.lie > 0.3) text += ' Raporları şişirerek koltuğunu korudun; bedelini köylüler ödedi.';
+    if (game.lies >= 2) text += ' Raporları şişirerek Pekin\'i mutlu ettin; bedelini köylüler ödedi.';
     const col = v => v >= 90 ? 'var(--green)' : v >= 70 ? 'var(--grain)' : 'var(--danger)';
     $('result').innerHTML = `
       <div class="kicker">Şubat 1961 · görev süren doldu</div>

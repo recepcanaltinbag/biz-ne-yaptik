@@ -523,3 +523,15 @@ input[type=range]::-moz-range-thumb { width: 24px; height: 24px; border-radius: 
   .dock .slide[data-mode="game"] .topbox .yb-sub { margin: 0; }
   .dock .slide[data-mode="game"] .topbox .yb-track { flex-basis: 100%; }
 }
+/* yılın yanında hız düğmesi */
+.dock .slide[data-mode="game"] .topbox .yearbar { position: relative !important; }
+.yb-speed {
+  position: absolute; right: 10px; top: 50%; transform: translateY(-60%); pointer-events: auto;
+  font: 1.05rem var(--hand); color: var(--ink); background: #fff; border: 2px solid var(--ink); border-radius: 999px;
+  padding: 2px 10px; box-shadow: 0 2px 0 var(--ink); cursor: pointer;
+}
+.yb-speed.on { background: var(--ink); color: #fff; }
+.dock .slide[data-mode="game"] .gpanel #g-speed { display: none; }
+.yearbar:not(.dock *) .yb-speed { display: none; }
+@media (max-width: 760px) { .yb-speed { right: 6px; font-size: .9rem; padding: 0 8px; } }
+@media (max-width: 760px) { .dock .slide[data-mode="game"] .topbox .yearbar { padding-right: 58px; } }
