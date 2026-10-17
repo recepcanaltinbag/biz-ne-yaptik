@@ -92,6 +92,16 @@ Bu kurallar kullanıcının geri bildirimleriyle tek tek oturtuldu. Yeni bölüm
 - **Seçenek metni duruma uysun:** göl %100'ken "göl ölüyor" demek yok.
 - Ortak `.goal` stili yalnız `p.goal` içindir; çubuk gibi başka öğelere sınıf adıyla sızmasın.
 
+## Kur ve unut olmasın (kullanıcının yakaladığı dinamik açığı)
+- Oyuncu hedefe yetecek ayarı bir kez yapıp beş yıl beklememeli. Kullanıcının Aral'da bulduğu: onarım %100, su hedefe tam yetecek kadar, bekle, kazan.
+- Bunu önlemek için:
+  - **Dünya yıldan yıla değişsin.** Aral'da nehir debisi her yıl farklı; her oyunda rastgele 2–3 kurak ve birkaç bereketli yıl var, kurak yıl **bir yıl önceden** haber verilir.
+  - **Hedef yıl yıl tırmansın.** Beş yıl sabit olmasın; ara yıllarda değerlendirmeye doğru artsın.
+  - **Hesap yıllık sorulsun.** Hedefin altındaki her yıl güvenden puan götürür. Büyük değerlendirme kartı yine beş yılda bir gelir.
+  - **Rozet ve iyi son "tepki vermeyi" ödüllendirsin.** Aral'da en fazla 1 kaçan yıl şartı var.
+- **Yayından önce Monte Carlo testi:** node ile 200–300 rastgele dünyada "kur ve unut" ile "uyum sağlayan" stratejileri karşılaştır. Kur ve unut rozeti alamamalı, uyum sağlayan alabilmeli. Örnek Aral sonuçları: kur ve unut %55 su → rozet %1; uyumlu → %97–100.
+- Her bölümde sor: "Oyuncu hangi tek ayarla oyunu çözebilir? O ayarı bozan dış olay ya da artan baskı ne?"
+
 ## Yeniden oynama (her yeni bölümde düşün)
 - Kullanıcı "ikinci oyunda sıkılmasınlar" dedi. Plan `ROADMAP.md` → "Yeniden oynama" bölümünde:
   - kişisel rekor;

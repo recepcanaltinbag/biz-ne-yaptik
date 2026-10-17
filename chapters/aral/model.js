@@ -12,7 +12,8 @@
   const QNAT = 70;                              // nehirlerin yıllık doğal suyu (km³)
   const NET_EVAP = 0.82;                        // m/yıl (buharlaşma − yağış)
   const NEED = 7;                               // 1960 pamuğu için tarlaya ulaşan etkin su (km³)
-  const DEF = { w: 0.2, fix: 0, warm: 1, dam: 0 };
+  // q: o yılın nehir debisi (1 = ortalama; kurak yıl ~0,6, bereketli ~1,25)
+  const DEF = { w: 0.2, fix: 0, warm: 1, dam: 0, q: 1 };
 
   const areaOf = V => A0 * Math.pow(Math.max(0, V) / V0, 0.6);
   const salOf = V => Math.min(280, S0 * V0 / Math.max(5, V)); // göl neredeyse kuruyunca tuz kabuğa döner
@@ -27,7 +28,8 @@
     // kanal onarımı yavaş yavaş verimi artırır (yıllar sürer)
     const effT = 0.5 + 0.35 * clamp(p.fix);
     st.eff += (effT - st.eff) * 0.18;
-    const inflow = QNAT * (1 - clamp(p.w));
+    const q = p.q === undefined ? 1 : p.q;
+    const inflow = QNAT * q * (1 - clamp(p.w));
     const evap = NET_EVAP * p.warm * st.A / 1000;
     st.V = clamp(st.V + inflow - evap, 8, V0 * 1.02); // fazlası taşar
     st.A = areaOf(st.V);
@@ -45,7 +47,7 @@
     const live = 1 - smooth(12, 26, st.sal);
     st.F = clamp(st.F + 0.35 * st.F * (live - st.F) - 0.45 * st.F * smooth(16, 30, st.sal) + 0.01 * live);
     // pamuk: tarlaya ulaşan su arttıkça artar ama azalan getiriyle; tuzlanan toprak verimi düşürür
-    const wd = QNAT * clamp(p.w) * st.eff;
+    const wd = QNAT * q * clamp(p.w) * st.eff;
     const dry = clamp(1 - st.A / A0);
     st.soil = clamp(st.soil - 0.006 * smooth(0.45, 0.95, p.w) * (st.eff < 0.7 ? 1 : 0.4) - 0.012 * smooth(0.35, 0.8, dry) + 0.004);
     st.C = Math.pow(wd / NEED, 0.45) * (0.55 + 0.45 * st.soil);

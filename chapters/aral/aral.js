@@ -13,8 +13,13 @@
   const fmtX = v => v.toFixed(2).replace('.', ',').replace(/0$/, '') + '×';
 
   const TOTAL = M.Y1 - M.Y0 + 1; // 51 yıl
-  const PLAN = { 1965: 1.3, 1970: 1.55, 1975: 1.75, 1980: 1.85, 1985: 1.9, 1990: 1.9, 1995: 1.7, 2000: 1.7 };
-  const targetFor = y => { for (const k of Object.keys(PLAN).map(Number)) if (y <= k) return PLAN[k]; return 1.7; };
+  const PLAN = { 1965: 1.3, 1970: 1.55, 1975: 1.75, 1980: 1.9, 1985: 2.0, 1990: 2.0, 1995: 1.85, 2000: 1.85 };
+  const targetFor = y => {
+    // hedef bir sonraki değerlendirmeye doğru her yıl biraz artar: tek ayar beş yıl yetmez
+    const ks = Object.keys(PLAN).map(Number); let k0 = 1960, v0 = 1;
+    for (const k of ks) { if (y <= k) return v0 + (PLAN[k] - v0) * clamp((y - k0) / (k - k0)); k0 = k; v0 = PLAN[k]; }
+    return v0;
+  };
   const planName = y => y <= 1965 ? 'Yedi Yıllık Plan (1959–65)' : y <= 1970 ? '8. Beş Yıllık Plan' : y <= 1975 ? '9. Beş Yıllık Plan' : y <= 1980 ? '10. Beş Yıllık Plan' : y <= 1985 ? '11. Beş Yıllık Plan' : y <= 1991 ? '12. Beş Yıllık Plan' : 'Bağımsız Özbekistan';
   const HISTORY = M.run(TOTAL, M.histP);
 
@@ -280,7 +285,7 @@
     drawCamel(G, t, dt);
 
     // nehir: dağdan çıkar, ayrım noktasında bir kısmı kanala, kalanı göle
-    const up = 9 * U, down = 1.2 * U + 9 * U * (1 - vis.w);
+    const qv = mode === 'game' ? (game.qNow || 1) : 1, up = 9 * U * qv, down = (1.2 * U + 9 * U * (1 - vis.w)) * qv;
     ctx.lineCap = 'round'; ctx.lineJoin = 'round';
     const river = (xa, xb, wdt, col) => { ctx.strokeStyle = col; ctx.lineWidth = wdt; ctx.beginPath(); for (let x = xa; x <= xb; x += 8) { const y = x < G.shore0 ? riverY(x, G) : lerp(riverY(G.shore0, G), G.waterY, (x - G.shore0) / Math.max(1, G.shoreX - G.shore0)); x === xa ? ctx.moveTo(x, y) : ctx.lineTo(x, y); } ctx.stroke(); };
     river(x1 * 0.09, G.xi, up, rgb(PAL.water));
@@ -474,7 +479,8 @@
     drawValveHint(G, t);
     const small = mobile;
     // nehrin bölündüğü yer: suyun yüzde kaçı nereye
-    const wPct = Math.round(vis.w * 100);
+    const wPct = Math.round(vis.w * 100), q = game.qNow || 1;
+    if (mode === 'game') tag(G.x1 * 0.12, riverY(G.x1 * 0.12, G) + 30 * U, q < 0.8 ? `☀️ Kurak yıl: nehir %${Math.round(q * 100)}` : q > 1.12 ? `🌨️ Bereketli yıl: nehir %${Math.round(q * 100)}` : `💧 Nehir bu yıl %${Math.round(q * 100)}`, { fs: small ? 11 : 13, color: q < 0.8 ? '#a0402a' : undefined });
     tag(G.xi, riverY(G.xi, G) - 12 * U, `💧 Tarlaya %${wPct} · Göle %${100 - wPct}`, { fs: small ? 11 : 13, color: vis.w > 0.7 ? '#a0402a' : rgb(PAL.ink) });
     // 1960 kıyısı ve kıyının ne kadar uzaklaştığı
     const km = M.shoreKm(vis.A * M.A0);
@@ -804,11 +810,19 @@
   const gW = $('g-w'), gFix = $('g-fix');
   const award = id => (window.Badges ? window.Badges.award(id) : false);
 
+  function makeFlow() {
+    const f = Array.from({ length: TOTAL + 2 }, () => 1 + (Math.random() + Math.random() + Math.random() - 1.5) * 0.09);
+    const pickYears = (n, a, b) => { const out = []; while (out.length < n) { const y = Math.round(rnd(a, b)); if (out.every(o => Math.abs(o - y) > 3)) out.push(y); } return out; };
+    pickYears(3, 1964, 2007).forEach(y => { f[y - M.Y0] = rnd(0.58, 0.68); });
+    pickYears(2, 1963, 2008).forEach(y => { if (f[y - M.Y0] > 0.9) f[y - M.Y0] = rnd(1.18, 1.28); });
+    return f;
+  }
+  const flowOf = y => (game.flow && game.flow[y - M.Y0]) || 1;
   function resetGame() {
     gs = M.newState();
     Object.assign(game, {
       started: false, paused: false, state: 'play', frac: 0, fired: new Set(), hist: [], speed: 1, touched: false, reading: 0,
-      story: false, endAfter: false, w: 0.2, fix: 0, trust: 70, reviews: [], replaced: false, inspected: false, siberia: false, dam: false, saved: false, truck: false, unlockedFix: false,
+      story: false, endAfter: false, flow: makeFlow(), w: 0.2, fix: 0, trust: 70, missYears: 0, reviews: [], replaced: false, inspected: false, siberia: false, dam: false, saved: false, truck: false, unlockedFix: false,
     });
     gW.value = 20; gW.disabled = false; gFix.value = 0; gFix.disabled = true; $('w-fix').classList.add('locked'); $('o-fix').textContent = "🔒 1967'de açılır";
     document.querySelectorAll('.coach').forEach(uncoach);
@@ -906,10 +920,17 @@
 
   function yearTick() {
     const y = gs.y;
-    M.step(gs, { w: game.w, fix: game.fix, warm: 1, dam: game.dam ? 1 : 0 });
+    M.step(gs, { w: game.w, fix: game.fix, warm: 1, dam: game.dam ? 1 : 0, q: flowOf(y) });
+    game.qNow = flowOf(y);
+    // gelecek yılın nehri: dağlardaki kar bir yıl önceden haber verir
+    const qn = flowOf(y + 1);
+    if (y < M.Y1 && qn < 0.75) milestone('☀️', 'Dağlardan haber', `Dağlarda kar az: <b>gelecek yıl</b> nehir yalnız %${Math.round(qn * 100)} akacak. Planı mı korursun, gölü mü?`, 'warn');
+    else if (y < M.Y1 && qn > 1.15) toast('🌨️', 'Dağlardan haber', `Bol kar yağdı: gelecek yıl nehir %${Math.round(qn * 100)} akacak.`, 'good');
     const h = gs.hist[gs.hist.length - 1];
     game.hist.push(h);
     const tgt = targetFor(y);
+    // Moskova her yıl sayar: hedefin altında kalan yıl güvenden ciddi puan götürür
+    if (y > M.Y0 && !game.replaced && h.C < tgt - 0.02) { game.missYears = (game.missYears || 0) + 1; game.trust = clamp(game.trust - 6, 0, 100); if (!PLAN[y]) once('miss' + Math.floor(y / 3), () => toast('📉', 'Moskova', `${y}: plan tutmadı (${fmtX(h.C)} / ${fmtX(tgt)}).`, 'warn')); }
     // güven: plan hedefine ne kadar yakınsan; kanal onarımı sürerken para "boruya" gider
     if (!game.replaced) {
       const building = game.fix > 0 && gs.eff < 0.5 + 0.35 * game.fix - 0.02;
@@ -991,7 +1012,7 @@
     const last = game.hist[game.hist.length - 1];
     if (last.A / M.A0 >= 0.6) award('aral-deniz');
     if (Math.min(...game.hist.map(h => h.F)) >= 0.5) award('aral-balik');
-    if (game.reviews.length && game.reviews.every(r => r.ok) && last.A / M.A0 >= 0.5) award('aral-plan');
+    if ((game.missYears || 0) <= 1 && last.A / M.A0 >= 0.5) award('aral-plan');
   }
   function endGame() {
     if (game.state === 'end') return;

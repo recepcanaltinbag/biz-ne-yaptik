@@ -87,6 +87,8 @@ Durum: ✅ hazır · 🔜 sırada · 📝 plan
 - **Hızlı tekrar:** ikinci oyunda görev kartı ve açılış hikâyesi atlanabilir; "Hızlı başla" düğmesi.
 
 ## Bekleyen iyileştirmeler (testçi raporlarından)
+- Kurbağa: "kur ve unut" testi (Monte Carlo) yapılmadı; rastgele olay ya da yayılma sıçraması (kamyonla taşınma) eklenebilir.
+- DDT: sıcak yaz patlamasının etkisi küçük (kur ve unut %76, uyumlu %90 rozet); daha belirgin bir tepki mekaniği aranmalı.
 - Kurbağa: kilometre taşı kartı kamera odağını örtmesin; bütçe doluyken "önce başka araçtan puan çek" uyarısı; 1950–60'larda küçük bir karar.
 - Aral: telefonda sahne alt yarıda kalıyor, üst yarı boş; ilk dakikada etiket kalabalığı (kademeli gösterilsin).
 - DDT ve Bakteri: laboratuvar grafiği büyüsün; laboratuvarda DDT için "Nereye?" seçimi.

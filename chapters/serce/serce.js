@@ -1099,7 +1099,7 @@
     gs = newState();
     Object.assign(game, {
       started: false, paused: false, state: 'play', frac: 0, campaign: true, quota: 25, yearKills: 0, totalKills: 0,
-      fired: new Set(), hist: [], stoppedBy: null, stoppedAt: undefined, sAtStop: 0,
+      insp: [Math.round(4 + Math.random() * 4), Math.round(15 + Math.random() * 6)], fired: new Set(), hist: [], stoppedBy: null, stoppedAt: undefined, sAtStop: 0,
       k: 0, lies: 0, food: [], inspected: false, trust: 70, replaced: false, speed: 1, touched: false, reading: 0,
     });
     gK.value = 10; gK.disabled = false;
@@ -1156,6 +1156,7 @@
   }
   function uncoach(card) { card.classList.remove('coach'); card.querySelectorAll('.coach-tip').forEach(t => t.remove()); clearTimeout(card._coachT); }
 
+  const milestone = (ic, from, text, tone) => showToast(ic, from, text, tone, { pause: true });
   function once(key, fn) { if (!game.fired.has(key)) { game.fired.add(key); fn(); } }
   const yearKey = () => calYear(Math.min(gs.m, TOTAL - 1));
 
@@ -1239,6 +1240,13 @@
 
   function monthTick() {
     const cm = calMonth(gs.m);
+    // Pekin denetimi: bir ay önceden haber gelir; denetim ayında tencereler sessizse güven sert düşer
+    if (game.campaign && !game.replaced && game.insp.includes(gs.m + 1)) milestone('🚗', 'Köy hoparlörü', '<b>Gelecek ay</b> Pekin\'den denetçi geliyor! Tencereler sessizse kötü olur.', 'warn');
+    if (game.campaign && !game.replaced && game.insp.includes(gs.m)) {
+      const d = Math.round((game.k - 0.5) * 50);
+      game.trust = clamp(game.trust + d, 0, 100);
+      toast('🕵️', 'Pekin denetçisi', d >= 0 ? 'Denetçi tencere sesinden memnun ayrıldı.' : `Denetçi köyü çok sessiz buldu. Pekin'in güveni ${-d} puan düştü.`, d >= 0 ? 'good' : 'bad');
+    }
     step(gs, { ...DEF, hunt: game.campaign ? game.k : 0 });
     const base = BASE.hist[gs.m - 1].F;
     game.hist.push({ S: gs.S, P: gs.P, Fr: clamp(gs.F / base) });

@@ -645,7 +645,7 @@
     gs = M.newState();
     Object.assign(game, {
       started: false, paused: false, state: 'play', frac: 0, fired: new Set(), hist: [], speed: 1, touched: false, reading: 0, story: false, endAfter: false,
-      z: { f: 1, g: 1, m: 1 }, s: 0.1, ipm: 0, support: 70, replaced: false, inspected: false, carson: null, ban: false, unlockedIpm: false, year: M.Y0,
+      outbreaks: (() => { const o = []; while (o.length < 3) { const y = Math.round(1950 + Math.random() * 38); if (o.every(x => Math.abs(x - y) > 4)) o.push(y); } return o; })(), z: { f: 1, g: 1, m: 1 }, s: 0.1, ipm: 0, support: 70, replaced: false, inspected: false, carson: null, ban: false, unlockedIpm: false, year: M.Y0,
     });
     gS.value = 10; gS.disabled = false; $('w-s').classList.remove('locked');
     document.querySelectorAll('#zones button').forEach(b => b.classList.add('on')); $('zones').classList.remove('locked');
@@ -750,7 +750,10 @@
 
   function yearTick() {
     const y = gs.y; game.year = y;
-    M.step(gs, { s: game.s, ipm: game.ipm, ban: game.ban ? 1 : 0, z: game.z });
+    const hot = game.outbreaks.includes(y);
+    M.step(gs, { s: game.s, ipm: game.ipm, ban: game.ban ? 1 : 0, z: game.z, heat: hot ? 2.6 : 1 });
+    if (hot) toast('🔥', 'Tarla raporu', 'Sıcak yaz: zararlılar patladı! Doğal düşmanı ya da ilacı az olan tarla zarar görüyor.', 'bad');
+    if (game.outbreaks.includes(y + 1) && y < M.Y1) milestone('🌡️', 'Hava tahmini', '<b>Gelecek yaz</b> çok sıcak ve nemli geçecek: zararlılar patlayabilir. Hazırlıklı ol.', 'warn');
     const h = gs.hist[gs.hist.length - 1];
     game.hist.push(h);
     nestYear(h);
@@ -815,7 +818,8 @@
     const hs = game.hist;
     if (Math.min(...hs.map(h => h.B)) >= 0.5) award('ddt-kartal');
     const avgY = hs.reduce((a, h) => a + h.Y, 0) / hs.length, avgS = hs.reduce((a, h) => a + h.s, 0) / hs.length;
-    if (avgY >= 0.93 && avgS <= 0.3) award('ddt-hasat');
+    const minY = Math.min(...hs.filter(h => h.y >= 1962).map(h => h.Y));
+    if (avgY >= 0.93 && avgS <= 0.3 && minY >= 0.85) award('ddt-hasat');
     // yasa beklemeden: 1972'den önce en az 5 yıl üst üste hiç ilaçlama
     let run = 0, best = 0; hs.forEach(h => { if (h.y < 1972 && h.s === 0) { run++; best = Math.max(best, run); } else run = 0; });
     if (best >= 5) award('ddt-erken');

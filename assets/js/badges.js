@@ -43,7 +43,7 @@
       fact: '1960\'ta Aral 68.000 km² idi: Van Gölü\'nün 18 katı.' },
     { id: 'aral-balik', ch: 'aral', icon: '🐟', name: 'Balıkçının dostu', hint: 'Konserve fabrikasının bacası hiç sönmesin.',
       fact: '1960\'ta Aral\'da yılda 40.000 tonu aşkın balık tutuluyordu.' },
-    { id: 'aral-plan', ch: 'aral', icon: '🔧', name: 'Hem pamuk hem deniz', hint: 'Her damlayı iki kez düşün.',
+    { id: 'aral-plan', ch: 'aral', icon: '🔧', name: 'Hem pamuk hem deniz', hint: 'Kurak yılı önceden gören, gölü de korur.',
       fact: 'Bazı tahminlere göre Orta Asya\'da sulama suyunun yarısı tarlaya ulaşmadan kayboluyordu.' },
     { id: 'aral-kokaral', ch: 'aral', icon: '🧱', name: 'Kuzey\'in umudu', hint: 'Küçük bir set, büyük bir umut.',
       fact: 'Gerçekte Kokaral seti 2005\'te bitti; birkaç yılda Kuzey Aral\'ın tuzu azaldı ve balıklar geri döndü.' },
