@@ -1130,10 +1130,10 @@
   // oyun akarken olayları adım adım anlatan kartlar
   const POSTER = 'https://upload.wikimedia.org/wikipedia/commons/6/6f/Kill_bird_and_insect.jpg';
   const STORY = [
-    [0, '🇨🇳', 'Çin', 'Mao Zedong <b>Büyük İleri Atılım</b>ı başlattı. Hedef birkaç yılda sanayileşmek, tarımda rekor kırmak.', '', { pause: true }],
+    [0, '🇨🇳', 'Çin', 'Mao Zedong <b>Büyük İleri Atılım</b>\'ı başlattı. Hedef birkaç yılda sanayileşmek, tarımda rekor kırmak.', '', { pause: true }],
     [0, '', 'Dört Zararlı Kampanyası', 'Dört düşman ilan edildi: <b>fare, sinek, sivrisinek ve serçe</b>. Serçenin suçu tahıl yemek.', '', { img: POSTER, pause: true }],
     [13500, '🥁', 'Yöntem', 'Köylüler tencere çalınca serçeler konamıyor, yorulup düşüyor. Ne kadar çok tencere, o kadar az serçe.', '', { ms: 9000 }],
-    [21000, '🌾', 'Tarladan not', 'Bu tarlada tahıl büyüyor, böcekler tahılı yiyor, serçeler de böcekleri. Bir de bunu aklında tut.', '', { ms: 9000 }],
+    [21000, '🌾', 'Tarladan not', 'Bu tarlada tahıl büyüyor, böcekler tahılı yiyor, serçeler de böcekleri. Bunu aklının bir köşesinde tut.', '', { ms: 9000 }],
     [28000, '📻', 'Pekin', 'Kampanya başladı. 1958 kotası: köy başına <b>25 serçe</b>. Seferberliği sen ayarla.', 'warn', { ms: 9000 }],
   ];
 
@@ -1248,7 +1248,7 @@
         once('impossible' + yearKey(), () => toast('🤷', 'Rapor', 'Kotayı dolduracak kadar serçe kalmadı. Raporda yine de "aşıldı" yazacak.'));
     }
 
-    if (gs.S < 0.75) once('zheng', () => toast('🔬', 'Kuşbilimci Zheng', 'Serçeler yavrularını böcekle besler. Bunu yapmasak mı?'));
+    if (gs.S < 0.75) once('zheng', () => toast('🔬', 'Kuşbilimci Zheng', 'Serçeler yavrularını böcekle besler. Kampanyayı durdursak mı?'));
     if (gs.S < 0.5) once('s50', () => toast('🐦', 'Gözlem', 'Gökyüzü seyreldi. Serçeler yarı yarıya azaldı.'));
     if (gs.S < 0.2) once('s20', () => toast('🔇', 'Gözlem', 'Sabahları artık kuş sesi gelmiyor.', 'bad'));
     if (gs.P > 1.6) once('p13', () => toast('🍃', 'Tarla raporu', 'Yapraklarda küçük delikler var. Önemsiz, herhalde.', 'warn'));
@@ -1321,8 +1321,8 @@
     if (o.mult >= 2) game.records = (game.records || 0) + 1;
     if (!game.replaced && game.campaign) game.trust = clamp(game.trust + o.trust, 0, 100);
     if (official) { official.reply = o.reply; official.leave = performance.now() + 2600; }
-    if (food < 60) toast('🍚', 'Köy ambarı', `Devlet raporlanan hasadın üçte birini aldı. Köylünün payı normalin %${food}'i. Kış zor geçecek.`, 'bad');
-    else if (o.mult > 1) toast('🍚', 'Köy ambarı', `Şişirilmiş rapor yüzünden fazla tahıl teslim edildi. Köylünün payı: normalin %${food}'i.`, 'warn');
+    if (food < 60) toast('🍚', 'Köy ambarı', `Devlet raporlanan hasadın üçte birini aldı. Köylüye normalin ancak %${food} kadarı kaldı. Kış zor geçecek.`, 'bad');
+    else if (o.mult > 1) toast('🍚', 'Köy ambarı', `Şişirilmiş rapor yüzünden fazla tahıl teslim edildi. Köylüye normalin ancak %${food} kadarı kaldı.`, 'warn');
     if (gs.m >= TOTAL) return endGame();
     game.state = 'play';
     if (!game.campaign) return;
@@ -1397,9 +1397,9 @@
     const you = [0, 1, 2].map(i => gs.harvests[i] === undefined ? null : hIdx(gs, i, BASE)), his = [0, 1, 2].map(i => hIdx(HISTORY, i, BASE));
     const done = you.filter(v => v !== null), avg = done.length ? done.reduce((a, b) => a + b) / done.length : 100, k = game.totalKills;
     let title, text;
-    if (game.replaced) { title = 'Görevden alındın'; text = 'Doğru bildiğini yaptın ve koltuğunu kaybettin. Tarihte kampanya yine de sürdü; itiraz edenler çoğu zaman susturuldu. Doğru şeyi bilmek yetmiyor, sistemin de dinlemesi gerekiyor.'; }
-    else if (k === 0) { title = 'Tencereni hiç çalmadın'; text = 'Kota tutmadı ve Pekin\'in güvenini zor korudun. Ama ambarların doldu, kuşlar hâlâ ötüyor. Tarih kitapları seni yazmayacak ve en iyi sonuç bu.'; }
-    else if (avg >= 93) { title = 'Erken durdun'; text = 'Kampanyaya katıldın ama ekosistemi kırmadan bıraktın. Bazen en iyi politika bir şey yapmamaktır, ama bunun için kimse heykel dikmez.'; }
+    if (game.replaced) { title = 'Görevden alındın'; text = 'Doğru bildiğini yaptın ve koltuğunu kaybettin. Tarihte kampanya yine de sürdü; itiraz edenler çoğu zaman susturuldu. Doğruyu bilmek yetmiyor; sistemin de seni dinlemesi gerekiyor.'; }
+    else if (k === 0) { title = 'Tencereni hiç çalmadın'; text = 'Kota tutmadı ve Pekin\'in güvenini zor korudun. Ama ambarların doldu, kuşlar hâlâ ötüyor. Tarih kitapları senden söz etmeyecek; en iyi sonuç da bu.'; }
+    else if (avg >= 93) { title = 'Erken durdun'; text = 'Kampanyaya katıldın ama ekosistemi bozmadan vazgeçtin. Bazen en iyi politika bir şey yapmamaktır, ama bunun için kimse heykel dikmez.'; }
     else if (avg >= 78) { title = 'Geç de olsa fark ettin'; text = 'Serçeler geri dönüyor ama acele etmiyorlar: yılda yalnızca bir iki kez kuluçkaya yatarlar. Bazı köyler yine de aç kaldı.'; }
     else { title = 'Serçelere karşı savaşı kazandın'; text = 'Çekirgeler de kazandı. Kaybeden sadece insanlar oldu. Tebrikler, tarihi başarıyla tekrarladın.'; }
     if (game.lies >= 2) text += ' Raporları şişirerek Pekin\'i mutlu ettin; bedelini köylüler ödedi.';
@@ -1410,7 +1410,7 @@
       <p class="verdict">${text}</p>
       <div class="rgrid">${you.map((v, i) => `<div><div class="y">${1958 + i} hasadı</div><div class="v" style="color:${v === null ? 'var(--ink-soft)' : col(v)}">${v === null ? '—' : '%' + v}</div><div class="h">tarihte: %${his[i]}</div></div>`).join('')}</div>
       ${(window.Badges && window.Badges.session().length) ? `<div class="run-badges">${window.Badges.session().map(id => { const d = window.Badges.DEFS.find(x => x.id === id); return `<span class="${d.hidden ? 'secret' : ''}">${d.icon} ${d.name}</span>`; }).join('')}</div>` : ''}
-      <p class="verdict">Düşürdüğün serçe: <b>${k}</b>. Gerçekte bu sayı yüz milyonlarcaydı.${game.food.some(f => f < 70) ? ` Şişirilmiş raporlar yüzünden köylünün payı bir yıl normalin <b>%${Math.min(...game.food)}</b>'ine düştü. Gerçek kıtlığı en çok bu büyüttü.` : ''}</p>
+      <p class="verdict">Düşürdüğün serçe: <b>${k}</b>. Gerçekte bu sayı yüz milyonlarcaydı.${game.food.some(f => f < 70) ? ` Şişirilmiş raporlar yüzünden köylünün payı bir yıl normalin <b>%${Math.min(...game.food)}</b> düzeyine düştü. Gerçek kıtlığı en çok bu büyüttü.` : ''}</p>
       <canvas class="rchart" id="rchart"></canvas>
       <div class="legend"><span style="--c:var(--bird)">Serçe</span><span style="--c:var(--bug)">Böcek</span><span style="--c:var(--grain)">Tahıl</span><span style="--c:#9aa59a">Tarihteki serçe (kesikli)</span></div>
       <div class="rbtns"><button class="hbtn" id="r-again">↺ Tekrar oyna</button><button class="hbtn" id="r-next">Kendin dene →</button></div>`;

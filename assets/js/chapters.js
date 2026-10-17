@@ -36,7 +36,7 @@ window.SEASONS = [
     { year: '1930', title: 'Toprak Gökyüzüne Uçtu', status: 'soon', text: 'Büyük Ovalar\'ın çayırları sürülüyor, sonra kuraklık geliyor. Toprak kara bulutlar hâlinde göğe yükseliyor.',
       img: C + 'thumb/b/b0/Son_of_farmer_in_dust_bowl_area%2C_Cimarron_County%2C_Oklahoma%2C_8b38282.jpg/960px-Son_of_farmer_in_dust_bowl_area%2C_Cimarron_County%2C_Oklahoma%2C_8b38282.jpg', credit: 'Arthur Rothstein, kamu malı', src: 'File:Son_of_farmer_in_dust_bowl_area,_Cimarron_County,_Oklahoma,_8b38282.jpg' },
   ]},
-  { icon: '🦠', title: 'Görünmez Düşmanlar', desc: 'Gözle göremediğimiz şeyler en uzun süre kalanlar.', chapters: [
+  { icon: '🦠', title: 'Görünmez Düşmanlar', desc: 'En uzun süre kalanlar, gözle göremediklerimiz.', chapters: [
     { year: '1945', title: 'Bakterilerin İntikamı', status: 'soon', text: 'Fleming uyarıyor: penisilini az ve yanlış kullanırsanız bakteriler direnç kazanır. Haklı çıkıyor. Evrimi petri kabında izle.',
       img: C + 'thumb/f/f5/Antibiotic_susceptibility_disk_diffusion.jpg/960px-Antibiotic_susceptibility_disk_diffusion.jpg', credit: 'Microrao, CC BY-SA 4.0', src: 'File:Antibiotic_susceptibility_disk_diffusion.jpg' },
     { year: '2015', title: 'İlaçla Büyüyen Tavuk', status: 'soon', text: 'Antibiyotiklerin büyük kısmı hasta insanlara değil, daha hızlı büyüsün diye çiftlik hayvanlarına gidiyor.',
@@ -55,7 +55,7 @@ window.SEASONS = [
   { icon: '🕊️', title: 'Son Örnekler', desc: '"Bunlar bitmez" dediğimiz şeyler.', chapters: [
     { year: '1914', title: 'Milyarlardan Sıfıra', status: 'soon', text: 'Gökyüzünü günlerce karartan milyarlarca göçmen güvercin ağlarla toplu hâlde avlanıyor. 1914\'te sonuncusu, Martha, bir hayvanat bahçesinde ölüyor.',
       img: C + '7/76/Passenger_Pigeon_Net_Cockburn_1829.jpg', credit: 'James Pattison Cockburn (1829), kamu malı', src: 'File:Passenger_Pigeon_Net_Cockburn_1829.jpg' },
-    { year: '1992', title: 'Balık Bitmez Sanıyorduk', status: 'soon', text: 'Newfoundland\'de 500 yıllık balıkçılık bir yazda çöküyor. Av kotalarını sen belirle, diğer gemiler de avlansın.',
+    { year: '1992', title: 'Balık Bitmez Sanıyorduk', status: 'soon', text: 'Newfoundland\'de 500 yıllık balıkçılık bir yazda çöküyor. Av kotalarını sen belirle; ama diğer gemiler de avlanıyor.',
       img: C + 'thumb/4/4b/Gadus_morhua_Gervais.jpg/960px-Gadus_morhua_Gervais.jpg', fit: 'contain', credit: 'Gervais ve Boulart, kamu malı', src: 'File:Gadus_morhua_Gervais.jpg' },
     { year: '1870', title: 'Kafatası Dağı', status: 'soon', text: 'On milyonlarca bizondan 1889\'da yalnızca birkaç yüzü kalıyor. Kafatası yığınları gübre fabrikalarına gidiyor.',
       img: C + 'thumb/e/e9/Bison_skull_pile_edit.jpg/960px-Bison_skull_pile_edit.jpg', credit: 'Bilinmiyor (1870\'ler), kamu malı', src: 'File:Bison_skull_pile_edit.jpg' },

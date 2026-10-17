@@ -796,7 +796,7 @@
       { label: 'Önce araştıralım', sub: 'Kurbağa bu böceği gerçekten yer mi?', fn: () => {
         (window.Badges ? window.Badges.award : () => {})('kurbaga-bilim');
         game.refused = 1;
-        setTimeout(() => choice('Böcek bilimci Walter Froggatt', 'Bir uyarı', '"Kurbağa böceği değil, önüne gelen her şeyi yer. Salarsak bir daha geri toplayamayız."', [
+        setTimeout(() => choice('Böcek bilimci Walter Froggatt', 'Bir uyarı', '"Kurbağa böceği değil, önüne gelen her şeyi yer. Salarsak onları geri toplayamayız."', [
           { label: 'Anladım →', sub: 'Peki şimdi ne olacak?', fn: () => setTimeout(() => choice('Hükümet yetkilisi', 'Şeker üreticileri bastırıyor', '"Böcekler kamışı yemeye devam ediyor. Yasağı kaldırmamız isteniyor. Kararın?"', [
             { label: 'Peki, salın', sub: 'Baskıya dayanamadın', fn: doRelease },
             { label: 'Hayır, kurbağa yok', sub: 'Böceği başka bir yolla çöz', fn: noRelease },
@@ -849,7 +849,7 @@
       updatePanel(); return;
     }
     if (game.phase === 'field') {
-      if (y === 1936) toast('🐸', 'Tarla gözlemi', 'Kurbağalar tarlada. Ama böcekler kamışın tepesinde, larvaları toprağın altında. Kurbağalar zıplayamıyor.', 'warn');
+      if (y === 1936) toast('🐸', 'Tarla gözlemi', 'Kurbağalar tarlada. Ama böcekler kamışın tepesinde, larvaları toprağın altında. Kurbağalar ikisine de ulaşamıyor.', 'warn');
       if (y === 1937) toast('🥚', 'Biyoloji notu', 'Bir dişi kurbağa bir seferde <b>30 bine kadar</b> yumurta bırakabiliyor.', '');
       if (y === 1938) toast('🍽️', 'Tarla gözlemi', 'Kurbağalar böcek yerine önlerine çıkan her şeyi yiyor: başka böcekler, kurbağalar, hatta küçük hayvanlar.', 'warn');
       if (y >= 1939) toMap();
@@ -857,10 +857,10 @@
     }
     if (y === 1947) toast('🧪', 'Kamış böceği', 'Böcek sonunda kimyasal ilaçlarla kontrol altına alındı. Kurbağalarla değil. Kurbağalar ise kaldı.', 'warn');
     if (y === 1990) toast('🦵', 'Bilim insanları', 'Öndeki kurbağaların bacakları uzuyor! En hızlılar öne geçip birbirleriyle çiftleşiyor. Cephe her yıl hızlanıyor.', 'warn');
-    if (y === 2020) toast('🐍', 'Biraz umut', 'Bazı yılanlar ve kuşlar kurbağadan kaçınmayı ya da onu güvenli yerinden yemeyi öğrendi. Ama bu onlarca yıl sürüyor.', 'good');
+    if (y === 2020) toast('🐍', 'Biraz umut', 'Bazı yılanlar ve kuşlar kurbağadan kaçınmayı ya da onu zehirsiz yerinden yemeyi öğrendi. Ama bu onlarca yıl sürüyor.', 'good');
     for (const k of ['collect', 'teach', 'fence']) if (!game.unlocked[k] && y >= UNLOCK[k]) {
       unlock(k, k === 'collect' ? 'Gönüllüler geceleri fenerle kurbağa topluyor. Bütçenden pay ayır; ön cephede yayılmayı yavaşlatır.'
-        : k === 'teach' ? 'Avcılara kusturucu, küçük bir kurbağa parçası yedir; tadından tiksinip bir daha dokunmasınlar. Gerçekte 2010\'larda denendi.'
+        : k === 'teach' ? 'Avcılara kusturucu, küçük bir kurbağa parçası yedir; tadından tiksinip bir daha dokunmasınlar. Bu yöntem 2010\'larda gerçekten denendi.'
         : 'Çöllerde kurbağalar çiftlik göletlerine muhtaç. Göletleri çitle, çölün içinden geçen yolu kes.');
       break;
     }
@@ -870,13 +870,13 @@
         site.hit = true;
         if (!game.focus || performance.now() > game.focus.until) focus(site.lon, site.lat, 2.2, 4200);
         say(site, st.p.teach >= 0.25 ? 'Iyy! Bu kurbağanın tadı\nberbat. Bir daha asla!' : 'Bu da ne? Lezzetli\ngörünüyor...');
-        once('site-' + site.name, () => toast(site.ic, site.name, st.p.teach >= 0.25 ? 'Eğitilmiş avcılar kurbağalardan uzak duruyor. Kayıplar beklenenden az.' : 'Kurbağayı yiyen avcılar zehirlenip ölüyor. Bazı bölgelerde nüfus %90\'ın üzerinde düşebiliyor.', st.p.teach >= 0.25 ? 'good' : 'bad'));
+        once('site-' + site.name, () => toast(site.ic, site.name, st.p.teach >= 0.25 ? 'Eğitilmiş avcılar kurbağalardan uzak duruyor. Kayıplar beklenenden az.' : 'Kurbağayı yiyen avcılar zehirlenip ölüyor. Bazı bölgelerde sayıları %90\'dan fazla azalabiliyor.', st.p.teach >= 0.25 ? 'good' : 'bad'));
       }
     }
     const MS = [
       ['nsw', 'Yeni Güney Galler', 'Kurbağalar güneyde Yeni Güney Galler\'e ulaştı.', null],
       ['nt', 'Kuzey Bölgesi', 'Kurbağalar Kuzey Bölgesi sınırını geçti.', 1984],
-      ['darwin', 'Darwin', 'Kurbağalar kuzeyin başkenti Darwin\'e ulaştı.', 2005],
+      ['darwin', 'Darwin', 'Kurbağalar Kuzey Bölgesi\'nin başkenti Darwin\'e ulaştı.', 2005],
       ['wa', 'Batı Avustralya', 'Kurbağalar Batı Avustralya\'ya girdi. Önlerinde Kimberley var.', 2009],
     ];
     const FOCUS = { nsw: [153, -28.6], nt: [137.6, -17.5], darwin: [130.85, -12.45], wa: [128.6, -15.8] };
@@ -891,7 +891,7 @@
     game.phase = 'map'; game.fade = 1; landKey = '';
     refreshFront(game.st);
     $('g-phase').textContent = 'Avustralya';
-    if (!game.noToads) toast('🗺️', 'Kurbağalar tarlalardan taştı', 'Artık tek bir tarla yetmez. Bütün kıtaya bakalım. Kahverengi alan kurbağaların yayıldığı yer.', '', { pause: true });
+    if (!game.noToads) toast('🗺️', 'Kurbağalar tarlalardan taştı', 'Artık tarlaya bakmak yetmez. Bütün kıtaya bakalım. Kahverengi alan kurbağaların yayıldığı yer.', '', { pause: true });
   }
 
   function milestone(year, title, text, histYear) {
@@ -942,7 +942,7 @@
     const last = game.hist[game.hist.length - 1];
     if (!last || game.state !== 'end') { $('result').innerHTML = '<h2>Önce oyunu bitir</h2><button class="hbtn">← Oyuna dön</button>'; $('result').querySelector('button').onclick = () => goTo(slideOf('game')); return; }
     let title, text;
-    if (game.noToads) { title = 'Kurbağasız Avustralya'; text = 'Uyarıyı dinledin. Kamış böceği birkaç yıl sonra kimyasallarla kontrol edildi; kurbağaya hiç gerek yokmuş. Kuzey kedileri, goannalar ve timsahlar bu kararı hiç bilmeyecek.'; }
+    if (game.noToads) { title = 'Kurbağasız Avustralya'; text = 'Uyarıyı dinledin. Kamış böceği birkaç yıl sonra kimyasallarla kontrol altına alındı; kurbağaya hiç gerek yokmuş. Kuzey kedileri, goannalar ve timsahlar bu kararı hiç bilmeyecek.'; }
     else if (last.pred >= 0.45 || last.areaPct <= H_END.areaPct * 0.8) { title = 'Fark yarattın'; text = 'Kurbağaları durduramadın, kimse durduramazdı. Ama doğru araçlara bütçe ayırarak yerli avcıların çoğunu korudun. Salmak bir günde oldu, telafisi bir asır sürüyor.'; }
     else { title = 'Kıtayı kurbağalara verdin'; text = 'Tarih tekrarlandı: 102 kurbağa, 200 milyonu aşan bir ordu oldu. Kamış böceği ise hiç umursamadı.'; }
     const pct = v => `%${Math.round(v * 100)}`;
@@ -1029,7 +1029,7 @@
   // KONUŞMALAR VE DOKUNMA
   // =====================================================================
   const LINES = {
-    toad: ['Böcek nerede? Yukarıda mı?\nO kadar zıplayamam.', 'Ben böcek değil,\nher şeyi yerim!', 'Vrrrrr! Burası\nçok güzelmiş.'],
+    toad: ['Böcek nerede? Yukarıda mı?\nO kadar zıplayamam.', 'Ben sadece böcek değil,\nher şeyi yerim!', 'Vrrrrr! Burası\nçok güzelmiş.'],
     beetle: ['Ben tepedeyim, larvalarım\ntoprağın altında. Bol şans!', 'Kurbağa mı? Hiç\nyukarı bakmıyor ki.'],
     sci: ['Kurbağa böceği yer.\nBasit biyoloji!', 'Hawaii\'de işe yaradı.\nGaliba.', 'Bu kurbağalar neden\nböceğe bakmıyor?'],
     ship: ['Düüüt! Hawaii\'den\n102 yolcu getirdim.', 'Dönüş biletleri\nalınmadı galiba...'],
