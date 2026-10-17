@@ -550,7 +550,7 @@
   function enterGame() {
     game.paused = false; $('g-pause').textContent = '❚❚ Durdur';
     if (game.started) return;
-    game.started = true; game.story = !wasDone;
+    game.started = true; game.story = true; // görev kartı kapanana kadar zaman durur
     const show = i => {
       if (mode !== 'game') return;
       if (i >= STORY.length) { game.story = false; return; }
@@ -559,7 +559,7 @@
       toast(ic, from, text, tone, { ...opt, then: opt.pause ? () => show(i + 1) : undefined });
       if (!opt.pause) setTimeout(() => show(i + 1), 4500 / Math.max(1, FAST / 2));
     };
-    const start = () => setTimeout(() => show(0), 300);
+    const start = () => { if (wasDone) game.story = false; setTimeout(() => show(0), 300); };
     if (window.Mission && !window.__mSeen && (window.__mSeen = 1)) window.Mission.show($('modal'), MISSION, start); else start();
   }
   function updateGame(dt) {

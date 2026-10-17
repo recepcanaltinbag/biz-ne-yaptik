@@ -1,3 +1,9 @@
+// test kancası: ?e2e ile, gizli pencerede de karelerin akması için requestAnimationFrame zamanlayıcıyla sürülür
+if (/[?&]e2e\b/.test(location.search)) {
+  const ch = new MessageChannel(); let q = [];
+  ch.port1.onmessage = () => { const l = q; q = []; const t = performance.now(); l.forEach(f => f(t)); };
+  window.requestAnimationFrame = f => { q.push(f); setTimeout(() => ch.port2.postMessage(0), 16); return 1; };
+}
 // Bölümlerin ortak sahne yardımcıları
 // - SceneUtils.avoidHud(x, y, w, h): baloncuk/etiket sol üstteki gösterge panelinin altına girmesin
 // - SceneUtils.lineChart(canvas, series, n, opts): her çizginin ucunda adı ve değeri, altta yıl ekseni

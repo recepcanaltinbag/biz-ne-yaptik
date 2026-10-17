@@ -72,7 +72,7 @@ window.SEASONS = [
       img: 'assets/img/cards/bales-of-pet-bottles-closeup.jpg', soft: true, credit: 'Grendelkhan, CC BY-SA 4.0', src: 'File:Bales_of_PET_bottles_closeup.jpg' },
   ]},
   { icon: '🕊️', title: 'Son Örnekler', desc: '"Bunlar bitmez" dediğimiz şeyler.', chapters: [
-    { year: '1914', title: 'Milyarlardan Sıfıra', status: 'soon', text: 'Gökyüzünü günlerce karartan milyarlarca göçmen güvercin ağlarla toplu hâlde avlanıyor. 1914\'te sonuncusu, Martha, bir hayvanat bahçesinde ölüyor.',
+    { year: '1860', title: 'Milyarlardan Sıfıra', status: 'live', href: 'chapters/guvercin/', text: 'Gökyüzünü günlerce karartan milyarlarca göçmen güvercin ağlarla toplu hâlde avlanıyor. 1914\'te sonuncusu, Martha, bir hayvanat bahçesinde ölüyor.',
       img: 'assets/img/cards/passenger-pigeon-net-cockburn-1829.jpg', credit: 'James Pattison Cockburn (1829), kamu malı', src: 'File:Passenger_Pigeon_Net_Cockburn_1829.jpg' },
     { year: '1992', title: 'Balık Bitmez Sanıyorduk', status: 'soon', text: 'Newfoundland\'de 500 yıllık balıkçılık bir yazda çöküyor. Av kotalarını sen belirle; ama diğer gemiler de avlanıyor.',
       img: 'assets/img/cards/gadus-morhua-gervais.jpg', fit: 'contain', credit: 'Gervais ve Boulart, kamu malı', src: 'File:Gadus_morhua_Gervais.jpg' },

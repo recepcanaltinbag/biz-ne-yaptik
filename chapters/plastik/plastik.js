@@ -5,8 +5,8 @@
     title: 'Plastik Çorba · 1950',
     role: 'Bir kıyı ülkesinin çevre bakanısın.',
     control: 'Her yıl <b class="inl">100 puanlık bütçe</b>: 🗑️ atık yönetimi, sonra 🛍️ plastik vergisi ve 🚢 temizlik gemileri.',
-    goal: '2030\'da denize giren plastiği tarihteki <b>yarısına</b> indir.',
-    watch: 'Halk temizlik gemilerini sever, vergiyi sevmez. Ama okyanusa ne girdiğine bak.',
+    goal: '2030\'da denize giren plastiği yılda <b>12 milyon tonun</b> altına indir.',
+    watch: 'Halk temizlik gemilerini sever. Vergiye yavaş yavaş alışır, birden gelen vergiye kızar.',
   };
   const M = window.PlastikModel;
   const $ = id => document.getElementById(id);
@@ -20,9 +20,8 @@
   const TOTAL = M.Y1 - M.Y0 + 1;
   const HISTORY = M.run(TOTAL, M.histP);
   const H2000 = HISTORY.hist[50].I; // 2000'deki girdi: zor rozet
-  const TARGET = HISTORY.hist[TOTAL - 1].I * 0.5; // hedef: 2030'da tarihteki girdinin yarısı
-  // üretim büyüdükçe aynı atık bütçesi daha az çöpü toplar
-  const capOf = prod => Math.min(1, Math.sqrt(350 / Math.max(1, prod)));
+  const TARGET = 12; // hedef: 2030'da yılda 12 milyon tonun altı (tarihte ~28)
+  const capOf = M.capOf; // üretim büyüdükçe aynı atık bütçesi daha az çöpü toplar
   const eraName = y => y < 1965 ? 'Plastik mucizesi' : y < 1997 ? 'Tek kullanımlık çağ' : y < 2018 ? 'Çöp alanı bulundu' : 'Atık nereye gidecek?';
   const COST = { waste: 1, tax: 0.6, clean: 1.4 }; // her %1 için puan
 
@@ -227,7 +226,7 @@
     if (mode === 'facts' || mode === 'lessons' || mode === 'title' || view.k > 0.5) return;
     if (!(G.x1 > 50 && G.gh > 20)) return;
     const r0 = Math.min(G.gh * 0.36, G.x1 * 0.1), cx0 = G.x1 - r0 - 16 * U, cy0 = G.gb - r0 - 30 * U;
-    const big = smooth(0, 1, mview.k), top = 150 * U, rB = Math.min((G.gb - top) * 0.4, G.x1 * 0.28);
+    const big = smooth(0, 1, mview.k), top = 200 * U, rB = Math.min((G.gb - top) * 0.4, G.x1 * 0.28);
     const r = Math.max(10, lerp(r0, rB, big)), cx = lerp(cx0, G.x1 / 2, big), cy = lerp(cy0, top + (G.gb - top) * 0.45, big);
     lensBox.x = cx; lensBox.y = cy; lensBox.r = r;
     if (big > 0.01) { ctx.fillStyle = `rgba(30,40,36,${0.55 * big})`; ctx.fillRect(0, 0, G.x1, H); }
@@ -275,7 +274,7 @@
     if (Math.random() < clamp((h ? h.I : 0.1) / 15) * 0.12 * (dt / 16) && mapParts.length < 260) mapParts.push({ x: Math.random() < 0.6 ? rnd(0.16, 0.22) : rnd(0.78, 0.84), y: rnd(0.15, 0.85), life: 1 });
     for (let i = mapParts.length - 1; i >= 0; i--) { const p = mapParts[i]; const [vx, vy] = current(p.x, p.y); p.x += vx * dt * 0.00012; p.y += vy * dt * 0.00012; p.life -= dt / 40000; if (p.life <= 0 || Math.hypot(p.x - 0.5, (p.y - 0.48) * 1.6) < 0.03) { mapParts.splice(i, 1); continue; } ctx.fillStyle = 'rgba(255,255,255,.85)'; ctx.fillRect(X(p.x), Y(p.y), 2.5 * U, 2.5 * U); }
     // şişe postası: oyuncunun bıraktığı şişe akıntıyla gider
-    for (let i = bottles.length - 1; i >= 0; i--) { const b = bottles[i]; const [vx, vy] = current(b.x, b.y); b.x += vx * dt * 0.00018; b.y += vy * dt * 0.00018; drawDebrisItem(X(b.x), Y(b.y), 0, U * 1.6, Math.atan2(vy, vx)); if (Math.hypot(b.x - 0.5, (b.y - 0.48) * 1.6) < 0.05) { bottles.splice(i, 1); floats.push({ x: X(0.5), y: Y(0.48), text: 'Şişen çöp alanına ulaştı!', life: 1.6 }); award('pla-sise'); } }
+    for (let i = bottles.length - 1; i >= 0; i--) { const b = bottles[i]; const [vx, vy] = current(b.x, b.y); b.x += vx * dt * 0.0005; b.y += vy * dt * 0.0005; drawDebrisItem(X(b.x), Y(b.y), 0, U * 1.6, Math.atan2(vy, vx)); if (Math.hypot(b.x - 0.5, (b.y - 0.48) * 1.6) < 0.05) { bottles.splice(i, 1); floats.push({ x: X(0.5), y: Y(0.48), text: 'Şişen çöp alanına ulaştı!', life: 1.6 }); award('pla-sise'); } }
     const lbl = (p, q, text, o) => tag(X(p), Y(q), text, o);
     lbl(0.1, 0.1, 'Asya', { fs: 12, a: 0.8 }); lbl(0.9, 0.1, 'K. Amerika', { fs: 12, a: 0.8 }); lbl(0.4, 0.85, 'Hawaii', { fs: 11, a: 0.8 });
     lbl(0.5, 0.33, `🗑️ Büyük Pasifik Çöp Alanı: ${Math.round(Gk)} bin ton · ${f1(area)} milyon km² (Türkiye'nin ${f1(area / 0.78)} katı)`, { fs: 13, color: Gk > 60 ? '#a0402a' : undefined });
@@ -290,7 +289,7 @@
     const h = curHist() || { I: 0.1, M: 0.5 };
     const P = {
       tourist: h.M > 30 ? ['Denize girmek istemiyorum,\nher yer poşet!', 'Bu kumda pipet\nbuldum yine.', 'Eskiden su\nberraktı.'] : vis.waste > 0.6 ? ['Çöp kutusu her yerde,\nharika!', 'Sahil tertemiz.', 'Pikniğin çöpünü\naldım, merak etme.'] : ['Poşet bedava,\nal bir tane daha!', 'Şişeyi kumda\nbırakayım, rüzgâr alır.', 'Plastik ne\nkadar pratik!'],
-      turtle: h.M > 20 ? ['Bu deniz anası mı?\nTadı plastik...', 'Yine poşet!\nKarnım dolu ama aç...', 'Ağa takıldım,\nkurtarın!'] : ['Deniz anası\navındayım.', 'Bu sahilde\nyumurtlayacağım.', 'Su tertemiz!'],
+      turtle: h.M > 8 ? ['Bu deniz anası mı?\nTadı plastik...', 'Yine poşet!\nKarnım dolu ama aç...', 'Ağa takıldım,\nkurtarın!'] : ['Deniz anası\navındayım.', 'Bu sahilde\nyumurtlayacağım.', 'Su tertemiz!'],
       boat: ['Bariyer büyük\nparçaları topluyor.', 'Mikroplastik mi?\nO ağdan geçiyor...', 'Bugün 2 ton\ntopladık!'],
       ghost: ['Hayalet ağ: kimse\nçekmiyor ama hâlâ avlıyor.', 'Bu ağ yıllarca\nyüzecek.'],
       lens: ['Her renkli nokta\nbir plastik parçası.', 'Gözle görünmez,\nbalık yutar.'],
@@ -411,7 +410,7 @@
   }
   function pumpToasts() {
     if (!toastQueue.length || mode !== 'game') return;
-    for (let i = toastQueue.length - 1; i >= 0; i--) { const a = toastQueue[i]; if (!(a[4] || {}).pause && a.born !== undefined && gs.y - a.born > 2) toastQueue.splice(i, 1); }
+    for (let i = toastQueue.length - 1; i >= 0; i--) { const a = toastQueue[i]; if (!(a[4] || {}).pause && !(a[4] || {}).keep && a.born !== undefined && gs.y - a.born > 2) toastQueue.splice(i, 1); }
     if (!toastQueue.length) return;
     const box = $('toasts'), visible = box.querySelectorAll('.toast:not(.out)').length;
     const k = toastQueue.findIndex(a => (a[4] || {}).pause);
@@ -455,14 +454,17 @@
   const choiceQ = [];
   const curHist = () => { const s = mode === 'sandbox' ? sb.st : gs; return s.hist.length ? s.hist[s.hist.length - 1] : null; };
 
-  function makeStorms() { const o = []; while (o.length < 3) { const y = Math.round(1965 + Math.random() * 62); if (o.every(x => Math.abs(x - y) > 4)) o.push(y); } return o; }
+  const BUSY = [1990, 1997, 2013, 2018];
+  function makeStorms() { const o = []; while (o.length < 3) { const y = Math.round(1965 + Math.random() * 62); if (o.every(x => Math.abs(x - y) > 4) && BUSY.every(b => Math.abs(b - y) > 1)) o.push(y); } return o; }
+  function makeCrises(storms) { const o = []; while (o.length < 2) { const y = 1992 + Math.floor(Math.random() * 34); if (o.every(x => Math.abs(x - y) > 6) && BUSY.every(b => Math.abs(b - y) > 1) && storms.every(s => Math.abs(s - y) > 1)) o.push(y); } return o; }
   function resetGame() {
     gs = M.newState();
     Object.assign(game, {
       started: false, paused: false, state: 'play', frac: 0, fired: new Set(), hist: [], speed: 1, touched: false, reading: 0, story: false, endAfter: false,
-      p: { waste: 0.2, tax: 0, clean: 0 }, budget: 100, export: 0, sat: 70, replaced: false, inspected: false, unlocked: { waste: true, tax: false, clean: false },
-      storms: makeStorms(), cap: 1, taxYears: 0, decided: null, lobbyUntil: 0,
+      p: { waste: 0.2, tax: 0, clean: 0 }, crises: [], budget: 100, export: 0, sat: 70, replaced: false, inspected: false, unlocked: { waste: true, tax: false, clean: false },
+      storms: makeStorms(), cap: 1, habit: 0, sc: 1, used: 0, moved: {}, lobbies: 0, taxYears: 0, decided: null, lobbyUntil: 0,
     });
+    game.crises = makeCrises(game.storms);
     SL.waste.value = 20; SL.tax.value = 0; SL.clean.value = 0; SL.tax.disabled = true; SL.clean.disabled = true;
     $('w-tax').classList.add('locked'); $('w-clean').classList.add('locked'); $('o-tax').textContent = "🔒 1990'da açılır"; $('o-clean').textContent = "🔒 2013'te açılır";
     document.querySelectorAll('.coach').forEach(uncoach);
@@ -471,28 +473,33 @@
     $('modal').hidden = true; $('yb-harvest').textContent = ''; $('toasts').innerHTML = ''; toastQueue.length = 0; lastToastAt = -1e9;
     $('g-intro').classList.remove('gone');
     if (window.Badges) window.Badges.resetSession(); tapCount.m = {};
-    choiceQ.length = 0; official = null; bottles.length = 0; setView('shore'); setMicro(false);
+    choiceQ.length = 0; official = null; bottles.length = 0; mapParts.length = 0; debris.length = 0; setView('shore'); setMicro(false);
   }
   // ortak bütçe: üç araç 100 puanı paylaşır; aşan kaydırıcı sığdığı kadar kalır
   function readPolicy(moved) {
     const pts = k => Number(SL[k].value) * COST[k];
     let used = Object.keys(SL).reduce((a, k) => a + (game.unlocked && game.unlocked[k] ? pts(k) : 0), 0);
-    if (used > game.budget && moved) {
+    const hard = 100 + (game.export ? 20 : 0);
+    if (used > hard && moved) {
       const others = used - pts(moved);
-      SL[moved].value = Math.max(0, Math.floor((game.budget - others) / COST[moved] / 5) * 5);
+      SL[moved].value = Math.max(0, Math.floor((hard - others) / COST[moved] / 5) * 5);
       used = others + pts(moved);
       floats.push({ x: W / 2, y: lay.gb * H - 20, text: 'Bütçe doldu: başka araçtan puan çek', life: 1.4, col: '#a0402a' });
     }
-    if (game.lobbyUntil && gs.y < game.lobbyUntil && Number(SL.tax.value) > 20) SL.tax.value = 20;
-    ['waste', 'tax', 'clean'].forEach(k => { game.p[k] = game.unlocked[k] ? SL[k].value / 100 : 0; if (game.unlocked[k]) $('o-' + k).textContent = Math.round(pts(k)) + ' puan'; });
-    if (game.cap < 0.99) $('o-waste').textContent = Math.round(pts('waste')) + ' puan · %' + Math.round(game.p.waste * game.cap * 100) + ' toplanıyor';
+    const lim = game.lobbies > 1 ? 10 : 20; // lobiye söz verdin
+    if (game.lobbyUntil && gs.y < game.lobbyUntil && Number(SL.tax.value) > lim) SL.tax.value = lim;
+    ['waste', 'tax', 'clean'].forEach(k => { game.p[k] = game.unlocked[k] ? SL[k].value / 100 : 0; if (game.unlocked[k]) $('o-' + k).textContent = (k === 'waste' ? '' : '%' + SL[k].value + ' · ') + Math.round(pts(k)) + ' puan'; });
+    if (game.cap < 0.99) $('o-waste').textContent = Math.round(pts('waste')) + ' puan · çöpün %' + Math.round(game.p.waste * game.cap * 100) + '\'i toplanıyor';
+    game.used = used;
     const tot = Math.max(1, game.budget);
     $('b-waste').style.width = pts('waste') / tot * 100 + '%';
     $('b-tax').style.width = (game.unlocked.tax ? pts('tax') : 0) / tot * 100 + '%';
     $('b-clean').style.width = (game.unlocked.clean ? pts('clean') : 0) / tot * 100 + '%';
-    $('g-budget').textContent = Math.max(0, Math.round(game.budget - used)) + ' puan boşta';
+    const over = used > game.budget + 0.5;
+    $('g-budget').textContent = over ? `bütçe aşıldı: araçlar %${Math.round(game.budget / used * 100)} güçte` : Math.max(0, Math.round(game.budget - used)) + ' puan boşta';
+    $('g-budget').style.color = over ? 'var(--danger)' : '';
   }
-  Object.entries(SL).forEach(([k, el]) => el.addEventListener('input', () => { initAudio(); readPolicy(k); if (!game.touched) { game.touched = true; setTimeout(() => $('g-intro').classList.add('gone'), 2500); } }));
+  Object.entries(SL).forEach(([k, el]) => el.addEventListener('input', () => { initAudio(); game.moved[k] = 1; readPolicy(k); if (!game.touched) { game.touched = true; setTimeout(() => $('g-intro').classList.add('gone'), 2500); } }));
   $('g-pause').onclick = () => { game.paused = !game.paused; $('g-pause').textContent = game.paused ? '▶ Devam' : '❚❚ Durdur'; };
   $('g-view').onclick = e => { e.stopPropagation(); initAudio(); setView(view.want === 'map' ? 'shore' : 'map'); };
   function setSpeed(v) { game.speed = v; $('g-speed').textContent = v + '×'; $('yb-speed').querySelectorAll('button').forEach(b => b.classList.toggle('on', Number(b.dataset.s) === v)); }
@@ -512,7 +519,7 @@
   const comeOfficial = (who, say) => { official = { t0: performance.now(), leave: 0, who, say }; };
   function unlock(k, text) {
     game.unlocked[k] = true; SL[k].disabled = false; $('w-' + k).classList.remove('locked'); readPolicy();
-    milestone(k === 'tax' ? '🛍️' : '🚢', 'Yeni araç', text, '', () => coach(SL[k], k === 'tax' ? '👉 Kaydır: plastik vergisi' : '👉 Kaydır: temizlik gemileri'));
+    milestone(k === 'tax' ? '🛍️' : '🚢', 'Yeni araç', text, '', () => !game.moved[k] && Number(SL[k].value) === 0 && coach(SL[k], k === 'tax' ? '👉 Kaydır: plastik vergisi' : '👉 Kaydır: temizlik gemileri'));
   }
 
   const STORY = [
@@ -522,7 +529,7 @@
   function enterGame() {
     game.paused = false; $('g-pause').textContent = '❚❚ Durdur';
     if (game.started) return;
-    game.started = true; game.story = !wasDone;
+    game.started = true; game.story = true; // görev kartı kapanana kadar zaman durur
     const show = i => {
       if (mode !== 'game') return;
       if (i >= STORY.length) { game.story = false; return; }
@@ -531,7 +538,7 @@
       toast(ic, from, text, tone, { ...opt, then: opt.pause ? () => show(i + 1) : undefined });
       if (!opt.pause) setTimeout(() => show(i + 1), 4500 / Math.max(1, FAST / 2));
     };
-    const start = () => setTimeout(() => show(0), 300);
+    const start = () => { if (wasDone) game.story = false; setTimeout(() => show(0), 300); };
     if (window.Mission && !window.__mSeen && (window.__mSeen = 1)) window.Mission.show($('modal'), MISSION, start); else start();
   }
   function updateGame(dt) {
@@ -568,44 +575,57 @@
     const y = gs.y;
     const storm = game.storms.includes(y) ? 1.8 : 1;
     const prev = gs.hist.length ? gs.hist[gs.hist.length - 1].prod : 2;
-    game.cap = capOf(prev);
-    M.step(gs, { ...game.p, waste: game.p.waste * game.cap, export: game.export, storm });
+    const crisis = game.crises.some(c => y >= c && y < c + 3);
+    game.budget = (crisis ? 70 : 100) + (game.export ? 20 : 0); readPolicy();
+    const sc = game.used > game.budget + 0.5 ? game.budget / game.used : 1; // bütçe yetmezse bütün araçlar zayıflar
+    game.sc = sc;
+    M.step(gs, { waste: game.p.waste * sc, tax: game.p.tax * sc, clean: game.p.clean * sc, export: game.export, storm });
+    game.cap = gs.hist[gs.hist.length - 1].cap;
     if (game.cap < 0.85) once('cap', () => toast('🏔️', 'Belediye', 'Çöp dağı büyüyor: <b>aynı bütçe artık daha az çöp topluyor</b>. Üretim yavaşlamazsa yetişemezsin.', 'warn'));
     readPolicy();
     const h = gs.hist[gs.hist.length - 1];
     game.hist.push({ ...h, tax: game.p.tax });
     if (game.p.tax >= 0.3) game.taxYears++;
     // halkın desteği: temizlik gemisi göze hoş gelir; vergi kızdırır; kirli sahil de kızdırır
-    if (!game.replaced) game.sat = clamp(game.sat + game.p.clean * 6 - game.p.tax * 7 - smooth(15, 50, h.M) * 3 + 1.2, 0, 100);
+    const tx = game.p.tax * sc, shock = Math.max(0, tx - game.habit); game.habit += (tx - game.habit) * 0.12;
+    if (!game.replaced) game.sat = clamp(game.sat + game.p.clean * sc * 6 - 1.5 * tx - 100 * shock * shock - smooth(15, 50, h.M) * 3 + 1.0, 0, 100);
+    if (shock > 0.15) once('shock' + Math.floor(y / 4), () => toast('😠', 'Halk', 'Vergi <b>birden</b> arttı, herkes kızgın. Yavaş artırırsan alışırlar.', 'warn'));
     $('yb-harvest').textContent = `🌊 ${f1(h.I)} Mt`; $('yb-harvest').style.color = h.I <= TARGET ? 'var(--green)' : h.I <= H2000 * 2 ? 'var(--grain)' : 'var(--danger)';
     if (storm > 1) { toast('🌧️', 'Sel', 'Şiddetli yağmur: dereler taştı, sokaktaki çöp denize süpürüldü.', 'bad'); pulseAt(() => [geo().shore, geo().gt + geo().gh * 0.32], '#c0503a'); }
+    if (game.crises.includes(y + 1)) milestone('📉', 'Maliye Bakanı', '<b>Gelecek yıl ekonomik kriz:</b> bütçe 3 yıl boyunca 70 puana iner. Neyi keseceğini sen seç, yoksa her şey zayıflar.', 'warn');
+    if (game.crises.includes(y)) once('cr' + y, () => toast('📉', 'Kriz', 'Bütçe 70 puana indi. Kaydırıcılar fazlaysa bütün araçlar <b>orantılı zayıflar</b>.', 'bad'));
+    if (game.crises.includes(y - 3)) toast('📈', 'Maliye', 'Kriz bitti, bütçe yeniden 100 puan.', 'good');
     if (game.storms.includes(y + 1) && y < M.Y1) milestone('⛈️', 'Hava tahmini', '<b>Gelecek yıl</b> sel bekleniyor: toplanmayan çöp denize gidecek.', 'warn');
-    if (y === 1965) toast('🛍️', 'İsveç', 'Plastik poşet icat edildi. Bedava, hafif, her yerde.');
-    if (y === 1973) toast('🍾', 'ABD', 'PET şişe icat edildi. Cam şişeler yavaş yavaş kayboluyor.');
+    if (y === 1955) toast('📰', 'Life dergisi', '"Atılıp geçilen hayat": kullan, at, yıkamaya gerek yok! Tek kullanımlık çağ başlıyor.', '', { keep: true });
+    if (y === 1972) toast('🔬', 'Sargasso Denizi', 'Bilim insanları açık denizde ilk kez <b>plastik tanecikleri</b> buldu.', 'warn', { keep: true });
+    if (y === 1988) toast('⚓', 'Uluslararası anlaşma', 'Gemilerden denize plastik atmak yasaklandı (MARPOL). Ama çöpün çoğu karadan geliyor.', '', { keep: true });
+    if (y === 1965) toast('🛍️', 'İsveç', 'Plastik poşet icat edildi. Bedava, hafif, her yerde.', '', { keep: true });
+    if (y === 1973) toast('🍾', 'ABD', 'PET şişe icat edildi. Cam şişeler yavaş yavaş kayboluyor.', '', { keep: true });
     if (y === 1990) unlock('tax', 'Bazı ülkeler tek kullanımlık plastiğe vergi koymayı düşünüyor. <b>Plastik vergisi</b>: üretimin büyümesini yavaşlatır, ama halk ve marketler kızar.');
     if (y === 1997) { setView('map', 9000); milestone('⛵', 'Kaptan Charles Moore', 'Hawaii\'den dönerken Pasifik\'in ortasında, karadan çok uzakta <b>plastikle dolu</b> bir deniz buldum. Akıntılar çöpü buraya topluyor!', 'bad'); }
     if (y === 2013) unlock('clean', '<b>Temizlik gemileri</b>: denizdeki büyük parçaları toplar. Halk bayılır. Ama mikroplastiğe dokunamaz.');
-    if (y === 2015) toast('📊', 'Bilim insanları', 'Hesap çıktı: okyanusa her yıl <b>milyonlarca ton</b> plastik giriyor.', 'warn');
+    if (y === 2015) toast('📊', 'Bilim insanları', 'Hesap çıktı: okyanusa her yıl <b>milyonlarca ton</b> plastik giriyor.', 'warn', { keep: true });
     if (y === 2018) {
       comeOfficial('lobby', 'Çin kapıyı kapattı.');
       choice('Atık şirketi', 'Çin atık almıyor', '"Çöpümüzü yıllarca Çin\'e satıyorduk. Artık almıyor. Türkiye ve Malezya gibi ülkelere satalım mı? Bütçen rahatlar."', [
-        { label: 'Yurt dışına sat', sub: '+20 puan bütçe; çöp başka kıyıdan denize gidebilir', fn: () => { game.export = 1; game.budget = 120; game.decided = 'export'; readPolicy(); toast('🚚', 'Liman', 'Çöp gemiyle yola çıktı. Senin sahilin daha temiz görünüyor.', 'warn'); } },
+        { label: 'Yurt dışına sat', sub: '+20 puan bütçe; çöp başka kıyıdan denize gidebilir', fn: () => { game.export = 1; game.budget = 120; game.decided = 'export'; readPolicy(); toast('🚚', 'Liman', 'Çöp gemiyle yola çıktı. Ama gittiği yerde de toplanamıyor: <b>denize giren</b> sayacı onu da sayıyor.', 'warn'); } },
         { label: 'Kendin işle', sub: 'Bütçe aynı; çöp yerinde ayrılır', fn: () => { game.decided = 'home'; award('pla-evde'); toast('♻️', 'Bakanlık', 'Yeni ayrıştırma tesisi açıldı.', 'good'); } },
       ], 'lobby');
     }
-    if (y === 2019) toast('🇹🇷', 'Türkiye', 'Türkiye\'de poşetler ücretli oldu. Market kasalarında bez çanta dönemi.', 'good');
+    if (y === 2019) toast('🇹🇷', 'Türkiye', 'Türkiye\'de poşetler ücretli oldu. Market kasalarında bez çanta dönemi.', 'good', { keep: true });
     if (h.M > 15) once('m15', () => { if (!view.user) setView('shore'); setMicro(true, 7000); toast('🔬', 'Biyolog', 'Büyük parçalar güneşte ufalanıyor: <b>mikroplastik</b>. Avuçtaki suya bak.', 'warn'); });
     if (h.turtle < 0.8) once('t80', () => { pulseAt(() => [turtle.sx, turtle.sy]); toast('🐢', 'Sahil', 'Bir kaplumbağa poşeti deniz anası sanıp yuttu.', 'bad'); });
     if (y >= 2000 && Math.random() < 0.06) { ghost.on = 1; ghost.x = rnd(0.7, 0.92); once('ghost' + Math.floor(y / 6), () => toast('🕸️', 'Balıkçı', 'Fırtınada bir ağ koptu: artık <b>hayalet ağ</b>, kimse çekmeden avlıyor.', 'warn')); }
     if (game.sat < 25 && !game.replaced) once('warn-sat', () => toast('📢', 'Market zinciri', '"Vergi müşteriyi kaçırıyor!" Halkın desteği düşüyor.', 'warn'));
-    if (game.sat <= 0 && !game.replaced && game.p.tax > 0.2) lobby();
+    if (game.sat <= 0 && !game.replaced && game.p.tax > 0.1 && gs.y >= game.lobbyUntil) lobby();
     if (gs.y > M.Y1 && game.state === 'play') endGame(); else if (gs.y > M.Y1) game.endAfter = true;
   }
   function lobby() {
-    if (game.inspected || game.replaced) return;
-    game.inspected = true; comeOfficial('lobby', 'Bu vergi bizi batırıyor!');
-    choice('Market zinciri lobisi', 'Vergi kalksın!', '"Müşteri kaçıyor, işçi çıkarıyoruz. Vergiyi <b>en fazla %20</b>ye indir, yoksa seni görevden aldırırız."', [
-      { label: 'Tamam, indiriyorum', sub: '5 yıl boyunca vergi en fazla %20', fn: () => { game.lobbyUntil = gs.y + 5; SL.tax.value = Math.min(Number(SL.tax.value), 20); readPolicy(); game.sat = 40; } },
+    if (game.replaced || game.state === 'choice') return;
+    game.lobbies++; const second = game.lobbies > 1, lim = second ? 10 : 20, yrs = second ? 8 : 5;
+    game.lobbyUntil = gs.y + yrs; comeOfficial('lobby', second ? 'Yine mi bu vergi?!' : 'Bu vergi bizi batırıyor!');
+    choice('Market zinciri lobisi', second ? 'Son uyarı' : 'Vergi kalksın!', second ? `"Sözünü tutmadın. Vergi <b>${yrs} yıl en fazla %${lim}</b> olacak. Bu son şansın."` : `"Müşteri kaçıyor, işçi çıkarıyoruz. Vergiyi <b>${yrs} yıl en fazla %${lim}</b>ye indir, yoksa seni görevden aldırırız."`, [
+      { label: 'Tamam, indiriyorum', sub: `${yrs} yıl boyunca vergi en fazla %${lim}`, fn: () => { SL.tax.value = Math.min(Number(SL.tax.value), lim); readPolicy(); game.sat = 40; game.habit = lim / 100; } },
       { label: 'Hayır, vergi kalıyor', sub: 'Görevden alınırsın, oyun biter', fn: () => { game.replaced = true; toast('📜', 'Hükümet', 'Görevden alındın. Yerine gelen ilk iş vergiyi kaldırdı.', 'bad'); endGame(); } },
     ], 'lobby');
   }
@@ -632,7 +652,7 @@
     const score = Math.round(clamp(1 - iY / Math.max(0.1, iH)) * 100);
     let title, text;
     if (game.replaced) { title = 'Görevden alındın'; text = 'Vergiyi savundun, market lobisi kazandı. Gerçekte de poşet ve şişe yasakları yıllarca ertelendi.'; }
-    else if (iY < TARGET) { title = 'Musluğu kıstın'; text = 'Denize giren plastik tarihteki yarısının altına indi. Temizlik değil, önleme kazandırdı. Ama okyanustaki mikroplastik daha yüzyıllarca orada.'; }
+    else if (iY < TARGET) { title = 'Musluğu kıstın'; text = 'Denize giren plastik yılda 12 milyon tonun altına indi. Temizlik değil, önleme kazandırdı. Ama okyanustaki mikroplastik daha yüzyıllarca orada.'; }
     else if (iY < iH * 0.75) { title = 'Yarı yolda'; text = 'Denize giren plastik tarihten az, ama hâlâ artıyor. Musluk açık kaldıkça paspas yetmez.'; }
     else if (game.p.clean > 0.3) { title = 'Paspasla taşan küvet'; text = 'Temizlik gemileri sahil fotoğraflarını güzelleştirdi, ama okyanusa giren plastik hiç azalmadı. Mikroplastik ise hiç toplanmadı.'; }
     else { title = 'Plastik çorba koyulaştı'; text = 'Tarih tekrarlandı: üretim katlandı, toplanmayan çöp denize aktı. Tebrikler, okyanusu tarihteki gibi doldurdun.'; }
@@ -644,7 +664,7 @@
       <p class="verdict">${text}</p>
       ${window.SceneUtils ? window.SceneUtils.bestLine('plastik', score, 'önleme başarısı', !game.replaced) : ''}
       <div class="rgrid">
-        <div><div class="y">Denize giren (2030)</div><div class="v" style="color:${iY < TARGET ? 'var(--green)' : iY < iH * 0.75 ? 'var(--grain)' : 'var(--danger)'}">${f1(iY)} Mt</div><div class="h">hedef: ${f1(TARGET)} · tarihte: ${f1(iH)}</div></div>
+        <div><div class="y">Denize giren (${game.replaced ? last.y : 2030})</div><div class="v" style="color:${game.replaced ? 'var(--ink)' : iY < TARGET ? 'var(--green)' : iY < iH * 0.75 ? 'var(--grain)' : 'var(--danger)'}">${f1(iY)} Mt</div><div class="h">${game.replaced ? '' : 'hedef: ' + TARGET + ' · '}tarihte: ${f1(iH)}</div></div>
         <div><div class="y">Mikroplastik</div><div class="v">${Math.round(last.m)} Mt</div><div class="h">tarihte: ${Math.round(hl.m)} Mt</div></div>
         <div><div class="y">Kaplumbağalar (en kötü)</div><div class="v" style="color:${col(tY)}">%${tY}</div><div class="h">tarihte: %${tH}</div></div>
       </div>
@@ -713,7 +733,7 @@
     const k = 1 - Math.pow(0.93, dt / 16);
     for (const key of Object.keys(target)) vis[key] = lerp(vis[key], target[key], k * 0.5);
     vis.bad = lerp(vis.bad, smooth(10, 60, vis.M), k * 0.5);
-    if (view.until && (game.reading || game.state === 'choice')) view.until += dt;
+    if (view.until && (game.reading || game.state === 'choice' || bottles.length)) view.until += dt;
     if (view.until && performance.now() > view.until && !view.user) setView('shore');
     if (mode !== 'game' && mode !== 'result' && view.want === 'map') setView('shore');
     view.k = lerp(view.k, view.want === 'map' ? 1 : 0, 1 - Math.pow(0.9, dt / 16));

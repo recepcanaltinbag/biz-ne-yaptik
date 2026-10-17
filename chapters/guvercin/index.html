@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Milyarlardan Sıfıra</title>
+<meta name="description" content="1860–1914: gökyüzünü günlerce karartan milyarlarca göçmen güvercin nasıl tükendi? Av komiseri sensin. Oynayarak gör.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/css/badges.css?v=261017232342">
+<link rel="stylesheet" href="../../assets/css/chapter.css?v=261017232342">
+<style>
+  .sl.locked span { color: var(--ink-soft); }
+  #m-pop { background: #6a7fb0; } #m-nest { background: #e0b04a; } #m-forest { background: #4f9a7a; }
+  .mrow .thr { position: absolute; top: -2px; bottom: -2px; width: 2px; background: #c0302a; }
+  .mrow .track { position: relative; }
+</style>
+</head>
+<body class="dock">
+<script>if (/[?&]layout=klasik\b/.test(location.search)) document.body.classList.remove("dock");</script>
+<canvas id="world" aria-hidden="true"></canvas>
+
+<header class="bar">
+  <a class="bar-home" href="../../">← Biz Ne Yaptık?</a>
+  <button class="bar-btn" id="sound" aria-label="Sesi aç/kapat">🔊 <span>Ses</span></button>
+</header>
+
+<div class="slides">
+
+  <section class="slide" data-mode="title">
+    <div class="center-col"><div class="glass">
+      <div class="kicker">Biz Ne Yaptık? · Sezon 6 · Bölüm 1</div>
+      <h1 class="title">Milyarlardan Sıfıra</h1>
+      <p class="sub">1860–1914 · oynama süresi ~5 dakika</p>
+      <button class="hbtn big" data-next>Başla →</button>
+    </div></div>
+  </section>
+
+  <section class="slide" data-mode="game">
+    <div class="narr game-intro" id="g-intro">
+      <p>Sen eyaletin av komiserisin. <b>Avın kurallarını sen koyarsın.</b></p>
+      <p class="try">👉 Kaydırıcıyla yuvaları koru. Gökyüzündeki sürüyü izle.</p>
+    </div>
+    <div class="topbox">
+      <div class="yearbar" aria-live="polite"><div class="yb-year" id="yb-year">1860</div><div class="yb-sub" id="yb-sub">Kararan gökyüzü</div><div class="yb-track"><i id="yb-fill"></i></div><span class="yb-harvest" id="yb-harvest"></span><span class="yb-speed" id="yb-speed" role="group" aria-label="Hız"><button type="button" data-s="1" class="on">1×</button><button type="button" data-s="2">2×</button><button type="button" data-s="4">4×</button></span><button type="button" class="yb-view" id="g-view">🗺️ Harita</button></div>
+      <div id="toasts" aria-live="polite"></div>
+    </div>
+    <aside class="gpanel" aria-label="Av komiserliği masası">
+      <button class="gp-toggle" type="button" aria-expanded="false">⋯ Daha fazla</button>
+      <div class="gp-hud">
+      <div class="gp-top">
+        <div class="chip date" id="g-date">1860</div>
+        <div class="chip" id="g-pop">🕊️ 4,2 milyar</div>
+      </div>
+      <p class="goal gp-extra">🎯 <b>Hedef:</b> 1914'te gökyüzünde en az yarım milyar güvercin uçsun.</p>
+      <div class="gp-meters">
+        <div class="mrow"><span>🕊️<em> Sürü</em></span><span class="track"><i id="m-pop"></i><b class="thr" id="m-thr" title="Bu çizginin altında koloniler ürememeye başlar"></b></span></div>
+        <div class="mrow"><span>🪺<em> Yuva başarısı</em></span><span class="track"><i id="m-nest"></i></span></div>
+        <div class="mrow"><span>🌳<em> Orman</em></span><span class="track"><i id="m-forest"></i></span></div>
+        <div class="mrow trust"><span>🏛️<em> Meclisin desteği</em></span><span class="track"><i id="m-trust"></i></span></div>
+      </div>
+      </div>
+      <label class="sl big" id="w-nest"><span>🪺 Yuva yasağı <b id="o-nest">%10</b></span><input type="range" id="g-nest" min="0" max="100" step="5" value="10"></label>
+      <label class="sl big locked" id="w-quota"><span>🛒 Pazar yasağı <b id="o-quota">🔒 1870'te açılır</b></span><input type="range" id="g-quota" min="0" max="100" step="5" value="0" disabled></label>
+      <label class="sl big locked" id="w-forest"><span>🌳 Orman koruma <b id="o-forest">🔒 1875'te açılır</b></span><input type="range" id="g-forest" min="0" max="100" step="5" value="0" disabled></label>
+      <div class="sb-ctrl gp-extra">
+        <button class="hbtn sm" id="g-pause">❚❚ Durdur</button>
+        <button class="hbtn sm" id="g-speed">1×</button>
+      </div>
+    </aside>
+    <div class="harvest" id="harvest" hidden></div>
+    <div class="modal" id="modal" hidden></div>
+  </section>
+
+  <section class="slide scroll" data-mode="result">
+    <div class="result" id="result"></div>
+  </section>
+
+  <section class="slide" data-mode="sandbox">
+    <aside class="sb-panel">
+      <h2>Simülasyon laboratuvarı</h2>
+      <p class="small">1860'tan 1914'e kadar sürü her yıl senin kurallarına göre değişir. Meclis yok, istediğini dene.</p>
+      <div class="presets">
+        <button class="pbtn" data-preset="history">Tarihteki gibi</button>
+        <button class="pbtn" data-preset="nest">Yalnız yuva</button>
+        <button class="pbtn" data-preset="late">1885'te her şey</button>
+        <button class="pbtn" data-preset="all">Erken ve dengeli</button>
+      </div>
+      <label class="sl"><span>🪺 Yuva yasağı <b id="o-pn"></b></span><input type="range" id="p-n" min="0" max="100" value="10"></label>
+      <label class="sl"><span>🛒 Pazar yasağı <b id="o-pq"></b></span><input type="range" id="p-q" min="0" max="100" value="0"></label>
+      <label class="sl"><span>🌳 Orman koruma <b id="o-pf"></b></span><input type="range" id="p-f" min="0" max="100" value="0"></label>
+      <canvas id="sb-chart" class="sb-chart"></canvas>
+      <div class="sb-stats"><span id="sb-year">1860</span><span id="sb-harvest">Sürü: 4,2 milyar</span></div>
+      <div class="sb-ctrl">
+        <button class="hbtn sm" id="sb-play">❚❚ Durdur</button>
+        <button class="hbtn sm" id="sb-speed">1×</button>
+        <button class="hbtn sm" id="sb-reset">↺ Sıfırla</button>
+      </div>
+      <button class="hbtn" data-next>Gerçekte ne oldu? →</button>
+    </aside>
+  </section>
+
+  <section class="slide scroll" data-mode="facts">
+    <article class="paper">
+      <h2>Gerçekte ne oldu?</h2>
+      <ul class="facts">
+        <li><b>1813</b> John James Audubon, Kentucky'de bir göçmen güvercin sürüsünün <b>üç gün</b> boyunca gökyüzünden geçtiğini yazdı. Kuzey Amerika'da 3–5 milyar güvercin yaşıyordu; belki de dünyanın en kalabalık kuşuydu.</li>
+        <li><b>1878</b> Demiryolu ve telgraf avcıları kolonilere kuşlarla birlikte taşıyordu. Michigan'daki Petoskey kolonisinde aylarca günde yaklaşık 50.000 kuş öldürüldü, varillerle şehirlere yollandı.</li>
+        <li><b>1914</b> Son yabani kuş 1900'de vuruldu. Türün son bireyi <b>Martha</b>, 1 Eylül 1914'te Cincinnati Hayvanat Bahçesi'nde öldü. Michigan'ın 1890'ların sonunda çıkardığı tam av yasağı çok geç kalmıştı.</li>
+      </ul>
+      <div class="callout"><b>Ama son güvercinleri yalnız av öldürmedi.</b> Güvercin yılda tek yumurta yapar ve yalnız dev kolonilerde ürerdi. Sürü küçülünce koloniler dağıldı, ürüyemediler (<i>Allee etkisi</i>). Orman kesimi de palamut ve kayın yemişini azalttı. Av durunca bile geri dönemediler.</div>
+      <button class="hbtn" data-next>Peki ne öğrendik? →</button>
+    </article>
+  </section>
+
+  <section class="slide scroll" data-mode="lessons">
+    <article class="paper">
+      <h2>Ne öğrendik?</h2>
+      <div class="lessons"><div class="lcard"><h3>🔢 "Bitmez" diye bir şey yok</h3><p>Milyarlarca kuş elli yılda bitti.</p></div><div class="lcard"><h3>⏰ Eşik geçilince geç</h3><p>Sürü belli bir boyutun altına inince koruma da yetmez.</p></div><div class="lcard"><h3>📜 Kâğıt yasa korumaz</h3><p>Yasa ancak uygulanırsa işe yarar.</p></div></div>
+      <h2>Sen ne yapabilirsin?</h2>
+      <ul class="todo"><li>🕊️ Bol görünen türleri de say: kuş sayımlarına (ör. eBird) gönüllü katıl.</li><li>🌳 Yaşlı ağaçları ve koruları koru; birçok kuş yemişine ve kovuğuna muhtaç.</li><li>🇹🇷 Türkiye'de de tükenme yaşandı: Anadolu parsı ve Hazar kaplanı kayboldu, kelaynaklar Birecik'te zor kurtarılıyor.</li></ul>
+      <details class="sources-fold"><summary>Kaynaklar ve model hakkında</summary><ul class="sources">
+        <li>J. J. Audubon, <i>Ornithological Biography</i>, cilt 1 (1831): 1813 sürüsünün anlatımı.</li>
+        <li>A. W. Schorger, <i>The Passenger Pigeon: Its Natural History and Extinction</i>, University of Wisconsin Press, 1955.</li>
+        <li>J. Greenberg, <i>A Feathered River Across the Sky</i>, Bloomsbury, 2014.</li>
+        <li>G. G. R. Murray ve ark., "Natural selection shaped the rise and fall of passenger pigeon genetic diversity", <i>Science</i> 358 (2017).</li>
+        <li>Little Traverse History Museum, "Passenger Pigeons Nest in Petoskey Area" (1878 kolonisi).</li>
+      </ul><p class="small">Model yıllık bir nüfus dengesine dayanır: yılda tek yavru, doğal ölüm, av ve orman kapasitesi. Koloni küçülünce üreme düşer (Allee etkisi). Sayılar tarihî tahminlere göre ayarlandı ve temsilidir.</p></details>
+      <div class="end-nav">
+        <a class="hbtn" href="../../#bolumler">← Tüm bölümler</a>
+        <button class="hbtn" data-goto="game">↺ Tekrar oyna</button>
+      </div>
+    </article>
+  </section>
+</div>
+
+<nav class="dots" id="dots" aria-label="Bölüm adımları"></nav>
+
+<script src="../../assets/js/stats.js?v=261017232342"></script>
+<script src="../../assets/js/mission.js?v=261017232342"></script>
+<script src="../../assets/js/scene-utils.js?v=261017232342"></script>
+<script src="../../assets/js/badges.js?v=261017232342"></script>
+<script src="../../assets/js/toon.js?v=261017232342"></script>
+<script src="model.js?v=261017232342"></script>
+<script src="guvercin.js?v=261017232342"></script>
+<script>/* gpToggle */document.querySelectorAll(".gp-toggle").forEach(b=>b.onclick=()=>{const p=b.closest(".gpanel");const o=p.classList.toggle("open");b.setAttribute("aria-expanded",o);b.textContent=o?"✕ Kapat":"⋯ Daha fazla";window.dispatchEvent(new Event("panel"));});</script>
+</body>
+</html>

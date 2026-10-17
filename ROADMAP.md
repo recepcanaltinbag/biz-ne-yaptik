@@ -53,13 +53,13 @@ Durum: ✅ hazır · 🔜 sırada · 📝 plan
 ## Sezon 5 · Plastik çağı
 | Bölüm | Olay | Oyun fikri |
 |---|---|---|
-| 📝 Plastik Çorba | Kuzey Pasifik, C. Moore (1997) | Şişe at, akıntılar (girdaplar) onu nereye götürüyor? |
+| ✅ Plastik Çorba | Kuzey Pasifik, C. Moore (1997) | Şişe at, akıntılar (girdaplar) onu nereye götürüyor? |
 | 📝 Şişe Sofrana Döner | Üretim, geri dönüşüm, mikroplastik | Yaşam döngüsü: kullan, at, parçalan, balık, sofra |
 
 ## Sezon 6 · Tükeniş
 | Bölüm | Olay | Oyun fikri |
 |---|---|---|
-| 📝 Milyarlardan Sıfıra | Göçmen güvercin, Martha (1914) | Allee etkisi: sürü küçülünce üreme çöker |
+| ✅ Milyarlardan Sıfıra | Göçmen güvercin, Martha (1914) | Allee etkisi: sürü küçülünce üreme çöker |
 | 📝 Balık Bitmez Sanıyorduk | Newfoundland, 1992 | Ortak malların trajedisi: kotanı sen, diğer gemileri yapay zekâ belirler |
 | 📝 Kafatası Dağı | Kuzey Amerika, 19. yüzyıl | Av baskısı ve politik amaçlar; geri dönüş çabaları |
 | 📝 Orman İnsanı Evsiz | Borneo orangutanları (1999–2015) | Orman kesimi ve avlanma; "ama" kutusu: kayıpların çoğu orman ayaktayken |
@@ -87,6 +87,8 @@ Durum: ✅ hazır · 🔜 sırada · 📝 plan
 - **Hızlı tekrar:** ikinci oyunda görev kartı ve açılış hikâyesi atlanabilir; "Hızlı başla" düğmesi.
 
 ## Bekleyen iyileştirmeler (testçi raporlarından)
+- Plastik: telefonda hedef satırı ve durdur düğmesi gizli, gösterge çubuklarında yalnız simge var; hayalet ağ seyrek çıkıyor (rozeti zor).
+- Plastik: iyi seçilmiş sabit karışım (vergi %35–40, atık yüksek) hâlâ kazanabiliyor; ama halkın desteği gergin kalıyor, kriz ve sel tepki istiyor.
 - Kurbağa: "kur ve unut" testi (Monte Carlo) yapılmadı; rastgele olay ya da yayılma sıçraması (kamyonla taşınma) eklenebilir.
 - DDT: sıcak yaz patlamasının etkisi küçük (kur ve unut %76, uyumlu %90 rozet); daha belirgin bir tepki mekaniği aranmalı.
 - Kurbağa: kilometre taşı kartı kamera odağını örtmesin; bütçe doluyken "önce başka araçtan puan çek" uyarısı; 1950–60'larda küçük bir karar.

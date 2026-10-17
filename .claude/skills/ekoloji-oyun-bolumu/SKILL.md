@@ -101,6 +101,16 @@ Bu kurallar kullanıcının geri bildirimleriyle tek tek oturtuldu. Yeni bölüm
   - **Rozet ve iyi son "tepki vermeyi" ödüllendirsin.** Aral'da en fazla 1 kaçan yıl şartı var.
 - **Yayından önce Monte Carlo testi:** node ile 200–300 rastgele dünyada "kur ve unut" ile "uyum sağlayan" stratejileri karşılaştır. Kur ve unut rozeti alamamalı, uyum sağlayan alabilmeli. Örnek Aral sonuçları: kur ve unut %55 su → rozet %1; uyumlu → %97–100.
 - Her bölümde sor: "Oyuncu hangi tek ayarla oyunu çözebilir? O ayarı bozan dış olay ya da artan baskı ne?"
+- **Plastik testinden öğrenilenler:**
+  - Düşük ayarın bedeli sıfır olmasın. Bedel her zaman biraz acıtsın.
+  - **Alışma (habituation):** halkın tepkisi düzeyden çok **ani artışa** bağlı olsun (`shock = max(0, x - habit)`, `habit` her yıl %12 yaklaşır, öfke ∝ shock²). Kademeli artırmak ödüllenir, tek seferde yüksek ayar cezalanır.
+  - **Bütçe krizi:** 1 yıl önceden haber verilen 2–3 yıllık bütçe kesintisi. Oyuncu neyi keseceğini seçmezse bütün araçlar orantılı zayıflar.
+  - **Baskı karakteri tek seferlik olmasın.** Lobiye "tamam" deyip süre bitince eski ayara dönmek açık bıraktı. Lobi tekrar gelsin, ikincisi daha sert olsun.
+  - **Lab ile oyun aynı modeli kullansın.** Oyuna özel kesintiyi (ör. "çöp dağı") oyun kodunda değil, `model.js` içinde uygula. Yoksa lab başka sonuç verir ve ders çelişir.
+  - **Önemli haber kartı eskiyip atılmasın:** tarihî kartlara `{ keep: true }` ver.
+  - **Görev kartı açıkken zaman dursun:** tekrar oynayışta da (`game.story = true`, `start()` içinde bırak).
+  - **Tarihî olayların çakışmasını önle:** büyük olay yılları (`BUSY`) rastgele sel ve kriz yıllarından en az 2 yıl uzak olsun.
+- **Uçtan uca duman testi:** `tools/e2e.js` her bölümü `?debug&hizli&sessiz&e2e` ile baştan sona otomatik oynatır, hataları ve takılmaları raporlar. `?e2e`, gizli pencerede de kareleri sürer. Yayından önce çalıştır.
 
 ## Yeniden oynama (her yeni bölümde düşün)
 - Kullanıcı "ikinci oyunda sıkılmasınlar" dedi. Plan `ROADMAP.md` → "Yeniden oynama" bölümünde:
