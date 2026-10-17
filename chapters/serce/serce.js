@@ -1128,7 +1128,7 @@
   $('yb-speed').querySelectorAll('button').forEach(b => b.onclick = e => { e.stopPropagation(); initAudio(); setSpeed(Number(b.dataset.s)); });
 
   // oyun akarken olayları adım adım anlatan kartlar
-  const POSTER = 'https://upload.wikimedia.org/wikipedia/commons/6/6f/Kill_bird_and_insect.jpg';
+  const POSTER = '../../assets/img/cards/kill-bird-and-insect.jpg';
   const STORY = [
     [0, '🇨🇳', 'Çin', 'Mao Zedong <b>Büyük İleri Atılım</b>\'ı başlattı. Hedef birkaç yılda sanayileşmek, tarımda rekor kırmak.', '', { pause: true }],
     [0, '', 'Dört Zararlı Kampanyası', 'Dört düşman ilan edildi: <b>fare, sinek, sivrisinek ve serçe</b>. Serçenin suçu tahıl yemek.', '', { img: POSTER, pause: true }],

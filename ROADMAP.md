@@ -13,6 +13,11 @@ Durum: ✅ hazır · 🔜 sırada · 📝 plan
 | ✅ Kurtarıcı Kurbağa | Avustralya, kamış kurbağası (1935) | Kurbağa sal, haritada istilanın yayılışını izle; karantina hatları çek |
 | 📝 24 Tavşanlık Felaket | Avustralya, 1859'da salınan tavşanlar | Üstel büyüme; çit ve hastalıkla (miksomatozis) kontrol, direnç gelişimi |
 | 📝 Gölün Yeni Patronu | Victoria Gölü, 1950'ler | Avcı balığı ekle, yerli türlerin (çiklitler) kayboluşunu izle |
+| 📝 Ordu Emulara Yenildi | Batı Avustralya, Emu Savaşı (1932) | Asker ve mermi bütçesi; emular dağılır. Asıl çözüm (çit, tarım politikası) sonradan açılır |
+| 📝 Kaplumbağanın Yemeğini Kim Yedi? | Galápagos, keçiler (1959 → Isabela Projesi) | Birkaç keçi üstel çoğalır, bitki örtüsü ve kaplumbağalar azalır; geri toplama maliyeti |
+| 📝 Tarzan'ın Maymunları | Florida, Silver Springs (1938) | Adaya bırakılan maymunlar yüzerek kaçar; turist besleme kuralı ↔ nüfus; B virüsü riski. Mit kutusu: Tarzan filmi |
+| 📝 Güneyi Yutan Sarmaşık | ABD, kudzu (1930'lar) | Erozyona karşı fide dağıt; sarmaşık ormanı ve direkleri sarar |
+| 📝 Mor Halı | Victoria Gölü, su sümbülü (1989) | Bitki örtüsü göl yüzeyini kaplar; oksijen ve tekne yolları; biyolojik kontrol (böcek) |
 
 ## Sezon 2 · Su
 | Bölüm | Olay | Oyun fikri |
@@ -23,6 +28,8 @@ Durum: ✅ hazır · 🔜 sırada · 📝 plan
 | 📝 Marmara Nefes Alamıyor | Marmara, 2021 | Azot/fosfor yükü + sıcaklık → müsilaj; kaynakta arıtma kararları |
 | 📝 Ova Çöküyor | Konya Ovası, yeraltı suyu | Kuyu aç, ürün artar, su tablası düşer, obruk açılır |
 | 📝 Dans Eden Kediler | Japonya, 1956, cıva zehirlenmesi | Biyobirikim: plankton → balık → kedi → insan |
+| 📝 Hamsiyi Kim Yedi? | Karadeniz, *Mnemiopsis leidyi* (1982 → 1989 hamsi çöküşü) | Safra suyuyla gelen tür; plankton ↔ hamsi ↔ denizanası; sonra gelen *Beroe* |
+| 📝 Göl Nereye Gitti? | Akşehir Gölü, 2000'ler | Kuyu ve sulama kaydırıcısı ↔ göl alanı; kuraklık yılları |
 
 ## Sezon 3 · Tarladaki kimya
 | Bölüm | Olay | Oyun fikri |
@@ -31,6 +38,7 @@ Durum: ✅ hazır · 🔜 sırada · 📝 plan
 | 📝 Arılar Nerede? | Neonikotinoidler, AB kısıtlaması (2018) | İlaç ↔ tozlaşma ↔ meyve verimi |
 | 📝 Boğulan Körfez | Meksika Körfezi, gübre akışı | Gübre dozu → nehir ağzında oksijensiz alan büyür |
 | 📝 Toprak Gökyüzüne Uçtu | ABD Büyük Ovalar, 1930'lar | Çayırı sür, kuraklık gelir, toprak uçar; nadas ve rüzgâr perdesi |
+| 📝 Birecik'in Son Kelaynakları | Birecik, kelaynak (1950'ler →) | İlaçlama ↔ koloni; koruma istasyonu ve yarı serbest koloni |
 
 ## Sezon 4 · Görünmez düşmanlar
 | Bölüm | Olay | Oyun fikri |
@@ -39,6 +47,8 @@ Durum: ✅ hazır · 🔜 sırada · 📝 plan
 | 📝 İlaçla Büyüyen Tavuk | Büyütme amaçlı kullanım, kolistin direnci (mcr-1, 2015) | Hayvan verimi ↔ direnç genlerinin yayılması |
 | 📝 Son Antibiyotik | Yeni antibiyotik sınıflarının azlığı | Ar-Ge hattı: binlerce adaydan biri; zaman, maliyet, düşük kâr |
 | 📝 Bir Mucit, İki Felaket | T. Midgley, C. Patterson; küresel yasak 2021 | Kurşun emisyonu ↔ kandaki kurşun; bilim ile sanayi lobisi |
+| 📝 Kuyruksuz Fareler | Hanoi fare avı (1902) | Kuyruk başına ödül: teşvik ters teper, insanlar fare yetiştirir |
+| 📝 Beş Günlük Karanlık | Londra Büyük Dumanı (1952 → 1956 Temiz Hava Yasası) | Kömür ↔ parçacık ↔ hastaneler; sis günlerinde ölümler |
 
 ## Sezon 5 · Plastik çağı
 | Bölüm | Olay | Oyun fikri |
@@ -52,6 +62,7 @@ Durum: ✅ hazır · 🔜 sırada · 📝 plan
 | 📝 Milyarlardan Sıfıra | Göçmen güvercin, Martha (1914) | Allee etkisi: sürü küçülünce üreme çöker |
 | 📝 Balık Bitmez Sanıyorduk | Newfoundland, 1992 | Ortak malların trajedisi: kotanı sen, diğer gemileri yapay zekâ belirler |
 | 📝 Kafatası Dağı | Kuzey Amerika, 19. yüzyıl | Av baskısı ve politik amaçlar; geri dönüş çabaları |
+| 📝 Orman İnsanı Evsiz | Borneo orangutanları (1999–2015) | Orman kesimi ve avlanma; "ama" kutusu: kayıpların çoğu orman ayaktayken |
 
 ## Sezon 7 · Umut
 | Bölüm | Olay | Oyun fikri |
@@ -59,6 +70,7 @@ Durum: ✅ hazır · 🔜 sırada · 📝 plan
 | 📝 Dünyanın Anlaştığı Gün | Montreal Protokolü, 1987 | Ülkeleri ikna et; CFC yasağı ve ozonun yavaş iyileşmesi |
 | 📝 Nehirleri Değiştiren Kurtlar | Yellowstone, 1995 | Trofik kaskad: kurt → geyik → söğüt → kunduz → nehir |
 | 📝 Ölü Nehre Fok Geldi | Thames, 1957 → bugün | Arıtma yatırımları, türlerin geri dönüşü |
+| 📝 Kaktüsü Yiyen Güve | Avustralya, *Cactoblastis* (1926) | Önce test edilen biyolojik kontrol: kurbağa bölümünün tersi |
 
 ## Teknik notlar
 - Her bölüm `chapters/<ad>/` içinde kendi `index.html`, `.css` ve `.js` dosyalarıyla durur.

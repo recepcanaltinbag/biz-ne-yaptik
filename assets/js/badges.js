@@ -41,8 +41,9 @@
   ];
 
   // rozet madalyonları: bölüm fotoğrafından (çizgi film filtresiyle) rozete özel bir kesit + renkli çerçeve + simge
-  const W = 'https://upload.wikimedia.org/wikipedia/commons/';
-  const IMG = { S: W + '6/6f/Kill_bird_and_insect.jpg', K: W + 'thumb/2/2b/Cane_toad_%28Bufo_marinus%29.jpg/960px-Cane_toad_%28Bufo_marinus%29.jpg' };
+  // fotoğraflar sitede barındırılır; yol, bu betiğin adresine göre çözülür (ana sayfa ve bölüm sayfaları için aynı)
+  const BASE = new URL('../img/cards/', (document.currentScript && document.currentScript.src) || location.href).href;
+  const IMG = { S: BASE + 'kill-bird-and-insect.jpg', K: BASE + 'cane-toad-bufo-marinus.jpg' };
   const ART = {"serce-dost": ["S", "50% 12%", 230, "#7fb069"], "serce-durust": ["S", "25% 55%", 260, "#e0b04a"], "serce-vicdan": ["S", "75% 35%", 250, "#6aa6c9"], "serce-bolluk": ["S", "50% 92%", 220, "#d9a441"], "serce-gozluk": ["S", "85% 8%", 300, "#f08a4b"], "serce-defter": ["S", "15% 30%", 280, "#9a7bd1"], "serce-rock": ["S", "60% 65%", 320, "#d0587e"], "serce-rekor": ["S", "35% 85%", 300, "#8a6fd8"], "kurbaga-yok": ["K", "30% 40%", 260, "#c96a5a"], "kurbaga-kakadu": ["K", "70% 55%", 240, "#7fb069"], "kurbaga-hedef": ["K", "50% 30%", 300, "#e0b04a"], "kurbaga-bilim": ["K", "20% 70%", 280, "#6aa6c9"], "kurbaga-tasmanya": ["K", "85% 20%", 320, "#5f9fb5"], "kurbaga-gemi": ["K", "10% 15%", 300, "#7d74d4"], "kurbaga-otostop": ["K", "60% 85%", 280, "#c98a4b"], "kurbaga-bacak": ["K", "90% 80%", 260, "#a46fd0"]};
   function medal(def, on) {
     const [im, pos, zoom, ring] = ART[def.id] || ['S', '50% 50%', 200, '#e0b04a'];

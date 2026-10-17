@@ -10,7 +10,7 @@
   const pick = a => a[Math.floor(Math.random() * a.length)];
   const smooth = M.smooth;
   const FAST = /[?&]hizli\b/.test(location.search) ? 6 : 1;
-  const TOAD_IMG = 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2b/Cane_toad_%28Bufo_marinus%29.jpg/960px-Cane_toad_%28Bufo_marinus%29.jpg';
+  const TOAD_IMG = '../../assets/img/cards/cane-toad-bufo-marinus.jpg';
   const INK = [43, 58, 46];
 
   // Tarihî senaryo (karşılaştırma için)
