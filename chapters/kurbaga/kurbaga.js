@@ -332,7 +332,7 @@
       if (!td.jump && Math.random() < 0.0016 * f) { td.jump = 1; td.jh = rnd(80, 140); }
       if (td.jump) { td.jump += 0.03 * f; if (td.jump > 2) td.jump = 0; }
       // böceğe yetişmeye çalışır ama kamışın tepesine hiç ulaşamaz
-      const jy = td.jump ? Math.sin((td.jump - 1) * Math.PI) * Math.min((td.jh || 100) * U, sh * 0.62) : 0;
+      const jy = td.jump ? Math.sin((td.jump - 1) * Math.PI) * (td.super > t ? td.jh * U : Math.min((td.jh || 100) * U, sh * 0.62)) : 0;
       td.sx = td.x; td.sy = td.y - td.hop - Math.max(0, jy);
       drawToad(td.sx, td.sy, td.s * U, t, td.ph, td.tx > td.x ? 1 : -1);
     }
@@ -484,8 +484,9 @@
   function drawFamily(st, t) {
     const site = SITES[0]; if (!site.x) return;
     const zs = 1 / Math.sqrt(cam.z), s = 0.9 * U * zs, x = site.x + 26 * U * zs, y = site.y + 26 * U * zs;
-    const invaded = sitePred(st, site) < 0.75, trained = st.p.teach > 0.3;
-    const momGone = invaded && !trained;
+    const invaded = sitePred(st, site) < 0.75, trained = st.p.teach >= 0.25;
+    if (mode === 'game' && invaded && !trained) family.lost = true;
+    const momGone = mode === 'game' ? !!family.lost : invaded && !trained;
     if (!momGone) drawQuoll(x, y, s, -1, t, invaded && trained ? 'bleh' : null);
     drawQuoll(x + 16 * s, y + 6 * s, s * 0.55, -1, t); drawQuoll(x + 26 * s, y + 4 * s, s * 0.5, 1, t);
     family.x = x; family.y = y - 18 * s;
@@ -527,7 +528,7 @@
       const anchor = kind === 'farmer' ? { lon: 146.2, lat: -18.6 } : kind === 'parade' ? pick([{ lon: 130.85, lat: -12.6 }, { lon: 152.6, lat: -27.3 }, { lon: 145.8, lat: -17.0 }])
         : kind === 'rain' ? { lon: game.bbox && game.bbox.west ? game.bbox.west[0] + 2 : 140, lat: -14 } : sp ? { lon: M.G.lon[sp.c], lat: M.G.lat[sp.c] } : { lon: 140, lat: -18 };
       if (kind === 'fence') { const dams = M.G.cells.filter(c => game.st.fenced[c]); if (dams.length) { const c = pick(dams); anchor.lon = M.G.lon[c]; anchor.lat = M.G.lat[c]; } }
-      gags.push({ kind, t0: t, dur: kind === 'rain' ? 9000 : 8000, ...anchor, trained: game.st.p.teach > 0.3 });
+      gags.push({ kind, t0: t, dur: kind === 'rain' ? 9000 : 8000, ...anchor, trained: game.st.p.teach >= 0.25 });
     }
     if (kind === 'volunteer') { const v = pick(volunteers); say(v, pick(['Bu gece bin kurbağa\ntopladık... yarın iki bin!', 'Kovam doldu,\nkurbağa bitmedi.'])); }
   }
@@ -685,6 +686,7 @@
     ['collect', 'teach', 'fence'].forEach(k => { $('w-' + k).classList.add('locked'); $('o-' + k).textContent = '🔒 ' + UNLOCK[k] + "'de açılır"; });
     $('g-pause').textContent = '❚❚ Durdur'; if (typeof setSpeed === 'function') setSpeed(1);
     $('modal').hidden = true; $('milestone').hidden = true; $('toasts').innerHTML = ''; toastQueue.length = 0; lastToastAt = -1e9;
+    if (window.Badges) window.Badges.resetSession(); tapCount.m = {}; family.lost = false;
     fieldToads.length = 0; scientists.length = 0; bubbles.length = 0; sprites = []; volunteers = []; gags.length = 0; nextGag = 0;
     SITES.forEach(s => { s.hit = false; });
     readPolicy(); updatePanel();
@@ -777,6 +779,7 @@
     choice('Gordonvale deneme istasyonu · bilim insanı', 'Yavrular hazır', '"Laboratuvarda binlerce yavru kurbağa büyüdü. Tarlalara salalım mı?"', [
       { label: 'Salın!', sub: 'Doğal, ucuz, hızlı bir çözüm', fn: doRelease },
       { label: 'Önce araştıralım', sub: 'Kurbağa bu böceği gerçekten yer mi?', fn: () => {
+        (window.Badges ? window.Badges.award : () => {})('kurbaga-bilim');
         game.refused = 1;
         setTimeout(() => choice('Böcek bilimci Walter Froggatt', 'Bir uyarı', '"Kurbağa böceği değil, önüne gelen her şeyi yer. Salarsak bir daha geri toplayamayız."', [
           { label: 'Anladım →', sub: 'Peki şimdi ne olacak?', fn: () => setTimeout(() => choice('Hükümet yetkilisi', 'Şeker üreticileri bastırıyor', '"Böcekler kamışı yemeye devam ediyor. Yasağı kaldırmamız isteniyor. Kararın?"', [
@@ -851,8 +854,8 @@
       if (sitePred(st, site) < 0.75) {
         site.hit = true;
         if (!game.focus || performance.now() > game.focus.until) focus(site.lon, site.lat, 2.2, 4200);
-        say(site, st.p.teach > 0.3 ? 'Iyy! Bu kurbağanın tadı\nberbat. Bir daha asla!' : 'Bu da ne? Lezzetli\ngörünüyor...');
-        once('site-' + site.name, () => toast(site.ic, site.name, st.p.teach > 0.3 ? 'Eğitilmiş avcılar kurbağalardan uzak duruyor. Kayıplar beklenenden az.' : 'Kurbağayı yiyen avcılar zehirlenip ölüyor. Bazı bölgelerde nüfus %90\'ın üzerinde düşebiliyor.', st.p.teach > 0.3 ? 'good' : 'bad'));
+        say(site, st.p.teach >= 0.25 ? 'Iyy! Bu kurbağanın tadı\nberbat. Bir daha asla!' : 'Bu da ne? Lezzetli\ngörünüyor...');
+        once('site-' + site.name, () => toast(site.ic, site.name, st.p.teach >= 0.25 ? 'Eğitilmiş avcılar kurbağalardan uzak duruyor. Kayıplar beklenenden az.' : 'Kurbağayı yiyen avcılar zehirlenip ölüyor. Bazı bölgelerde nüfus %90\'ın üzerinde düşebiliyor.', st.p.teach >= 0.25 ? 'good' : 'bad'));
       }
     }
     const MS = [
@@ -886,7 +889,15 @@
     el.onpointerdown = next; // yalnız dokununca geçer
   }
 
+  function awardEnd() {
+    const A = (window.Badges ? window.Badges.award : () => {}), last = game.hist[game.hist.length - 1];
+    if (game.noToads) { A('kurbaga-yok'); return; }
+    if (!last || game.st.year < 2025) return;
+    if (last.pred >= 0.45) A('kurbaga-hedef');
+    if (!family.lost) A('kurbaga-kakadu');
+  }
   function endGame() {
+    if (game.state !== 'end') awardEnd();
     game.state = 'end';
     setTimeout(() => { if (mode === 'game') goTo(slideOf('result')); }, 1400);
   }
@@ -921,6 +932,7 @@
       <div class="kicker">2025 · 90 yıl sonra</div>
       <h2>${title}</h2>
       <p class="verdict">${text}</p>
+      ${(window.Badges && window.Badges.session().length) ? `<div class="run-badges">${window.Badges.session().map(id => { const d = window.Badges.DEFS.find(x => x.id === id); return `<span class="${d.hidden ? 'secret' : ''}">${d.icon} ${d.name}</span>`; }).join('')}</div>` : ''}
       <div class="rgrid">
         <div><div class="y">Yayıldığı alan</div><div class="v">%${last.areaPct.toFixed(0)}</div><div class="h">tarihte: %${H_END.areaPct.toFixed(0)}</div></div>
         <div><div class="y">Kurbağa</div><div class="v">${game.noToads ? '0' : fmtToads(last.toads)}</div><div class="h">tarihte: ${fmtToads(H_END.toads)}</div></div>
@@ -1022,10 +1034,21 @@
     gags.forEach(g => { if (g.kind === 'truck' && g.x !== undefined) out.push([g.x, g.y, 'truck', g]); });
     return out.filter(c => c[0] !== undefined);
   }
+  const tapCount = (key, win = 3500) => { const n = performance.now(); const c = tapCount.m[key] || { n: 0, t: 0 }; c.n = n - c.t < win ? c.n + 1 : 1; c.t = n; tapCount.m[key] = c; return c.n; };
+  tapCount.m = {};
   function talk(c) {
     const [x, y, kind, obj] = c;
+    if (mode === 'game') {
+      const A = (window.Badges ? window.Badges.award : () => {});
+      if (kind === 'ship' && tapCount('ship') >= 3) { A('kurbaga-gemi'); say({ x, y }, 'Kaptan: "Bir dahakine\nonları Hawaii\'de bırakın!"'); return; }
+      if (kind === 'truck') A('kurbaga-otostop');
+      if (kind === 'toad' && obj) {
+        obj._taps = (performance.now() - (obj._tapT || 0) < 3000) ? (obj._taps || 0) + 1 : 1; obj._tapT = performance.now();
+        if (obj._taps >= 2) { obj.super = performance.now() + 2600; obj.jump = 1; obj.jh = 900; A('kurbaga-bacak'); say({ get x() { return obj.sx; }, get y() { return Math.max(70, obj.sy); } }, 'Bacaklarım uzadı!\nBöceğe yetişeceğim!'); trill(); return; }
+      }
+    }
     const st = mode === 'sandbox' ? sb.st : game.st;
-    let text = kind === 'site' ? (sitePred(st, obj) < 0.45 ? (st.p.teach > 0.3 ? 'Kurbağaya dokunmamayı\nöğrendik. Zor oldu.' : 'Burada eskiden\nçok kalabalıktık...') : 'Bu da ne? Lezzetli\ngörünüyor...') : pick(LINES[kind]);
+    let text = kind === 'site' ? (sitePred(st, obj) < 0.45 ? (st.p.teach >= 0.25 ? 'Kurbağaya dokunmamayı\nöğrendik. Zor oldu.' : 'Burada eskiden\nçok kalabalıktık...') : 'Bu da ne? Lezzetli\ngörünüyor...') : pick(LINES[kind]);
     say({ get x() { return kind === 'beetle' ? obj.x : x; }, get y() { return y; } }, text);
     if (kind === 'toad' || kind === 'mtoad') trill(); else blip(kind === 'beetle' ? 1400 : 600);
   }
@@ -1035,6 +1058,13 @@
     const cs = candidates(); let best = null, bd = Infinity; // en yakın karakter, mesafe sınırı yok
     const onMap = mode === 'sandbox' || mode === 'result' || (mode === 'game' && game.phase === 'map');
     const [px, py] = onMap ? toBase(e.clientX, e.clientY) : [e.clientX, e.clientY];
+    if (onMap && mode === 'game') {
+      const [lon, lat] = unP(px, py);
+      if (lon > 143.3 && lon < 149.2 && lat < -39.7 && lat > -44.2) {
+        (window.Badges ? window.Badges.award : () => {})('kurbaga-tasmanya');
+        say({ x: px, y: py }, 'Burada kurbağa yok!\nHava çok soğuk.'); return;
+      }
+    }
     for (const c of cs) { const d = Math.hypot(c[0] - px, c[1] - py); if (d < bd) { bd = d; best = c; } }
     if (best) talk(best);
   });
@@ -1100,6 +1130,6 @@
 
   window.addEventListener('resize', () => { resize(); buildField(); });
   resize(); buildField(); resetGame(); goTo(0);
-  if (/[?&]debug\b/.test(location.search)) window.__dbg = { game, sb, fieldToads, gags, cam, get mode() { return mode; }, gag: () => { nextGag = 1; }, go: m => { maxSeen = slides.length; goTo(slideOf(m)); } };
+  if (/[?&]debug\b/.test(location.search)) window.__dbg = { game, sb, fieldToads, gags, cam, ship, family, P, toScreen, get mode() { return mode; }, gag: () => { nextGag = 1; }, go: m => { maxSeen = slides.length; goTo(slideOf(m)); } };
   requestAnimationFrame(frame);
 })();

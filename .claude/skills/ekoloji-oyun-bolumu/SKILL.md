@@ -104,6 +104,12 @@ Bu kurallar kullanıcının geri bildirimleriyle tek tek oturtuldu. Yeni bölüm
 4. **Sığma:** `tools/layout-audit.js` çalıştırılır. Bu betik her bölümün her slaytını 1440×900, 1024×768, 375×812 ve 360×640'ta açıp pencereden taşan öğeleri listeler (yerel sunucuda ana sayfayı aç, sonra `await eval(await (await fetch('/tools/layout-audit.js')).text())`). Çıktı **"sorun yok"** olmadan yayına çıkma. Metin sayfaları ve laboratuvar paneli dahil hiçbir ekran kaydırma gerektirmemeli.
 5. Bütün dosyalarda `node --check` çalıştırılır, konsolda hata kalmamalı. Ardından `?v=` sürümü artırılır, push edilir ve canlı sürüm curl ile kontrol edilir.
 
+## Rozetler
+- Ortak sistem `assets/js/badges.js` (+ `assets/css/badges.css`). Her bölümde **4 açık rozet** (iyi senaryolar, ipucu görünür) ve **4 kapalı rozet** (gizli; tek dokunuş, 2–3 dokunuş ya da sürpriz oyun anı). Her rozet gerçek bir "Biliyor muydun?" bilgisiyle gelir. "Yakında" bölümlere rozet konmaz.
+- Rozet koşulları **sahnede görüneni** izlesin (ör. Kakadu annesi bir kez kaybolursa geri gelmez, rozet de gelmez). Eşikler oyun içinde her yerde aynı olsun (ör. öğretmen kurbağa ≥ 25 puan).
+- **Her rozet kazanılabilir olmalı:** node ya da `?debug&hizli` ile her rozet için bir senaryo oynatılıp gerçekten açıldığı doğrulanır. Ayrıca rozetin yanlışlıkla açılmadığı da kontrol edilir (ör. yalan söyleyen "Dürüst bakan" almamalı).
+- Sistem testleri: tekrar kazanım `false` döner, bilinmeyen kimlik reddedilir, kodla dışa ve içe aktarma çalışır, bozuk kod reddedilir, panel 16 kart çizer, gizliler "???" görünür.
+
 ## Görsel ve ses
 - Palet: doğal yeşil (`#e9f0de`). Ekosistem bozuldukça arka plan `#f4dbd1` tonuna kayar. Yazıların arkasında yarı saydam beyaz zemin olur.
 - Fotoğraflar Wikimedia Commons'tan (kamu malı veya CC) alınır, atıflı kullanılır ve `toon.js` ile işlenir. Fotoğraf seçerken kırpma ve içerik uyumuna dikkat et (ör. morina bölümünde balık görseli olsun).

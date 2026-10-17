@@ -71,3 +71,34 @@ footer .byline { margin-top: 14px; font-size: .8rem; opacity: .75; }
 .hero h1 { margin: .12em 0 .18em; }
 .season:first-child { margin-top: 18px; }
 @media (min-width: 900px) { .hero { padding-top: 34px; } }
+
+/* rozet menüsü ve paneli */
+.topnav { display: flex; align-items: center; gap: 14px; }
+.badge-btn { font: 1.1rem var(--hand); color: var(--ink); background: var(--paper); border: 2px solid var(--ink); border-radius: 999px; padding: 2px 12px; cursor: pointer; box-shadow: 0 2px 0 var(--ink); }
+.badge-btn b { font-weight: 400; color: var(--danger); }
+.badge-panel { position: absolute; z-index: 50; right: max(16px, calc((100vw - 1120px) / 2 + 16px)); top: 58px; width: min(520px, calc(100vw - 24px)); max-height: calc(100vh - 80px); overflow-y: auto;
+  background: var(--paper); border: 2px solid var(--ink); border-radius: 18px; box-shadow: 0 6px 0 var(--ink), 0 30px 60px rgba(43,58,46,.18); padding: 14px 16px; }
+.badge-panel[hidden] { display: none; }
+.bp-head { display: flex; justify-content: space-between; align-items: center; }
+.bp-head h2 { font: 400 1.7rem var(--hand); margin: 0; }
+.bp-close { font-size: 1.1rem; background: none; border: 0; cursor: pointer; color: var(--ink-soft); }
+.bp-group h3 { font: 400 1.25rem var(--hand); margin: 10px 0 6px; display: flex; justify-content: space-between; }
+.bp-group h3 a { color: var(--ink); text-decoration: none; } .bp-group h3 span { color: var(--ink-soft); }
+.bp-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+.bp-card { display: grid; grid-template-columns: 40px 1fr; gap: 8px; align-items: center; padding: 6px 8px; border-radius: 12px; background: #eceae2; color: #8a877e; }
+.bp-card .bp-ic { width: 40px; height: 40px; border-radius: 10px; display: grid; place-items: center; font-size: 1.3rem; background: #dedbd0; filter: grayscale(1); }
+.bp-card.on { background: #f7ecc9; color: var(--ink); }
+.bp-card.on .bp-ic { background: #f3d27a; filter: none; }
+.bp-card.on.secret { background: #ebe3f7; } .bp-card.on.secret .bp-ic { background: #c7b4ef; }
+.bp-n { font: 1.05rem var(--hand); line-height: 1.1; }
+.bp-s { font-size: .74rem; line-height: 1.25; }
+.bp-note { font-size: .8rem; color: var(--ink-soft); margin: 10px 0 6px; }
+.bp-code { display: flex; gap: 8px; flex-wrap: wrap; }
+.bp-code button { font: 1rem var(--hand); background: #fff; border: 2px solid var(--line); border-radius: 10px; padding: 3px 10px; cursor: pointer; color: var(--ink); }
+.bp-msg { font-size: .85rem; color: var(--green); min-height: 1em; margin: 4px 0 0; }
+.card-badges { display: inline-block; margin-top: 6px; font: .95rem var(--hand); background: #f7ecc9; border-radius: 99px; padding: 1px 9px; }
+@media (max-width: 640px) {
+  .topnav > a { display: none; }
+  .badge-panel { position: fixed; left: 8px; right: 8px; top: auto; bottom: 0; width: auto; max-height: 80vh; border-radius: 18px 18px 0 0; box-shadow: 0 -10px 40px rgba(43,58,46,.2); }
+  .bp-grid { grid-template-columns: 1fr 1fr; }
+}

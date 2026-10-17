@@ -1,0 +1,84 @@
+// Rozetler: her bölümde 4 açık (hedefi görünür) ve 4 kapalı (gizli) rozet.
+// Tarayıcının yerel hafızasında saklanır; "rozet kodu" ile başka cihaza taşınabilir.
+(() => {
+  'use strict';
+  const KEY = 'bny-rozetler-v1';
+  const DEFS = [
+    // --- Serçelere Savaş ---
+    { id: 'serce-dost', ch: 'serce', icon: '🕊️', name: 'Serçelerin dostu', hint: 'Hiç serçe düşürmeden oyunu bitir.',
+      fact: 'Bir serçe çifti yavru beslerken günde yüzlerce böcek taşıyabilir.' },
+    { id: 'serce-durust', ch: 'serce', icon: '📏', name: 'Dürüst bakan', hint: 'Üç hasatta da gerçeği yaz.',
+      fact: 'Büyük İleri Atılım\'da şişirilen raporlar yüzünden devlet, aslında olmayan tahılı topladı.' },
+    { id: 'serce-vicdan', ch: 'serce', icon: '🧭', name: 'Vicdan', hint: 'Müfettişe hayır de.',
+      fact: 'Kampanyaya itiraz eden bilim insanları vardı. Kuşbilimci Zheng Zuoxin bunlardan biriydi.' },
+    { id: 'serce-bolluk', ch: 'serce', icon: '🌾', name: 'Bolluk yılları', hint: 'Üç hasatta da %90\'ın üstünde ürün al.',
+      fact: 'Serçeler hem tahıl hem böcek yer; dengede, tarlanın dostudurlar.' },
+    { id: 'serce-gozluk', ch: 'serce', icon: '😎', name: 'Güneş de bıktı', hidden: true,
+      fact: 'Tanıklar, durmadan çalan tencereler yüzünden konamayan serçelerin yorgunluktan düştüğünü anlatır.' },
+    { id: 'serce-defter', ch: 'serce', icon: '📓', name: 'Zheng\'in defteri', hidden: true,
+      fact: 'Kuşbilimciler serçelerin mide içeriğini incelediler: yavru döneminde çoğunlukla böcek yiyorlardı.' },
+    { id: 'serce-rock', ch: 'serce', icon: '🎸', name: 'Tencere Rock', hidden: true,
+      fact: 'Kampanyada insanlar tencere, gong ve davul çaldı; bazıları çatılara çıkıp bayrak salladı.' },
+    { id: 'serce-rekor', ch: 'serce', icon: '📈', name: 'Rakam sihirbazı', hidden: true,
+      fact: '1958\'de bazı yerlerde hasat, gerçeğin birkaç katı olarak raporlandı.' },
+    // --- Kurtarıcı Kurbağa ---
+    { id: 'kurbaga-yok', ch: 'kurbaga', icon: '🚫', name: 'Kurbağasız Avustralya', hint: 'Kurbağaları hiç salma.',
+      fact: 'Froggatt\'ın uyarısıyla salımlar kısa bir süre durduruldu, ama 1936\'da yeniden başladı.' },
+    { id: 'kurbaga-kakadu', ch: 'kurbaga', icon: '🐾', name: 'Kakadu\'nun koruyucusu', hint: 'Kurbağaları Kakadu\'ya varmadan yavaşlat.',
+      fact: 'Kurbağaların gelişine karşı bazı kuzey kedileri kurbağasız adalara taşınarak korundu.' },
+    { id: 'kurbaga-hedef', ch: 'kurbaga', icon: '🎯', name: 'Hedef tuttu', hint: 'Yerli avcıları %45\'in üstünde tut.',
+      fact: 'Bazı yılanlar birkaç on yılda kurbağadan kaçınmayı ya da zehre dayanmayı geliştirdi.' },
+    { id: 'kurbaga-bilim', ch: 'kurbaga', icon: '🧪', name: 'Bilime kulak ver', hint: 'Salmadan önce araştır.',
+      fact: 'Biyolojik kontrol işe yarayabilir, ama önce hedef türü gerçekten etkilediği test edilmeli.' },
+    { id: 'kurbaga-tasmanya', ch: 'kurbaga', icon: '🏝️', name: 'Soğuk ada', hidden: true,
+      fact: 'Tasmanya\'da yerleşik kamış kurbağası nüfusu yok; soğuk iklim ve Bass Boğazı doğal bir engel.' },
+    { id: 'kurbaga-gemi', ch: 'kurbaga', icon: '🚢', name: 'Kaptanın sırrı', hidden: true,
+      fact: 'Avustralya\'ya gelen kurbağalar Hawaii\'den getirildi. Hawaii\'ye de 1932\'de Porto Riko\'dan getirilmişlerdi.' },
+    { id: 'kurbaga-otostop', ch: 'kurbaga', icon: '🚚', name: 'Otostopçu', hidden: true,
+      fact: 'Kurbağalar zaman zaman araçlara ve yüklere saklanarak yeni bölgelere taşındı.' },
+    { id: 'kurbaga-bacak', ch: 'kurbaga', icon: '🦵', name: 'Uzun bacaklar', hidden: true,
+      fact: 'Yayılma cephesindeki kurbağaların bacakları, arkadakilere göre belirgin şekilde daha uzun.' },
+  ];
+
+  const read = () => { try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch (e) { return {}; } };
+  const write = d => { try { localStorage.setItem(KEY, JSON.stringify(d)); } catch (e) {} };
+  let got = read();
+  const session = [];
+
+  function toastEl() {
+    let el = document.getElementById('badge-toast-box');
+    if (!el) { el = document.createElement('div'); el.id = 'badge-toast-box'; document.body.appendChild(el); }
+    return el;
+  }
+  function show(def) {
+    const box = toastEl();
+    const t = document.createElement('div');
+    t.className = 'badge-toast' + (def.hidden ? ' secret' : '');
+    t.innerHTML = `<div class="bt-ic">${def.icon}</div><div><div class="bt-k">${def.hidden ? 'Gizli rozet bulundu!' : 'Rozet kazanıldı'}</div><div class="bt-n">${def.name}</div><div class="bt-f">🔍 ${def.fact}</div></div>`;
+    t.onclick = () => t.remove();
+    box.appendChild(t);
+    setTimeout(() => { t.classList.add('out'); setTimeout(() => t.remove(), 500); }, 7000);
+    try { if (window.AudioContext && Badges._ac) Badges._ac(); } catch (e) {}
+  }
+
+  const Badges = {
+    DEFS,
+    has: id => !!got[id],
+    award(id) {
+      const def = DEFS.find(d => d.id === id);
+      if (!def || got[id]) return false;
+      got[id] = new Date().toISOString().slice(0, 10); write(got); session.push(id); show(def);
+      return true;
+    },
+    session: () => session.slice(),
+    resetSession: () => { session.length = 0; },
+    list: ch => DEFS.filter(d => !ch || d.ch === ch),
+    count: ch => { const l = DEFS.filter(d => !ch || d.ch === ch); return [l.filter(d => got[d.id]).length, l.length]; },
+    date: id => got[id],
+    exportCode: () => btoa(unescape(encodeURIComponent(JSON.stringify(got)))),
+    importCode(code) {
+      try { const d = JSON.parse(decodeURIComponent(escape(atob(code.trim())))); if (typeof d !== 'object') return false; got = { ...got, ...d }; write(got); return true; } catch (e) { return false; }
+    },
+  };
+  window.Badges = Badges;
+})();

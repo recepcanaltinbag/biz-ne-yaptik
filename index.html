@@ -8,16 +8,28 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Inter:wght@400;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/css/style.css?v=261017140244">
+<link rel="stylesheet" href="assets/css/badges.css?v=261017141744">
+<link rel="stylesheet" href="assets/css/style.css?v=261017141744">
 </head>
 <body>
 
 <header class="topbar">
   <div class="wrap">
     <a class="brand" href="./">Biz Ne Yaptık?</a>
-    <nav><a href="#bolumler">Bölümler</a></nav>
+    <nav class="topnav"><a href="#bolumler">Bölümler</a><button class="badge-btn" id="badge-btn" aria-expanded="false" aria-controls="badge-panel">🏅 Rozetler <b id="badge-count">0/16</b> ▾</button></nav>
   </div>
 </header>
+<div class="badge-panel" id="badge-panel" hidden>
+  <div class="bp-head"><h2>Rozetler</h2><button class="bp-close" id="badge-close" aria-label="Kapat">✕</button></div>
+  <div id="badge-groups"></div>
+  <p class="bp-note">Yeni bölümler açıldıkça rozetleri de gelecek. Rozetler bu tarayıcıda saklanır.</p>
+  <div class="bp-code">
+    <button id="badge-copy">📋 Rozet kodumu kopyala</button>
+    <button id="badge-paste">📥 Kod yapıştır</button>
+  </div>
+  <p class="bp-msg" id="badge-msg" aria-live="polite"></p>
+</div>
+
 
 <main class="wrap">
   <section class="hero">
@@ -41,7 +53,36 @@
     <p class="byline">Hazırlayan: Recep Can Altınbağ</p>
   </div>
 </footer>
-<script src="assets/js/toon.js?v=261017140244"></script>
-<script src="assets/js/chapters.js?v=261017140244"></script>
+<script src="assets/js/badges.js?v=261017141744"></script>
+<script src="assets/js/toon.js?v=261017141744"></script>
+<script src="assets/js/chapters.js?v=261017141744"></script>
+<script>
+(() => {
+  const B = window.Badges; if (!B) return;
+  const CH = [['serce', 'Serçelere Savaş', 'chapters/serce/'], ['kurbaga', 'Kurtarıcı Kurbağa', 'chapters/kurbaga/']];
+  const btn = document.getElementById('badge-btn'), panel = document.getElementById('badge-panel');
+  function render() {
+    const [g, n] = B.count(); document.getElementById('badge-count').textContent = g + '/' + n;
+    document.getElementById('badge-groups').innerHTML = CH.map(([id, name, href]) => {
+      const [gg, nn] = B.count(id);
+      return `<section class="bp-group"><h3><a href="${href}">${name}</a> <span>${gg}/${nn}</span></h3><div class="bp-grid">${B.list(id).map(d => {
+        const on = B.has(d.id);
+        const title = on || !d.hidden ? d.name : '???';
+        const sub = on ? '🗓️ ' + B.date(d.id).split('-').reverse().join('.') : d.hidden ? 'Gizli rozet' : d.hint;
+        return `<div class="bp-card ${on ? 'on' : ''} ${d.hidden ? 'secret' : ''}" title="${on ? d.fact.replace(/"/g, '&quot;') : ''}"><div class="bp-ic">${on ? d.icon : '🔒'}</div><div><div class="bp-n">${title}</div><div class="bp-s">${sub}</div></div></div>`;
+      }).join('')}</div></section>`;
+    }).join('');
+  }
+  const open = v => { panel.hidden = !v; btn.setAttribute('aria-expanded', v); if (v) render(); };
+  btn.onclick = e => { e.stopPropagation(); open(panel.hidden); };
+  document.getElementById('badge-close').onclick = () => open(false);
+  document.addEventListener('click', e => { if (!panel.hidden && !panel.contains(e.target) && e.target !== btn) open(false); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') open(false); });
+  const msg = t => { document.getElementById('badge-msg').textContent = t; };
+  document.getElementById('badge-copy').onclick = async () => { const c = B.exportCode(); try { await navigator.clipboard.writeText(c); msg('Kod kopyalandı. Diğer cihazda "Kod yapıştır" ile aç.'); } catch (e) { prompt('Rozet kodun:', c); } };
+  document.getElementById('badge-paste').onclick = () => { const c = prompt('Rozet kodunu yapıştır:'); if (!c) return; msg(B.importCode(c) ? 'Rozetler yüklendi.' : 'Bu kod okunamadı.'); render(); };
+  render();
+})();
+</script>
 </body>
 </html>

@@ -157,6 +157,9 @@
     bug: [88, 118, 48], locust: [128, 112, 40], sun: [246, 210, 104],
   };
 
+  const sunPos = { x: 0, y: 0, r: 0, glasses: 0 };
+  const tapCount = (key, win = 3500) => { const n = performance.now(); const c = tapCount.m[key] || { n: 0, t: 0 }; c.n = n - c.t < win ? c.n + 1 : 1; c.t = n; tapCount.m[key] = c; return c.n; };
+  tapCount.m = {};
   const birds = [], bugs = [], rings = [], floats = [], bubbles = [], villagers = [];
   const clouds = Array.from({ length: 4 }, (_, i) => ({ x: rnd(0, 1), y: rnd(0.12, 0.3), s: rnd(0.7, 1.2), v: rnd(0.000006, 0.000014) }));
   const vis = { S: 1, P: 0.6, Fr: 1, c: 6.3, warm: 1, bad: 0 };
@@ -299,7 +302,12 @@
 
     // güneş ve bulutlar
     ctx.fillStyle = rgb(PAL.sun, winter ? 0.55 : 0.95);
-    ctx.beginPath(); ctx.arc(x1 * 0.84, H * 0.17 + (winter ? 30 * U : 0), 30 * U, 0, 6.283); ctx.fill();
+    sunPos.x = x1 * 0.84; sunPos.y = H * 0.17 + (winter ? 30 * U : 0); sunPos.r = 30 * U;
+    ctx.beginPath(); ctx.arc(sunPos.x, sunPos.y, sunPos.r, 0, 6.283); ctx.fill();
+    if (sunPos.glasses > t) { // gizli: güneş de gürültüden bıktı
+      ctx.fillStyle = rgb(PAL.ink); ctx.fillRect(sunPos.x - 22 * U, sunPos.y - 8 * U, 18 * U, 9 * U); ctx.fillRect(sunPos.x + 4 * U, sunPos.y - 8 * U, 18 * U, 9 * U); ctx.fillRect(sunPos.x - 4 * U, sunPos.y - 6 * U, 8 * U, 2.5 * U);
+      ctx.strokeStyle = rgb(PAL.ink); ctx.lineWidth = 2.4 * U; ctx.beginPath(); ctx.arc(sunPos.x, sunPos.y + 8 * U, 9 * U, 0.2, 2.9); ctx.stroke();
+    }
     for (const cl of clouds) {
       cl.x += cl.v * dt; if (cl.x > 1.15) cl.x = -0.15;
       const cx = cl.x * x1, cy = cl.y * H, s = 26 * U * cl.s;
@@ -492,7 +500,7 @@
     leavers.forEach(v => add(v.x, v.y - 30 * U, () => { bubbles.length = 0; bubbles.push({ obj: v, x: v.x, y: v.y, oy: 46 * U, text: pick(['Eve gidiyorum,\nrahatsız etme!', 'Yarın yine\ntencere mi?']), life: 1 }); }));
     farmers.forEach(fm => { if (fm.sx !== undefined) add(fm.sx, fm.sy, () => say({ get x() { return fm.sx; }, get y() { return fm.sy; } }, 'farmer', 8 * U)); });
     if (official && official.x !== undefined) add(official.x, official.y, () => { bubbles.length = 0; bubbles.push({ obj: official, x: official.x, y: official.y, text: pick(['Rakamlar, yoldaş.\nRakamlar!', 'Pekin bekliyor.']), life: 1 }); });
-    if (nest.x !== undefined && vis.S > 0.06) add(nest.x, nest.y, () => { bubbles.length = 0; bubbles.push({ obj: { get x() { return nest.x; }, get y() { return nest.y; } }, x: 0, y: 0, text: game.campaign && game.k > 0.25 ? 'Anne, yemek yok mu?' : pick(['Cik cik! Annem\nböcek getirdi!', 'Daha çok çekirge!']), life: 1 }); chirp(nest.x); });
+    if (nest.x !== undefined && vis.S > 0.06) add(nest.x, nest.y, () => { if (tapCount('nest') >= 3) (window.Badges ? window.Badges.award : () => {})('serce-defter'); bubbles.length = 0; bubbles.push({ obj: { get x() { return nest.x; }, get y() { return nest.y; } }, x: 0, y: 0, text: game.campaign && game.k > 0.25 ? 'Anne, yemek yok mu?' : pick(['Cik cik! Annem\nböcek getirdi!', 'Daha çok çekirge!']), life: 1 }); chirp(nest.x); });
     if (!cands.length) return false;
     cands.sort((a, b) => a[0] - b[0]);
     cands[0][1]();
@@ -623,6 +631,7 @@
       gags.push({ kind, t0: t, dur: 6500, f, sx: f.sx, sy: f.sy });
       sayAt(() => [f.sx, f.sy], 'Hey! Şapkam!');
     } else if (kind === 'band') {
+      (window.Badges ? window.Badges.award : () => {})('serce-rock');
       const cx = x1 * rnd(0.3, 0.6), y = gt + (gb - gt) * 0.12 + 40 * U;
       gags.push({ kind, t0: t, dur: 10000, cx, y, beat: 0 });
       sayAt(() => [cx, y - 70 * U], pick(['Tencere Rock Grubu\nsahnede!', 'Bu şarkı serçelere\ngelsin!', 'Bir, iki, üç, dört!']));
@@ -1076,6 +1085,7 @@
     $('modal').hidden = true; $('harvest').hidden = true; if ($('yb-harvest')) $('yb-harvest').textContent = ''; $('toasts').innerHTML = ''; toastQueue.length = 0; lastToastAt = -1e9;
     $('g-intro').classList.remove('gone');
     birds.forEach(b => { if (b.fallen) b.a = 0; });
+    if (window.Badges) window.Badges.resetSession(); tapCount.m = {}; game.records = 0;
     villagers.length = 0; leavers.length = 0; game.nextShift = 0; official = null; if (typeof gags !== 'undefined') { gags.length = 0; nextGag = 0; }
     renderQuota();
   }
@@ -1291,6 +1301,7 @@
     const reported = v * o.mult, left = Math.max(0, v - 0.33 * reported), food = Math.round(left / 0.67);
     game.food[i] = food;
     if (o.mult > 1) game.lies++;
+    if (o.mult >= 2) game.records = (game.records || 0) + 1;
     if (!game.replaced && game.campaign) game.trust = clamp(game.trust + o.trust, 0, 100);
     if (official) { official.reply = o.reply; official.leave = performance.now() + 2600; }
     if (food < 60) toast('🍚', 'Köy ambarı', `Devlet raporlanan hasadın üçte birini aldı. Köylünün payı normalin %${food}'i. Kış zor geçecek.`, 'bad');
@@ -1342,12 +1353,22 @@
     if (text && official.lastText !== text) { official.lastText = text; bubbles.length = 0; bubbles.push({ obj: official, x, y: official.y, text, life: 1 }); }
   }
 
+  function awardEnd() {
+    const A = (window.Badges ? window.Badges.award : () => {});
+    if (game.replaced) { A('serce-vicdan'); return; }
+    if (gs.harvests.length < 3) return;
+    if (game.totalKills === 0) A('serce-dost');
+    if (game.food.length === 3 && game.lies === 0) A('serce-durust');
+    if ([0, 1, 2].every(i => hIdx(gs, i, BASE) >= 90)) A('serce-bolluk');
+    if ((game.records || 0) >= 3) A('serce-rekor');
+  }
   function endGame() {
+    if (game.state !== 'end') awardEnd();
     game.state = 'end';
     setTimeout(() => { if (mode === 'game') goTo(slideOf('result')); }, 1500);
   }
   resetGame();
-  if (/[?&]debug\b/.test(location.search)) window.__dbg = { game, gags, get gs() { return gs; }, get mode() { return mode; }, gag: () => { nextGag = 1; }, go: m => { maxSeen = slides.length; goTo(slideOf(m)); } };
+  if (/[?&]debug\b/.test(location.search)) window.__dbg = { game, gags, nest, sunPos, get gs() { return gs; }, get mode() { return mode; }, gag: () => { nextGag = 1; }, go: m => { maxSeen = slides.length; goTo(slideOf(m)); } };
 
 
   function renderResult() {
@@ -1367,6 +1388,7 @@
       <h2>${title}</h2>
       <p class="verdict">${text}</p>
       <div class="rgrid">${you.map((v, i) => `<div><div class="y">${1958 + i} hasadı</div><div class="v" style="color:${v === null ? 'var(--ink-soft)' : col(v)}">${v === null ? '—' : '%' + v}</div><div class="h">tarihte: %${his[i]}</div></div>`).join('')}</div>
+      ${(window.Badges && window.Badges.session().length) ? `<div class="run-badges">${window.Badges.session().map(id => { const d = window.Badges.DEFS.find(x => x.id === id); return `<span class="${d.hidden ? 'secret' : ''}">${d.icon} ${d.name}</span>`; }).join('')}</div>` : ''}
       <p class="verdict">Düşürdüğün serçe: <b>${k}</b>. Gerçekte bu sayı yüz milyonlarcaydı.${game.food.some(f => f < 70) ? ` Şişirilmiş raporlar yüzünden köylünün payı bir yıl normalin <b>%${Math.min(...game.food)}</b>'ine düştü. Gerçek kıtlığı en çok bu büyüttü.` : ''}</p>
       <canvas class="rchart" id="rchart"></canvas>
       <div class="legend"><span style="--c:var(--bird)">Serçe</span><span style="--c:var(--bug)">Böcek</span><span style="--c:var(--grain)">Tahıl</span><span style="--c:#9aa59a">Tarihteki serçe (kesikli)</span></div>
@@ -1462,7 +1484,14 @@
   cv.addEventListener('pointerdown', e => {
     const x = e.clientX, y = e.clientY;
     initAudio();
-    if (mode === 'game') { if (!talkAt(x, y)) rings.push({ x, y, r: 4, life: 0.5, big: false }); return; }
+    if (mode === 'game') {
+      if (Math.hypot(x - sunPos.x, y - sunPos.y) < sunPos.r + 14 * U) {
+        sunPos.glasses = performance.now() + 9000;
+        bubbles.length = 0; bubbles.push({ obj: { get x() { return sunPos.x; }, get y() { return sunPos.y + 10 * U; } }, x: 0, y: 0, text: 'Bu gürültüde\nben de duramıyorum!', life: 1 });
+        (window.Badges ? window.Badges.award : () => {})('serce-gozluk'); return;
+      }
+      if (!talkAt(x, y)) rings.push({ x, y, r: 4, life: 0.5, big: false }); return;
+    }
     if (mode === 'sandbox') { if (x < lay.x1 * W) scare(x, y, true); return; }
     if (mode === 'intro') {
       let best = null, bd = 50 * U;
