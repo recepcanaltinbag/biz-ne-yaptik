@@ -27,7 +27,7 @@
     { id: 'kurbaga-kakadu', ch: 'kurbaga', icon: '🐾', name: 'Kakadu\'nun koruyucusu', hint: 'Kuzeydeki küçük aile hikâyenin sonunu görsün.',
       fact: 'Kurbağaların gelişine karşı bazı kuzey kedileri kurbağasız adalara taşınarak korundu.' },
     { id: 'kurbaga-hedef', ch: 'kurbaga', icon: '🎯', name: 'Hedef tuttu', hint: 'Çizginin altına düşme.',
-      fact: 'Bazı yılanlar birkaç on yılda kurbağadan kaçınmayı ya da zehre dayanmayı geliştirdi.' },
+      fact: 'Kurbağalar geldikten sonra, bazı yılanlar 70 yıl kadar içinde kurbağadan kaçınmayı ya da zehre dayanmayı geliştirdi.' },
     { id: 'kurbaga-bilim', ch: 'kurbaga', icon: '🧪', name: 'Bilime kulak ver', hint: 'Bilim insanını dinlemenin zamanı vardır.',
       fact: 'Biyolojik kontrol işe yarayabilir, ama önce hedef türü gerçekten etkilediği test edilmeli.' },
     { id: 'kurbaga-tasmanya', ch: 'kurbaga', icon: '🏝️', name: 'Soğuk ada', hidden: true,

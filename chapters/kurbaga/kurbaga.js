@@ -566,7 +566,7 @@
           drawToad(ax, ay, 0.8 * S, t, 0, 1);
           drawPerson(ax + 22 * S, ay + 2 * S, 0.8 * S, '#f4f4f0', t, 0);
           ctx.strokeStyle = '#d9b45a'; ctx.lineWidth = 3 * S; ctx.beginPath(); ctx.moveTo(ax - 10 * S, ay + 4 * S); ctx.lineTo(ax + 12 * S, ay + 4 * S); ctx.stroke();
-          if (!g.said && p > 0.15) { g.said = 1; say(g, pick(['Bacaklar yine\nuzamış!', 'Öndekiler en uzun\nbacaklılar. Evrim!'])); }
+          if (!g.said && p > 0.15) { g.said = 1; say(g, pick(['Öndekilerin bacakları\ndaha uzun!', 'Öndekiler en uzun\nbacaklılar. Evrim!'])); }
         }
         if (g.kind === 'parade') {
           ctx.strokeStyle = 'rgba(80,80,80,.7)'; ctx.lineWidth = 6 * S; ctx.beginPath(); ctx.moveTo(ax - 50 * S, ay); ctx.lineTo(ax + 50 * S, ay); ctx.stroke();
@@ -857,7 +857,7 @@
     }
     if (y === 1947) toast('🧪', 'Kamış böceği', 'Böcek sonunda kimyasal ilaçlarla kontrol altına alındı. Kurbağalarla değil. Kurbağalar ise kaldı.', 'warn');
     if (y === 1990) toast('🦵', 'Bilim insanları', 'Öndeki kurbağaların bacakları uzuyor! En hızlılar öne geçip birbirleriyle çiftleşiyor. Cephe her yıl hızlanıyor.', 'warn');
-    if (y === 2020) toast('🐍', 'Biraz umut', 'Bazı yılanlar ve kuşlar kurbağadan kaçınmayı ya da onu güvenli yerinden yemeyi öğrendi. Ama bu on yıllar sürüyor.', 'good');
+    if (y === 2020) toast('🐍', 'Biraz umut', 'Bazı yılanlar ve kuşlar kurbağadan kaçınmayı ya da onu güvenli yerinden yemeyi öğrendi. Ama bu onlarca yıl sürüyor.', 'good');
     for (const k of ['collect', 'teach', 'fence']) if (!game.unlocked[k] && y >= UNLOCK[k]) {
       unlock(k, k === 'collect' ? 'Gönüllüler geceleri fenerle kurbağa topluyor. Bütçenden pay ayır; ön cephede yayılmayı yavaşlatır.'
         : k === 'teach' ? 'Avcılara kusturucu, küçük bir kurbağa parçası yedir; tadından tiksinip bir daha dokunmasınlar. Gerçekte 2010\'larda denendi.'
@@ -1062,7 +1062,7 @@
       if (kind === 'truck') A('kurbaga-otostop');
       if (kind === 'toad' && obj) {
         obj._taps = (performance.now() - (obj._tapT || 0) < 3000) ? (obj._taps || 0) + 1 : 1; obj._tapT = performance.now();
-        if (obj._taps >= 2) { obj.super = performance.now() + 2600; obj.jump = 1; obj.jh = 900; A('kurbaga-bacak'); say({ get x() { return obj.sx; }, get y() { return Math.max(70, obj.sy); } }, 'Bacaklarım uzadı!\nBöceğe yetişeceğim!'); trill(); return; }
+        if (obj._taps >= 2) { obj.super = performance.now() + 2600; obj.jump = 1; obj.jh = 900; A('kurbaga-bacak'); say({ get x() { return obj.sx; }, get y() { return Math.max(70, obj.sy); } }, 'Süper zıplayış!\nBen cephenin\nen hızlısıyım!'); trill(); return; }
       }
     }
     const st = mode === 'sandbox' ? sb.st : game.st;
