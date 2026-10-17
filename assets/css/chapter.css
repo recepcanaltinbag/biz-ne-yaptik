@@ -578,3 +578,4 @@ input[type=range]::-moz-range-thumb { width: 24px; height: 24px; border-radius: 
   .yb-speed button { font-size: .82rem; padding: 0 6px; border-width: 1.5px; }
   .dock .slide[data-mode="game"] .topbox .yearbar { padding-right: 96px; }
 }
+.harvest .go-h { margin-top: 10px; }

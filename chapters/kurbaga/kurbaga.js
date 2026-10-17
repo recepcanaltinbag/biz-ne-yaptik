@@ -598,11 +598,11 @@
   function milestone(year, title, text, histYear) {
     game.state = 'milestone'; if (game.speed > 1) setSpeed(1);
     const el = $('milestone');
-    el.innerHTML = `<div><div class="k">${title}</div><div class="n">${year}</div><div class="s">${text}${histYear ? `<br>Tarihte: ${histYear}` : ''}</div><div class="tap">devam etmek için dokun</div></div>`;
+    el.innerHTML = `<div><div class="k">${title}</div><div class="n">${year}</div><div class="s">${text}${histYear ? `<br>Tarihte: ${histYear}` : ''}</div><button class="hbtn sm go-h">Devam →</button></div>`;
     el.hidden = false; trill();
     let done = false;
     const next = () => { if (done) return; done = true; el.hidden = true; game.state = 'play'; };
-    el.onpointerdown = next; setTimeout(next, 4200 / FAST);
+    el.onpointerdown = next; // yalnız dokununca geçer
   }
 
   function endGame() {

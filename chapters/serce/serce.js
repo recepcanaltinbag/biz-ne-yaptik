@@ -1046,7 +1046,7 @@
     el.innerHTML = `<div class="hcard"><div class="k">${1958 + i} hasadı</div><div class="sheaves">${sheaves}</div>
       <div class="n" style="color:${col}">%<span id="hv-n">0</span></div>
       <div class="hbar"><i style="width:0;background:${col}" id="hv-bar"></i><b title="normal yıl"></b></div>
-      <div class="s">normal bir yılın yüzdesi · çizgi: normal yıl</div><div class="tap">devam etmek için dokun</div></div>`;
+      <div class="s">normal bir yılın yüzdesi · çizgi: normal yıl</div><button class="hbtn sm go-h">Devam →</button></div>`;
     $('yb-harvest').textContent = `🌾 %${v}`; $('yb-harvest').style.color = col;
     el.hidden = false;
     const t0 = performance.now();
@@ -1059,8 +1059,7 @@
     })();
     let done = false;
     const next = () => { if (done) return; done = true; el.hidden = true; afterHarvest(i, v); };
-    el.onpointerdown = next;
-    setTimeout(next, 4200);
+    el.onpointerdown = next; // okuyabilsin diye yalnız dokununca geçer
   }
 
   function afterHarvest(i, v) {

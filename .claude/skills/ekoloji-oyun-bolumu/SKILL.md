@@ -55,6 +55,7 @@ Bu kurallar kullanıcının geri bildirimleriyle tek tek oturtuldu. Yeni bölüm
 - Bir kartın ekranda kalma süresi = 4,5 sn + metin uzunluğu × 65 ms (en fazla 16 sn).
 - Kart açıkken zaman ×1,5 yavaşlar, ekranda hiçbir şey yokken ×0,55 hızlanır. İlk aylar biraz daha yavaş akar.
 - Yılın yanında **[1×][2×][4×]** üç düğmeli hız seçici bulunur. Yeni bir olay, hasat ya da dönüm noktası gelince hız 1×'e döner.
+- Hasat, dönüm noktası ve karar kartları **kendiliğinden kapanmaz**; oyuncu dokunur ya da "Devam →" der.
 - Kart başlıklarında yılı tekrar etme, yıl zaten üstte görünüyor.
 
 ## Düzen ("dock")
