@@ -351,3 +351,133 @@ input[type=range]::-moz-range-thumb { width: 24px; height: 24px; border-radius: 
   .gp-top .chip { font-size: .85rem; }
   .title { font-size: 2.6rem; }
 }
+
+/* ===== "Şerit" düzeni: üstte yıl + haber, ortada hikâye kartı, altta kontrol şeridi ===== */
+@keyframes cardIn { from { opacity: 0; transform: translate(-50%, -46%) scale(.96); } }
+@keyframes newsIn { from { opacity: 0; transform: translateY(-8px); } }
+.dock .slide[data-mode="game"] .game-intro { display: none; }
+.dock .slide[data-mode="game"] .yearbar { left: 50%; }
+.dock .slide[data-mode="game"] #toasts, .dock .slide[data-mode="game"] .game-intro:not(.gone) ~ #toasts {
+  left: 50%; right: auto; transform: translateX(-50%); top: 150px; width: min(600px, calc(100% - 36px)); align-items: stretch; gap: 8px;
+}
+.dock .toast:not(.pause) {
+  background: rgba(255,255,255,.86); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+  border: 0; box-shadow: 0 2px 12px rgba(43,58,46,.12); border-radius: 14px; padding: 8px 14px;
+  grid-template-columns: 30px 1fr; font-size: 1.18rem; animation: newsIn .45s ease both;
+}
+.dock .toast:not(.pause) .ic { width: 30px; height: 30px; font-size: 1.2rem; background: none; }
+.dock .toast:not(.pause) .x { display: none; }
+.dock .toast.bad:not(.pause) { box-shadow: inset 4px 0 0 var(--danger), 0 2px 12px rgba(43,58,46,.12); }
+.dock .toast.warn:not(.pause) { box-shadow: inset 4px 0 0 var(--grain), 0 2px 12px rgba(43,58,46,.12); }
+.dock .toast.good:not(.pause) { box-shadow: inset 4px 0 0 var(--green), 0 2px 12px rgba(43,58,46,.12); }
+.dock .toast.pause {
+  position: fixed; left: 50%; top: 46%; transform: translate(-50%, -50%); z-index: 30;
+  width: min(560px, calc(100vw - 32px)); font-size: 1.4rem; padding: 20px 22px; grid-template-columns: 64px 1fr;
+  box-shadow: 0 6px 0 var(--ink), 0 30px 80px rgba(43,58,46,.25); animation: cardIn .45s ease both;
+}
+.dock .toast.pause .ic { width: 64px; height: 64px; font-size: 2.1rem; }
+.dock .toast.pause.story { grid-template-columns: 130px 1fr; }
+.dock .toast.pause.story img { width: 130px; height: 170px; }
+.dock .toast.pause.out { animation: toastOut .35s ease forwards; }
+
+@media (min-width: 761px) {
+  .dock .gpanel {
+    top: auto; right: auto; left: 50%; transform: translateX(-50%); bottom: 40px; width: min(1180px, calc(100% - 36px));
+    flex-direction: row; flex-wrap: wrap; align-items: center; gap: 10px 26px; padding: 12px 20px; overflow: visible;
+  }
+  .dock .gpanel .gp-top { flex: 0 0 auto; }
+  .dock .gpanel .gp-top .chip.date { display: none; }
+  .dock .gpanel .gp-meters { grid-template-columns: repeat(5, auto); gap: 4px 16px; font-size: 1.02rem; flex: 0 0 auto; }
+  .dock .gpanel .mrow { grid-template-columns: auto 64px; gap: 6px; }
+  .dock .gpanel .gp-stats { flex: 0 0 auto; grid-template-columns: auto auto; }
+  .dock .gpanel .gp-stats div { padding: 2px 10px; }
+  .dock .gpanel .sl.big { flex: 1 1 220px; min-width: 200px; }
+  .dock .gpanel .sl.big span { font-size: 1.08rem; }
+  .dock .gpanel .goal { display: none; }
+  .dock .gpanel .budget { flex: 0 0 auto; gap: 8px; }
+  .dock .gpanel .sb-ctrl { flex: 0 0 auto; }
+  .dock .gpanel .sb-ctrl .hbtn { flex: 0 0 auto; }
+}
+@media (max-width: 760px) {
+  .dock .slide[data-mode="game"] #toasts, .dock .slide[data-mode="game"] .game-intro:not(.gone) ~ #toasts { top: 104px; width: calc(100% - 20px); }
+  .dock .toast:not(.pause) { font-size: .98rem; padding: 6px 10px; grid-template-columns: 24px 1fr; }
+  .dock .toast:not(.pause) .ic { width: 24px; height: 24px; font-size: 1rem; }
+  .dock .toast.pause { font-size: 1.08rem; padding: 14px; grid-template-columns: 44px 1fr; top: 42%; }
+  .dock .toast.pause .ic { width: 44px; height: 44px; font-size: 1.5rem; }
+  .dock .toast.pause.story { grid-template-columns: 80px 1fr; }
+  .dock .toast.pause.story img { width: 80px; height: 104px; }
+}
+
+/* ===== Oyun HUD'u: göstergeler sol üstte zeminsiz, yalnız kaydırıcılar beyaz kartta ===== */
+.dock .slide[data-mode="game"] .gpanel {
+  background: transparent; border: 0; box-shadow: none; padding: 0; overflow: visible; max-height: none;
+  top: auto; bottom: 36px; left: 18px; right: 18px; width: auto; transform: none;
+  display: flex; flex-direction: row; flex-wrap: wrap; align-items: flex-end; justify-content: center; gap: 10px;
+  pointer-events: none;
+}
+.dock .slide[data-mode="game"] .gpanel > * { pointer-events: auto; }
+.dock .gp-toggle { display: none !important; }
+.dock .gp-hud {
+  position: fixed; left: 18px; top: 58px; width: 240px; display: grid; gap: 8px; pointer-events: none;
+  font-family: var(--hand); text-shadow: 0 1px 0 rgba(255,255,255,.9), 0 0 8px rgba(255,255,255,.7);
+}
+.dock .gp-hud .chip { pointer-events: auto; }
+.dock .gp-hud .gp-top { display: flex; gap: 6px; }
+.dock .gp-hud .chip.date { display: none; }
+.dock .gp-hud .gp-meters { grid-template-columns: 1fr; gap: 5px; font-size: 1.08rem; }
+.dock .gp-hud .mrow { grid-template-columns: 1fr 96px; gap: 8px; }
+.dock .gp-hud .mrow em { display: inline; }
+.dock .gp-hud .track { background: rgba(43,58,46,.16); box-shadow: inset 0 0 0 1px rgba(43,58,46,.12); }
+.dock .gp-hud .gp-stats { grid-template-columns: 1fr 1fr; gap: 4px 10px; }
+.dock .gp-hud .gp-stats div { background: none; border: 0; padding: 0; }
+.dock .gp-hud .gp-stats b { font-size: 1.4rem; }
+.dock .gp-hud .goal { display: block; border-left-width: 3px; font-size: 1rem; margin: 0; }
+.dock .slide[data-mode="game"] .sl.big {
+  flex: 0 1 300px; min-width: 220px; background: var(--paper); border: 2px solid var(--ink); border-radius: 16px;
+  padding: 6px 14px 2px; box-shadow: 0 4px 0 var(--ink);
+}
+.dock .slide[data-mode="game"] .sl.big.locked { opacity: .7; }
+.dock .slide[data-mode="game"] .budget { flex: 0 0 auto; background: var(--paper); border: 2px solid var(--ink); border-radius: 999px; padding: 4px 14px; gap: 10px; }
+.dock .slide[data-mode="game"] .sb-ctrl { flex: 0 0 auto; display: flex !important; }
+.dock .slide[data-mode="game"] .sb-ctrl .hbtn { flex: 0 0 auto; }
+.dock .slide[data-mode="game"] .gpanel .gp-extra { display: initial; }
+
+@media (max-width: 760px) {
+  .dock .gp-hud { left: 10px; top: 44px; width: 128px; gap: 4px; }
+  .dock .gp-hud .gp-top .chip { font-size: .85rem; padding: 0 8px; }
+  .dock .gp-hud .gp-top .track { width: 26px; }
+  .dock .gp-hud .gp-meters { grid-template-columns: 1fr; gap: 2px; font-size: .9rem; }
+  .dock .gp-hud .mrow { grid-template-columns: 22px 1fr; gap: 4px; }
+  .dock .gp-hud .mrow em { display: none; }
+  .dock .gp-hud .gp-stats { grid-template-columns: 1fr; gap: 0; }
+  .dock .gp-hud .gp-stats small { font-size: .72rem; }
+  .dock .gp-hud .gp-stats b { font-size: 1rem; }
+  .dock .gp-hud .goal { display: none; }
+  .dock .slide[data-mode="game"] .yearbar { left: auto; right: 10px; transform: none; }
+  .dock .slide[data-mode="game"] #toasts, .dock .slide[data-mode="game"] .game-intro:not(.gone) ~ #toasts { left: 146px; right: 10px; width: auto; transform: none; top: 100px; }
+  .dock .slide[data-mode="game"] .gpanel { left: 8px; right: 8px; bottom: 30px; gap: 6px; }
+  .dock .slide[data-mode="game"] .sl.big { flex: 1 1 100%; min-width: 0; padding: 2px 12px 0; border-radius: 14px; box-shadow: 0 3px 0 var(--ink); }
+  .dock .slide[data-mode="game"] .sl.big.locked { display: none; }
+  .dock .slide[data-mode="game"] .budget { font-size: .9rem; padding: 2px 10px; }
+  .dock .slide[data-mode="game"] .sb-ctrl { display: none !important; }
+}
+/* #toasts dönüşüm almasın: içindeki ortalanmış hikâye kartı ekrana göre konumlansın */
+.dock .slide[data-mode="game"] #toasts, .dock .slide[data-mode="game"] .game-intro:not(.gone) ~ #toasts {
+  transform: none; left: 50%; margin-left: calc(min(600px, 100vw - 36px) / -2);
+}
+@media (max-width: 760px) {
+  .dock .slide[data-mode="game"] #toasts, .dock .slide[data-mode="game"] .game-intro:not(.gone) ~ #toasts { left: 146px; margin-left: 0; }
+}
+.dock .gp-hud .gp-meters, .dock .gp-hud .mrow { min-width: 0; }
+.dock .gp-hud .mrow .track { width: auto; min-width: 0; }
+@media (max-width: 760px) {
+  .dock .gp-hud .gp-meters { grid-template-columns: minmax(0, 1fr); }
+  .dock .gp-hud .mrow { grid-template-columns: 22px minmax(0, 1fr); }
+}
+.dock .gp-hud { grid-template-columns: minmax(0, 1fr); }
+.facts { list-style: none; padding: 0; margin: 0 0 1em; display: grid; gap: 10px; }
+.facts li { display: grid; grid-template-columns: 74px 1fr; gap: 12px; align-items: baseline; font-size: 1.06rem; }
+.facts li b:first-child { font: 400 1.35rem var(--hand); color: var(--danger); }
+@media (max-width: 760px) { .facts li { grid-template-columns: 1fr; gap: 0; } }
+.dock .gp-hud #g-phase { display: none; }
+@media (max-width: 760px) { .dock .slide[data-mode="game"] .gpanel .gp-hud .goal { display: none; } }

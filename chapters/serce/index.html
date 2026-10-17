@@ -8,9 +8,10 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Inter:wght@400;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../../assets/css/chapter.css?v=202610171242">
+<link rel="stylesheet" href="../../assets/css/chapter.css?v=202610171250">
 </head>
-<body>
+<body class="dock">
+<script>if (/[?&]layout=klasik\b/.test(location.search)) document.body.classList.remove("dock");</script>
 <canvas id="world" aria-hidden="true"></canvas>
 
 <header class="bar">
@@ -39,6 +40,7 @@
     <div class="yearbar" aria-live="polite"><div class="yb-year" id="yb-year">1958</div><div class="yb-sub" id="yb-sub">Mart</div><div class="yb-track"><i id="yb-fill"></i></div></div>
     <aside class="gpanel" aria-label="Bakanlık masası">
       <button class="gp-toggle" type="button" aria-expanded="false">⋯ Daha fazla</button>
+      <div class="gp-hud">
       <div class="gp-top">
         <div class="chip date" id="g-date">Mart 1958</div>
         <div class="chip quota" id="g-quota"><span class="lbl">Kota</span> <b id="q-n">0</b>/<span id="q-t">25</span> <span class="track"><i id="q-bar"></i></span></div>
@@ -49,6 +51,7 @@
         <div class="mrow"><span>🌾<em> Tahıl</em></span><span class="track"><i id="m-f"></i></span></div>
         <div class="mrow"><span>🍚<em> Köylünün payı</em></span><span class="track"><i id="m-t"></i></span></div>
         <div class="mrow trust"><span>🏛️<em> Pekin'in güveni</em></span><span class="track"><i id="m-trust"></i></span></div>
+      </div>
       </div>
       <label class="sl big"><span>📣 Tencere seferberliği <b id="o-k">%0</b></span><input type="range" id="g-k" min="0" max="100" step="5" value="0"></label>
       <label class="sl big"><span>📝 Rapordaki abartı <b id="o-lie">%0</b></span><input type="range" id="g-lie" min="0" max="100" step="5" value="0"></label>
@@ -101,11 +104,12 @@
   <section class="slide scroll" data-mode="facts">
     <article class="paper">
       <h2>Gerçekte ne oldu?</h2>
-      <p>1958'de Çin, Büyük İleri Atılım'la birlikte <b>Dört Zararlı Kampanyası</b>nı başlattı. İnsanlar gün boyu tencere, tava ve davul çalarak serçelerin konmasını engelledi. Yuvalar bozuldu, yumurtalar kırıldı, okul çocukları topladıkları ölü kuşları saydırdı. Tahminlere göre <b>yüz milyonlarca</b> serçe öldürüldü.</p>
-      <p>Kuşbilimci Zheng Zuoxin ve meslektaşları serçelerin özellikle yavru beslerken çok sayıda böcek yediğini söylüyordu. Haklı çıktılar: doğal düşmanı ortadan kalkan <b>çekirge ve başka zararlılar patladı</b>. 1960'ta serçeler sessizce listeden çıkarıldı ve yerlerine tahtakuruları kondu. Nüfusu yenilemek için Sovyetler Birliği'nden serçe getirildiği de anlatılır, ancak bu iddia iyi belgelenmiş değil.</p>
-      <div class="callout">
-        <b>Dürüst olalım:</b> 1959–1961 Büyük Çin Kıtlığı'nın (tahminlere göre 15 milyondan 45 milyonun üzerine kadar ölüm) ana sebebi serçeler değildi. Zorla kolektifleştirme, şişirilmiş hasat raporları, olmayan tahılın devlete teslim edilmesi, bilim dışı tarım yöntemleri ve kötü hava birlikte etki etti. Serçe kampanyası bu felakete eklenen etkenlerden biriydi, ama en öğretici olanı.
-      </div>
+      <ul class="facts">
+        <li><b>1958</b> Çin, Dört Zararlı Kampanyası'yla serçelere savaş açtı. Tencere çalınarak, yuvalar bozularak <b>yüz milyonlarca</b> serçe öldürüldü.</li>
+        <li><b>Sonra</b> Doğal düşmanı kalmayan çekirgeler ve zararlılar çoğaldı, hasat zarar gördü.</li>
+        <li><b>1960</b> Serçeler sessizce listeden çıkarıldı, yerlerine tahtakuruları kondu.</li>
+      </ul>
+      <div class="callout"><b>Ama asıl sebep serçeler değildi.</b> 1959–61 kıtlığında (tahminen 15 ila 45 milyonun üzerinde ölüm) zorla kolektifleştirme, şişirilmiş raporlar ve olmayan tahılın toplanması belirleyiciydi. Serçe kampanyası yangına dökülen benzindi.</div>
       <button class="hbtn" data-next>Peki ne öğrendik? →</button>
     </article>
   </section>
@@ -144,8 +148,8 @@
 
 <nav class="dots" id="dots" aria-label="Bölüm adımları"></nav>
 
-<script src="../../assets/js/toon.js?v=202610171242"></script>
-<script src="serce.js?v=202610171242"></script>
+<script src="../../assets/js/toon.js?v=202610171250"></script>
+<script src="serce.js?v=202610171250"></script>
 <script>/* gpToggle */document.querySelectorAll(".gp-toggle").forEach(b=>b.onclick=()=>{const p=b.closest(".gpanel");const o=p.classList.toggle("open");b.setAttribute("aria-expanded",o);b.textContent=o?"✕ Kapat":"⋯ Daha fazla";window.dispatchEvent(new Event("panel"));});</script>
 </body>
 </html>

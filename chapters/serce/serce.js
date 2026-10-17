@@ -132,11 +132,11 @@
     if (m === 'intro') L.gt = 0.6;
     if (m === 'poster') L.gt = 0.82;
     if (m === 'game') {
-      if (mobile) {
+      if (mobile || document.body.classList.contains('dock')) {
         // tarla, panelin hemen üstünde biter: panel küçüldükçe sahne büyür
         const pnl = document.querySelector('.slide.active .gpanel');
         const top = pnl ? pnl.getBoundingClientRect().top : H * 0.56;
-        L.gb = clamp((top - 6) / H, 0.4, 0.8); L.gt = Math.max(0.24, L.gb - 0.3);
+        L.gb = clamp((top - 6) / H, 0.4, 0.86); L.gt = Math.max(0.24, L.gb - (mobile ? 0.3 : 0.36));
       } else { L.gt = 0.6; L.x1 = (W - 366) / W; }
     }
     if (m === 'result' || m === 'facts' || m === 'lessons') L.gt = 0.9;
@@ -681,8 +681,9 @@
     const close = () => {
       if (el.classList.contains('out')) return;
       el.classList.add('out');
+      lastToastAt = Math.max(lastToastAt, performance.now() - 9000 / (typeof FAST === 'number' ? FAST : 1) + 5000 / (typeof FAST === 'number' ? FAST : 1));
       if (opt.pause) game.reading = Math.max(0, (game.reading || 1) - 1);
-      if (opt.then) setTimeout(opt.then, 900);
+      if (opt.then) setTimeout(opt.then, 3000 / (typeof FAST === 'number' ? FAST : 1));
       setTimeout(() => { el.remove(); pumpToasts(); }, 400);
     };
     el.onclick = close;
@@ -883,7 +884,7 @@
     setTimeout(() => { if (mode === 'game') goTo(slideOf('result')); }, 1500);
   }
   resetGame();
-  if (/[?&]debug\b/.test(location.search)) window.__dbg = { game, get gs() { return gs; }, get mode() { return mode; } };
+
 
   function renderResult() {
     if (gs.harvests.length < 3) { $('result').innerHTML = '<h2>Önce oyunu bitir</h2><button class="hbtn" data-g="3">← Oyuna dön</button>'; $('result').querySelector('button').onclick = () => goTo(slideOf('game')); return; }

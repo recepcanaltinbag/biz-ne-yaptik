@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Inter:wght@400;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../../assets/css/chapter.css?v=202610171242">
+<link rel="stylesheet" href="../../assets/css/chapter.css?v=202610171250">
 <style>
   .gp-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; font-family: var(--hand); }
   .gp-stats div { background: #fff; border: 2px solid var(--line); border-radius: 12px; padding: 4px 10px; }
@@ -22,7 +22,8 @@
   @media (max-width: 760px) { .gp-stats b { font-size: 1.1rem; } .goal { display: none; } }
 </style>
 </head>
-<body>
+<body class="dock">
+<script>if (/[?&]layout=klasik\b/.test(location.search)) document.body.classList.remove("dock");</script>
 <canvas id="world" aria-hidden="true"></canvas>
 
 <header class="bar">
@@ -45,6 +46,7 @@
     <div class="yearbar" aria-live="polite"><div class="yb-year" id="yb-year">1935</div><div class="yb-sub" id="yb-sub">Kamış tarlası</div><div class="yb-track"><i id="yb-fill"></i></div></div>
     <aside class="gpanel" aria-label="Kontrol masası">
       <button class="gp-toggle" type="button" aria-expanded="false">⋯ Daha fazla</button>
+      <div class="gp-hud">
       <div class="gp-top"><div class="chip date" id="g-year">1935</div><div class="chip" id="g-phase">Kamış tarlası</div></div>
       <div class="gp-stats">
         <div><small>Kurbağa</small><b id="s-toads">102</b></div>
@@ -54,6 +56,7 @@
         <div class="mrow"><span>🦎<em> Yerli avcılar</em></span><span class="track"><i id="m-pred"></i></span></div>
       </div>
       <p class="goal gp-extra" id="g-goal">Hedef: 2025'e kadar yerli avcıları <b>%45'in</b> üstünde tut.</p>
+      </div>
       <div class="budget"><span>💰 Bütçe</span><span id="g-budget">100 / 100</span></div>
       <label class="sl big locked" id="w-collect"><span>🪣 Gönüllü toplama <b id="o-collect">🔒 1980</b></span><input type="range" id="g-collect" min="0" max="100" step="5" value="0" disabled></label>
       <label class="sl big locked" id="w-teach"><span>🎓 Öğretmen kurbağa <b id="o-teach">🔒 2008</b></span><input type="range" id="g-teach" min="0" max="100" step="5" value="0" disabled></label>
@@ -102,14 +105,12 @@
   <section class="slide scroll" data-mode="facts">
     <article class="paper">
       <h2>Gerçekte ne oldu?</h2>
-      <p>Haziran 1935'te Hawaii'den Queensland'e <b>102 kamış kurbağası</b> getirildi. Gordonvale yakınındaki deneme istasyonunda üretilen binlerce yavru, kamış böceğiyle savaşmak için şeker bölgelerine salındı.</p>
-      <p>Plan baştan sorunluydu. Yetişkin kamış böcekleri kamışın üst kısımlarında yaşar, larvaları ise toprağın altında kökleri yer. Kurbağa ikisine de ulaşamadı. Böcek bilimci <b>Walter Froggatt</b> kurbağanın "önüne gelen her şeyi" yiyeceği uyarısını yaptı. Salımlar kısa bir süre durduruldu, sonra 1936'da yeniden başladı.</p>
-      <p>Kamış böceği sonunda kurbağalarla değil, kimyasal ilaçlar ve tarım yöntemleriyle kontrol altına alındı. Kurbağalar ise kaldı. Bir dişi bir seferde <b>30 bine kadar yumurta</b> bırakabiliyor. Bugün Avustralya'da <b>200 milyonu aşkın</b> kurbağa olduğu tahmin ediliyor ve kapladıkları alan 1,2 milyon km²'yi geçti.</p>
-      <p>Daha da şaşırtıcısı, kurbağalar yayılırken evrimleşti. Cephenin en önündeki kurbağaların bacakları daha uzun. En hızlılar öne geçiyor ve birbirleriyle çiftleşiyor. Yayılma hızı başlarda yılda 10 km civarındayken, 2000'lerde kuzeyde yılda 50 km'yi aştı.</p>
-      <div class="callout">
-        <b>Asıl kurbanlar:</b> Kurbağanın derisindeki zehir (bufadienolidler) onu yiyen yerli avcıları öldürüyor. Kuzey kedisi (quoll), bazı goanna kertenkeleleri, tatlı su timsahları ve yılanlar çok etkilendi. Bazı bölgelerde goanna nüfusu %90'ın üzerinde düştü. Bazı türler zamanla kurbağadan kaçınmayı öğrendi ya da direnç geliştirdi; ama bu on yıllar sürüyor.
-      </div>
-      <p>Oyundaki araçlar gerçek araştırmalara dayanıyor. <b>Öğretmen kurbağa</b> yöntemi, avcılara kusturucu bir ilaçla işlenmiş küçük kurbağa parçaları ya da yavru kurbağalar verip tadından tiksinmelerini öğretiyor; kuzey kedileriyle yapılan denemelerde hayatta kalmayı artırdı. <b>Su noktası çiti</b> fikri, kurak bölgelerde kurbağaların çiftlik göletlerine muhtaç olmasına dayanıyor: göletler çitlenirse kurbağalar çölü geçemeyebilir.</p>
+      <ul class="facts">
+        <li><b>1935</b> Hawaii'den 102 kurbağa getirildi, binlerce yavrusu Queensland'in kamış tarlalarına salındı.</li>
+        <li><b>Ama</b> Kamış böceği kamışın tepesinde, larvası toprağın altında yaşıyor. Kurbağa ikisine de ulaşamadı. Böcek sonunda kimyasallarla kontrol edildi.</li>
+        <li><b>Bugün</b> 200 milyonu aşkın kurbağa, 1,2 milyon km²'den fazla alan. Öndekilerin bacakları uzadı, cephe yılda 10 km'den 50 km'nin üstüne hızlandı.</li>
+      </ul>
+      <div class="callout"><b>Asıl kurbanlar yerli avcılar.</b> Kurbağanın zehri onu yiyen kuzey kedisi, goanna, timsah ve yılanları öldürüyor. Oyundaki "öğretmen kurbağa" ve "gölet çiti" gerçek araştırmalara dayanıyor.</div>
       <button class="hbtn" data-next>Peki ne öğrendik? →</button>
     </article>
   </section>
@@ -150,9 +151,9 @@
 
 <nav class="dots" id="dots" aria-label="Bölüm adımları"></nav>
 
-<script src="../../assets/js/toon.js?v=202610171242"></script>
-<script src="model.js?v=202610171242"></script>
-<script src="kurbaga.js?v=202610171242"></script>
+<script src="../../assets/js/toon.js?v=202610171250"></script>
+<script src="model.js?v=202610171250"></script>
+<script src="kurbaga.js?v=202610171250"></script>
 <script>/* gpToggle */document.querySelectorAll(".gp-toggle").forEach(b=>b.onclick=()=>{const p=b.closest(".gpanel");const o=p.classList.toggle("open");b.setAttribute("aria-expanded",o);b.textContent=o?"✕ Kapat":"⋯ Daha fazla";window.dispatchEvent(new Event("panel"));});</script>
 </body>
 </html>

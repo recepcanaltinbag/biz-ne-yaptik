@@ -83,9 +83,14 @@
     if (mobile) {
       const pnl = document.querySelector('.slide.active .gpanel, .slide.active .sb-panel');
       const bottom = pnl ? pnl.getBoundingClientRect().top - 8 : H * 0.56;
-      return { x: 8, y: 116, w: W - 16, h: Math.max(120, bottom - 116) };
+      return { x: 8, y: 150, w: W - 16, h: Math.max(120, bottom - 150) };
     }
     const right = mode === 'sandbox' ? 380 : 366;
+    if (mode === 'game' && document.body.classList.contains('dock')) {
+      const pnl = document.querySelector('.slide.active .gpanel');
+      const bottom = pnl ? pnl.getBoundingClientRect().top - 10 : H - 60;
+      return { x: 24, y: 178, w: W - 48, h: Math.max(160, bottom - 178) };
+    }
     const top = mode === 'game' ? 150 : 64;
     return { x: 24, y: top, w: W - right - 48, h: H - top - 52 };
   }
@@ -213,9 +218,9 @@
     for (let i = 0; i < Math.round(W / 140); i++) { const s = pick(stalks); beetles.push({ st: s, dy: rnd(0.02, 0.15), ph: rnd(0, 6.28) }); }
   }
   function drawField(t, dt, crowd) {
-    const pnl = mobile && mode === 'game' ? document.querySelector('.slide.active .gpanel') : null;
+    const pnl = (mobile || document.body.classList.contains('dock')) && mode === 'game' ? document.querySelector('.slide.active .gpanel') : null;
     const floor = pnl ? pnl.getBoundingClientRect().top - 6 : H;
-    const gt = mobile ? Math.min(H * 0.46, floor - 150) : H * 0.74, sh = H * (mobile ? 0.24 : 0.36);
+    const gt = mobile ? Math.min(H * 0.46, floor - 150) : Math.min(H * 0.74, floor - 170), sh = H * (mobile ? 0.24 : 0.34);
     ctx.fillStyle = '#c9b48a'; ctx.fillRect(0, gt, W, H - gt);
     ctx.strokeStyle = rgb(INK, 0.5); ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(0, gt); ctx.lineTo(W, gt); ctx.stroke();
     ctx.fillStyle = 'rgba(120,90,50,.18)'; for (let i = 0; i < 6; i++) ctx.fillRect(0, gt + 14 + i * i * 6, W, 2);
@@ -244,12 +249,12 @@
     const want = crowd;
     while (fieldToads.length < want) {
       const sx = scientists[0] ? scientists[0].x + 30 * U : W * 0.2;
-      fieldToads.push({ x: sx + rnd(-30, 90) * U, y: gt + rnd(26, Math.max(40, (floor - gt) * 0.85)), tx: rnd(20, W - (mobile ? 20 : 380)), ph: rnd(0, 6.28), hop: 0, s: rnd(0.9, 1.25), jump: 0 });
+      fieldToads.push({ x: sx + rnd(-30, 90) * U, y: gt + rnd(26, Math.max(40, (floor - gt) * 0.85)), tx: rnd(20, W - (mobile || document.body.classList.contains('dock') ? 20 : 380)), ph: rnd(0, 6.28), hop: 0, s: rnd(0.9, 1.25), jump: 0 });
     }
     fieldToads.length = Math.max(0, want);
     const f = dt / 16.67;
     for (const td of fieldToads) {
-      if (Math.abs(td.tx - td.x) < 4) td.tx = rnd(20, W - (mobile ? 20 : 380));
+      if (Math.abs(td.tx - td.x) < 4) td.tx = rnd(20, W - (mobile || document.body.classList.contains('dock') ? 20 : 380));
       td.x += Math.sign(td.tx - td.x) * 0.5 * U * f;
       td.hop = Math.max(0, Math.sin(t * 0.006 + td.ph * 3)) * 6 * U;
       if (!td.jump && Math.random() < 0.0006 * f) td.jump = 1;
@@ -389,8 +394,9 @@
     const close = () => {
       if (el.classList.contains('out')) return;
       el.classList.add('out');
+      lastToastAt = Math.max(lastToastAt, performance.now() - 9000 / (typeof FAST === 'number' ? FAST : 1) + 5000 / (typeof FAST === 'number' ? FAST : 1));
       if (opt.pause) game.reading = Math.max(0, game.reading - 1);
-      if (opt.then) setTimeout(opt.then, 700);
+      if (opt.then) setTimeout(opt.then, 3000 / (typeof FAST === 'number' ? FAST : 1));
       setTimeout(() => { el.remove(); pumpToasts(); }, 400);
     };
     el.onclick = close;
