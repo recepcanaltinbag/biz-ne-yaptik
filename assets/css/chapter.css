@@ -753,3 +753,9 @@ input[type=range]::-moz-range-thumb { width: 24px; height: 24px; border-radius: 
 .dock .slide[data-mode="game"] .gpanel .budget { order: 20; flex-basis: 100%; justify-content: center; background: none; border: 0; padding: 0; }
 .dock .slide[data-mode="game"] .gpanel .budget .bbar { background-color: #fff; }
 .dock .slide[data-mode="game"] .gpanel .sb-ctrl { order: 10; }
+
+/* bölümü bitirenlere başlıkta kısayollar */
+.replay-nav { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; align-items: center; margin-top: 12px; font: 500 .82rem Inter, sans-serif; }
+.replay-nav span { width: 100%; text-align: center; opacity: .7; }
+.replay-nav button { font: inherit; border: 1px solid rgba(43,58,46,.25); background: rgba(255,255,255,.6); color: inherit; border-radius: 99px; padding: 4px 11px; cursor: pointer; }
+.replay-nav button:hover { background: #fff; }

@@ -85,11 +85,11 @@ footer .byline { margin-top: 14px; font-size: .8rem; opacity: .75; }
 .bp-group h3 { font: 400 1.25rem var(--hand); margin: 10px 0 6px; display: flex; justify-content: space-between; }
 .bp-group h3 a { color: var(--ink); text-decoration: none; } .bp-group h3 span { color: var(--ink-soft); }
 .bp-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
-.bp-card { display: grid; grid-template-columns: 40px 1fr; gap: 8px; align-items: center; padding: 6px 8px; border-radius: 12px; background: #eceae2; color: #8a877e; }
-.bp-card .bp-ic { width: 40px; height: 40px; border-radius: 10px; display: grid; place-items: center; font-size: 1.3rem; background: #dedbd0; filter: grayscale(1); }
+.bp-card { display: grid; grid-template-columns: 52px 1fr; gap: 10px; align-items: center; padding: 6px 8px; border-radius: 12px; background: #eceae2; color: #8a877e; }
+.bp-card .bp-ic { width: 46px; height: 46px; margin: 3px; }
 .bp-card.on { background: #f7ecc9; color: var(--ink); }
-.bp-card.on .bp-ic { background: #f3d27a; filter: none; }
-.bp-card.on.secret { background: #ebe3f7; } .bp-card.on.secret .bp-ic { background: #c7b4ef; }
+
+.bp-card.on.secret { background: #ebe3f7; }
 .bp-n { font: 1.05rem var(--hand); line-height: 1.1; }
 .bp-s { font-size: .74rem; line-height: 1.25; }
 .bp-note { font-size: .8rem; color: var(--ink-soft); margin: 10px 0 6px; }

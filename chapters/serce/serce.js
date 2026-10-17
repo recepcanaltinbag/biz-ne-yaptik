@@ -985,12 +985,26 @@
   // =====================================================================
   const slides = [...document.querySelectorAll('.slide')];
   let cur = 0, maxSeen = 0, mode = 'title';
+  // bölüm bir kez bitirildiyse (bu tarayıcıda) bütün slaytlar seçilebilir
+  const DONE_KEY = 'bny-bitti-serce';
+  const wasDone = (() => { try { return !!localStorage.getItem(DONE_KEY); } catch (e) { return false; } })();
+  if (wasDone) maxSeen = slides.length - 1;
   const dotsEl = $('dots');
   slides.forEach((_, i) => {
     const b = document.createElement('button'); b.setAttribute('aria-label', `Adım ${i + 1}`);
     b.onclick = () => { if (i <= maxSeen) goTo(i); };
     dotsEl.appendChild(b);
   });
+  function paintDots() { [...dotsEl.children].forEach((d, k) => { d.classList.toggle('on', k === cur); d.classList.toggle('seen', k <= maxSeen); d.disabled = k > maxSeen; }); }
+  function replayNav() {
+    const t = slides[slideOf('title')]; if (!t || t.querySelector('.replay-nav')) return;
+    const nav = document.createElement('div'); nav.className = 'replay-nav';
+    nav.innerHTML = '<span>Bu bölümü bitirdin. Doğrudan geç:</span>';
+    [['sandbox', '🧪 Laboratuvar'], ['facts', '📜 Gerçekte ne oldu?'], ['lessons', '💡 Ne öğrendik?']].forEach(([m, l]) => {
+      const b = document.createElement('button'); b.textContent = l; b.onclick = () => goTo(slideOf(m)); nav.appendChild(b);
+    });
+    (t.querySelector('.glass') || t).appendChild(nav);
+  }
   function goTo(i) {
     if (i < 0 || i >= slides.length) return;
     if (mode === 'game' && game.state !== 'end') game.paused = true;
@@ -999,7 +1013,7 @@
     cur = i; maxSeen = Math.max(maxSeen, i);
     slides[cur].classList.add('active'); slides[cur].scrollTop = 0;
     mode = slides[cur].dataset.mode;
-    [...dotsEl.children].forEach((d, k) => { d.classList.toggle('on', k === cur); d.classList.toggle('seen', k <= maxSeen); d.disabled = k > maxSeen; });
+    paintDots();
     if (mode === 'game') enterGame();
     if (mode === 'result') renderResult();
     if (mode === 'sandbox') enterSandbox();
@@ -1368,9 +1382,12 @@
   function endGame() {
     if (game.state !== 'end') awardEnd();
     game.state = 'end';
+    try { localStorage.setItem(DONE_KEY, '1'); } catch (e) {}
+    maxSeen = slides.length - 1; paintDots(); replayNav();
     setTimeout(() => { if (mode === 'game') goTo(slideOf('result')); }, 1500);
   }
   resetGame();
+  if (wasDone) { paintDots(); replayNav(); }
   if (/[?&]debug\b/.test(location.search)) window.__dbg = { game, gags, nest, sunPos, birds, bubbles, get gs() { return gs; }, get mode() { return mode; }, gag: () => { nextGag = 1; }, go: m => { maxSeen = slides.length; goTo(slideOf(m)); } };
 
 

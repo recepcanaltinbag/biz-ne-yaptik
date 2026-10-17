@@ -8,8 +8,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Inter:wght@400;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/css/badges.css?v=261017142006">
-<link rel="stylesheet" href="assets/css/style.css?v=261017142006">
+<link rel="stylesheet" href="assets/css/badges.css?v=261017143041">
+<link rel="stylesheet" href="assets/css/style.css?v=261017143041">
 </head>
 <body>
 
@@ -53,9 +53,9 @@
     <p class="byline">Hazırlayan: Recep Can Altınbağ</p>
   </div>
 </footer>
-<script src="assets/js/badges.js?v=261017142006"></script>
-<script src="assets/js/toon.js?v=261017142006"></script>
-<script src="assets/js/chapters.js?v=261017142006"></script>
+<script src="assets/js/badges.js?v=261017143041"></script>
+<script src="assets/js/toon.js?v=261017143041"></script>
+<script src="assets/js/chapters.js?v=261017143041"></script>
 <script>
 (() => {
   const B = window.Badges; if (!B) return;
@@ -69,9 +69,12 @@
         const on = B.has(d.id);
         const title = on || !d.hidden ? d.name : '???';
         const sub = on ? '🗓️ ' + B.date(d.id).split('-').reverse().join('.') : d.hidden ? 'Gizli rozet' : d.hint;
-        return `<div class="bp-card ${on ? 'on' : ''} ${d.hidden ? 'secret' : ''}" title="${on ? d.fact.replace(/"/g, '&quot;') : ''}"><div class="bp-ic">${on ? d.icon : '🔒'}</div><div><div class="bp-n">${title}</div><div class="bp-s">${sub}</div></div></div>`;
+        const tip = !on && !d.hidden;
+        return `<div class="bp-card ${on ? 'on' : ''} ${d.hidden ? 'secret' : ''}" title="${on ? d.fact.replace(/"/g, '&quot;') : ''}"><div class="bp-ic">${B.medal(d, on)}</div><div><div class="bp-n">${title}</div><div class="bp-s${tip ? ' hint' : ''}">${tip ? `<span class="hint-k">👁 ipucu</span><span class="hint-t">${sub}</span>` : sub}</div></div></div>`;
       }).join('')}</div></section>`;
     }).join('');
+    B.paint(document.getElementById('badge-groups'));
+    document.querySelectorAll('#badge-groups .hint').forEach(h => h.onclick = e => { e.stopPropagation(); h.classList.toggle('show'); });
   }
   const open = v => { panel.hidden = !v; btn.setAttribute('aria-expanded', v); if (v) render(); };
   btn.onclick = e => { e.stopPropagation(); open(panel.hidden); };
