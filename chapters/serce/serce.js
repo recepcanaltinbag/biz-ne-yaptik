@@ -202,10 +202,11 @@
   function drawBird(b, t) {
     const s = 9 * U * b.sz;
     ctx.save(); ctx.translate(b.x, b.y); ctx.globalAlpha = b.a;
+    const dir = b.vx >= 0 || b.fallen ? 1 : -1;
     if (b.fallen) ctx.rotate(b.rot);
-    ctx.scale(b.vx >= 0 || b.fallen ? 1 : -1, 1);
-    const flapSpeed = b.panic > 0 ? 0.045 : 0.018;
-    const flap = b.fallen ? 0.3 : Math.sin(t * flapSpeed + b.ph) * 0.7;
+    else ctx.rotate(dir * clamp(Math.atan2(b.vy, Math.abs(b.vx) + 0.001) * 0.55, -0.5, 0.5)); // dönüşte yatar
+    ctx.scale(dir, 1);
+    const flap = b.fallen ? 0.3 : b.flap !== undefined ? b.flap : Math.sin(t * (b.panic > 0 ? 0.045 : 0.018) + b.ph) * 0.7;
     // kuyruk
     ctx.fillStyle = rgb(PAL.birdDark);
     ctx.beginPath(); ctx.moveTo(-s * 0.7, -s * 0.1); ctx.lineTo(-s * 1.55, -s * 0.45); ctx.lineTo(-s * 1.45, s * 0.25); ctx.closePath(); ctx.fill();
@@ -324,6 +325,8 @@
     ctx.strokeStyle = rgb(PAL.ink, 0.5); ctx.lineWidth = 2;
     ctx.beginPath(); for (let x = 0; x <= x1 + 10; x += 10) x ? ctx.lineTo(x, groundY(x)) : ctx.moveTo(x, groundY(x)); ctx.stroke();
 
+    if (mode === 'game' || mode === 'title') drawNestTree(t, gt, x1);
+
     // başaklar: arkadan öne sıralar
     const rows = [0.06, 0.16, 0.28, 0.41, 0.55, 0.7, 0.86], bandH = gb - gt, stalkH = Math.max(bandH, H - gt);
     let stem = mixC(PAL.stem, PAL.stemRipe, ripe); stem = mixC(stem, PAL.stemDry, clamp(dmg * 0.9));
@@ -434,6 +437,7 @@
     const f = dt / 16.67;
     farmers.forEach((fm, i) => {
       fm.x += fm.dir * (job === 'plough' ? 0.00045 : 0.00018) * f;
+      for (const o of farmers) if (o !== fm && Math.abs(o.x - fm.x) < 0.07 && Math.sign(o.x - fm.x) === fm.dir) fm.dir = -fm.dir;
       if (fm.x > 0.92) fm.dir = -1; if (fm.x < 0.08) fm.dir = 1;
       const x = fm.x * x1, y = gt + (gb - gt) * (0.42 + i * 0.22), s = U * (1.05 + i * 0.15);
       fm.sx = x; fm.sy = y - 40 * s; // baloncuk için
@@ -506,8 +510,73 @@
   const gags = [];
   let nextGag = 0;
   function sayAt(getPos, text) { bubbles.length = 0; bubbles.push({ obj: { get x() { return getPos()[0]; }, get y() { return getPos()[1]; } }, x: 0, y: 0, text, life: 1 }); }
-  function drawKid(x, y, s, shirt, t, ph, aim) {
-    ctx.save(); ctx.translate(x, y); ctx.scale(s, s);
+
+  // ---- tarlanın arkasında kalıcı ağaç ve yuva: anne serçe yavrularına böcek taşır ----
+  const nest = { next: 0, phase: 'idle', t0: 0, lastCry: 0 };
+  function drawNestTree(t, gt, x1) {
+    const tx = x1 * (mobile ? 0.86 : 0.9), base = gt + 6 * U, s = U;
+    // gövde ve dallar
+    ctx.strokeStyle = '#7a5a3a'; ctx.lineCap = 'round';
+    ctx.lineWidth = 12 * s; ctx.beginPath(); ctx.moveTo(tx, base); ctx.quadraticCurveTo(tx + 4 * s, base - 70 * s, tx - 4 * s, base - 130 * s); ctx.stroke();
+    ctx.lineWidth = 5 * s; ctx.beginPath(); ctx.moveTo(tx - 2 * s, base - 95 * s); ctx.lineTo(tx - 46 * s, base - 112 * s); ctx.stroke();
+    // yaprak kümesi (kışın seyrek)
+    const leaf = vis.warm > 0.5 ? [116, 160, 84] : [150, 150, 120];
+    ctx.fillStyle = rgb(leaf, vis.warm > 0.5 ? 0.95 : 0.55);
+    [[0, -150, 42], [-30, -134, 30], [30, -132, 32], [-8, -176, 28], [22, -166, 24]].forEach(([dx, dy, r]) => { ctx.beginPath(); ctx.arc(tx + dx * s, base + dy * s, r * s, 0, 6.283); ctx.fill(); });
+    // yuva ve yavrular
+    const nx = tx - 44 * s, ny = base - 112 * s;
+    const fed = nest.phase === 'feed';
+    const chicks = vis.S > 0.06;
+    if (chicks) for (let k = -1; k <= 1; k++) {
+      const open = fed || nest.phase === 'approach' ? Math.sin(t * 0.02 + k) > -0.3 : false;
+      ctx.fillStyle = '#c9a07a'; ctx.beginPath(); ctx.arc(nx + k * 7 * s, ny - 4 * s, 5 * s, 0, 6.283); ctx.fill();
+      ctx.fillStyle = rgb(PAL.ink); ctx.beginPath(); ctx.arc(nx + k * 7 * s + 2 * s, ny - 5 * s, 1 * s, 0, 6.283); ctx.fill();
+      ctx.fillStyle = '#e8a03c'; ctx.beginPath(); ctx.moveTo(nx + k * 7 * s - 2 * s, ny - 7 * s); ctx.lineTo(nx + k * 7 * s, ny - (open ? 15 : 10) * s); ctx.lineTo(nx + k * 7 * s + 2 * s, ny - 7 * s); ctx.fill();
+    }
+    ctx.fillStyle = '#a8865a'; ctx.beginPath(); ctx.ellipse(nx, ny, 17 * s, 8 * s, 0, 0, Math.PI); ctx.fill();
+    ctx.strokeStyle = 'rgba(90,60,30,.6)'; ctx.lineWidth = 1.2; for (let k = -2; k <= 2; k++) { ctx.beginPath(); ctx.moveTo(nx + k * 6 * s - 6 * s, ny + 2 * s); ctx.lineTo(nx + k * 6 * s + 6 * s, ny + 5 * s); ctx.stroke(); }
+    nest.x = nx; nest.y = ny - 14 * s;
+
+    // anne serçenin ziyareti
+    if (!nest.next) nest.next = t + 6000;
+    const canPlay = (mode === 'game' && game.state === 'play' && !game.paused && !game.reading) || mode === 'title';
+    if (nest.phase === 'idle' && t > nest.next && canPlay && vis.S > 0.06 && vis.warm > 0.4) { nest.phase = 'approach'; nest.t0 = t; }
+    if (nest.phase === 'idle' && t > nest.next && vis.S <= 0.06 && mode === 'game' && t - nest.lastCry > 22000 && !bubbles.length) {
+      nest.lastCry = t; nest.next = t + 20000;
+      bubbles.push({ obj: { get x() { return nest.x; }, get y() { return nest.y; } }, x: 0, y: 0, text: 'Anne...? Neredesin?', life: 1 });
+    }
+    const sx = nx + 200 * s, sy = ny - 120 * s, e = t - nest.t0;
+    let bx = null, by = null, panic = 0;
+    if (nest.phase === 'approach') {
+      const q = Math.min(1, e / 2200);
+      bx = lerp(sx, nx + 10 * s, q); by = lerp(sy, ny - 18 * s, q) - Math.sin(q * Math.PI) * 20 * s;
+      if (q >= 1) {
+        const scared = mode === 'game' && game.campaign && game.k > 0.25;
+        nest.phase = scared ? 'scared' : 'feed'; nest.t0 = t;
+        if (!scared) floats.push({ x: nx, y: ny - 24 * s, text: 'hap!', life: 0.9, col: PAL.bird });
+      }
+    } else if (nest.phase === 'feed') {
+      bx = nx + 10 * s; by = ny - 18 * s;
+      if (e > 1600) { nest.phase = 'leave'; nest.t0 = t; }
+    } else if (nest.phase === 'scared') {
+      // tencere sesi: anne konamadan kaçar
+      const q = Math.min(1, e / 1400); panic = 30;
+      bx = lerp(nx + 10 * s, sx + 60 * s, q); by = lerp(ny - 18 * s, sy - 60 * s, q);
+      if (q >= 1) {
+        nest.phase = 'idle'; nest.next = t + rnd(9000, 14000);
+        if (!bubbles.length) bubbles.push({ obj: { get x() { return nest.x; }, get y() { return nest.y; } }, x: 0, y: 0, text: pick(['Anne, yemek yok mu?', 'Anneee! Açız!', 'Yine mi gürültü?\nAnne gelemedi...']), life: 1 });
+      }
+    } else if (nest.phase === 'leave') {
+      const q = Math.min(1, e / 1600);
+      bx = lerp(nx + 10 * s, sx, q); by = lerp(ny - 18 * s, sy, q);
+      if (q >= 1) { nest.phase = 'idle'; nest.next = t + rnd(8000, 13000); }
+    }
+    if (bx !== null) drawBird({ x: bx, y: by, vx: nest.phase === 'approach' ? -1 : 1, sz: 1, ph: 0, panic, hits: 0, a: 1, fallen: false }, t);
+    if (bx !== null && (nest.phase === 'approach' || nest.phase === 'feed')) { ctx.fillStyle = rgb(PAL.bug); ctx.fillRect(bx - 12 * s, by + 1 * s, 4 * s, 2.5 * s); }
+  }
+
+  function drawKid(x, y, s, shirt, t, ph, aim, dir = 1) {
+    ctx.save(); ctx.translate(x, y); ctx.scale(s * dir, s);
     const run = Math.sin(t * 0.03 + ph);
     ctx.strokeStyle = rgb(PAL.ink); ctx.lineWidth = 2.4; ctx.lineCap = 'round';
     ctx.beginPath(); ctx.moveTo(-3, -6); ctx.lineTo(-5 - run * 4, 2); ctx.moveTo(3, -6); ctx.lineTo(5 + run * 4, 2); ctx.stroke();
@@ -526,9 +595,9 @@
     if (farmers.some(f => f.sx !== undefined) && birds.some(b => !b.fallen)) opts.push('hat');
     if (vis.P > 2 && farmers.some(f => f.sx !== undefined)) opts.push('broom', 'lunch');
     if (villagers.length >= 2 && game.k > 0.3) opts.push('concert');
+    if (game.campaign && game.k >= 0.7) opts.push('band', 'band', 'band');
     if (villagers.length) opts.push('tumble');
     if (birds.some(b => !b.fallen)) opts.push('dog');
-    if ((!game.campaign || game.k < 0.2) && vis.S > 0.4 && vis.warm > 0.5) opts.push('nest', 'nest');
     if (!opts.length) return;
     const kind = pick(opts);
     if (kind === 'kids') {
@@ -546,6 +615,10 @@
       f.hatGone = t + 6500;
       gags.push({ kind, t0: t, dur: 6500, f, sx: f.sx, sy: f.sy });
       sayAt(() => [f.sx, f.sy], 'Hey! Şapkam!');
+    } else if (kind === 'band') {
+      const cx = x1 * rnd(0.3, 0.6), y = gt + (gb - gt) * 0.12 + 40 * U;
+      gags.push({ kind, t0: t, dur: 10000, cx, y, beat: 0 });
+      sayAt(() => [cx, y - 70 * U], pick(['Tencere Rock Grubu\nsahnede!', 'Bu şarkı serçelere\ngelsin!', 'Bir, iki, üç, dört!']));
     } else if (kind === 'concert') {
       const [a, b] = villagers.slice(0, 2);
       gags.push({ kind, t0: t, dur: 7000, a, b });
@@ -583,9 +656,9 @@
         const X = q => g.dir > 0 ? lerp(-40, x1 + 40, q) : lerp(x1 + 40, -40, q);
         const bx = X(p + 0.12), by = g.y - 70 * U + Math.sin(t * 0.01) * 10 * U;
         drawBird({ x: bx, y: by, vx: g.dir, sz: 1, ph: 0, panic: 30, hits: 0, a: 1, fallen: false }, t);
-        const k1 = [X(p), g.y], k2 = [X(p - 0.05), g.y + 6 * U];
-        drawKid(k1[0], k1[1], 1.1 * U * g.dir, '#5b8fc0', t, 0, true);
-        drawKid(k2[0], k2[1], 1.1 * U * g.dir, '#d9b45a', t, 1.5, false);
+        const k1 = [X(p), g.y], k2 = [X(p - 0.015), g.y + 22 * U];
+        drawKid(k1[0], k1[1], 1.1 * U, '#5b8fc0', t, 0, true, g.dir);
+        drawKid(k2[0], k2[1], 1.1 * U, '#d9b45a', t, 1.5, false, g.dir);
         g.k1 = k1; g.k2 = k2;
         if (!g.said) { g.said = 1; sayAt(() => g.k1 ? [g.k1[0], g.k1[1] - 34 * U] : [0, 0], pick(['Bu sefer kesin\nvuracağım!', 'Kaçma serçe!', 'Bir puan bana!'])); }
         if (p > 0.42 && !g.peb) g.peb = { t0: t, x0: k1[0], y0: k1[1] - 24 * U };
@@ -601,6 +674,49 @@
             sayAt(() => g.k2 ? [g.k2[0], g.k2[1] - 34 * U] : [0, 0], pick(['Ayy! Bana değil!', 'Serçe orada,\nben burdayım!', 'Annemeee söylicem!']));
           }
         }
+      } else if (g.kind === 'band') {
+        // abartılı kampanya: beş kişilik tencere grubu
+        const beat = Math.floor((t - g.t0) / 420);
+        if (beat !== g.beat) { g.beat = beat; if (beat % 2 === 0) thud(); else clang(g.cx); }
+        const bounce = Math.abs(Math.sin((t - g.t0) * 0.0075)) * 5 * U;
+        const members = [
+          { dx: -100, shirt: [196, 72, 52], inst: 'drum' }, { dx: -50, shirt: [64, 110, 160], inst: 'guitar' },
+          { dx: 0, shirt: [170, 120, 50], inst: 'sing' }, { dx: 50, shirt: [92, 130, 70], inst: 'horn' }, { dx: 100, shirt: [120, 90, 160], inst: 'cymbal' },
+        ];
+        // küçük sahne
+        ctx.fillStyle = 'rgba(122,90,58,.85)'; ctx.fillRect(g.cx - 130 * U, g.y - 2 * U, 260 * U, 10 * U);
+        members.forEach((m, k) => {
+          const x = g.cx + m.dx * U, y = g.y - (k % 2 ? bounce : 5 * U - bounce), s = 1.1 * U;
+          ctx.save(); ctx.translate(x, y); ctx.scale(s, s);
+          ctx.fillStyle = rgb(m.shirt); ctx.beginPath(); ctx.roundRect ? ctx.roundRect(-8, -26, 16, 24, 7) : ctx.rect(-8, -26, 16, 24); ctx.fill();
+          ctx.fillStyle = '#f2d2b0'; ctx.beginPath(); ctx.arc(0, -33, 8, 0, 6.283); ctx.fill();
+          ctx.fillStyle = rgb(PAL.ink); ctx.beginPath(); ctx.arc(-2.6, -34, 1.3, 0, 6.283); ctx.arc(2.6, -34, 1.3, 0, 6.283); ctx.fill();
+          ctx.strokeStyle = rgb(PAL.ink); ctx.lineWidth = 1.6; ctx.beginPath(); ctx.arc(0, -31, 3.4, 0.1, 3.0); ctx.stroke();
+          const hit = Math.sin((t - g.t0) * 0.015 + k) > 0;
+          if (m.inst === 'drum') {
+            ctx.fillStyle = '#c0503a'; ctx.beginPath(); ctx.ellipse(0, -4, 13, 9, 0, 0, 6.283); ctx.fill();
+            ctx.fillStyle = '#f3ecd8'; ctx.beginPath(); ctx.ellipse(0, -11, 13, 4, 0, 0, 6.283); ctx.fill();
+            ctx.strokeStyle = '#6b4a2b'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(-8, -18); ctx.lineTo(-4, hit ? -12 : -22); ctx.moveTo(8, -18); ctx.lineTo(4, hit ? -22 : -12); ctx.stroke();
+          } else if (m.inst === 'guitar') {
+            ctx.save(); ctx.rotate(-0.5);
+            ctx.fillStyle = '#d9a95a'; ctx.beginPath(); ctx.ellipse(2, -10, 8, 6, 0, 0, 6.283); ctx.fill();
+            ctx.strokeStyle = '#6b4a2b'; ctx.lineWidth = 2.4; ctx.beginPath(); ctx.moveTo(8, -12); ctx.lineTo(24, -16); ctx.stroke();
+            ctx.restore();
+          } else if (m.inst === 'sing') {
+            ctx.fillStyle = '#8b9096'; ctx.beginPath(); ctx.arc(10, -30, 4, 0, 6.283); ctx.fill();
+            ctx.strokeStyle = '#6b4a2b'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(10, -26); ctx.lineTo(14, -14); ctx.stroke();
+          } else if (m.inst === 'horn') {
+            ctx.strokeStyle = '#d9b45a'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(4, -30); ctx.lineTo(18, -36); ctx.stroke();
+            ctx.fillStyle = '#d9b45a'; ctx.beginPath(); ctx.moveTo(18, -40); ctx.lineTo(26, -42); ctx.lineTo(24, -30); ctx.lineTo(18, -32); ctx.closePath(); ctx.fill();
+          } else {
+            ctx.fillStyle = '#8b9096'; [-12, 12].forEach((dx, q) => { ctx.beginPath(); ctx.ellipse(dx, hit === !!q ? -30 : -22, 7, 2.5, 0, 0, 6.283); ctx.fill(); });
+          }
+          ctx.restore();
+          if (Math.random() < 0.05) floats.push({ x: x + rnd(-8, 8) * U, y: y - 54 * U, text: pick(['♪', '♫', '♬', 'BANG!']), life: 1, col: [192, 80, 58] });
+        });
+        // çevredeki serçeler kaçışır
+        for (const b of birds) if (!b.fallen && Math.hypot(b.x - g.cx, b.y - g.y) < 220 * U) { b.panic = 30; }
+        if (p > 0.55 && !g.said) { g.said = 1; sayAt(() => [g.cx + 50 * U, g.y - 70 * U], pick(['Bis! Bis!', 'Serçeler kaçtı ama\nseyirci kalmadı!', 'Turne Pekin\'e!'])); }
       } else if (g.kind === 'concert') {
         if (Math.random() < 0.12) { const v = Math.random() < 0.5 ? g.a : g.b; floats.push({ x: v.x + rnd(-10, 10) * U, y: v.y - 50 * U, text: pick(['♪', '♫', '♬']), life: 1, col: [192, 80, 58] }); if (Math.random() < 0.3) clang(v.x); }
         if (p > 0.5 && !g.said) { g.said = 1; sayAt(() => [g.b.x, g.b.y - 46 * U], pick(['Turneye çıkalım!', 'Serçeler bile\ndans ediyor!'])); }
@@ -748,8 +864,9 @@
         b.vx += ((cx / n - b.x) * 0.0007 + (ax / n - b.vx) * 0.025) * f;
         b.vy += ((cy / n - b.y) * 0.0007 + (ay / n - b.vy) * 0.025) * f;
       }
-      b.vx += (sx * 14 * U + (Math.random() - 0.5) * 0.08) * f;
-      b.vy += (sy * 14 * U + (Math.random() - 0.5) * 0.08) * f;
+      b.wa = (b.wa === undefined ? rnd(0, 6.28) : b.wa) + Math.sin(t * 0.0008 + b.ph * 2.3) * 0.035 * f;
+      b.vx += (sx * 14 * U + Math.cos(b.wa) * 0.03 * U) * f;
+      b.vy += (sy * 14 * U + Math.sin(b.wa) * 0.022 * U) * f;
 
       // böcek avı: sağlıklı tarlada serçeler zaman zaman tarlaya dalar
       if (!b.dive && !b.panic && !b.leave && vis.warm > 0.5 && bugs.length && Math.random() < 0.0016 * f) {
@@ -772,8 +889,16 @@
       } else {
         b.vx += (b.x < x1 / 2 ? -0.08 : 0.08) * U * f; b.vy -= 0.02 * f;
       }
-      const sp = Math.hypot(b.vx, b.vy), max = (b.panic ? 5.5 : b.dive ? 3.6 : 2.3) * U, min = 0.9 * U;
-      if (sp > max) { b.vx *= max / sp; b.vy *= max / sp; } else if (sp < min) { b.vx *= min / (sp || 1); b.vy *= min / (sp || 1); }
+      const sp = Math.hypot(b.vx, b.vy) || 0.001, cruise = (b.panic ? 4.6 : b.dive ? 3.2 : 1.7 + Math.sin(b.ph) * 0.3) * U;
+      const kf = 1 + ((cruise - sp) / sp) * 0.06 * f;            // seyir hızına yumuşakça yaklaş
+      b.vx *= kf; b.vy *= kf;
+      const hard = cruise * 1.7; if (sp > hard) { b.vx *= hard / sp; b.vy *= hard / sp; }
+      // tırmanırken hızlı çırpar, alçalırken süzülür
+      const climb = clamp(-b.vy / (2 * U), -1, 1);
+      b.fp = (b.fp || b.ph) + (b.panic ? 0.5 : 0.16 + Math.max(0, climb) * 0.22) * f;
+      const amp = b.panic ? 0.85 : climb < -0.25 ? 0.18 : 0.62;
+      b.fa = lerp(b.fa || amp, amp, 0.08 * f);
+      b.flap = Math.sin(b.fp) * b.fa;
       b.x += b.vx * f; b.y += b.vy * f;
       if (b.leave && (b.x < -40 || b.x > x1 + 40 || b.y < -40)) { birds.splice(i, 1); continue; }
     }
@@ -1069,7 +1194,8 @@
   }
   function askReport(i, v) {
     const m = $('modal');
-    m.innerHTML = `<div class="card"><div class="from">Devlet yetkilisi</div><h2>${1958 + i} hasadı: gerçekte %${v}</h2><p>Pekin'e giden rapora ne yazalım? Devlet, <b>raporlanan</b> hasadın üçte birini toplayacak.</p><div class="opts"></div></div>`;
+    m.innerHTML = `<div class="card talk"><div class="who"></div><div><div class="from">Devlet yetkilisi</div><h2>${1958 + i} hasadı: gerçekte %${v}</h2><p class="speech">"Yoldaş, Pekin'e giden rapora ne yazalım? Devlet <b>raporlanan</b> hasadın üçte birini toplayacak."</p><div class="opts"></div></div></div>`;
+    m.querySelector('.who').appendChild(officialPortrait());
     const box = m.querySelector('.opts');
     [
       { label: `Gerçeği yaz (%${v})`, sub: v < 90 ? 'Dürüst ama Pekin pek sevinmez' : 'Dürüst ve güvenli', mult: 1, trust: v < 90 ? -15 : 5, reply: 'Hmm... Pekin\'e\nbunu mu yollayayım?' },
@@ -1102,6 +1228,25 @@
 
   // devlet yetkilisi: takım elbise, dosya, kalem
   let official = null;
+  function drawOfficialBody(g, st) {
+    g.fillStyle = 'rgba(0,0,0,.14)'; g.beginPath(); g.ellipse(0, 2, 12, 3, 0, 0, 6.283); g.fill();
+    g.strokeStyle = '#2f3b46'; g.lineWidth = 3.4; g.lineCap = 'round';
+    g.beginPath(); g.moveTo(-3, -6); g.lineTo(-4 - st, 2); g.moveTo(3, -6); g.lineTo(4 + st, 2); g.stroke();
+    g.fillStyle = '#4a5866'; g.beginPath(); g.roundRect ? g.roundRect(-9, -30, 18, 26, 5) : g.rect(-9, -30, 18, 26); g.fill();
+    g.fillStyle = '#3a4652'; for (let k = 0; k < 3; k++) { g.beginPath(); g.arc(0, -25 + k * 7, 1.2, 0, 6.283); g.fill(); }
+    g.fillStyle = '#f2d2b0'; g.beginPath(); g.arc(0, -37, 7.5, 0, 6.283); g.fill();
+    g.fillStyle = '#4a5866'; g.beginPath(); g.ellipse(0, -43, 9, 3.5, 0, 0, 6.283); g.fill(); g.fillRect(-6, -48, 12, 5); // kasket
+    g.fillStyle = '#c0503a'; g.beginPath(); g.arc(0, -46, 1.6, 0, 6.283); g.fill();
+    g.fillStyle = rgb(PAL.ink); g.beginPath(); g.arc(-2.6, -37, 1.2, 0, 6.283); g.arc(2.6, -37, 1.2, 0, 6.283); g.fill();
+    g.fillStyle = '#e8dcc0'; g.fillRect(-20, -26, 11, 14); g.strokeStyle = '#8a7a5a'; g.lineWidth = 1; g.strokeRect(-20, -26, 11, 14); // dosya
+  }
+  function officialPortrait() {
+    const c = document.createElement('canvas'), dpr = Math.min(2, window.devicePixelRatio || 1), w = 120, h = 150;
+    c.width = w * dpr; c.height = h * dpr; c.className = 'portrait';
+    const g = c.getContext('2d'); g.setTransform(dpr, 0, 0, dpr, 0, 0); g.translate(w / 2 + 6, h - 8); g.scale(2.7, 2.7);
+    drawOfficialBody(g, 0);
+    return c;
+  }
   function drawOfficial(t, gt, gb, x1) {
     if (!official) return;
     const now = performance.now(), e = now - official.t0;
@@ -1112,17 +1257,7 @@
     const y = gt + (gb - gt) * 0.18 + 36 * U, s = 1.2 * U, walk = e < 1500 || (official.leave && now > official.leave);
     official.x = x; official.y = y - 52 * U;
     ctx.save(); ctx.translate(x, y); ctx.scale(s, s);
-    const st = walk ? Math.sin(t * 0.02) * 4 : 0;
-    ctx.fillStyle = 'rgba(0,0,0,.14)'; ctx.beginPath(); ctx.ellipse(0, 2, 12, 3, 0, 0, 6.283); ctx.fill();
-    ctx.strokeStyle = '#2f3b46'; ctx.lineWidth = 3.4; ctx.lineCap = 'round';
-    ctx.beginPath(); ctx.moveTo(-3, -6); ctx.lineTo(-4 - st, 2); ctx.moveTo(3, -6); ctx.lineTo(4 + st, 2); ctx.stroke();
-    ctx.fillStyle = '#4a5866'; ctx.beginPath(); ctx.roundRect ? ctx.roundRect(-9, -30, 18, 26, 5) : ctx.rect(-9, -30, 18, 26); ctx.fill();
-    ctx.fillStyle = '#3a4652'; for (let k = 0; k < 3; k++) { ctx.beginPath(); ctx.arc(0, -25 + k * 7, 1.2, 0, 6.283); ctx.fill(); }
-    ctx.fillStyle = '#f2d2b0'; ctx.beginPath(); ctx.arc(0, -37, 7.5, 0, 6.283); ctx.fill();
-    ctx.fillStyle = '#4a5866'; ctx.beginPath(); ctx.ellipse(0, -43, 9, 3.5, 0, 0, 6.283); ctx.fill(); ctx.fillRect(-6, -48, 12, 5); // kasket
-    ctx.fillStyle = '#c0503a'; ctx.beginPath(); ctx.arc(0, -46, 1.6, 0, 6.283); ctx.fill();
-    ctx.fillStyle = rgb(PAL.ink); ctx.beginPath(); ctx.arc(-2.6, -37, 1.2, 0, 6.283); ctx.arc(2.6, -37, 1.2, 0, 6.283); ctx.fill();
-    ctx.fillStyle = '#e8dcc0'; ctx.fillRect(-20, -26, 11, 14); ctx.strokeStyle = '#8a7a5a'; ctx.lineWidth = 1; ctx.strokeRect(-20, -26, 11, 14); // dosya
+    drawOfficialBody(ctx, walk ? Math.sin(t * 0.02) * 4 : 0);
     ctx.restore();
     // konuşma
     const text = official.reply || (e > 1300 ? official.say : null);

@@ -579,3 +579,59 @@ input[type=range]::-moz-range-thumb { width: 24px; height: 24px; border-radius: 
   .dock .slide[data-mode="game"] .topbox .yearbar { padding-right: 96px; }
 }
 .harvest .go-h { margin-top: 10px; }
+/* karakterle konuşan karar kartı */
+.card.talk { display: grid; grid-template-columns: 120px 1fr; gap: 14px; align-items: start; width: min(600px, 100%); }
+.card.talk .who { position: relative; background: #eef3e6; border: 2px solid var(--ink); border-radius: 16px; overflow: hidden; height: 150px; }
+.card.talk .portrait { width: 120px; height: 150px; display: block; }
+.card.talk .speech { position: relative; background: #fff; border: 2px solid var(--line); border-radius: 12px; padding: 8px 12px; }
+.card.talk .speech::before { content: ""; position: absolute; left: -9px; top: 14px; border: 8px solid transparent; border-right-color: var(--line); border-left: 0; }
+@media (max-width: 760px) {
+  .card.talk { grid-template-columns: 74px 1fr; gap: 10px; }
+  .card.talk .who { height: 96px; }
+  .card.talk .portrait { width: 74px; height: 92px; }
+}
+
+/* Sonuç ekranı pencereye sığsın: ölçüler ekran yüksekliğine göre */
+.slide[data-mode="result"] { padding-top: 52px; padding-bottom: 40px; }
+.result { padding: 12px 20px 14px; }
+.result .kicker { font-size: .72rem; }
+.result h2 { font-size: clamp(1.6rem, 5.2vh, 3rem); margin: .1em 0 .15em; }
+.result .verdict { font-size: clamp(.98rem, 2.2vh, 1.25rem); margin-bottom: .5em; line-height: 1.35; }
+.rgrid { margin: 8px 0; gap: 8px; }
+.rgrid > div { padding: 6px 6px; }
+.rgrid .v { font-size: clamp(1.4rem, 4.4vh, 2.3rem); }
+.rgrid .y, .rgrid .h { font-size: clamp(.78rem, 1.7vh, 1rem); }
+.rchart { height: clamp(90px, 17vh, 170px); }
+.result .legend { margin: 4px 0 8px; font-size: .9rem; }
+.rbtns .hbtn { font-size: 1.1rem; padding: 6px 18px; }
+@media (max-width: 760px) {
+  .slide[data-mode="result"] { padding: 46px 10px 34px; }
+  .result { padding: 10px 12px; }
+  .rgrid { grid-template-columns: repeat(3, 1fr); }
+  .rgrid > div { padding: 4px 2px; }
+}
+/* uzun metin sayfaları kendi içinde kayar; altta noktalarla çakışmasın */
+.slide.scroll { padding-bottom: 56px; overscroll-behavior: contain; }
+@media (max-height: 720px) {
+  .result .legend { display: none; }
+  .rchart { height: clamp(70px, 13vh, 110px); }
+  .result h2 { font-size: clamp(1.4rem, 4.6vh, 2.2rem); }
+  .result .verdict { font-size: .95rem; }
+  .slide[data-mode="result"] { padding-top: 44px; padding-bottom: 30px; }
+}
+
+/* Bilgisayar: yıl solda, haberler sağında (tek yatay şerit) */
+@media (min-width: 761px) {
+  .dock .slide[data-mode="game"] .topbox {
+    flex-direction: row; align-items: flex-start; gap: 14px;
+    left: 280px; right: 24px; width: auto; max-width: 860px; margin: 0 auto;
+  }
+  .dock .slide[data-mode="game"] .topbox .yearbar {
+    flex: 0 0 220px; display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 4px 8px; padding: 0 6px 4px;
+  }
+  .dock .slide[data-mode="game"] .topbox .yb-year, .dock .slide[data-mode="game"] .topbox .yb-sub,
+  .dock .slide[data-mode="game"] .topbox .yb-track { flex-basis: 100%; }
+  .dock .slide[data-mode="game"] .topbox .yb-harvest, .dock .slide[data-mode="game"] .topbox .yb-speed { position: static; transform: none; }
+  .dock .slide[data-mode="game"] .topbox #toasts { flex: 1 1 auto; min-width: 0; padding-top: 6px; }
+  .dock .slide[data-mode="game"] .topbox .toast:not(.pause):first-child { margin-top: 0; }
+}

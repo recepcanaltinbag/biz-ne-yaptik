@@ -63,6 +63,8 @@ Bu kurallar kullanıcının geri bildirimleriyle tek tek oturtuldu. Yeni bölüm
 - **Sol üst:** zeminsiz HUD (kota, göstergeler, istatistikler). Telefonda 128 px genişliğinde ve yalnızca simgeli.
 - **Alt:** yalnız kaydırıcılar, ayrı beyaz kartlarda. Sahne (toprak, başaklar) ekranın en altına kadar uzanır, kontroller sahnenin üzerinde yüzer.
 - **Orta:** durduran hikâye kartları, hasat kartı (başaklar ve "normal yıl" çizgili çubuk) ve karar kartları. Bu katmanlar `z-index` ile haber kutusunun üstünde durmalı.
+- **Her ekran pencereye sığmalı** (bilgisayar ve telefon). Sonuç ekranı gibi kartlarda ölçüleri `vh` ile ölçekle (`clamp(…, 5vh, …)`), kısa ekranlarda (`max-height: 720px`) açıklama ve lejantı gizle. 1024×768, 1440×900, 375×812 ve 360×640'ta `scrollHeight <= innerHeight` olduğunu JS ile ölçerek doğrula. Uzun metin sayfaları kendi içinde kayar.
+- **Bilgisayarda üst şerit yatay:** solda yıl, ay, zaman çizgisi, son sonuç ve hız düğmeleri; hemen sağında haberler. Telefonda yıl ve haber alt alta, HUD'un sağında durur.
 - `position: fixed` kartın atalarında `transform` ya da `backdrop-filter` olmasın, yoksa kart ekran yerine kutuya göre konumlanır.
 - Telefonda: kilitli araçlar ve durdur düğmesi gizli, yazılar küçük. 375×812 ve 360×640'ta mutlaka bak.
 
@@ -71,6 +73,11 @@ Bu kurallar kullanıcının geri bildirimleriyle tek tek oturtuldu. Yeni bölüm
 - Ortam sohbeti 9–16 sn'de bir gelir. Dokununca en yakın karakter konuşur.
 - Replikler duruma göre değişen havuzlardan seçilsin, her durumda en az üç seçenek olsun. Esprili olsun ("Annemin tenceresini ödünç aldım.").
 - **Mizahi sahne (gag) sistemi:** 17–27 sn'de bir, duruma uygun küçük bir sahne. Örnekler: sapanlı çocukların taşı birbirine çarpar, tencere kafaya geçer, serçe şapka kapar, köylü uyuya kalır, çiftçi süpürgeyle çekirge kovalar, tencere konseri, takılıp düşen köylü, serçe kovalayan köpek, ekmeği yiyen çekirgeler, yavrularını besleyen serçe. Havuz geniş olsun, duruma göre seçilsin. Şiddet içermeyen, çizgi film tarzı şakalar olsun.
+
+- **Karar anında karakter yanına gelir:** karar kartı, kararı soran karakterin portresiyle (sahnedeki çizimden canvas'a) ve konuşma balonuyla açılır. Karakter sahnede de yürüyüp yanında durur, kartın arkasında kalmayacak şekilde konumlanır.
+- **Kalıcı duygusal öğe:** sahnede sürekli duran ve politikaya tepki veren küçük bir hikâye (ör. ağaçtaki yuva: kampanya yüksekken anne konamaz, yavrular "Anne, yemek yok mu?" der; serçe tükenince yuva sessizleşir).
+- **Abartı ödüllendirilsin:** oyuncu bir kaydırıcıyı uca götürünce ona özel, büyük bir sahne gelsin (ör. %70 üstü seferberlikte 5 kişilik tencere rock grubu).
+- **Hareket akıcı olsun:** kuşlarda rastgele titreme yok; yavaş dönen yön (wander), seyir hızına yumuşak yaklaşma, ivme sınırı, dönüşte yatma, tırmanırken hızlı çırpma ve alçalırken süzülme. İnsanlar birbirinin içinden geçmez, gruplar yan yana yürür. Figür çevirirken yalnız yatay ölçekle (`scale(dir * s, s)`), dikeyi asla ters çevirme.
 
 ## Görsel ve ses
 - Palet: doğal yeşil (`#e9f0de`). Ekosistem bozuldukça arka plan `#f4dbd1` tonuna kayar. Yazıların arkasında yarı saydam beyaz zemin olur.
