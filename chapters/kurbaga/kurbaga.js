@@ -630,7 +630,7 @@
     slides[cur].classList.add('active'); slides[cur].scrollTop = 0;
     mode = slides[cur].dataset.mode; landKey = '';
     paintDots();
-    if (mode === 'game') enterGame();
+    if (mode === 'game') { if (window.Stat) window.Stat.event('basla-kurbaga', 'Başladı: Kurtarıcı Kurbağa'); enterGame(); }
     if (mode === 'result') renderResult();
     if (mode === 'sandbox') enterSandbox();
   }
@@ -915,6 +915,7 @@
     if (game.state !== 'end') awardEnd();
     game.state = 'end';
     try { localStorage.setItem(DONE_KEY, '1'); } catch (e) {}
+    if (window.Stat) window.Stat.event('bitti-kurbaga', 'Bitirdi: Kurtarıcı Kurbağa');
     maxSeen = slides.length - 1; paintDots(); replayNav();
     setTimeout(() => { if (mode === 'game') goTo(slideOf('result')); }, 1400);
   }

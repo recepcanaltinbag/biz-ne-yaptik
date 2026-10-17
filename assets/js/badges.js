@@ -85,6 +85,7 @@
       const def = DEFS.find(d => d.id === id);
       if (!def || got[id]) return false;
       got[id] = new Date().toISOString().slice(0, 10); write(got); session.push(id); show(def);
+      if (window.Stat) window.Stat.event('rozet-' + id, 'Rozet: ' + def.name);
       return true;
     },
     session: () => session.slice(),

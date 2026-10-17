@@ -1014,7 +1014,7 @@
     slides[cur].classList.add('active'); slides[cur].scrollTop = 0;
     mode = slides[cur].dataset.mode;
     paintDots();
-    if (mode === 'game') enterGame();
+    if (mode === 'game') { if (window.Stat) window.Stat.event('basla-serce', 'Başladı: Serçelere Savaş'); enterGame(); }
     if (mode === 'result') renderResult();
     if (mode === 'sandbox') enterSandbox();
     if (mode === 'title' || mode === 'intro' || mode === 'poster' || mode === 'facts' || mode === 'lessons') {
@@ -1383,6 +1383,7 @@
     if (game.state !== 'end') awardEnd();
     game.state = 'end';
     try { localStorage.setItem(DONE_KEY, '1'); } catch (e) {}
+    if (window.Stat) window.Stat.event('bitti-serce', 'Bitirdi: Serçelere Savaş');
     maxSeen = slides.length - 1; paintDots(); replayNav();
     setTimeout(() => { if (mode === 'game') goTo(slideOf('result')); }, 1500);
   }
