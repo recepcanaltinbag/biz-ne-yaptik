@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Inter:wght@400;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../../assets/css/chapter.css?v=202610171223">
+<link rel="stylesheet" href="../../assets/css/chapter.css?v=202610171239">
 </head>
 <body>
 <canvas id="world" aria-hidden="true"></canvas>
@@ -36,21 +36,23 @@
       <p>Sen Tarım Bakanısın. Tencereleri köylüler çalar, raporları memurlar yazar. <b>Kararı sen verirsin.</b></p>
       <p class="try">👉 Kaydırıcılarla kampanyayı ayarla. Pekin seni izliyor.</p>
     </div>
+    <div class="yearbar" aria-live="polite"><div class="yb-year" id="yb-year">1958</div><div class="yb-sub" id="yb-sub">Mart</div><div class="yb-track"><i id="yb-fill"></i></div></div>
     <aside class="gpanel" aria-label="Bakanlık masası">
+      <button class="gp-toggle" type="button" aria-expanded="false">⋯ Daha fazla</button>
       <div class="gp-top">
         <div class="chip date" id="g-date">Mart 1958</div>
         <div class="chip quota" id="g-quota"><span class="lbl">Kota</span> <b id="q-n">0</b>/<span id="q-t">25</span> <span class="track"><i id="q-bar"></i></span></div>
       </div>
       <div class="gp-meters">
-        <div class="mrow"><span>🐦 Serçe</span><span class="track"><i id="m-s"></i></span></div>
-        <div class="mrow"><span>🦗 Böcek</span><span class="track"><i id="m-p"></i></span></div>
-        <div class="mrow"><span>🌾 Tahıl</span><span class="track"><i id="m-f"></i></span></div>
-        <div class="mrow"><span>🍚 Köylünün payı</span><span class="track"><i id="m-t"></i></span></div>
-        <div class="mrow trust"><span>🏛️ Pekin'in güveni</span><span class="track"><i id="m-trust"></i></span></div>
+        <div class="mrow"><span>🐦<em> Serçe</em></span><span class="track"><i id="m-s"></i></span></div>
+        <div class="mrow"><span>🦗<em> Böcek</em></span><span class="track"><i id="m-p"></i></span></div>
+        <div class="mrow"><span>🌾<em> Tahıl</em></span><span class="track"><i id="m-f"></i></span></div>
+        <div class="mrow"><span>🍚<em> Köylünün payı</em></span><span class="track"><i id="m-t"></i></span></div>
+        <div class="mrow trust"><span>🏛️<em> Pekin'in güveni</em></span><span class="track"><i id="m-trust"></i></span></div>
       </div>
       <label class="sl big"><span>📣 Tencere seferberliği <b id="o-k">%0</b></span><input type="range" id="g-k" min="0" max="100" step="5" value="0"></label>
       <label class="sl big"><span>📝 Rapordaki abartı <b id="o-lie">%0</b></span><input type="range" id="g-lie" min="0" max="100" step="5" value="0"></label>
-      <div class="sb-ctrl">
+      <div class="sb-ctrl gp-extra">
         <button class="hbtn sm" id="g-pause">❚❚ Durdur</button>
         <button class="hbtn sm" id="g-speed">1×</button>
       </div>
@@ -118,11 +120,11 @@
         <div class="lcard"><h3>📝 Şişirilmiş rapor açlık getirir</h3><p>Rakamlar güzel göründükçe kimse sorunu görmedi. Devlet olmayan tahılı topladı; asıl kıtlığı bu büyüttü.</p></div>
       </div>
       <h2>Bugün ne yapılabilir?</h2>
-      <p>Modern tarım bu dersi <b>Entegre Zararlı Yönetimi</b> adıyla uyguluyor: önce doğal düşmanlar, ilaç en son çare. İsrail ve Ürdün'de çiftçiler fareyle mücadelede zehir yerine binlerce peçeli baykuş yuvası kullanıyor.</p>
+      <p>Bugün pek çok çiftçi bu dersi uyguluyor: zararlılarla doğal düşmanlarını koruyarak mücadele ediyor. İsrail ve Ürdün'de çiftçiler fareleri avlaması için tarlalara binlerce peçeli baykuş yuvası kurdu.</p>
       <div class="lessons">
-        <div class="lcard"><h3>🏡 Balkonunda, bahçende</h3><p>İlaç kullanma. Kuş yuvası ve böcek oteli as, yerel çiçekler ek.</p></div>
+        <div class="lcard"><h3>🏡 Balkonunda, bahçende</h3><p>Kuş yuvası ve böcek oteli as, yerel çiçekler ek. Serçeler sana teşekkür edecek.</p></div>
         <div class="lcard"><h3>📱 Gönüllü bilim insanı ol</h3><p>Gördüğün kuşları ve böcekleri eBird ya da iNaturalist'e kaydet. Bilim insanları nüfusları bu verilerle izliyor.</p></div>
-        <div class="lcard"><h3>🏛️ Belediyene sor</h3><p>İlaçlama yerine biyolojik mücadele yapılıp yapılmadığını sor ve bunu talep et.</p></div>
+        <div class="lcard"><h3>🏛️ Belediyene sor</h3><p>Parklarda ve kent tarlalarında kuşlar için yuva ve ağaç dikimi yapılıp yapılmadığını sor, talep et.</p></div>
       </div>
       <h2>Kaynaklar</h2>
       <ul class="sources">
@@ -142,7 +144,8 @@
 
 <nav class="dots" id="dots" aria-label="Bölüm adımları"></nav>
 
-<script src="../../assets/js/toon.js?v=202610171223"></script>
-<script src="serce.js?v=202610171223"></script>
+<script src="../../assets/js/toon.js?v=202610171239"></script>
+<script src="serce.js?v=202610171239"></script>
+<script>/* gpToggle */document.querySelectorAll(".gp-toggle").forEach(b=>b.onclick=()=>{const p=b.closest(".gpanel");const o=p.classList.toggle("open");b.setAttribute("aria-expanded",o);b.textContent=o?"✕ Kapat":"⋯ Daha fazla";window.dispatchEvent(new Event("panel"));});</script>
 </body>
 </html>

@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Inter:wght@400;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../../assets/css/chapter.css?v=202610171223">
+<link rel="stylesheet" href="../../assets/css/chapter.css?v=202610171239">
 <style>
   .gp-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; font-family: var(--hand); }
   .gp-stats div { background: #fff; border: 2px solid var(--line); border-radius: 12px; padding: 4px 10px; }
@@ -42,21 +42,23 @@
   </section>
 
   <section class="slide" data-mode="game">
+    <div class="yearbar" aria-live="polite"><div class="yb-year" id="yb-year">1935</div><div class="yb-sub" id="yb-sub">Kamış tarlası</div><div class="yb-track"><i id="yb-fill"></i></div></div>
     <aside class="gpanel" aria-label="Kontrol masası">
+      <button class="gp-toggle" type="button" aria-expanded="false">⋯ Daha fazla</button>
       <div class="gp-top"><div class="chip date" id="g-year">1935</div><div class="chip" id="g-phase">Kamış tarlası</div></div>
       <div class="gp-stats">
         <div><small>Kurbağa</small><b id="s-toads">102</b></div>
         <div><small>Yayıldığı alan</small><b id="s-area">%0</b></div>
       </div>
       <div class="gp-meters">
-        <div class="mrow"><span>🦎 Yerli avcılar</span><span class="track"><i id="m-pred"></i></span></div>
+        <div class="mrow"><span>🦎<em> Yerli avcılar</em></span><span class="track"><i id="m-pred"></i></span></div>
       </div>
-      <p class="goal" id="g-goal">Hedef: 2025'e kadar yerli avcıları <b>%45'in</b> üstünde tut.</p>
+      <p class="goal gp-extra" id="g-goal">Hedef: 2025'e kadar yerli avcıları <b>%45'in</b> üstünde tut.</p>
       <div class="budget"><span>💰 Bütçe</span><span id="g-budget">100 / 100</span></div>
       <label class="sl big locked" id="w-collect"><span>🪣 Gönüllü toplama <b id="o-collect">🔒 1980</b></span><input type="range" id="g-collect" min="0" max="100" step="5" value="0" disabled></label>
       <label class="sl big locked" id="w-teach"><span>🎓 Öğretmen kurbağa <b id="o-teach">🔒 2008</b></span><input type="range" id="g-teach" min="0" max="100" step="5" value="0" disabled></label>
       <label class="sl big locked" id="w-fence"><span>🚧 Su noktası çiti <b id="o-fence">🔒 2010</b></span><input type="range" id="g-fence" min="0" max="100" step="5" value="0" disabled></label>
-      <div class="sb-ctrl">
+      <div class="sb-ctrl gp-extra">
         <button class="hbtn sm" id="g-pause">❚❚ Durdur</button>
         <button class="hbtn sm" id="g-speed">1×</button>
       </div>
@@ -148,8 +150,9 @@
 
 <nav class="dots" id="dots" aria-label="Bölüm adımları"></nav>
 
-<script src="../../assets/js/toon.js?v=202610171223"></script>
-<script src="model.js?v=202610171223"></script>
-<script src="kurbaga.js?v=202610171223"></script>
+<script src="../../assets/js/toon.js?v=202610171239"></script>
+<script src="model.js?v=202610171239"></script>
+<script src="kurbaga.js?v=202610171239"></script>
+<script>/* gpToggle */document.querySelectorAll(".gp-toggle").forEach(b=>b.onclick=()=>{const p=b.closest(".gpanel");const o=p.classList.toggle("open");b.setAttribute("aria-expanded",o);b.textContent=o?"✕ Kapat":"⋯ Daha fazla";window.dispatchEvent(new Event("panel"));});</script>
 </body>
 </html>

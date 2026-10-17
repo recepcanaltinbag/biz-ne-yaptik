@@ -11,20 +11,16 @@
   const rnd = (a, b) => a + Math.random() * (b - a);
 
   // =====================================================================
-  // MODEL — S: serçe (1 = sağlıklı), P: zararlı böcek (~0.8 normal), F: tarla (0–1), tox: kirlilik
+  // MODEL — S: serçe (1 = sağlıklı), P: zararlı böcek (~0.8 normal), F: tarla (0–1)
   // =====================================================================
   const MONTHS = ['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'];
   const TOTAL = 36;
   const calMonth = m => (2 + m) % 12;
   const calYear = m => 1958 + Math.floor((2 + m) / 12);
   const isWarm = cm => cm >= 3 && cm <= 8;
-  const DEF = { hunt: 0, pest: 0, nest: 0, heat: 1 };
+  const DEF = { hunt: 0, nest: 0, heat: 1 };
 
-  const newState = () => ({ m: 0, S: 1, P: 0.5, F: 1, tox: 0, res: 0, harvests: [], hist: [] });
-
-  function applyPesticide(st) {
-    st.P *= 0.35; st.S *= 0.88; st.tox = Math.min(1, st.tox + 0.35);
-  }
+  const newState = () => ({ m: 0, S: 1, P: 0.5, F: 1, harvests: [], hist: [] });
 
   function step(st, p = DEF) {
     const cm = calMonth(st.m);
@@ -32,18 +28,11 @@
     // serçeler Nisan–Temmuz arası ürer; yuvalar hem üremeyi hem dışarıdan gelişi artırır
     if (cm >= 3 && cm <= 6) st.S += (0.15 + 0.2 * p.nest) * st.S * (1 - st.S) + 0.004 * (1 + 3 * p.nest) * (1 - st.S);
     st.S -= p.hunt * 0.2 * st.S;
-    st.S -= st.tox * 0.04 * st.S;
-    st.tox = Math.min(1, st.tox + p.pest * 0.1);
-    // ilaç zamanla etkisini yitirir: hayatta kalan böcekler dirençli olanlardır
-    st.res = Math.min(0.85, st.res + p.pest * 0.035);
-    const kill = (st.tox * 0.12 + p.pest * 0.3) * (1 - st.res);
-    if (isWarm(cm)) st.P += 0.5 * p.heat * st.P * (1 - st.P / 4) - 0.4 * st.S * st.P - kill * st.P;
+    if (isWarm(cm)) st.P += 0.5 * p.heat * st.P * (1 - st.P / 4) - 0.4 * st.S * st.P;
     else st.P = Math.max(0.08, st.P * 0.8);
     if (isWarm(cm)) st.F -= st.F * 0.055 * st.P;
     if (cm >= 6 && cm <= 8) st.F -= st.F * 0.025 * st.S;
-    if (isWarm(cm)) st.F -= st.F * 0.03 * st.tox; // kirlilik: toprak, su, tozlaşma
     if (cm === 9) st.harvests.push(st.F);
-    st.tox *= 0.92;
     st.S = clamp(st.S); st.P = Math.max(0.05, st.P); st.F = clamp(st.F);
     st.hist.push({ S: st.S, P: st.P, F: st.F });
     st.m++;
@@ -142,7 +131,14 @@
     const L = { gt: 0.66, gb: 1, x1: 1 };
     if (m === 'intro') L.gt = 0.6;
     if (m === 'poster') L.gt = 0.82;
-    if (m === 'game') { if (mobile) { L.gt = 0.3; L.gb = 0.54; } else { L.gt = 0.6; L.x1 = (W - 366) / W; } }
+    if (m === 'game') {
+      if (mobile) {
+        // tarla, panelin hemen üstünde biter: panel küçüldükçe sahne büyür
+        const pnl = document.querySelector('.slide.active .gpanel');
+        const top = pnl ? pnl.getBoundingClientRect().top : H * 0.56;
+        L.gb = clamp((top - 6) / H, 0.4, 0.8); L.gt = Math.max(0.24, L.gb - 0.3);
+      } else { L.gt = 0.6; L.x1 = (W - 366) / W; }
+    }
     if (m === 'result' || m === 'facts' || m === 'lessons') L.gt = 0.9;
     if (m === 'sandbox') { if (mobile) { L.gt = 0.3; L.gb = 0.47; } else { L.gt = 0.58; L.x1 = (W - 380) / W; } }
     return L;
@@ -159,9 +155,9 @@
     bug: [88, 118, 48], locust: [128, 112, 40], sun: [246, 210, 104],
   };
 
-  const birds = [], bugs = [], rings = [], floats = [], bubbles = [], villagers = [], planes = [], mist = [];
+  const birds = [], bugs = [], rings = [], floats = [], bubbles = [], villagers = [];
   const clouds = Array.from({ length: 4 }, (_, i) => ({ x: rnd(0, 1), y: rnd(0.12, 0.3), s: rnd(0.7, 1.2), v: rnd(0.000006, 0.000014) }));
-  const vis = { S: 1, P: 0.6, Fr: 1, tox: 0, c: 6.3, warm: 1, bad: 0 };
+  const vis = { S: 1, P: 0.6, Fr: 1, c: 6.3, warm: 1, bad: 0 };
 
   function groundY(x) { return lay.gt * H + Math.sin(x * 0.009) * 5 * U + Math.sin(x * 0.021 + 1.3) * 3 * U; }
 
@@ -356,8 +352,6 @@
       }
     });
 
-    // ilaç sisi
-    if (vis.tox > 0.03) { ctx.fillStyle = `rgba(160,110,200,${vis.tox * 0.16})`; ctx.fillRect(0, gt - 40 * U, x1, gb - gt + 40 * U); }
 
     // böcekler
     const bugTarget = Math.round(clamp(vis.P / 4) * (mode === 'sandbox' ? 170 : 230) * vis.warm);
@@ -466,12 +460,12 @@
   // ---- karakterler ara ara konuşur; dokununca da konuşurlar ----
   const pick = a => a[Math.floor(Math.random() * a.length)];
   function lines(kind) {
-    const pests = vis.P > 1.6, fewBirds = vis.S < 0.4, campaign = game.campaign && game.k > 0.2, tox = vis.tox > 0.2;
+    const pests = vis.P > 1.6, fewBirds = vis.S < 0.4, campaign = game.campaign && game.k > 0.2;
     if (kind === 'bird') return pick(campaign ? ['Konacak yer yok!\nKanatlarım yandı!', 'Bu gürültü de ne?!', 'Hiç dinlenemiyorum...']
       : fewBirds ? ['Arkadaşlarım nerede?', 'Burası çok sessiz...'] : ['Cik! Bugün yüzlerce\nböcek yakaladım.', 'Yavrularım böceğe bayılır!', 'Biraz tahıl, bol böcek.']);
     if (kind === 'villager') return pick(fewBirds ? ['Kuş kalmadı ki\nneye vuruyoruz?', 'Kotayı nasıl dolduracağız?'] : ['Kolum koptu\nama kota kota!', 'Bang! Bang! Bang!', 'Komşu köy 2 katını yapmış!']);
     if (kind === 'farmer') return pick(pests ? ['Yapraklar delik deşik...', 'Böcekler her yerde!\nNereden çıktılar?', 'Bu yıl ambar dolmaz.']
-      : tox ? ['Bu ilacın kokusu\nbaşımı döndürüyor.', 'Kuyudaki su tuhaf.'] : fewBirds ? ['Serçe yok, şimdilik\ntahıl bize kalır.', 'Kuşlar gidince\nbiraz rahatladık mı?'] : ['Hava güzel,\nbaşaklar dolgun.', 'Serçeler biraz yer,\nama dert değil.']);
+      : fewBirds ? ['Serçe yok, şimdilik\ntahıl bize kalır.', 'Kuşlar gidince\nbiraz rahatladık mı?'] : ['Hava güzel,\nbaşaklar dolgun.', 'Serçeler biraz yer,\nama dert değil.']);
   }
   function say(obj, kind, oy) {
     bubbles.length = Math.min(bubbles.length, 1);
@@ -500,7 +494,7 @@
     if (opts.length) pick(opts)();
   }
 
-  // köylüler tencere çalar, uçaklar ilaç püskürtür: hepsi oyuncunun kaydırıcılarına bağlı
+  // köylüler tencere çalar: kampanya kaydırıcısına bağlı
   function drawCampaign(t, dt, gt, gb, x1) {
     const f = dt / 16.67;
     const want = game.campaign ? Math.round(game.k * 9) : 0;
@@ -533,41 +527,8 @@
       }
     });
 
-    // ilaç uçakları
-    if (game.spray > 0 && game.state === 'play' && !game.paused && planes.length < 1 + Math.round(game.spray) && Math.random() < 0.004 * f * (0.3 + game.spray)) {
-      const dir = Math.random() < 0.5 ? 1 : -1;
-      planes.push({ x: dir > 0 ? -80 : x1 + 80, y: lerp(90, gt - 70 * U, Math.random() * 0.5), dir, v: rnd(2.6, 3.4) * U });
-    }
-    for (let i = planes.length - 1; i >= 0; i--) {
-      const p = planes[i];
-      p.x += p.dir * p.v * f;
-      if (p.x < -120 || p.x > x1 + 120) { planes.splice(i, 1); continue; }
-      if (p.x > 0 && p.x < x1) for (let k = 0; k < 2; k++) mist.push({ x: p.x - p.dir * 22 * U + rnd(-4, 4), y: p.y + 8 * U, vx: rnd(-0.3, 0.3), vy: rnd(0.6, 1.4) * U, life: 1, r: rnd(3, 7) * U });
-      drawPlane(p, t);
-    }
-    for (let i = mist.length - 1; i >= 0; i--) {
-      const m = mist[i];
-      m.x += m.vx * f; m.y += m.vy * f; m.r += 0.08 * f; m.life -= 0.006 * f;
-      if (m.y > gt + 20 * U) { m.vy *= 0.9; m.life -= 0.01 * f; }
-      if (m.life <= 0) { mist.splice(i, 1); continue; }
-      ctx.fillStyle = `rgba(150,105,205,${m.life * 0.28})`;
-      ctx.beginPath(); ctx.arc(m.x, m.y, m.r, 0, 6.283); ctx.fill();
-    }
   }
 
-  function drawPlane(p, t) {
-    const s = 1.2 * U;
-    ctx.save(); ctx.translate(p.x, p.y); ctx.scale(p.dir * s, s);
-    ctx.fillStyle = '#d8d2c0'; ctx.strokeStyle = rgb(PAL.ink); ctx.lineWidth = 2 / s;
-    ctx.beginPath(); ctx.ellipse(0, 0, 30, 8, 0, 0, 6.283); ctx.fill(); ctx.stroke();           // gövde
-    ctx.fillStyle = '#c0503a';
-    ctx.beginPath(); ctx.roundRect ? ctx.roundRect(-10, -16, 18, 6, 2) : ctx.rect(-10, -16, 18, 6); ctx.fill(); ctx.stroke(); // üst kanat
-    ctx.beginPath(); ctx.roundRect ? ctx.roundRect(-12, 4, 22, 6, 2) : ctx.rect(-12, 4, 22, 6); ctx.fill(); ctx.stroke();   // alt kanat
-    ctx.beginPath(); ctx.moveTo(-26, -2); ctx.lineTo(-36, -14); ctx.lineTo(-30, 0); ctx.closePath(); ctx.fill(); ctx.stroke(); // kuyruk
-    ctx.strokeStyle = rgb(PAL.ink); ctx.beginPath(); ctx.moveTo(31, -9 * Math.sin(t * 0.08)); ctx.lineTo(31, 9 * Math.sin(t * 0.08)); ctx.stroke(); // pervane
-    ctx.fillStyle = '#6aa7d8'; ctx.beginPath(); ctx.arc(8, -3, 4, 0, 6.283); ctx.fill();
-    ctx.restore();
-  }
 
   function updateBirds(t, dt, gt, gb, x1) {
     const f = dt / 16.67;
@@ -579,8 +540,8 @@
       if (birds.length < 3) for (let i = 0; i < target - 1; i++) spawnBird(true);
     }
     if (alive.length > target) {
-      if (mode === 'game' && (game.k > 0 || vis.tox > 0.05)) {
-        const byPot = game.campaign && game.k > 0 && Math.random() < game.k / (game.k + vis.tox * 0.8 + 0.001);
+      if (mode === 'game' && game.k > 0) {
+        const byPot = game.campaign && game.k > 0 && true;
         let b = alive[Math.floor(Math.random() * alive.length)];
         if (byPot && villagers.length) {
           const v = villagers[Math.floor(Math.random() * villagers.length)];
@@ -590,7 +551,7 @@
         fallBird(b, byPot);
       } else {
         const b = alive[Math.floor(Math.random() * alive.length)];
-        if (vis.tox > 0.08 && mode !== 'title') fallBird(b, false); else b.leave = true;
+        b.leave = true;
       }
     }
     const top = 80, bottom = Math.max(top + 40, gt - 34 * U);
@@ -675,7 +636,7 @@
     if (mode === 'result') renderResult();
     if (mode === 'sandbox') enterSandbox();
     if (mode === 'title' || mode === 'intro' || mode === 'poster' || mode === 'facts' || mode === 'lessons') {
-      Object.assign(target, { S: 1, P: 0.6, Fr: 1, tox: 0, warm: 1 }); vis.c = 6.3;
+      Object.assign(target, { S: 1, P: 0.6, Fr: 1, warm: 1 }); vis.c = 6.3;
     }
   }
   document.querySelectorAll('[data-next]').forEach(b => b.addEventListener('click', () => { initAudio(); goTo(cur + 1); }));
@@ -689,11 +650,29 @@
   // =====================================================================
   // BİLDİRİMLER
   // =====================================================================
+  // bildirimler sıraya girer: aralarında en az birkaç saniye, ekranda az kart
   const toastQueue = [];
-  function toast(ic, from, text, tone = '', opt = {}) {
+  let lastToastAt = -1e9;
+  function toast(...args) {
+    const opt = args[4] || {};
+    toastQueue.push(args);
+    // sıra uzarsa en eski küçük haberleri at; hikâye ve yeni araç kartları kalır
+    while (toastQueue.length > 6) { const k = toastQueue.findIndex(a => !(a[4] || {}).pause); if (k < 0) break; toastQueue.splice(k, 1); }
+    pumpToasts();
+  }
+  function pumpToasts() {
+    if (!toastQueue.length || mode !== 'game') return;
+    const box = $('toasts'), visible = box.querySelectorAll('.toast:not(.out)').length;
+    const gap = 9000 / (typeof FAST === 'number' ? FAST : 1);
+    if (visible >= (mobile ? 1 : 2) || performance.now() - lastToastAt < gap) return;
+    const k = toastQueue.findIndex(a => (a[4] || {}).pause);
+    const next = toastQueue.splice(k >= 0 ? k : 0, 1)[0];
+    lastToastAt = performance.now();
+    showToast(...next);
+  }
+  setInterval(pumpToasts, 300);
+  function showToast(ic, from, text, tone = '', opt = {}) {
     const box = $('toasts');
-    // telefonda sahneyi kapatmamak için kartlar sırayla, tek tek gelir
-    if (mobile && box.querySelector('.toast:not(.out)')) { toastQueue.push([ic, from, text, tone, opt]); return; }
     const el = document.createElement('div');
     el.className = 'toast ' + tone + (opt.img ? ' story' : '');
     el.innerHTML = (opt.img ? `<img src="${opt.img}" alt="">` : `<div class="ic">${ic}</div>`) +
@@ -704,7 +683,7 @@
       el.classList.add('out');
       if (opt.pause) game.reading = Math.max(0, (game.reading || 1) - 1);
       if (opt.then) setTimeout(opt.then, 900);
-      setTimeout(() => { el.remove(); if (toastQueue.length && mode === 'game') toast(...toastQueue.shift()); }, 400);
+      setTimeout(() => { el.remove(); pumpToasts(); }, 400);
     };
     el.onclick = close;
     if (opt.img && window.Toon) window.Toon.process(opt.img, { maxW: 320 }).then(u => { const im = el.querySelector('img'); if (im) im.src = u; }).catch(() => {});
@@ -729,20 +708,20 @@
     gs = newState();
     Object.assign(game, {
       started: false, paused: false, state: 'play', frac: 0, campaign: true, quota: 25, yearKills: 0, totalKills: 0,
-      fired: new Set(), hist: [], usedPesticide: false, stoppedBy: null, stoppedAt: undefined, sAtStop: 0,
-      k: 0, spray: 0, lie: 0, food: [], trust: 70, replaced: false, speed: 1, touched: false, reading: 0,
+      fired: new Set(), hist: [], stoppedBy: null, stoppedAt: undefined, sAtStop: 0,
+      k: 0, lie: 0, food: [], trust: 70, replaced: false, speed: 1, touched: false, reading: 0,
     });
     gK.value = 0; gSpray.value = 0; gK.disabled = false; readGameSliders();
     $('g-pause').textContent = '❚❚ Durdur'; $('g-speed').textContent = '1×';
-    $('modal').hidden = true; $('harvest').hidden = true; $('toasts').innerHTML = ''; toastQueue.length = 0;
+    $('modal').hidden = true; $('harvest').hidden = true; $('toasts').innerHTML = ''; toastQueue.length = 0; lastToastAt = -1e9;
     $('g-intro').classList.remove('gone');
     birds.forEach(b => { if (b.fallen) b.a = 0; });
-    villagers.length = 0; planes.length = 0; mist.length = 0;
+    villagers.length = 0;
     renderQuota();
   }
 
   function readGameSliders() {
-    game.k = gK.value / 100; game.lie = gSpray.value / 100; game.spray = 0;
+    game.k = gK.value / 100; game.lie = gSpray.value / 100;
     $('o-k').textContent = '%' + gK.value; $('o-lie').textContent = '%' + gSpray.value;
   }
   [gK, gSpray].forEach(el => el.addEventListener('input', () => {
@@ -775,7 +754,7 @@
         if (i >= STORY.length || mode !== 'game') return;
         const [, ic, from, text, tone, opt] = STORY[i];
         toast(ic, from, text, tone, { ...opt, then: opt.pause ? () => show(i + 1) : undefined });
-        if (!opt.pause) setTimeout(() => show(i + 1), 7000 / Math.max(1, FAST / 2));
+        if (!opt.pause) setTimeout(() => show(i + 1), 9000 / Math.max(1, FAST / 2));
       };
       setTimeout(() => show(0), 500);
     }
@@ -812,8 +791,10 @@
 
   function updateGame(dt) {
     if (mode !== 'game' || game.paused || game.reading || game.state !== 'play' || gs.m >= TOTAL) return;
-    const reading = $('toasts').querySelector('.toast:not(.out)') ? 1.6 : 1;
-    game.frac += dt / (monthDur() * reading);
+    // kart okunurken zaman yavaşlar; yapılacak bir şey yokken hızlanır
+    const visible = $('toasts').querySelector('.toast:not(.out)');
+    const pace = visible ? 1.5 : toastQueue.length ? 1 : 0.55;
+    game.frac += dt / (monthDur() * pace);
     if (game.frac >= 1) { game.frac -= 1; monthTick(); }
   }
 
@@ -825,7 +806,7 @@
 
   function monthTick() {
     const cm = calMonth(gs.m);
-    step(gs, { ...DEF, hunt: game.campaign ? game.k : 0, pest: game.spray });
+    step(gs, { ...DEF, hunt: game.campaign ? game.k : 0 });
     const base = BASE.hist[gs.m - 1].F;
     game.hist.push({ S: gs.S, P: gs.P, Fr: clamp(gs.F / base) });
 
@@ -902,6 +883,7 @@
     setTimeout(() => { if (mode === 'game') goTo(slideOf('result')); }, 1500);
   }
   resetGame();
+  if (/[?&]debug\b/.test(location.search)) window.__dbg = { game, get gs() { return gs; }, get mode() { return mode; } };
 
   function renderResult() {
     if (gs.harvests.length < 3) { $('result').innerHTML = '<h2>Önce oyunu bitir</h2><button class="hbtn" data-g="3">← Oyuna dön</button>'; $('result').querySelector('button').onclick = () => goTo(slideOf('game')); return; }
@@ -961,7 +943,7 @@
   const sb = { running: false, speed: 1, frac: 0, st: newState(), p: { ...DEF }, hist: [], lastH: null };
   const SL = { hunt: 'p-hunt', nest: 'p-nest', heat: 'p-heat' };
   function readSliders() {
-    sb.p.hunt = $('p-hunt').value / 100; sb.p.pest = 0;
+    sb.p.hunt = $('p-hunt').value / 100;
     sb.p.nest = $('p-nest').value / 100; sb.p.heat = $('p-heat').value / 100;
     $('o-hunt').textContent = '%' + $('p-hunt').value;
     $('o-nest').textContent = '%' + $('p-nest').value; $('o-heat').textContent = '×' + (sb.p.heat).toFixed(1);
@@ -1034,7 +1016,7 @@
   // =====================================================================
   // DÖNGÜ
   // =====================================================================
-  const target = { S: 1, P: 0.6, Fr: 1, tox: 0, warm: 1 };
+  const target = { S: 1, P: 0.6, Fr: 1, warm: 1 };
   let last = performance.now(), bgTick = 0, lastBg = '';
   function frame(now) {
     const dt = Math.min(50, now - last); last = now;
@@ -1043,17 +1025,17 @@
     // hangi dünya gösteriliyor?
     if (mode === 'game' || mode === 'result') {
       const base = gs.m > 0 ? BASE.hist[gs.m - 1].F : 1;
-      Object.assign(target, { S: gs.S, P: gs.P, Fr: clamp(gs.F / base), tox: gs.tox, warm: isWarm(calMonth(Math.min(gs.m, TOTAL - 1))) ? 1 : 0 });
+      Object.assign(target, { S: gs.S, P: gs.P, Fr: clamp(gs.F / base), warm: isWarm(calMonth(Math.min(gs.m, TOTAL - 1))) ? 1 : 0 });
       vis.c = 2 + Math.min(gs.m, TOTAL) + (game.state === 'play' ? game.frac : 0);
     } else if (mode === 'sandbox') {
       const cm = calMonth(Math.max(0, sb.st.m - 1));
-      Object.assign(target, { S: sb.st.S, P: sb.st.P, Fr: sb.st.m ? clamp(sb.st.F / EQ_F[cm]) : 1, tox: sb.st.tox, warm: isWarm(calMonth(sb.st.m)) ? 1 : 0 });
+      Object.assign(target, { S: sb.st.S, P: sb.st.P, Fr: sb.st.m ? clamp(sb.st.F / EQ_F[cm]) : 1, warm: isWarm(calMonth(sb.st.m)) ? 1 : 0 });
       vis.c = 2 + sb.st.m + sb.frac;
     }
     const k = 1 - Math.pow(0.92, dt / 16);
     vis.S = lerp(vis.S, target.S, k * 1.5 > 1 ? 1 : k * 1.5);
     vis.P = lerp(vis.P, target.P, k * 0.6); vis.Fr = lerp(vis.Fr, target.Fr, k * 0.6);
-    vis.tox = lerp(vis.tox, target.tox, k * 0.6); vis.warm = lerp(vis.warm, target.warm, k * 0.25);
+    vis.warm = lerp(vis.warm, target.warm, k * 0.25);
     const health = 0.45 * clamp(vis.Fr) + 0.35 * vis.S + 0.2 * (1 - clamp(vis.P / 4));
     vis.bad = lerp(vis.bad, smooth(0.08, 0.6, 1 - health), k * 0.5);
 
@@ -1066,6 +1048,10 @@
     if (mode === 'game') {
       const mm = Math.min(gs.m, TOTAL - 1);
       $('g-date').textContent = `${MONTHS[calMonth(mm)]} ${calYear(mm)}`;
+      const yy = String(calYear(mm));
+      if ($('yb-year').textContent !== yy) { const el = $('yb-year'); el.textContent = yy; el.classList.remove('pulse'); void el.offsetWidth; el.classList.add('pulse'); }
+      $('yb-sub').textContent = MONTHS[calMonth(mm)];
+      $('yb-fill').style.width = clamp((gs.m + game.frac) / TOTAL) * 100 + '%';
       $('m-s').style.width = vis.S * 100 + '%';
       $('m-p').style.width = clamp(vis.P / 4) * 100 + '%';
       $('m-f').style.width = clamp(vis.Fr) * 100 + '%';

@@ -83,10 +83,11 @@
     if (mobile) {
       const pnl = document.querySelector('.slide.active .gpanel, .slide.active .sb-panel');
       const bottom = pnl ? pnl.getBoundingClientRect().top - 8 : H * 0.56;
-      return { x: 8, y: 54, w: W - 16, h: Math.max(120, bottom - 54) };
+      return { x: 8, y: 116, w: W - 16, h: Math.max(120, bottom - 116) };
     }
     const right = mode === 'sandbox' ? 380 : 366;
-    return { x: 24, y: 64, w: W - right - 48, h: H - 64 - 52 };
+    const top = mode === 'game' ? 150 : 64;
+    return { x: 24, y: top, w: W - right - 48, h: H - top - 52 };
   }
   function setProj() {
     const r = mapRect(), mw = 42 * 0.86, mh = 34.5;
@@ -212,7 +213,9 @@
     for (let i = 0; i < Math.round(W / 140); i++) { const s = pick(stalks); beetles.push({ st: s, dy: rnd(0.02, 0.15), ph: rnd(0, 6.28) }); }
   }
   function drawField(t, dt, crowd) {
-    const gt = H * (mobile ? 0.5 : 0.74), sh = H * (mobile ? 0.26 : 0.36);
+    const pnl = mobile && mode === 'game' ? document.querySelector('.slide.active .gpanel') : null;
+    const floor = pnl ? pnl.getBoundingClientRect().top - 6 : H;
+    const gt = mobile ? Math.min(H * 0.46, floor - 150) : H * 0.74, sh = H * (mobile ? 0.24 : 0.36);
     ctx.fillStyle = '#c9b48a'; ctx.fillRect(0, gt, W, H - gt);
     ctx.strokeStyle = rgb(INK, 0.5); ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(0, gt); ctx.lineTo(W, gt); ctx.stroke();
     ctx.fillStyle = 'rgba(120,90,50,.18)'; for (let i = 0; i < 6; i++) ctx.fillRect(0, gt + 14 + i * i * 6, W, 2);
@@ -241,7 +244,7 @@
     const want = crowd;
     while (fieldToads.length < want) {
       const sx = scientists[0] ? scientists[0].x + 30 * U : W * 0.2;
-      fieldToads.push({ x: sx, y: gt + rnd(30, (H - gt) * 0.85), tx: rnd(20, W - (mobile ? 20 : 380)), ph: rnd(0, 6.28), hop: 0, s: rnd(0.9, 1.25), jump: 0 });
+      fieldToads.push({ x: sx + rnd(-30, 90) * U, y: gt + rnd(26, Math.max(40, (floor - gt) * 0.85)), tx: rnd(20, W - (mobile ? 20 : 380)), ph: rnd(0, 6.28), hop: 0, s: rnd(0.9, 1.25), jump: 0 });
     }
     fieldToads.length = Math.max(0, want);
     const f = dt / 16.67;
@@ -355,10 +358,29 @@
   // =====================================================================
   // BİLDİRİMLER (okuma süresine saygılı)
   // =====================================================================
+  // bildirimler sıraya girer: aralarında en az birkaç saniye, ekranda az kart
   const toastQueue = [];
-  function toast(ic, from, text, tone = '', opt = {}) {
+  let lastToastAt = -1e9;
+  function toast(...args) {
+    const opt = args[4] || {};
+    toastQueue.push(args);
+    // sıra uzarsa en eski küçük haberleri at; hikâye ve yeni araç kartları kalır
+    while (toastQueue.length > 6) { const k = toastQueue.findIndex(a => !(a[4] || {}).pause); if (k < 0) break; toastQueue.splice(k, 1); }
+    pumpToasts();
+  }
+  function pumpToasts() {
+    if (!toastQueue.length || mode !== 'game') return;
+    const box = $('toasts'), visible = box.querySelectorAll('.toast:not(.out)').length;
+    const gap = 9000 / (typeof FAST === 'number' ? FAST : 1);
+    if (visible >= (mobile ? 1 : 2) || performance.now() - lastToastAt < gap) return;
+    const k = toastQueue.findIndex(a => (a[4] || {}).pause);
+    const next = toastQueue.splice(k >= 0 ? k : 0, 1)[0];
+    lastToastAt = performance.now();
+    showToast(...next);
+  }
+  setInterval(pumpToasts, 300);
+  function showToast(ic, from, text, tone = '', opt = {}) {
     const box = $('toasts');
-    if (mobile && box.querySelector('.toast:not(.out)')) { toastQueue.push([ic, from, text, tone, opt]); if (toastQueue.length > 4) toastQueue.shift(); return; }
     const el = document.createElement('div');
     el.className = 'toast ' + tone + (opt.img ? ' story' : '');
     el.innerHTML = (opt.img ? `<img src="${opt.img}" alt="">` : `<div class="ic">${ic}</div>`) +
@@ -369,7 +391,7 @@
       el.classList.add('out');
       if (opt.pause) game.reading = Math.max(0, game.reading - 1);
       if (opt.then) setTimeout(opt.then, 700);
-      setTimeout(() => { el.remove(); if (toastQueue.length && mode === 'game') toast(...toastQueue.shift()); }, 400);
+      setTimeout(() => { el.remove(); pumpToasts(); }, 400);
     };
     el.onclick = close;
     if (opt.img && window.Toon) window.Toon.process(opt.img, { maxW: 320 }).then(u => { const im = el.querySelector('img'); if (im) im.src = u; }).catch(() => {});
@@ -393,7 +415,7 @@
     Object.values(sliders).forEach(s => { s.value = 0; s.disabled = true; });
     ['collect', 'teach', 'fence'].forEach(k => { $('w-' + k).classList.add('locked'); $('o-' + k).textContent = '🔒 ' + UNLOCK[k]; });
     $('g-pause').textContent = '❚❚ Durdur'; $('g-speed').textContent = '1×';
-    $('modal').hidden = true; $('milestone').hidden = true; $('toasts').innerHTML = ''; toastQueue.length = 0;
+    $('modal').hidden = true; $('milestone').hidden = true; $('toasts').innerHTML = ''; toastQueue.length = 0; lastToastAt = -1e9;
     fieldToads.length = 0; scientists.length = 0; bubbles.length = 0; sprites = []; volunteers = [];
     SITES.forEach(s => { s.hit = false; });
     readPolicy(); updatePanel();
@@ -476,7 +498,8 @@
     const y = game.st.year;
     let ms = game.phase === 'field' ? 6500 : y < 1975 ? 900 : 1700;
     if (game.noToads) ms = 900;
-    if ($('toasts').querySelector('.toast:not(.out)')) ms *= 1.6;
+    // kart okunurken zaman yavaşlar; yapılacak bir şey yokken hızlanır
+    ms *= $('toasts').querySelector('.toast:not(.out)') ? 1.5 : toastQueue.length ? 1 : 0.6;
     return ms / game.speed / FAST;
   }
 
@@ -565,6 +588,10 @@
   function updatePanel() {
     const st = game.st, s = game.hist[game.hist.length - 1] || M.stats(st);
     $('g-year').textContent = st.year;
+    const yy = String(st.year);
+    if ($('yb-year').textContent !== yy) { const el = $('yb-year'); el.textContent = yy; el.classList.remove('pulse'); void el.offsetWidth; el.classList.add('pulse'); }
+    $('yb-sub').textContent = game.phase === 'field' ? 'Kamış tarlası' : game.noToads ? 'Kurbağasız Avustralya' : 'Avustralya';
+    $('yb-fill').style.width = clamp((st.year - 1935 + game.frac) / 90) * 100 + '%';
     const fieldCount = game.released ? Math.round(102 * Math.pow(9, st.year - 1935 + game.frac)) : 102;
     $('s-toads').textContent = game.noToads ? '0' : game.phase === 'field' ? fmtToads(Math.min(fieldCount, 5e6)) : fmtToads(Math.max(s.toads, fieldCount > 5e6 ? 5e6 : fieldCount));
     $('s-area').textContent = '%' + s.areaPct.toFixed(1);
@@ -753,5 +780,6 @@
 
   window.addEventListener('resize', () => { resize(); buildField(); });
   resize(); buildField(); resetGame(); goTo(0);
+  if (/[?&]debug\b/.test(location.search)) window.__dbg = { game, sb, fieldToads, get mode() { return mode; } };
   requestAnimationFrame(frame);
 })();
