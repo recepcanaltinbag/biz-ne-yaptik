@@ -8,8 +8,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Inter:wght@400;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/css/badges.css?v=261017145703">
-<link rel="stylesheet" href="assets/css/style.css?v=261017145703">
+<link rel="stylesheet" href="assets/css/badges.css?v=261017145922">
+<link rel="stylesheet" href="assets/css/style.css?v=261017145922">
 </head>
 <body>
 
@@ -52,13 +52,20 @@
       <ul id="credits"></ul>
     </details>
     <p class="byline">Hazırlayan: Recep Can Altınbağ</p>
-    <p class="visits" data-count="TOTAL" data-label="👀 Şimdiye kadar {n} ziyaret" hidden></p>
+    <details class="stats" id="stats" hidden>
+      <summary><span id="st-total">👀 Ziyaretçiler</span> · <b>📊 Ayrıntılı istatistikler</b></summary>
+      <div class="st-body">
+        <div class="st-tabs" role="tablist"><button data-p="" class="on">Tüm zamanlar</button><button data-p="month">Son 1 ay</button><button data-p="week">Son 1 hafta</button></div>
+        <div id="st-content"><p class="st-load">Yükleniyor…</p></div>
+        <p class="st-note">Sayılar GoatCounter'dan gelir ve birkaç saatte bir güncellenir. Çerez yok, kişisel veri toplanmaz.</p>
+      </div>
+    </details>
   </div>
 </footer>
-<script src="assets/js/stats.js?v=261017145703"></script>
-<script src="assets/js/badges.js?v=261017145703"></script>
-<script src="assets/js/toon.js?v=261017145703"></script>
-<script src="assets/js/chapters.js?v=261017145703"></script>
+<script src="assets/js/stats.js?v=261017145922"></script>
+<script src="assets/js/badges.js?v=261017145922"></script>
+<script src="assets/js/toon.js?v=261017145922"></script>
+<script src="assets/js/chapters.js?v=261017145922"></script>
 <script>
 (() => {
   const B = window.Badges; if (!B) return;
@@ -112,6 +119,44 @@
   }
   addEventListener('scroll', () => { if (!ticking) { ticking = true; requestAnimationFrame(spy); } }, { passive: true });
   spy();
+})();
+</script>
+<script>
+(() => {
+  const S = window.Stat, box = document.getElementById('stats');
+  if (!S || !S.get || !box) return;
+  const live = (window.SEASONS || []).flatMap(s => s.chapters).filter(c => c.status === 'live' && c.href).map(c => ({ id: c.href.split('/')[1], title: c.title, href: c.href }));
+  const fmt = n => n.toLocaleString('tr-TR');
+  S.get('TOTAL').then(n => { if (n === null) return; document.getElementById('st-total').textContent = `👀 Şimdiye kadar ${fmt(n)} ziyaretçi`; box.hidden = false; });
+  const cache = {};
+  async function load(p) {
+    const el = document.getElementById('st-content');
+    if (!cache[p]) {
+      el.innerHTML = '<p class="st-load">Yükleniyor…</p>';
+      const [total, ...rest] = await Promise.all([
+        S.get('TOTAL', p),
+        ...live.flatMap(c => [S.get('basla-' + c.id, p), S.get('bitti-' + c.id, p)]),
+        ...(window.Badges ? window.Badges.DEFS.map(d => S.get('rozet-' + d.id, p)) : []),
+      ]);
+      const ch = live.map((c, i) => ({ ...c, start: rest[i * 2] || 0, done: rest[i * 2 + 1] || 0 }));
+      const bd = window.Badges ? window.Badges.DEFS.map((d, i) => ({ d, n: rest[live.length * 2 + i] || 0 })) : [];
+      cache[p] = { total: total || 0, ch, bd };
+    }
+    const { total, ch, bd } = cache[p];
+    const top = bd.filter(x => x.n > 0).sort((a, b) => b.n - a.n).slice(0, 6);
+    const rare = bd.filter(x => x.d.hidden && x.n > 0).sort((a, b) => a.n - b.n)[0];
+    const plays = ch.reduce((a, c) => a + c.start, 0), dones = ch.reduce((a, c) => a + c.done, 0), badges = bd.reduce((a, x) => a + x.n, 0);
+    el.innerHTML = `
+      <div class="st-big"><div><b>${fmt(total)}</b><span>ziyaretçi</span></div><div><b>${fmt(plays)}</b><span>oyun başladı</span></div><div><b>${fmt(dones)}</b><span>oyun bitti</span></div><div><b>${fmt(badges)}</b><span>rozet açıldı</span></div></div>
+      <h4>Bölümler</h4>
+      <div class="st-ch">${ch.map(c => { const r = c.start ? Math.min(100, Math.round(c.done / c.start * 100)) : 0; return `<a href="${c.href}" class="st-row"><span class="st-name">${c.title}</span><span class="st-num">🎮 ${fmt(c.start)} · 🏁 ${fmt(c.done)}</span><span class="st-bar"><i style="width:${r}%"></i></span><span class="st-pct">${c.start ? '%' + r + ' bitirdi' : '–'}</span></a>`; }).join('')}</div>
+      <h4>En çok açılan rozetler</h4>
+      ${top.length ? `<div class="st-badges">${top.map(x => { const seen = !x.d.hidden || window.Badges.has(x.d.id); return `<div class="st-b"><span class="st-m">${window.Badges.medal(x.d, seen)}</span><span>${seen ? x.d.name : '???'}</span><b>${fmt(x.n)}</b></div>`; }).join('')}</div>` : '<p class="st-load">Bu dönemde henüz rozet açılmadı.</p>'}
+      ${rare ? `<p class="st-rare">💎 En az bulunan gizli rozet: yalnızca <b>${fmt(rare.n)}</b> kişi buldu.</p>` : ''}`;
+    if (window.Badges) window.Badges.paint(el);
+  }
+  box.addEventListener('toggle', () => { if (box.open) load(box.querySelector('.st-tabs .on').dataset.p); });
+  box.querySelectorAll('.st-tabs button').forEach(b => b.onclick = () => { box.querySelectorAll('.st-tabs button').forEach(x => x.classList.toggle('on', x === b)); load(b.dataset.p); });
 })();
 </script>
 </body>

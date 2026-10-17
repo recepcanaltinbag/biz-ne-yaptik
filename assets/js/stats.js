@@ -32,6 +32,15 @@
     });
   };
   document.addEventListener('DOMContentLoaded', () => Stat.fill());
+  // tek bir sayıyı getirir: hiç kaydı yoksa 0, sayaç kapalıysa ya da hata olursa null
+  Stat.get = (path, start) => {
+    if (!CODE) return Promise.resolve(null);
+    const q = start ? '?start=' + encodeURIComponent(start) : '';
+    return fetch(`https://${CODE}.goatcounter.com/counter/${encodeURIComponent(path)}.json${q}`)
+      .then(r => r.status === 404 ? { count: '0' } : r.ok ? r.json() : null)
+      .then(d => d ? parseInt(String(d.count).replace(/\D/g, ''), 10) || 0 : null)
+      .catch(() => null);
+  };
   window.Stat = Stat;
   if (!CODE || /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || /\.(localhost|test)$/.test(location.hostname)) return;
   const s = document.createElement('script');
