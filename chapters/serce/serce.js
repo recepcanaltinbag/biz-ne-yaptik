@@ -959,8 +959,11 @@
       } else {
         b.vx += (b.x < x1 / 2 ? -0.08 : 0.08) * U * f; b.vy -= 0.02 * f;
       }
-      const sp = Math.hypot(b.vx, b.vy) || 0.001, cruise = (b.panic ? 4.6 : b.dive ? 3.2 : 1.7 + Math.sin(b.ph) * 0.3) * U;
-      const kf = 1 + ((cruise - sp) / sp) * 0.06 * f;            // seyir hızına yumuşakça yaklaş
+      // konuşan serçe, baloncuğu okunabilsin diye yavaşlar ve neredeyse havada asılı kalır
+      const talking = bubbles.some(bb => bb.bird === b || bb.obj === b);
+      if (talking) { b.dive = null; b.panic = 0; b.vy *= Math.pow(0.9, f); }
+      const sp = Math.hypot(b.vx, b.vy) || 0.001, cruise = (talking ? 0.35 : b.panic ? 4.6 : b.dive ? 3.2 : 1.7 + Math.sin(b.ph) * 0.3) * U;
+      const kf = 1 + ((cruise - sp) / sp) * (talking ? 0.2 : 0.06) * f;            // seyir hızına yumuşakça yaklaş
       b.vx *= kf; b.vy *= kf;
       const hard = cruise * 1.7; if (sp > hard) { b.vx *= hard / sp; b.vy *= hard / sp; }
       // tırmanırken hızlı çırpar, alçalırken süzülür
@@ -1368,7 +1371,7 @@
     setTimeout(() => { if (mode === 'game') goTo(slideOf('result')); }, 1500);
   }
   resetGame();
-  if (/[?&]debug\b/.test(location.search)) window.__dbg = { game, gags, nest, sunPos, get gs() { return gs; }, get mode() { return mode; }, gag: () => { nextGag = 1; }, go: m => { maxSeen = slides.length; goTo(slideOf(m)); } };
+  if (/[?&]debug\b/.test(location.search)) window.__dbg = { game, gags, nest, sunPos, birds, bubbles, get gs() { return gs; }, get mode() { return mode; }, gag: () => { nextGag = 1; }, go: m => { maxSeen = slides.length; goTo(slideOf(m)); } };
 
 
   function renderResult() {

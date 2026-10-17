@@ -75,6 +75,7 @@ Bu kurallar kullanıcının geri bildirimleriyle tek tek oturtuldu. Yeni bölüm
 ## Karakterler ve mizah
 - Sade, ncase tarzı çizimler (yuvarlak kafa, iki nokta göz). Konuşma balonları el yazısı fontuyla.
 - Ortam sohbeti 9–16 sn'de bir gelir. **Ekrana nereye dokunulursa dokunulsun en yakın karakter konuşur** (mesafe sınırı yok). Konuşabilenler: hayvanlar, insanlar, görevli, yuvadaki yavrular, gemi, kamyon gibi her canlı ya da canlandırılmış öğe.
+- **Konuşan karakter yavaşlar:** baloncuğu ekrandayken uçan ya da yürüyen karakter neredeyse durur, baloncuk okunabilsin. (Serçede ~10 kat yavaşlama ölçüldü.)
 - Replikler duruma göre değişen havuzlardan seçilsin, her durumda en az üç seçenek olsun. Esprili olsun ("Annemin tenceresini ödünç aldım.").
 - **Mizahi sahne (gag) sistemi:** 17–27 sn'de bir, duruma uygun küçük bir sahne. Örnekler: sapanlı çocukların taşı birbirine çarpar, tencere kafaya geçer, serçe şapka kapar, köylü uyuya kalır, çiftçi süpürgeyle çekirge kovalar, tencere konseri, takılıp düşen köylü, serçe kovalayan köpek, ekmeği yiyen çekirgeler, yavrularını besleyen serçe. Havuz geniş olsun, duruma göre seçilsin. Şiddet içermeyen, çizgi film tarzı şakalar olsun.
 

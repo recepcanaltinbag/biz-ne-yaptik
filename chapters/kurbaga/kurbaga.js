@@ -327,7 +327,8 @@
     const f = dt / 16.67;
     for (const td of fieldToads) {
       if (Math.abs(td.tx - td.x) < 4) td.tx = rnd(seaW + 20, W - (mobile || document.body.classList.contains('dock') ? 20 : 380));
-      td.x += Math.sign(td.tx - td.x) * 0.5 * U * f;
+      const talking = bubbles.some(bb => bb.obj && bb.obj._toad === td);
+      if (!talking) td.x += Math.sign(td.tx - td.x) * 0.5 * U * f;
       td.hop = Math.max(0, Math.sin(t * 0.006 + td.ph * 3)) * 6 * U;
       if (!td.jump && Math.random() < 0.0016 * f) { td.jump = 1; td.jh = rnd(80, 140); }
       if (td.jump) { td.jump += 0.03 * f; if (td.jump > 2) td.jump = 0; }
@@ -1049,7 +1050,7 @@
     }
     const st = mode === 'sandbox' ? sb.st : game.st;
     let text = kind === 'site' ? (sitePred(st, obj) < 0.45 ? (st.p.teach >= 0.25 ? 'Kurbağaya dokunmamayı\nöğrendik. Zor oldu.' : 'Burada eskiden\nçok kalabalıktık...') : 'Bu da ne? Lezzetli\ngörünüyor...') : pick(LINES[kind]);
-    say({ get x() { return kind === 'beetle' ? obj.x : x; }, get y() { return y; } }, text);
+    say({ _toad: kind === 'toad' ? obj : null, get x() { return kind === 'beetle' ? obj.x : kind === 'toad' && obj ? obj.sx : x; }, get y() { return kind === 'toad' && obj ? obj.sy - 10 * U : y; } }, text);
     if (kind === 'toad' || kind === 'mtoad') trill(); else blip(kind === 'beetle' ? 1400 : 600);
   }
   cv.addEventListener('pointerdown', e => {
