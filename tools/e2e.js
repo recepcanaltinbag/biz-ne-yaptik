@@ -3,7 +3,7 @@
 // Kullanım (yerel sunucuda ana sayfa açıkken): eval(await (await fetch('/tools/e2e.js')).text()); sonra window.__e2e okunur.
 window.__e2e = { done: false, log: [] };
 (async () => {
-  const CH = window.E2E_CHAPTERS || ['serce', 'kurbaga', 'aral', 'ddt', 'bakteri', 'plastik', 'guvercin'];
+  const CH = window.E2E_CHAPTERS || ['serce', 'kurbaga', 'aral', 'ddt', 'bakteri', 'plastik', 'guvercin', 'ozon'];
   const STRATS = window.E2E_STRATS || ['pick0', 'pickLast'];
   const R = window.__e2e;
   for (const ch of CH) for (const strat of STRATS) {

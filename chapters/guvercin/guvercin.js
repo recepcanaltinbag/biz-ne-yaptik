@@ -21,6 +21,7 @@
   const HISTORY = M.run(TOTAL, M.histP);
   HISTORY.hist.forEach(h => { if (h.P * 1e9 < 40) h.P = 0; });
   const GOAL = 0.5, THR = 0.3; // hedef ve Allee eşiği (milyar)
+  const yk = y => window.SceneUtils ? window.SceneUtils.yilEk(y, 'de') : y + "'de";
   const popText = P => P >= 1 ? f1(P) + ' milyar' : P >= 0.001 ? Math.round(P * 1000) + ' milyon' : P >= 1e-6 ? Math.round(P * 1e6) + ' bin' : P > 0 ? Math.round(P * 1e9) + ' kuş' : 'yok';
   const popBar = P => clamp(Math.sqrt(P / 4.2));
   const eraName = (y, P) => y < 1866 ? 'Kararan gökyüzü' : P >= THR ? (y < 1890 ? 'Demiryolu ve telgraf' : 'Sürüler direniyor') : P > 0 ? 'Dağılan sürüler' : 'Son kuşlar';
@@ -647,8 +648,8 @@
     if (game.replaced) { title = 'Görevden alındın'; text = 'Yasaları savundun, ama kasabalar ve tüccarlar kazandı. Gerçekte de yuva yasağı vardı, ama kimse uygulamadı.'; }
     else if (P >= GOAL) { title = 'Gökyüzü hâlâ kararıyor'; text = `1914'te ${popText(P)} güvercin uçuyor. Erken davrandın, sürüyü eşiğin üstünde tuttun. Martha hiç yalnız kalmadı.`; }
     else if (P > 0) { title = 'Son sürüler'; text = `1914'te ${popText(P)} kuş kaldı. Yaşıyorlar, ama çizginin altındalar: koloniler ürememeye devam ederse sonları yakın.`; }
-    else if (game.maxLate > 1.2) { title = 'Çok geçti'; text = `Sonunda yasaları sıkılaştırdın, ama sürü eşiğin altına inmişti. Kuşlar ürüyemedi: son yabani kuş ${game.wildGone}'de gitti.`; }
-    else { title = 'Martha\'nın yalnızlığı'; text = `Tarih tekrarlandı: milyarlarca kuş elli yılda bitti. Son yabani güvercin ${game.wildGone}'de gitti, Martha 1914'te öldü.`; }
+    else if (game.maxLate > 1.2) { title = 'Çok geçti'; text = `Sonunda yasaları sıkılaştırdın, ama sürü eşiğin altına inmişti. Kuşlar ürüyemedi: son yabani kuş ${yk(game.wildGone)} gitti.`; }
+    else { title = 'Martha\'nın yalnızlığı'; text = `Tarih tekrarlandı: milyarlarca kuş elli yılda bitti. Son yabani güvercin ${yk(game.wildGone)} gitti, Martha 1914'te öldü.`; }
     const col = v => v >= GOAL ? 'var(--green)' : v >= THR ? 'var(--grain)' : 'var(--danger)';
     $('result').innerHTML = `
       <div class="kicker">${game.replaced ? (gs.y - 1) + ' · görevden alındın' : '1914 · görev süren doldu'}</div>

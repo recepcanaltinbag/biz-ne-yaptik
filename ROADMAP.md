@@ -67,7 +67,7 @@ Durum: ✅ hazır · 🔜 sırada · 📝 plan
 ## Sezon 7 · Umut
 | Bölüm | Olay | Oyun fikri |
 |---|---|---|
-| 📝 Dünyanın Anlaştığı Gün | Montreal Protokolü, 1987 | Ülkeleri ikna et; CFC yasağı ve ozonun yavaş iyileşmesi |
+| ✅ Dünyanın Anlaştığı Gün | Montreal Protokolü, 1987 | Ülkeleri ikna et; CFC yasağı ve ozonun yavaş iyileşmesi |
 | 📝 Nehirleri Değiştiren Kurtlar | Yellowstone, 1995 | Trofik kaskad: kurt → geyik → söğüt → kunduz → nehir |
 | 📝 Ölü Nehre Fok Geldi | Thames, 1957 → bugün | Arıtma yatırımları, türlerin geri dönüşü |
 | 📝 Kaktüsü Yiyen Güve | Avustralya, *Cactoblastis* (1926) | Önce test edilen biyolojik kontrol: kurbağa bölümünün tersi |

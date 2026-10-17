@@ -99,5 +99,13 @@ if (/[?&]e2e\b/.test(location.search)) {
     if (rec) return `<p class="best-line new">🎉 Yeni rekor! ${label}: <b>%${now}</b> (önceki: %${best.score})</p>`;
     return `<p class="best-line">🏆 En iyi ${label}: <b>%${best.score}</b> (${d(best)}) · bu sefer: %${now}</p>`;
   }
-  window.SceneUtils = { avoidHud, lineChart, bestLine };
+  // Türkçe yıl eki: yilEk(2059, 'de') → "2059'da", yilEk(1903, 'den') → "1903'ten"; okunuşun son sesine göre
+  function yilEk(n, ek = 'de') {
+    const x = Math.abs(Math.round(n)), o = x % 10, t = Math.floor(x / 10) % 10, h = Math.floor(x / 100) % 10;
+    const word = o ? ['', 'bir', 'iki', 'üç', 'dört', 'beş', 'altı', 'yedi', 'sekiz', 'dokuz'][o] : t ? ['', 'on', 'yirmi', 'otuz', 'kırk', 'elli', 'altmış', 'yetmiş', 'seksen', 'doksan'][t] : h ? 'yüz' : 'bin';
+    const vow = [...word].reverse().find(c => 'aeıioöuü'.includes(c)), back = 'aıou'.includes(vow), hard = 'çfhkpsşt'.includes(word[word.length - 1]);
+    const base = { de: back ? 'da' : 'de', den: back ? 'dan' : 'den' }[ek] || ek;
+    return `${n}'${hard ? base.replace('d', 't') : base}`;
+  }
+  window.SceneUtils = { avoidHud, lineChart, bestLine, yilEk };
 })();

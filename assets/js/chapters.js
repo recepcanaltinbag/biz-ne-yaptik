@@ -82,7 +82,7 @@ window.SEASONS = [
       img: 'assets/img/cards/bornean-orangutan-pongo-pygmaeus-tanjung-putting-national-pa.jpg', credit: 'Thomas Fuhrmann, CC BY-SA 4.0', src: 'File:Bornean_orangutan_(Pongo_pygmaeus),_Tanjung_Putting_National_Park_01.jpg' },
   ]},
   { icon: '🌱', title: 'Düzeltebildiklerimiz', desc: 'Düzeltebildiğimiz zamanlar da oldu.', chapters: [
-    { year: '1987', title: 'Dünyanın Anlaştığı Gün', status: 'hope', text: 'Bir kez olsun bütün dünya anlaşıyor ve işe yarıyor. Montreal Protokolü\'nü sen müzakere et.',
+    { year: '1974', title: 'Dünyanın Anlaştığı Gün', status: 'live', href: 'chapters/ozon/', text: 'Bir kez olsun bütün dünya anlaşıyor ve işe yarıyor. Montreal Protokolü\'nü sen müzakere et.',
       img: 'assets/img/cards/hole-in-the-ozone-layer-over-antarctica-gpn-2002-000117.jpg', credit: 'NASA, kamu malı', src: 'File:Hole_in_the_Ozone_Layer_Over_Antarctica_-_GPN-2002-000117.jpg' },
     { year: '1995', title: 'Nehirleri Değiştiren Kurtlar', status: 'hope', text: 'Yellowstone\'a 14 kurt getiriliyor ve nehirlerin akışına kadar her şey değişiyor.',
       img: 'assets/img/cards/wolf-moving-through-fresh-snow-38346213996.jpg', credit: 'Yellowstone NP (NPS), kamu malı', src: 'File:Wolf_moving_through_fresh_snow_(38346213996).jpg' },

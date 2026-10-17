@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Dünyanın Anlaştığı Gün</title>
+<meta name="description" content="1974–2060: ozon tabakası delinirken bütün dünyayı tek bir anlaşmada buluşturabilir misin? Montreal Protokolü'nü oynayarak gör.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/css/badges.css?v=261018000911">
+<link rel="stylesheet" href="../../assets/css/chapter.css?v=261018000911">
+<style>
+  .sl.locked span { color: var(--ink-soft); }
+  #m-ozone { background: #5a8ad0; } #m-cfc { background: #b5543c; } #m-sign { background: #4f9a7a; }
+  .budget { font-family: var(--hand); font-size: 1.05rem; display: flex; align-items: center; gap: 8px; }
+  .bbar { display: flex; height: 10px; width: 110px; border-radius: 99px; overflow: hidden; background: #e6e2d4; }
+  .bbar i { display: block; height: 100%; }
+  #b-sci { background: #8a6fd8; } #b-dip { background: #e0b04a; } #b-fund { background: #4f9a7a; }
+</style>
+</head>
+<body class="dock">
+<script>if (/[?&]layout=klasik\b/.test(location.search)) document.body.classList.remove("dock");</script>
+<canvas id="world" aria-hidden="true"></canvas>
+
+<header class="bar">
+  <a class="bar-home" href="../../">← Biz Ne Yaptık?</a>
+  <button class="bar-btn" id="sound" aria-label="Sesi aç/kapat">🔊 <span>Ses</span></button>
+</header>
+
+<div class="slides">
+
+  <section class="slide" data-mode="title">
+    <div class="center-col"><div class="glass">
+      <div class="kicker">Biz Ne Yaptık? · Sezon 7 · Bölüm 1</div>
+      <h1 class="title">Dünyanın Anlaştığı Gün</h1>
+      <p class="sub">1974–2060 · oynama süresi ~5 dakika</p>
+      <button class="hbtn big" data-next>Başla →</button>
+    </div></div>
+  </section>
+
+  <section class="slide" data-mode="game">
+    <div class="narr game-intro" id="g-intro">
+      <p>Sen BM çevre programında baş müzakerecisin. <b>Dünyayı ikna etmek senin işin.</b></p>
+      <p class="try">👉 Bütçeyi bilime ve diplomasiye böl. Masadaki ülkeleri izle.</p>
+    </div>
+    <div class="topbox">
+      <div class="yearbar" aria-live="polite"><div class="yb-year" id="yb-year">1974</div><div class="yb-sub" id="yb-sub">Bir uyarı</div><div class="yb-track"><i id="yb-fill"></i></div><span class="yb-harvest" id="yb-harvest"></span><span class="yb-speed" id="yb-speed" role="group" aria-label="Hız"><button type="button" data-s="1" class="on">1×</button><button type="button" data-s="2">2×</button><button type="button" data-s="4">4×</button></span><button type="button" class="yb-view" id="g-view">🌍 Kutup</button></div>
+      <div id="toasts" aria-live="polite"></div>
+    </div>
+    <aside class="gpanel" aria-label="Müzakere masası">
+      <button class="gp-toggle" type="button" aria-expanded="false">⋯ Daha fazla</button>
+      <div class="gp-hud">
+      <div class="gp-top">
+        <div class="chip date" id="g-date">1974</div>
+        <div class="chip budget"><span>💰</span><span class="bbar"><i id="b-sci"></i><i id="b-dip"></i><i id="b-fund"></i></span><b id="g-budget">40 puan boşta</b></div>
+      </div>
+      <p class="goal gp-extra">🎯 <b>Hedef:</b> ozon deliği <b>2060'a kadar</b> kapanacak yola girsin. <span id="g-rec"></span></p>
+      <div class="gp-meters">
+        <div class="mrow"><span>🛡️<em> Ozon tabakası</em></span><span class="track"><i id="m-ozone"></i></span></div>
+        <div class="mrow"><span>🏭<em> CFC salımı</em></span><span class="track"><i id="m-cfc"></i></span></div>
+        <div class="mrow"><span>✍️<em> İmzalayanlar</em></span><span class="track"><i id="m-sign"></i></span></div>
+        <div class="mrow trust"><span>📣<em> Kamuoyu kaygısı</em></span><span class="track"><i id="m-trust"></i></span></div>
+      </div>
+      </div>
+      <label class="sl big" id="w-sci"><span>🔬 Bilim ve ölçüm <b id="o-sci">30 puan</b></span><input type="range" id="g-sci" min="0" max="100" step="5" value="30"></label>
+      <label class="sl big" id="w-dip"><span>🤝 Diplomasi <b id="o-dip">30 puan</b></span><input type="range" id="g-dip" min="0" max="100" step="5" value="30"></label>
+      <label class="sl big locked" id="w-fund"><span>💰 Ozon fonu <b id="o-fund">🔒 1990'da açılır</b></span><input type="range" id="g-fund" min="0" max="100" step="5" value="0" disabled></label>
+      <div class="sb-ctrl gp-extra">
+        <button class="hbtn sm" id="g-pause">❚❚ Durdur</button>
+        <button class="hbtn sm" id="g-speed">1×</button>
+      </div>
+    </aside>
+    <div class="harvest" id="harvest" hidden></div>
+    <div class="modal" id="modal" hidden></div>
+  </section>
+
+  <section class="slide scroll" data-mode="result">
+    <div class="result" id="result"></div>
+  </section>
+
+  <section class="slide" data-mode="sandbox">
+    <aside class="sb-panel">
+      <h2>Simülasyon laboratuvarı</h2>
+      <p class="small">1974'ten 2060'a kadar ozon her yıl senin kurallarına göre değişir. Bütçe sınırı yok.</p>
+      <div class="presets">
+        <button class="pbtn" data-preset="history">Tarihteki gibi</button>
+        <button class="pbtn" data-preset="none">Anlaşma olmasaydı</button>
+        <button class="pbtn" data-preset="weak">Yalnız %50 kesinti</button>
+        <button class="pbtn" data-preset="best">Erken ve sıkı</button>
+      </div>
+      <label class="sl"><span>🔬 Bilim <b id="o-ps"></b></span><input type="range" id="p-s" min="0" max="100" value="30"></label>
+      <label class="sl"><span>🤝 Diplomasi <b id="o-pd"></b></span><input type="range" id="p-d" min="0" max="100" value="30"></label>
+      <label class="sl"><span>📜 Anlaşmanın sıkılığı <b id="o-pk"></b></span><input type="range" id="p-k" min="0" max="100" value="75"></label>
+      <canvas id="sb-chart" class="sb-chart"></canvas>
+      <div class="sb-stats"><span id="sb-year">1974</span><span id="sb-harvest">Ozon deliği: 0</span></div>
+      <div class="sb-ctrl">
+        <button class="hbtn sm" id="sb-play">❚❚ Durdur</button>
+        <button class="hbtn sm" id="sb-speed">1×</button>
+        <button class="hbtn sm" id="sb-reset">↺ Sıfırla</button>
+      </div>
+      <button class="hbtn" data-next>Gerçekte ne oldu? →</button>
+    </aside>
+  </section>
+
+  <section class="slide scroll" data-mode="facts">
+    <article class="paper">
+      <h2>Gerçekte ne oldu?</h2>
+      <ul class="facts">
+        <li><b>1974</b> Mario Molina ve Sherwood Rowland, buzdolabı ve spreylerdeki CFC gazlarının stratosfere çıkıp <b>ozon tabakasını</b> yıkabileceğini gösterdi. Sanayi buna "bilim kurgu" dedi.</li>
+        <li><b>1985</b> İngiliz Antarktika araştırmacıları her baharda Antarktika üstünde açılan <b>ozon deliğini</b> buldu. İki yıl sonra, 1987'de <b>Montreal Protokolü</b> imzalandı; 1990'da gelişmekte olan ülkelere yardım için bir fon kuruldu. Türkiye 1991'de katıldı.</li>
+        <li><b>Bugün</b> Montreal Protokolü'nü <b>dünyadaki bütün ülkeler</b> onayladı (2009). Yasaklı gazların %99'u bırakıldı. Antarktika'daki deliğin 2066 civarında kapanması bekleniyor.</li>
+      </ul>
+      <div class="callout"><b>Ama iyileşme yavaş.</b> CFC havada 50–100 yıl kalır; bugün kesilen gaz, onlarca yıl ozonu yemeye devam eder. 2018'de havada beklenmedik CFC-11 bulundu, kaçak üretim Çin'in doğusuna kadar izlendi ve durduruldu. Ölçmeye devam etmeseydik fark etmeyecektik.</div>
+      <button class="hbtn" data-next>Peki ne öğrendik? →</button>
+    </article>
+  </section>
+
+  <section class="slide scroll" data-mode="lessons">
+    <article class="paper">
+      <h2>Ne öğrendik?</h2>
+      <div class="lessons"><div class="lcard"><h3>🔬 Önce ölç</h3><p>Sorunu kanıtlayan bilim olmasaydı anlaşma da olmazdı.</p></div><div class="lcard"><h3>🤝 Herkesi masaya al</h3><p>Yardım fonu gelişmekte olan ülkeleri anlaşmaya kattı.</p></div><div class="lcard"><h3>⏳ Doğa gecikmeli cevap verir</h3><p>Bugünkü karar, onlarca yıl sonra işe yarar.</p></div></div>
+      <h2>Sen ne yapabilirsin?</h2>
+      <ul class="todo"><li>🧴 Güneşte koruyucu, şapka ve güneş gözlüğü kullan; UV indeksine bak.</li><li>❄️ Eski buzdolabı ve klimaları geri dönüşüme ver; gazları uzmanlar toplasın.</li><li>🌍 İklim için de aynı şey mümkün: ülkelerin anlaşmalarını takip et ve konuş.</li></ul>
+      <details class="sources-fold"><summary>Kaynaklar ve model hakkında</summary><ul class="sources">
+        <li>M. J. Molina, F. S. Rowland, "Stratospheric sink for chlorofluoromethanes", <i>Nature</i> 249 (1974).</li>
+        <li>J. C. Farman, B. G. Gardiner, J. D. Shanklin, "Large losses of total ozone in Antarctica reveal seasonal ClOx/NOx interaction", <i>Nature</i> 315 (1985).</li>
+        <li>WMO/UNEP, <i>Scientific Assessment of Ozone Depletion: 2022</i> (Antarktika için ~2066).</li>
+        <li>S. A. Montzka ve ark., "An unexpected and persistent increase in global emissions of ozone-depleting CFC-11", <i>Nature</i> 557 (2018); M. Rigby ve ark., <i>Nature</i> 569 (2019).</li>
+        <li>R. E. Benedick, <i>Ozone Diplomacy</i>, Harvard University Press, 1998.</li>
+      </ul><p class="small">Model yedi bloğun CFC kullanımına, ikna ve imzaya, anlaşmanın takvimine ve stratosferdeki klorun yavaş birikip yavaş azalmasına dayanır. Delik, klor 1980 düzeyini aşınca açılır. Sayılar tarihî gidişe göre ayarlandı ve temsilidir.</p></details>
+      <div class="end-nav">
+        <a class="hbtn" href="../../#bolumler">← Tüm bölümler</a>
+        <button class="hbtn" data-goto="game">↺ Tekrar oyna</button>
+      </div>
+    </article>
+  </section>
+</div>
+
+<nav class="dots" id="dots" aria-label="Bölüm adımları"></nav>
+
+<script src="../../assets/js/stats.js?v=261018000911"></script>
+<script src="../../assets/js/mission.js?v=261018000911"></script>
+<script src="../../assets/js/scene-utils.js?v=261018000911"></script>
+<script src="../../assets/js/badges.js?v=261018000911"></script>
+<script src="../../assets/js/toon.js?v=261018000911"></script>
+<script src="model.js?v=261018000911"></script>
+<script src="ozon.js?v=261018000911"></script>
+<script>/* gpToggle */document.querySelectorAll(".gp-toggle").forEach(b=>b.onclick=()=>{const p=b.closest(".gpanel");const o=p.classList.toggle("open");b.setAttribute("aria-expanded",o);b.textContent=o?"✕ Kapat":"⋯ Daha fazla";window.dispatchEvent(new Event("panel"));});</script>
+</body>
+</html>

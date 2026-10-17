@@ -110,6 +110,15 @@ Bu kurallar kullanıcının geri bildirimleriyle tek tek oturtuldu. Yeni bölüm
   - **Önemli haber kartı eskiyip atılmasın:** tarihî kartlara `{ keep: true }` ver.
   - **Görev kartı açıkken zaman dursun:** tekrar oynayışta da (`game.story = true`, `start()` içinde bırak).
   - **Tarihî olayların çakışmasını önle:** büyük olay yılları (`BUSY`) rastgele sel ve kriz yıllarından en az 2 yıl uzak olsun.
+- **Güvercin testinden öğrenilenler:**
+  - **"Kâğıt yasa" etkisini sınırla.** Uygulanmadan (bekçi, denetim) bir yasağın etkisi ~%50'de kalsın; tek kaydırıcıyı uca çekmek kazandırmasın.
+  - **Monte Carlo'da "düşünen oyuncu" stratejisi** (desteğe bakıp ayarlayan, olaylara tepki veren) kazanabilmeli; sabit, tek araçlı ve "geç ama tam" stratejiler kaybetmeli. Laboratuvar ön ayarları da aynı dersi göstermeli.
+  - **Dönem adı ve sahne öğeleri yıla değil duruma bağlansın** (ör. "Son kuşlar" yazısı ancak sürü gerçekten bittiyse çıksın).
+  - **Olay sırası:** bir kart (koloni haberi, tren) sahnede henüz olmayan bir şeyden söz etmesin; önce onu tanıtan kart gelsin.
+  - **Baskı kartının üçüncüsü** artık uyarı değil, sonuç olsun (görevden alma).
+  - **Rozet eşiği** modelde gerçekten ulaşılabilir mi? En iyi stratejiyle node'da kontrol et.
+- **Çizim hatası döngüyü durdurmasın:** `try { render(now, dt); } catch (e) { … }`. Kanvas, negatif yarıçap gibi tek bir hatada bütün oyunu dondurur. Boyutları `Math.max(…)` ile sınırla.
+- **Arka plan sekmesinde zamanlayıcılar kısılır:** uzun e2e testini öndeki sekmede çalıştır.
 - **Uçtan uca duman testi:** `tools/e2e.js` her bölümü `?debug&hizli&sessiz&e2e` ile baştan sona otomatik oynatır, hataları ve takılmaları raporlar. `?e2e`, gizli pencerede de kareleri sürer. Yayından önce çalıştır.
 
 ## Yeniden oynama (her yeni bölümde düşün)
