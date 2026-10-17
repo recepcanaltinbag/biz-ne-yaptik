@@ -131,3 +131,6 @@ footer .byline { margin-top: 14px; font-size: .8rem; opacity: .75; }
   .badge-btn { font-size: .95rem; padding: 3px 9px; }
 }
 @media (max-width: 370px) { .badge-btn .bb-word { display: none; } }
+.card-plays { display: inline-block; margin: 6px 0 0 6px; font: .95rem var(--hand); background: #e3eed6; border-radius: 99px; padding: 1px 9px; }
+.card-plays[hidden], .visits[hidden] { display: none; }
+.visits { font-size: .8rem; color: var(--ink-soft); margin: 2px 0 0; }

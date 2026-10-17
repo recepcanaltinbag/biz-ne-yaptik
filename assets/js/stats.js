@@ -15,6 +15,23 @@
       else pending.push([path, title]);
     },
   };
+  // herkese açık sayaçlar: GoatCounter ayarlarında "Allow adding visitor counts on your website" açık olmalı.
+  // Kapalıysa ya da hata olursa öğe gizli kalır.
+  Stat.fill = root => {
+    if (!CODE) return;
+    (root || document).querySelectorAll('[data-count]').forEach(el => {
+      const path = el.dataset.count;
+      fetch(`https://${CODE}.goatcounter.com/counter/${encodeURIComponent(path)}.json`)
+        .then(r => r.ok ? r.json() : null)
+        .then(d => {
+          if (!d || !d.count || d.count === '0') return;
+          el.textContent = (el.dataset.label || '{n}').replace('{n}', d.count);
+          el.hidden = false;
+        })
+        .catch(() => {});
+    });
+  };
+  document.addEventListener('DOMContentLoaded', () => Stat.fill());
   window.Stat = Stat;
   if (!CODE || /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || /\.(localhost|test)$/.test(location.hostname)) return;
   const s = document.createElement('script');

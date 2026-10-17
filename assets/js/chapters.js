@@ -82,7 +82,7 @@ window.SEASONS = [
         const end = c.status === 'live' ? 'a' : 'div';
         return `<${tag}>
           <div class="thumb"><img src="${c.img}" data-toon="${c.img}"${c.soft ? ' data-soft' : ''} alt="${esc(c.title)}" loading="lazy"${c.pos ? ` style="object-position:${c.pos}"` : ''}${c.fit ? ` class="fit-${c.fit}"` : ''}>${badge[c.status]}<span class="year">${esc(c.year)}</span></div>
-          <div class="body"><h3>${esc(c.title)}</h3><p>${esc(c.text)}</p>${c.status === 'live' && window.Badges && c.href ? (() => { const id = c.href.split('/')[1]; const [g, n] = window.Badges.count(id); return n ? `<span class="card-badges">🏅 ${g}/${n}</span>` : ''; })() : ''}</div>
+          <div class="body"><h3>${esc(c.title)}</h3><p>${esc(c.text)}</p>${c.status === 'live' && window.Badges && c.href ? (() => { const id = c.href.split('/')[1]; const [g, n] = window.Badges.count(id); return (n ? `<span class="card-badges">🏅 ${g}/${n}</span>` : '') + `<span class="card-plays" data-count="bitti-${id}" data-label="🏁 {n} kişi bitirdi" hidden></span>`; })() : ''}</div>
         </${end}>`;
       }).join('')}</div>
     </section>`).join('');
