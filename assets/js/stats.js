@@ -3,7 +3,7 @@
 // Olaylar: bölüme başlama (basla-<bölüm>), bölümü bitirme (bitti-<bölüm>), rozet (rozet-<id>).
 (() => {
   'use strict';
-  const CODE = ''; // GoatCounter kod adı, ör. 'biz-ne-yaptik' → https://biz-ne-yaptik.goatcounter.com
+  const CODE = 'recepcan'; // GoatCounter kod adı, ör. 'biz-ne-yaptik' → https://biz-ne-yaptik.goatcounter.com
   const pending = [];
   const sent = new Set();
   const Stat = {
