@@ -18,16 +18,18 @@
   // p: reçete kolaylığı (0 çok sıkı, 1 herkese), h: hijyen ve aşı, reserve: yedekte tutulan ilaçlar
   const DEF = { p: 0.3, h: 0, reserve: {} };
 
-  function newState() { return { y: Y0, r: {}, avail: [], I: 1, succ: 1, missed: 0, hist: [] }; }
+  function newState() { return { y: Y0, r: {}, avail: [], I: 1, succ: 1, missed: 0, hE: 0, hist: [] }; }
 
   function step(st, p = DEF) {
     const y = st.y;
     for (const d of DRUGS) if (d.y === y && !st.avail.includes(d.id)) { st.avail.push(d.id); st.r[d.id] = 0.01; }
     const pr = clamp(p.p === undefined ? 0.3 : p.p), h = clamp(p.h || 0), reserve = p.reserve || {};
-    // enfeksiyon yükü: hijyen ve aşı azaltır
-    st.I = 1 - 0.45 * h;
+    // enfeksiyon yükü: hijyen ve aşı azaltır, ama alışkanlık ve aşı yılları alır
+    st.hE += (h - st.hE) * 0.15;
+    st.I = 1 - 0.4 * st.hE;
     // gerçek bakteriyel enfeksiyonların ne kadarı tedavi ediliyor; fazlası gereksiz (grip, soğuk algınlığı)
-    const cover = clamp(0.45 + 1.3 * pr), extra = Math.max(0, pr - 0.42) * 1.6;
+    // doktor gerçek hastayı nezleden her zaman ayıramaz: tedavi arttıkça gereksiz reçete de artar
+    const cover = clamp(0.45 + 1.15 * pr), extra = 0.93 * smooth(0.1, 1, pr) * (p.test ? 0.6 : 1);
     const U = st.I * (cover * 0.5 + extra);
     // ilk tercih: yedekte olmayan, en az dirençli ilaç; yedekler yalnız ağır hastalara
     const front = st.avail.filter(id => !reserve[id]);
@@ -40,10 +42,10 @@
     if (!frontSorted.length) resv.forEach(id => { use[id] = U / resv.length; });
     // yedek ilaç yalnız ilk ilacın işe yaramadığı ağır hastalara gider
     const bestFront = frontSorted.length ? st.r[frontSorted[0]] : 1;
-    resv.forEach(id => { use[id] += U * 0.3 * bestFront / resv.length; });
+    resv.forEach(id => { use[id] += U * 0.55 * bestFront / resv.length; });
     for (const id of st.avail) {
       const r = st.r[id], u = use[id];
-      st.r[id] = clamp(r + 0.85 * u * (1 - 0.5 * h) * r * (1 - r) + 0.003 * u - 0.05 * (1 - Math.min(1, u * 2)) * r * (1 - r), 0.001, 0.99);
+      st.r[id] = clamp(r + 0.85 * u * (1 - 0.4 * st.hE) * r * (1 - r) + 0.003 * u - 0.05 * (1 - Math.min(1, u * 2)) * r * (1 - r), 0.001, 0.99);
     }
     // tedavi başarısı: ilk ilaç işe yaramazsa ikinci denenir (biraz geç ve daha az etkili)
     const best = frontSorted.length ? st.r[frontSorted[0]] : 1;

@@ -11,7 +11,7 @@
       fact: 'Büyük İleri Atılım\'da şişirilen raporlar yüzünden devlet, aslında olmayan tahılı topladı.' },
     { id: 'serce-vicdan', ch: 'serce', icon: '🧭', name: 'Vicdan', hint: 'Bazen en cesur cevap tek kelimedir.',
       fact: 'Kampanyaya itiraz eden bilim insanları vardı. Kuşbilimci Zheng Zuoxin bunlardan biriydi.' },
-    { id: 'serce-bolluk', ch: 'serce', icon: '🌾', name: 'Bolluk yılları', hint: 'Ambarlar üç kez dolup taşsın.',
+    { id: 'serce-bolluk', ch: 'serce', icon: '🌾', name: 'Bolluk yılları', hint: 'Tarla üç yıl da cömert olsun.',
       fact: 'Serçeler hem tahıl hem böcek yer; denge korunursa tarlanın dostudurlar.' },
     { id: 'serce-gozluk', ch: 'serce', icon: '😎', name: 'Güneş de bıktı', hidden: true,
       fact: 'Tanıklar, durmadan çalan tencereler yüzünden konamayan serçelerin yorgunluktan düştüğünü anlatır.' },

@@ -4,7 +4,7 @@
   const MISSION = {
     title: 'Bakterilerin İntikamı · 1945',
     role: 'Kasabanın sağlık müdürüsün. Hastalar kapıya gelir, doktorlar reçete yazar.',
-    control: '💊 <b class="inl">Reçete kolaylığı</b>: azsa gerçek hastalar ilaçsız kalır, çoksa nezleye de antibiyotik gider. Her yeni ilaç gelince <b class="inl">herkese ver</b> ya da <b class="inl">yedekte tut</b> kararı senin. 1961\'de 🧼 hijyen ve aşı açılır.',
+    control: '💊 <b class="inl">Reçete kolaylığı</b>: azsa gerçek hastalar ilaçsız kalır, çoksa nezleye de antibiyotik gider. Her yeni ilaç gelince <b class="inl">herkese ver</b> ya da <b class="inl">yedekte tut</b> kararı senin. 1960\'ta 🧼 hijyen ve aşı açılır.',
     goal: '2015\'e kadar tedavi başarısını yüksek tut: ilaçlar işe yaramaya devam etsin.',
     watch: 'Sağdaki mikroskopta yeşil bakteriler ilaca duyarlı, kırmızılar dirençli. Soldaki ilaç dolabında her ilacın ne kadar "yorulduğunu" gör.',
   };
@@ -26,7 +26,7 @@
   // =====================================================================
   // SES
   // =====================================================================
-  let AC = null, master, noiseBuf, muted = false;
+  let AC = null, master, noiseBuf, muted = /[?&](debug|hizli|sessiz)\b/.test(location.search); // test sırasında ses çıkmasın
   function initAudio() {
     if (AC) { if (AC.state === 'suspended') AC.resume(); return; }
     try {
@@ -51,6 +51,7 @@
   const pop = () => tone(520, 260, 0.08, 0.025, 'sine');
   const wave = () => tone(300, 900, 0.5, 0.02, 'sine');
   const cluck = () => { tone(700, 500, 0.08, 0.03, 'square'); setTimeout(() => tone(760, 520, 0.08, 0.025, 'square'), 120); };
+  if (muted) $('sound').innerHTML = '🔇 <span>Ses</span>';
   $('sound').onclick = () => {
     muted = !muted; initAudio();
     if (AC) master.gain.setTargetAtTime(muted ? 0 : 0.8, AC.currentTime, 0.05);
@@ -93,7 +94,7 @@
   const clouds = Array.from({ length: 3 }, () => ({ x: rnd(0, 1), y: rnd(0.08, 0.22), s: rnd(0.7, 1.2), v: rnd(0.000006, 0.000012) }));
   const lensBox = { x: 0, y: 0, r: 0 }, bread = { x: 0, y: 0 }, chicken = { x: 0, y: 0, dir: 1, ph: 0 }, doctor = { x: 0, y: 0 };
   const shelf = [];
-  const dose = { t0: -1e9, k: 0 };
+  const dose = { t0: -1e9, k: 0, dur: 1400 };
   const tapCount = (key, win = 3500) => { const n = performance.now(); const c = tapCount.m[key] || { n: 0, t: 0 }; c.n = n - c.t < win ? c.n + 1 : 1; c.t = n; tapCount.m[key] = c; return c.n; };
   tapCount.m = {};
   const N_BUGS = 64;
@@ -155,7 +156,8 @@
     const cx0 = G.x1 - r0 - (mobile ? 10 : 26) * U, cy0 = Math.max(r0 + 60 * U, G.gt - r0 * 0.15);
     // dokununca mercek ekranı kaplar
     const big = smooth(0, 1, mview.k), top = 150 * U, rB = Math.min((G.gb - top) * 0.4, G.x1 * 0.3);
-    const r = lerp(r0, rB, big), cx = lerp(cx0, G.x1 / 2, big), cy = lerp(cy0, top + (G.gb - top) * 0.45, big);
+    const r = Math.max(10, lerp(r0, rB, big)), cx = lerp(cx0, G.x1 / 2, big), cy = lerp(cy0, top + (G.gb - top) * 0.45, big);
+    if (!(G.x1 > 50 && G.gh > 20)) return;
     if (big > 0.01) { ctx.fillStyle = `rgba(30,40,36,${0.55 * big})`; ctx.fillRect(0, 0, G.x1, H); }
     lensBox.x = cx; lensBox.y = cy; lensBox.r = r;
     // gövde
@@ -165,7 +167,7 @@
     ctx.fillStyle = rgb(PAL.lens); ctx.fillRect(cx - r, cy - r, r * 2, r * 2);
     ctx.fillStyle = 'rgba(200,220,190,.35)'; for (let i = 0; i < 6; i++) { ctx.beginPath(); ctx.arc(cx + Math.cos(i * 1.7) * r * 0.5, cy + Math.sin(i * 2.3) * r * 0.5, r * 0.18, 0, 6.283); ctx.fill(); }
     // ilaç dalgası
-    const dk = (t - dose.t0) / 1400;
+    const dk = (t - dose.t0) / dose.dur;
     if (dk >= 0 && dk < 1) { const wx = cx - r + dk * r * 2.2; const gr = ctx.createLinearGradient(wx - r * 0.4, 0, wx, 0); gr.addColorStop(0, 'rgba(110,160,220,0)'); gr.addColorStop(1, 'rgba(110,160,220,.45)'); ctx.fillStyle = gr; ctx.fillRect(wx - r * 0.4, cy - r, r * 0.4, r * 2); }
     const bl = Math.max(5, r0 * 0.1) * (1 + 0.5 * big);
     for (const b of bugs) {
@@ -175,7 +177,7 @@
       if (b.die === 1 && dk >= 0 && dk < 1.2 && bx < cx - r + dk * r * 2.2) b.die = 2;
       if (b.die === 2) b.k = Math.max(0, b.k - dt / 500);
       if (b.die === 3) b.k = Math.min(1, b.k + dt / 600);
-      if (b.k <= 0 && b.die === 2) { b.res = Math.random() < (b.nextRes ?? 0); b.die = 3; b.a = rnd(0, 6.283); b.d = Math.sqrt(Math.random()) * 0.88; }
+      if (b.k <= 0 && b.die === 2) respawn(b);
       if (b.k <= 0.01) continue;
       ctx.save(); ctx.translate(bx, by); ctx.rotate(b.rot); ctx.scale(b.k, b.k);
       ctx.fillStyle = rgb(b.res ? PAL.res : PAL.sens, b.die === 2 ? 0.5 : 0.95);
@@ -194,7 +196,17 @@
     } else tag(cx, cy - r - (dk >= 0 && dk < 1 ? 30 : 8) * U, '🔍 dokun: büyüt', { fs: mobile ? 10 : 11 });
   }
   // her yıl: duyarlıların bir kısmı ilaçla ölür; boşluklar dirençli oranına göre dolar
-  function doseYear(h, frontR) {
+  // ölen yerine yenisi doğar: dirençliyse hayatta kalan bir dirençlinin hemen yanında (bölünme)
+  function respawn(b) {
+    b.res = Math.random() < (b.nextRes ?? 0); b.die = 3; b.k = 0.05;
+    const par = b.res ? bugs.filter(o => o !== b && o.res && o.die !== 2 && o.k > 0.5) : [];
+    if (par.length) { const p = pick(par); b.a = p.a + rnd(-0.12, 0.12); b.d = clamp(p.d + rnd(-0.06, 0.06), 0.05, 0.88); b.rot = p.rot + rnd(-0.4, 0.4); }
+    else { b.a = rnd(0, 6.283); b.d = Math.sqrt(Math.random()) * 0.88; }
+  }
+  function doseYear(h, frontR, yearMs = 1400) {
+    // önceki dalga bitmeden yeni yıl geldiyse bekleyen ölümler hemen işlenir (2×/4× hızda da doğru oran)
+    bugs.forEach(b => { if (b.die === 1 || b.die === 2) respawn(b); });
+    dose.dur = clamp(yearMs * 0.7, 250, 1400);
     const kill = Math.min(0.85, h.U * 1.2);
     const target = clamp(frontR);
     const sens = bugs.filter(b => !b.res && b.die !== 2);
@@ -213,7 +225,7 @@
   function drawShelf(G) {
     // ilaç dolabı: her şişede kırmızı = direnç; kilit = yedekte
     const avail = curState().avail || [];
-    const bw = (mobile ? 20 : 26) * U, gap = 8 * U, x0 = G.x1 * (mobile ? 0.03 : 0.05), y0 = G.gt - (mobile ? 18 : 26) * U;
+    const bw = (mobile ? 18 : 24) * U, gap = 7 * U, x0 = G.x1 * 0.03, y0 = G.gb - 34 * U;
     const w = Math.max(avail.length, 1) * (bw + gap) + gap;
     ctx.fillStyle = '#c9b48a'; ctx.fillRect(x0 - gap, y0 + 4 * U, w, 6 * U);
     ctx.fillStyle = '#8a7350'; ctx.fillRect(x0 - gap, y0 + 10 * U, 4 * U, 30 * U); ctx.fillRect(x0 - gap + w - 4 * U, y0 + 10 * U, 4 * U, 30 * U);
@@ -229,7 +241,7 @@
       if (curReserve()[id]) { ctx.font = `${12 * U}px sans-serif`; ctx.fillText('🔒', x + bw * 0.15, y + bw * 0.9); }
       ctx.fillStyle = rgb(PAL.ink); ctx.font = `${(mobile ? 8 : 10) * U}px "Patrick Hand"`; ctx.textAlign = 'center'; ctx.fillText(nameOf(id).slice(0, mobile ? 5 : 9), x + bw / 2, y0 + 22 * U); ctx.textAlign = 'left';
     });
-    if (avail.length) tag(x0 + w / 2 - gap, y0 - bw * 1.5 - 10 * U, '🧴 İlaç dolabı · kırmızı = direnç', { fs: mobile ? 10 : 12 });
+    if (avail.length) tag(x0 + w / 2 - gap, y0 - bw * 1.5 - 8 * U, Object.keys(curReserve()).length ? '🧴 İlaç dolabı · kırmızı = direnç · 🔒 dokun: aç' : '🧴 İlaç dolabı · kırmızı = direnç', { fs: mobile ? 10 : 12 });
   }
 
   function render(t, dt) {
@@ -257,7 +269,7 @@
     drawShelf(G);
     drawPatients(G, t, dt);
     // tavuk (arka bahçede)
-    chicken.ph += dt * 0.01; chicken.x = x1 * 0.06 + Math.sin(chicken.ph * 0.05) * 20 * U; chicken.y = G.road + 30 * U;
+    chicken.ph += dt * 0.01; chicken.x = x1 * 0.26 + Math.sin(chicken.ph * 0.05) * 20 * U; chicken.y = G.road + 30 * U;
     const cd = Math.cos(chicken.ph * 0.05) > 0 ? 1 : -1;
     ctx.save(); ctx.translate(chicken.x, chicken.y); ctx.scale(U * cd, U);
     ctx.fillStyle = '#f4efe2'; ctx.beginPath(); ctx.ellipse(0, -8, 9, 7, 0, 0, 6.283); ctx.fill(); ctx.beginPath(); ctx.arc(7, -15, 4.5, 0, 6.283); ctx.fill();
@@ -302,7 +314,7 @@
       p.sx = p.x; p.sy = y - 44 * U;
       if (p.x > G.x1 * 0.62) { patients.splice(i, 1); continue; }
       person(p.x, y, U * (mobile ? 0.8 : 0.95), { dir: 1, shirt: p.shirt, scarf: p.scarf, step: p.st !== 'visit' ? Math.sin(t * 0.02 + p.ph) * 3 : 0, sad: p.st === 'leave' && !p.ok });
-      ctx.font = `${13 * U}px sans-serif`; ctx.fillText(p.vir ? '🤧' : '🤒', p.x - 7 * U, y - 44 * U);
+      ctx.font = `${18 * U}px sans-serif`; ctx.fillText(p.vir ? '🤧' : '🤒', p.x - 10 * U, y - 46 * U);
       if (p.st === 'leave') { ctx.font = `${14 * U}px "Patrick Hand"`; ctx.fillStyle = p.ok ? '#3a7a3a' : '#a0402a'; ctx.fillText(p.ok ? '✓' : '✗', p.x + 9 * U, y - 40 * U); }
     }
   }
@@ -332,6 +344,8 @@
     add(doctor.sx, doctor.sy, 'doctor');
     add(chicken.sx, chicken.sy, 'chicken', () => { cluck(); award('bak-tavuk'); });
     add(bread.x, bread.y - 6 * U, 'bread', () => award('bak-kuf'));
+    // kilitli şişeye dokunmak yedeği açar
+    for (const sh of shelf) if (mode === 'game' && game.reserve[sh.id] && Math.abs(x - sh.x) < 16 * U && y > sh.y - 10 * U && y < sh.y + 50 * U) { delete game.reserve[sh.id]; sayAt({ x: sh.x, y: sh.y }, nameOf(sh.id) + ' artık\nherkese veriliyor.'); blip(); return true; }
     shelf.forEach(s => add(s.x, s.y, 'shelf'));
     if (official && official.x) add(official.x, official.y, 'official');
     if (!c.length) return false;
@@ -483,28 +497,32 @@
   const curState = () => mode === 'sandbox' ? sb.st : gs;
   const curReserve = () => mode === 'sandbox' ? sb.p.reserve : game.reserve || {};
   const curHist = () => { const s = curState(); return s.hist.length ? s.hist[s.hist.length - 1] : null; };
-  const frontName = () => { const s = curState(), r = curReserve(); const f = (s.avail || []).filter(id => !r[id]).sort((a, b) => s.r[a] - s.r[b]); return nameOf(f[0] || 'pen'); };
+  let lensDrug = 'pen';
+  function pickLensDrug(s, res) { const f = (s.avail || []).filter(id => !res[id]).sort((a, b) => s.r[a] - s.r[b]); if (!f.length) return lensDrug; if (!s.r[lensDrug] || res[lensDrug] || !f.includes(lensDrug) || s.r[lensDrug] > s.r[f[0]] + 0.12) lensDrug = f[0]; return lensDrug; }
+  const frontName = () => nameOf(lensDrug);
 
   function resetGame() {
     gs = M.newState();
     Object.assign(game, {
       started: false, paused: false, state: 'play', frac: 0, fired: new Set(), hist: [], speed: 1, touched: false, reading: 0, story: false, endAfter: false,
-      p: 0.35, h: 0, reserve: {}, decisions: [], otc: false, sat: 70, replaced: false, inspected: false, unlockedH: false,
+      p: 0.35, h: 0, reserve: {}, decisions: [], lockUntil: 0, events: [], test: false, otc: false, sat: 70, replaced: false, inspected: false, unlockedH: false,
     });
-    gP.value = 35; gP.disabled = false; gH.value = 0; gH.disabled = true; $('w-h').classList.add('locked'); $('o-h').textContent = "🔒 1961'de açılır";
+    gP.value = 35; gP.disabled = false; gH.value = 0; gH.disabled = true; $('w-h').classList.add('locked'); $('o-h').textContent = "🔒 1960'ta açılır";
     document.querySelectorAll('.coach').forEach(uncoach);
     readGameSliders();
     $('g-pause').textContent = '❚❚ Durdur'; setSpeed(1);
     $('modal').hidden = true; $('yb-harvest').textContent = ''; $('toasts').innerHTML = ''; toastQueue.length = 0; lastToastAt = -1e9;
     $('g-intro').classList.remove('gone');
     if (window.Badges) window.Badges.resetSession(); tapCount.m = {};
-    choiceQ.length = 0; official = null; patients.length = 0; resetBugs();
+    choiceQ.length = 0; official = null; patients.length = 0; resetBugs(); planEvents(); lensDrug = 'pen';
   }
   function readGameSliders() {
     game.p = gP.value / 100; game.h = game.unlockedH ? gH.value / 100 : 0;
     $('o-p').textContent = '%' + gP.value; if (game.unlockedH) $('o-h').textContent = '%' + gH.value;
   }
-  [gP, gH].forEach(el => el.addEventListener('input', () => { initAudio(); readGameSliders(); if (!game.touched) { game.touched = true; setTimeout(() => $('g-intro').classList.add('gone'), 2500); } }));
+  [gP, gH].forEach(el => el.addEventListener('input', () => { initAudio();
+    if (el === gP && game.lockUntil && gs.y < game.lockUntil && Number(gP.value) < 70) { gP.value = 70; once('lock' + game.lockUntil, () => toast('📜', 'Hasta derneği', `Söz verdin: ${game.lockUntil}'e kadar reçete en az %70.`, 'warn')); }
+    readGameSliders(); if (!game.touched) { game.touched = true; setTimeout(() => $('g-intro').classList.add('gone'), 2500); } }));
   $('g-pause').onclick = () => { game.paused = !game.paused; $('g-pause').textContent = game.paused ? '▶ Devam' : '❚❚ Durdur'; };
   function setSpeed(v) { game.speed = v; $('g-speed').textContent = v + '×'; $('yb-speed').querySelectorAll('button').forEach(b => b.classList.toggle('on', Number(b.dataset.s) === v)); }
   $('g-speed').onclick = () => setSpeed(game.speed === 1 ? 2 : game.speed === 2 ? 4 : 1);
@@ -537,7 +555,7 @@
       if (i >= STORY.length) { game.story = false; return; }
       const [ic, from, text, tone, opt] = STORY[i];
       toast(ic, from, text, tone, { ...opt, then: opt.pause ? () => show(i + 1) : undefined });
-      if (!opt.pause) setTimeout(() => show(i + 1), 6500 / Math.max(1, FAST / 2));
+      if (!opt.pause) setTimeout(() => show(i + 1), 4500 / Math.max(1, FAST / 2));
     };
     const start = () => setTimeout(() => show(0), 300);
     if (window.Mission && !window.__mSeen && (window.__mSeen = 1)) window.Mission.show($('modal'), MISSION, start); else start();
@@ -552,7 +570,7 @@
   }
   function choice(from, title, text, opts, who) {
     if (game.state === 'choice') { choiceQ.push([from, title, text, opts, who]); return; }
-    game.state = 'choice'; if (game.speed > 1) setSpeed(1);
+    game.state = 'choice'; // seçilen hız korunur (testçi: her kartta 1×'e dönmesin)
     const m = $('modal');
     m.innerHTML = `<div class="card talk"><div class="who"></div><div><div class="from">${from}</div><h2>${title}</h2><p class="speech">${text}</p><div class="opts"></div></div></div>`;
     m.querySelector('.who').appendChild(portrait(who || 'sci'));
@@ -572,17 +590,33 @@
     m.hidden = false;
   }
 
+  // her oyunda 3 rastgele olay (yeniden oynamada farklı bir dünya)
+  const EVENTS = [
+    { id: 'grip', ic: '🤧', from: 'Salgın', text: 'Büyük bir grip salgını! Kapıda kuyruk iki katı. Herkes ilaç istiyor ama grip bir <b>virüs</b>: antibiyotik işe yaramaz.', fn: () => { game.gripYear = gs.y; } },
+    { id: 'test', ic: '🧪', from: 'Laboratuvar', text: 'Hızlı tanı testi geldi! Doktor artık nezleyi bakteri enfeksiyonundan daha kolay ayırıyor. Gereksiz reçete azalacak.', fn: () => { game.test = true; } },
+    { id: 'travel', ic: '✈️', from: 'Havalimanı', text: 'Uzak bir ülkeden dönen yolcularla dirençli bakteri kasabaya geldi. Dirençli bakteri sınır tanımaz.', fn: () => { const f = gs.avail.filter(id => !game.reserve[id]); f.forEach(id => { gs.r[id] = Math.min(0.99, gs.r[id] + 0.12); }); } },
+    { id: 'vaccine', ic: '💉', from: 'Sağlık bakanlığı', text: 'Yeni bir aşı kampanyası başladı: aşılanan hastalanmaz, hastalanmayan ilaç kullanmaz.', fn: () => { game.hBonus = 0.25; } },
+    { id: 'farm', ic: '🐔', from: 'Çiftlik', text: 'Çiftliklerde hayvan yemine antibiyotik katılıyor, hayvanlar hızlı büyüsün diye. Dirençli bakteriler oradan da yayılıyor.', fn: () => { gs.avail.forEach(id => { gs.r[id] = Math.min(0.99, gs.r[id] + 0.06); }); } },
+  ];
+  function planEvents() {
+    const pool = EVENTS.slice().sort(() => Math.random() - 0.5).slice(0, 3);
+    const years = [rnd(1966, 1976), rnd(1978, 1992), rnd(1994, 2008)].map(Math.round);
+    game.events = pool.map((e, i) => ({ ...e, y: years[i] }));
+  }
   function yearTick() {
     const y = gs.y;
     // reçetesiz satış (1951'e kadar) gereksiz kullanımı artırır
-    const pEff = clamp(game.p + (game.otc && y < 1951 ? 0.25 : 0));
-    M.step(gs, { p: pEff, h: game.h, reserve: game.reserve });
+    const ev = game.events.find(e => e.y === y);
+    if (ev) { ev.fn(); milestone(ev.ic, ev.from, ev.text, ev.id === 'test' || ev.id === 'vaccine' ? 'good' : 'warn'); }
+    const pEff = clamp(game.p + (game.otc && y < 1951 ? 0.25 : 0) + (game.gripYear === y ? 0.25 : 0));
+    M.step(gs, { p: pEff, h: clamp(game.h + (game.hBonus || 0)), reserve: game.reserve, test: game.test });
     const h = gs.hist[gs.hist.length - 1];
     game.hist.push({ ...h, p: game.p });
     const front = gs.avail.filter(id => !game.reserve[id]).sort((a, b) => gs.r[a] - gs.r[b]);
-    doseYear(h, front.length ? gs.r[front[0]] : 0);
+    const ld = pickLensDrug(gs, game.reserve);
+    doseYear(h, gs.r[ld] || 0, YEAR * (gs.y < M.Y0 + 3 ? 1.5 : 1) / game.speed * 0.6);
     // hasta memnuniyeti: insanlar ilaç almayı sever; tedavisiz kalan ve iyileşmeyen kızar
-    if (!game.replaced) game.sat = clamp(game.sat + (pEff - 0.42) * 10 - h.missed * 12 - (1 - h.succ) * 8 + 2.5, 0, 100);
+    if (!game.replaced) game.sat = clamp(game.sat + (pEff - 0.42) * 10 - h.missed * 12 - (1 - h.succ) * 14 - game.h * 2 + 2.5, 0, 100);
     $('yb-harvest').textContent = `✅ %${Math.round(h.succ * 100)}`; $('yb-harvest').style.color = h.succ >= 0.85 ? 'var(--green)' : h.succ >= 0.6 ? 'var(--grain)' : 'var(--danger)';
 
     if (y === 1946) {
@@ -609,7 +643,7 @@
     if (y === 1960) {
       game.unlockedH = true; gH.disabled = false; $('w-h').classList.remove('locked'); readGameSliders();
       setMicro(true, 8000);
-      milestone('🦠', 'Londra · 1960', 'Metisilin bir yıl önce gelmişti; şimdi ona da dirençli stafilokok bulundu: <b>MRSA</b>. Hastanelerde elden ele yayılıyor. El yıkama ve aşı yeni bir silah olabilir.', 'bad', () => coach(gH, '👉 Kaydır: hijyen ve aşı'));
+      milestone('🦠', 'Londra · 1960', game.reserve.met ? 'Sen Metisilin\'i yedekte tuttun; ama dünyanın başka yerinde ona dirençli stafilokok bulundu: <b>MRSA</b>. Dirençli bakteri sınır tanımaz. El yıkama ve aşı yeni bir silah olabilir.' : 'Metisilin bir yıl önce gelmişti; şimdi ona da dirençli stafilokok bulundu: <b>MRSA</b>. Hastanelerde elden ele yayılıyor. El yıkama ve aşı yeni bir silah olabilir.', 'bad', () => coach(gH, '👉 Kaydır: hijyen ve aşı'));
     }
     if (y === 1995) milestone('🧫', 'Araştırmacılar', '1987\'den beri yeni bir antibiyotik sınıfı bulunamadı. Bulmak çok zor, şirketler için kârı az. Elimizdekileri korumak zorundayız.', 'warn');
     if (game.sat < 25 && !game.replaced) once('warn-sat', () => toast('📞', 'Belediye', 'Hastalar şikâyetçi: "Doktor ilaç yazmıyor!"', 'warn'));
@@ -620,7 +654,7 @@
     if (game.inspected || game.replaced) return;
     game.inspected = true; comeOfficial('patient', 'İlaç istiyoruz!');
     choice('Hasta derneği başkanı', 'Sabır tükendi', '"Herkes ilaç istiyor! Reçete kolaylığını <b>en az %70</b> yap, yoksa seni görevden aldıracağız."', [
-      { label: 'Tamam, kolaylaştırıyorum', sub: 'Reçete kolaylığı en az %70 olur', fn: () => { gP.value = Math.max(Number(gP.value), 70); readGameSliders(); game.sat = 45; } },
+      { label: 'Tamam, kolaylaştırıyorum', sub: 'Reçete kolaylığı 5 yıl boyunca en az %70', fn: () => { gP.value = Math.max(Number(gP.value), 70); game.lockUntil = gs.y + 5; readGameSliders(); game.sat = 45; } },
       { label: 'Hayır, ilaçları koruyacağım', sub: 'Görevden alınırsın, oyun biter', fn: () => { game.replaced = true; toast('📜', 'Belediye', 'Görevden alındın. Yerine gelen ilk iş reçeteyi serbest bıraktı.', 'bad'); endGame(); } },
     ], 'patient');
   }
@@ -649,6 +683,7 @@
     let title, text;
     if (game.replaced) { title = 'Görevden alındın'; text = 'İlaçları korumak istedin ama hastalar bekleyemedi. Gerçekte de doktorlar "hasta ilaç istiyor" baskısıyla her gün karşılaşıyor.'; }
     else if (sY >= 80) { title = 'İlaçlar hâlâ çalışıyor'; text = 'Gerektiği kadar ilaç verdin, yeni ilaçları korudun. Bakteriler de evrimleşti, ama sen onlara ders çalıştırmadın.'; }
+    else if (hs.reduce((a, h) => a + h.missed, 0) / n > 0.22) { title = 'Hastalar ilaçsız kaldı'; text = 'Direnç az kaldı, ama kural o kadar sıkıydı ki gerçek enfeksiyonu olan pek çok hasta ilaçsız döndü. İlaç saklanacak değil, doğru kişiye verilecek bir şey.'; }
     else if (sY >= 50) { title = 'Zor ama ayakta'; text = 'Bazı ilaçlar tükendi, ama elde hâlâ işe yarayanlar var. Bir sonraki ilaç ne zaman bulunacak? Kimse bilmiyor.'; }
     else { title = 'Bakteriler kazandı'; text = 'Her yeni ilaç birkaç yıl kurtardı, sonra o da yoruldu. Tebrikler, tarihi başarıyla tekrarladın. Fleming haklıydı.'; }
     const col = v => v >= 80 ? 'var(--green)' : v >= 50 ? 'var(--grain)' : 'var(--danger)';
@@ -726,8 +761,8 @@
       if (sb.preset === 'history') { $('p-p').value = Math.round(pp.p * 100); $('p-h').value = Math.round(pp.h * 100); $('o-pp').textContent = '%' + Math.round(pp.p * 100); $('o-ph').textContent = '%' + Math.round(pp.h * 100); }
       M.step(sb.st, pp);
       const h = sb.st.hist[sb.st.hist.length - 1], res = pp.reserve || {};
-      const f = sb.st.avail.filter(id => !res[id]).sort((a, b) => sb.st.r[a] - sb.st.r[b]);
-      doseYear(h, f.length ? sb.st.r[f[0]] : 0);
+      const ld = pickLensDrug(sb.st, res);
+      doseYear(h, sb.st.r[ld] || 0, 900 / sb.speed);
       updateSbStats(); drawSbChart();
     }
   }

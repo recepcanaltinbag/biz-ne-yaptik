@@ -22,7 +22,7 @@
   // =====================================================================
   // SES
   // =====================================================================
-  let AC = null, master, chorus, muted = false;
+  let AC = null, master, chorus, muted = /[?&](debug|hizli|sessiz)\b/.test(location.search); // test sırasında ses çıkmasın
   function initAudio() {
     if (AC) { if (AC.state === 'suspended') AC.resume(); return; }
     try {
@@ -64,6 +64,7 @@
     o.connect(e); e.connect(master); e.gain.setValueAtTime(0.05, t); e.gain.exponentialRampToValueAtTime(0.0001, t + 0.15);
     o.start(t); o.stop(t + 0.16);
   }
+  if (muted) $('sound').innerHTML = '🔇 <span>Ses</span>';
   $('sound').onclick = () => {
     muted = !muted; initAudio();
     if (AC) master.gain.setTargetAtTime(muted ? 0 : 0.8, AC.currentTime, 0.05);

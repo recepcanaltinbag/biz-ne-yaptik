@@ -19,7 +19,7 @@
   // =====================================================================
   // SES — rüzgâr, kuş cıvıltısı (ötücü kuş sayısıyla), uçak motoru, vızıltı
   // =====================================================================
-  let AC = null, master, buzzGain, motorGain, noiseBuf, muted = false;
+  let AC = null, master, buzzGain, motorGain, noiseBuf, muted = /[?&](debug|hizli|sessiz)\b/.test(location.search); // test sırasında ses çıkmasın
   function initAudio() {
     if (AC) { if (AC.state === 'suspended') AC.resume(); return; }
     try {
@@ -56,6 +56,7 @@
   const eagleCry = () => { tone(2400, 1500, 0.35, 0.025, 'triangle'); setTimeout(() => tone(2200, 1400, 0.3, 0.02, 'triangle'), 300); };
   const blip = () => tone(880, 660, 0.12, 0.03, 'triangle');
   const crack = () => tone(1800, 300, 0.08, 0.05, 'square');
+  if (muted) $('sound').innerHTML = '🔇 <span>Ses</span>';
   $('sound').onclick = () => {
     muted = !muted; initAudio();
     if (AC) master.gain.setTargetAtTime(muted ? 0 : 0.8, AC.currentTime, 0.05);
@@ -724,7 +725,7 @@
   }
   function choice(from, title, text, opts, who) {
     if (game.state === 'choice') { choiceQ.push([from, title, text, opts, who]); return; }
-    game.state = 'choice'; if (game.speed > 1) setSpeed(1);
+    game.state = 'choice'; // seçilen hız korunur (testçi: her kartta 1×'e dönmesin)
     const m = $('modal');
     m.innerHTML = `<div class="card talk"><div class="who"></div><div><div class="from">${from}</div><h2>${title}</h2><p class="speech">${text}</p><div class="opts"></div></div></div>`;
     m.querySelector('.who').appendChild(portrait(who || 'off'));

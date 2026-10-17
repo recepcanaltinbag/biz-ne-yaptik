@@ -21,7 +21,7 @@
   // =====================================================================
   // SES — rüzgâr, dalga, martı, su sıçraması, korna
   // =====================================================================
-  let AC = null, master, waveGain, windGain, noiseBuf, muted = false;
+  let AC = null, master, waveGain, windGain, noiseBuf, muted = /[?&](debug|hizli|sessiz)\b/.test(location.search); // test sırasında ses çıkmasın
   function initAudio() {
     if (AC) { if (AC.state === 'suspended') AC.resume(); return; }
     try {
@@ -53,6 +53,7 @@
   const splash = () => tone(600, 120, 0.18, 0.04);
   const horn = () => { tone(180, 170, 0.6, 0.05, 'sawtooth'); };
   const blip = () => tone(880, 660, 0.12, 0.03, 'triangle');
+  if (muted) $('sound').innerHTML = '🔇 <span>Ses</span>';
   $('sound').onclick = () => {
     muted = !muted; initAudio();
     if (AC) master.gain.setTargetAtTime(muted ? 0 : 0.8, AC.currentTime, 0.05);
@@ -874,7 +875,7 @@
   function choice(from, title, text, opts, who) {
     // aynı yıl iki karar gelirse ikincisi sıraya girer, üst üste yazılmaz
     if (game.state === 'choice') { choiceQ.push([from, title, text, opts, who]); return; }
-    game.state = 'choice'; if (game.speed > 1) setSpeed(1);
+    game.state = 'choice'; // seçilen hız korunur (testçi: her kartta 1×'e dönmesin)
     const m = $('modal');
     m.innerHTML = `<div class="card talk"><div class="who"></div><div><div class="from">${from}</div><h2>${title}</h2><p class="speech">${text}</p><div class="opts"></div></div></div>`;
     m.querySelector('.who').appendChild(portrait(who || 'off'));
@@ -923,7 +924,7 @@
     // kanal onarımı 1970'te açılır
     if (y === 1967 && !game.unlockedFix) {
       game.unlockedFix = true; gFix.disabled = false; $('w-fix').classList.remove('locked'); readGameSliders(); if (game.speed > 1) setSpeed(1);
-      milestone('🔧', 'Su mühendisi', 'Kanalları betonla kaplasak ve tarlayı damla damla sulasak, <b>aynı pamuğu çok daha az suyla</b> yetiştirebiliriz. Ama yılların işi, para ister.', '', () => coach(gFix, '👉 Kaydır: kanalları onar'));
+      milestone('🔧', 'Su mühendisi', 'Kanalları betonla kaplasak ve tarlayı damla damla sulasak, <b>aynı pamuğu çok daha az suyla</b> yetiştirebiliriz. Ama yılların işi, para ister.', '', () => { if (Number(gFix.value) < 50) coach(gFix, '👉 Kaydır: kanalları onar'); });
     }
     // Sibirya projesi: hayal mi, çözüm mü?
     if (y === 1975) {

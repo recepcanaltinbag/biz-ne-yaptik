@@ -166,7 +166,13 @@ Bu kurallar kullanıcının geri bildirimleriyle tek tek oturtuldu. Yeni bölüm
 2. **Ses ve görüntü tutarlılığı:** her ses ve her sahne için "bunu sahnede kim yapıyor?" sorusunun cevabı olmalı.
 3. **Akış logu:** gerçek hızda kart açılış ve kapanış zamanları loglanır. Arka arkaya kart, 15 saniyeden uzun boşluk ya da kendiliğinden kapanan önemli kart olmamalı.
 4. **Sığma:** `tools/layout-audit.js` çalıştırılır. Bu betik her bölümün her slaytını 1440×900, 1024×768, 375×812 ve 360×640'ta açıp pencereden taşan öğeleri listeler (yerel sunucuda ana sayfayı aç, sonra `await eval(await (await fetch('/tools/layout-audit.js')).text())`). Çıktı **"sorun yok"** olmadan yayına çıkma. Metin sayfaları ve laboratuvar paneli dahil hiçbir ekran kaydırma gerektirmemeli.
-5. Bütün dosyalarda `node --check` çalıştırılır, konsolda hata kalmamalı. Ardından `?v=` sürümü artırılır, push edilir ve canlı sürüm curl ile kontrol edilir.
+5. `node tools/check-meta.js` çalıştırılır, çıktı **"Üst bilgi: sorun yok"** olmalı. Betik şunları denetler:
+   - başlıktaki "Sezon X · Bölüm Y" ana sayfadaki sırayla aynı mı (bölüm numarası site genelinde değil, **sezon içinde** sayılır);
+   - başlık kartla aynı mı;
+   - `mission.js` ve `scene-utils.js` yükleniyor mu;
+   - `DONE_KEY` doğru mu;
+   - 8 rozet var mı.
+6. Bütün dosyalarda `node --check` çalıştırılır, konsolda hata kalmamalı. Ardından `?v=` sürümü artırılır, push edilir ve canlı sürüm curl ile kontrol edilir.
 
 ## Rozetler
 - Ortak sistem `assets/js/badges.js` (+ `assets/css/badges.css`). Her bölümde **4 açık rozet** (iyi senaryolar, ipucu görünür) ve **4 kapalı rozet** (gizli; tek dokunuş, 2–3 dokunuş ya da sürpriz oyun anı). Her rozet gerçek bir "Biliyor muydun?" bilgisiyle gelir. "Yakında" bölümlere rozet konmaz.

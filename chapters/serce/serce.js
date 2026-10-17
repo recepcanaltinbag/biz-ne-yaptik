@@ -1,7 +1,7 @@
 // Bölüm 1 — Serçelere Savaş (Çin, 1958–1961)
 (() => {
   'use strict';
-  const MISSION = {"title": "Serçelere Savaş · Çin, 1958", "role": "Çin'in Tarım Bakanısın. Köylüler tencere çalar, memurlar rapor yazar.", "control": "📣 <b class=\"inl\">Tencere seferberliği</b> kaydırıcısı: ne kadar çok tencere, o kadar az serçe.", "goal": "Üç hasat boyunca köylüyü doyur: tahılı koru ama Pekin'in güvenini de kaybetme.", "watch": "Her hasattan sonra yetkili gelip rapor isteyecek. Ne yazacağına sen karar vereceksin."};
+  const MISSION = {"title": "Serçelere Savaş · Çin, 1958", "role": "Çin'in Tarım Bakanısın. Köylüler tencere çalar, memurlar rapor yazar.", "control": "📣 <b class=\"inl\">Tencere seferberliği</b> kaydırıcısı. %20'ye kadar tencere sesi serçeleri yalnız korkutur; daha fazlası yorup düşürür.", "goal": "Üç hasat boyunca köylüyü doyur. Pekin köy başına <b class=\"inl\">25 serçe</b> kotası koyuyor: tahılı koru ama Pekin'in güvenini de kaybetme.", "watch": "Her hasattan sonra yetkili gelip rapor isteyecek. Ne yazacağına sen karar vereceksin."};
 
   const $ = id => document.getElementById(id);
   const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
@@ -29,7 +29,8 @@
     if (cm === 2) st.F = 1; // yeni ekim
     // serçeler Nisan–Temmuz arası ürer; yuvalar hem üremeyi hem dışarıdan gelişi artırır
     if (cm >= 3 && cm <= 6) st.S += (0.15 + 0.2 * p.nest) * st.S * (1 - st.S) + 0.004 * (1 + 3 * p.nest) * (1 - st.S);
-    st.S -= p.hunt * 0.2 * st.S;
+    // %20'ye kadar tencere sesi serçeleri yalnız korkutur; fazlası yorup düşürür
+    st.S -= Math.max(0, (p.hunt - 0.2) / 0.8) * 0.2 * st.S;
     if (isWarm(cm)) st.P += 0.85 * p.heat * st.P * (1 - st.P / PK) - 0.62 * st.S * st.P;
     else st.P = Math.max(0.08, st.P * 0.8);
     if (isWarm(cm)) st.F -= st.F * 0.05 * st.P;
@@ -55,7 +56,7 @@
   // =====================================================================
   // SES — tamamen sentezlenmiş: rüzgâr, cıvıltı, tencere, böcek vızıltısı
   // =====================================================================
-  let AC = null, master, buzzGain, noiseBuf, muted = false;
+  let AC = null, master, buzzGain, noiseBuf, muted = /[?&](debug|hizli|sessiz)\b/.test(location.search); // test sırasında ses çıkmasın
   function initAudio() {
     if (AC) { if (AC.state === 'suspended') AC.resume(); return; }
     try {
@@ -111,6 +112,7 @@
     e.gain.setValueAtTime(0.09, t); e.gain.exponentialRampToValueAtTime(0.0001, t + 0.2);
     o.start(t); o.stop(t + 0.22);
   }
+  if (muted) $('sound').innerHTML = '🔇 <span>Ses</span>';
   $('sound').onclick = () => {
     muted = !muted; initAudio();
     if (AC) master.gain.setTargetAtTime(muted ? 0 : 0.8, AC.currentTime, 0.05);
@@ -1137,7 +1139,7 @@
   const STORY = [
     [0, '🇨🇳', 'Çin', 'Mao Zedong <b>Büyük İleri Atılım</b>\'ı başlattı. Hedef birkaç yılda sanayileşmek, tarımda rekor kırmak.', '', { pause: true }],
     [0, '', 'Dört Zararlı Kampanyası', 'Dört düşman ilan edildi: <b>fare, sinek, sivrisinek ve serçe</b>. Serçenin suçu tahıl yemek.', '', { img: POSTER, pause: true }],
-    [13500, '🥁', 'Yöntem', 'Köylüler tencere çalınca serçeler konamıyor, yorulup düşüyor. Ne kadar çok tencere, o kadar az serçe.', '', { ms: 9000 }],
+    [13500, '🥁', 'Yöntem', 'Köylüler tencere çalınca serçeler konamıyor. <b>%20\'ye kadar</b> ses onları yalnız korkutur; daha fazlası yorup düşürür. Ne kadar çok tencere, o kadar az serçe.', '', { ms: 9000 }],
     [21000, '🌾', 'Tarladan not', 'Bu tarlada tahıl büyüyor, böcekler tahılı yiyor, serçeler de böcekleri. Bunu aklının bir köşesinde tut.', '', { ms: 9000 }],
     [28000, '📻', 'Pekin', 'Kampanya başladı. 1958 kotası: köy başına <b>25 serçe</b>. Seferberliği sen ayarla.', 'warn', { ms: 9000 }],
   ];
@@ -1163,7 +1165,7 @@
       game.started = true;
       const show = i => {
         if (mode !== 'game') return;
-        if (i >= STORY.length) return gK.value <= 20 ? coach(gK, '👉 Kaydır: daha çok tencere', 0) : null;
+        if (i >= STORY.length) { game.quotaKnown = true; return; }
         const [, ic, from, text, tone, opt] = STORY[i];
         toast(ic, from, text, tone, { ...opt, then: opt.pause ? () => show(i + 1) : undefined });
         if (!opt.pause) setTimeout(() => show(i + 1), 9000 / Math.max(1, FAST / 2));
@@ -1243,7 +1245,9 @@
 
     // Pekin'in güveni: kampanya kısıldıkça düşer
     if (game.campaign && !game.replaced) {
-      game.trust = clamp(game.trust + (game.k - 0.35) * 8, 0, 100);
+      // güven ancak kota duyurulduktan sonra işler; biraz tencere sesi bile Pekin'i oyalar
+      if (game.quotaKnown) game.trust = clamp(game.trust + (game.k - 0.25) * 8, 0, 100);
+      game.maxK = Math.max(game.maxK || 0, game.k);
       if (game.k < 0.3 && game.trust < 60) once('warn1-' + yearKey(), () => toast('📞', 'Parti sekreteri', 'Tencereler neden bu kadar sessiz? Komşu köyler kotayı çoktan doldurdu.', 'warn'));
       if (game.trust < 40 && game.k < 0.6) once('coach-trust', () => coach(gK, '👉 Pekin kızıyor: seferberliği artır'));
       if (game.trust < 25) once('warn2', () => toast('⚠️', 'Pekin', 'Pekin\'den sert bir mektup geldi: "Kampanyayı ciddiye alın." Son uyarı.', 'bad'));
@@ -1252,7 +1256,7 @@
     if (game.campaign && isWarm(cm)) {
       const alive = birds.filter(b => !b.fallen && !b.leave).length;
       if (game.quota - game.yearKills > alive + 1)
-        once('impossible' + yearKey(), () => toast('🤷', 'Rapor', 'Kotayı dolduracak kadar serçe kalmadı. Raporda yine de "aşıldı" yazacak.'));
+        if (gs.S < 0.4) once('impossible' + yearKey(), () => toast('🤷', 'Rapor', 'Kotayı dolduracak kadar serçe kalmadı. Raporda yine de "aşıldı" yazacak.'));
     }
 
     if (gs.S < 0.75) once('zheng', () => toast('🔬', 'Kuşbilimci Zheng', 'Serçeler yavrularını böcekle besler. Kampanyayı durdursak mı?'));
@@ -1379,7 +1383,7 @@
 
   function awardEnd() {
     const A = (window.Badges ? window.Badges.award : () => {});
-    if (game.replaced) { A('serce-vicdan'); if (game.totalKills === 0) A('serce-dost'); return; }
+    if (game.replaced) { A('serce-vicdan'); if (game.totalKills === 0) A('serce-dost'); if (game.food.length && game.lies === 0) A('serce-durust'); return; }
     if (gs.harvests.length < 3) return;
     if (game.totalKills === 0) A('serce-dost');
     if (game.food.length === 3 && game.lies === 0) A('serce-durust');
@@ -1405,6 +1409,7 @@
     const done = you.filter(v => v !== null), avg = done.length ? done.reduce((a, b) => a + b) / done.length : 100, k = game.totalKills;
     let title, text;
     if (game.replaced) { title = 'Görevden alındın'; text = 'Doğru bildiğini yaptın ve koltuğunu kaybettin. Tarihte kampanya yine de sürdü; itiraz edenler çoğu zaman susturuldu. Doğruyu bilmek yetmiyor; sistemin de seni dinlemesi gerekiyor.'; }
+    else if (k === 0 && (game.maxK || 0) > 0.05) { title = 'Sembolik kampanya'; text = 'Tencereler çaldı ama serçeler yalnız korkup kaçtı. Pekin\'i oyaladın, kuşlara dokunmadın, ambarlar doldu. Akıllıca bir oyun; ama gerçekte bunu yapabilen çok az yönetici vardı.'; }
     else if (k === 0) { title = 'Tencereni hiç çalmadın'; text = 'Kota tutmadı ve Pekin\'in güvenini zor korudun. Ama ambarların doldu, kuşlar hâlâ ötüyor. Tarih kitapları senden söz etmeyecek; en iyi sonuç da bu.'; }
     else if (avg >= 93) { title = 'Erken durdun'; text = 'Kampanyaya katıldın ama ekosistemi bozmadan vazgeçtin. Bazen en iyi politika bir şey yapmamaktır, ama bunun için kimse heykel dikmez.'; }
     else if (avg >= 78) { title = 'Geç de olsa fark ettin'; text = 'Serçeler geri dönüyor ama acele etmiyorlar: yılda yalnızca bir iki kez kuluçkaya yatarlar. Bazı köyler yine de aç kaldı.'; }
@@ -1417,7 +1422,7 @@
       <p class="verdict">${text}</p>
       <div class="rgrid">${you.map((v, i) => `<div><div class="y">${1958 + i} hasadı</div><div class="v" style="color:${v === null ? 'var(--ink-soft)' : col(v)}">${v === null ? '—' : '%' + v}</div><div class="h">tarihte: %${his[i]}</div></div>`).join('')}</div>
       ${(window.Badges && window.Badges.session().length) ? `<div class="run-badges">${window.Badges.session().map(id => { const d = window.Badges.DEFS.find(x => x.id === id); return `<span class="${d.hidden ? 'secret' : ''}">${d.icon} ${d.name}</span>`; }).join('')}</div>` : ''}
-      <p class="verdict">Düşürdüğün serçe: <b>${k}</b>. Gerçekte bu sayı yüz milyonlarcaydı.${game.food.some(f => f < 70) ? ` Şişirilmiş raporlar yüzünden köylünün payı bir yıl normalin <b>%${Math.min(...game.food)}</b> düzeyine düştü. Gerçek kıtlığı en çok bu büyüttü.` : ''}</p>
+      <p class="verdict">Düşürdüğün serçe: <b>${k}</b>. Gerçekte bu sayı yüz milyonlarcaydı.${game.food.some(f => f < 70) ? (game.lies ? ` Şişirilmiş raporlar yüzünden köylünün payı bir yıl normalin <b>%${Math.min(...game.food)}</b> düzeyine düştü. Gerçek kıtlığı en çok bu büyüttü.` : ` Hasat kötü olunca devletin aldığı pay yüzünden köylünün payı bir yıl normalin <b>%${Math.min(...game.food)}</b> düzeyine düştü.`) : ''}</p>
       <canvas class="rchart" id="rchart"></canvas>
       <div class="legend"><span style="--c:var(--bird)">Serçe</span><span style="--c:var(--bug)">Böcek</span><span style="--c:var(--grain)">Tahıl</span><span style="--c:#9aa59a">Tarihteki serçe (kesikli)</span></div>
       <div class="rbtns"><button class="hbtn" id="r-again">↺ Tekrar oyna</button><button class="hbtn" id="r-next">Kendin dene →</button><a class="hbtn" href="../../#bolumler">☰ Tüm bölümler</a></div>`;

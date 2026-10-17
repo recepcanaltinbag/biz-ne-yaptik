@@ -31,7 +31,7 @@
     c.width = w * dpr; c.height = h * dpr;
     const g = c.getContext('2d'); g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, w, h);
     const labels = series.some(s => s.label);
-    const padL = 8, padR = labels ? Math.min(118, w * 0.34) : 10, padT = 10, padB = (opts.y0 || opts.xLabel) ? 18 : 10;
+    const padL = 8, padR = labels ? Math.min(150, w * 0.38) : 10, padT = 10, padB = (opts.y0 || opts.xLabel) ? 18 : 10;
     const X = i => padL + (i / Math.max(1, n - 1)) * (w - padL - padR), Y = v => padT + (1 - Math.max(0, Math.min(1, v))) * (h - padT - padB);
     // yıl ekseni
     g.strokeStyle = 'rgba(43,58,46,.12)'; g.lineWidth = 1; g.fillStyle = 'rgba(43,58,46,.6)'; g.font = '11px Inter, sans-serif'; g.textAlign = 'center';

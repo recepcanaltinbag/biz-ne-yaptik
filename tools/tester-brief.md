@@ -9,6 +9,7 @@ Sen "Biz Ne Yaptık?" eğitici ekoloji oyunları sitesinin oyun testçisisin. Ya
 Bölüm özeti ve son değişiklikler: <ÖZET>
 
 **Nasıl test edilir:**
+- **Sayfayı her zaman `?sessiz` ile aç** (ör. `.../chapters/aral/?sessiz`; hızlı modda `?sessiz&hizli`). Kullanıcı test seslerini duymak istemiyor.
 - Akış sırası: başlık → görev kartı → oyun → sonuç → laboratuvar → gerçekte ne oldu → dersler.
 - En az bir kez baştan sona GERÇEK hızda oyna.
 - Şu stratejileri dene: "tarihteki gibi", "hep maksimum", "hiç dokunma", "akıllı/dengeli". Gerekirse `?hizli` ile 8× hızla.

@@ -8,15 +8,15 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Inter:wght@400;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/css/badges.css?v=261017163734">
-<link rel="stylesheet" href="assets/css/style.css?v=261017163734">
+<link rel="stylesheet" href="assets/css/badges.css?v=261017165932">
+<link rel="stylesheet" href="assets/css/style.css?v=261017165932">
 </head>
 <body>
 
 <header class="topbar">
   <div class="wrap">
     <a class="brand" href="./">Biz Ne Yaptık?</a>
-    <nav class="topnav"><button class="season-btn" id="season-btn" aria-expanded="false" aria-controls="season-menu"><span id="season-now">Sezonlar</span> ▾</button><button class="badge-btn" id="badge-btn" aria-expanded="false" aria-controls="badge-panel">🏅 <span class="bb-word">Rozetler</span> <b id="badge-count">0/16</b> ▾</button></nav>
+    <nav class="topnav"><a class="nav-stats" href="#stats" id="nav-stats" title="Site istatistikleri" aria-label="Site istatistikleri">📊</a><button class="season-btn" id="season-btn" aria-expanded="false" aria-controls="season-menu"><span id="season-now">Sezonlar</span> ▾</button><button class="badge-btn" id="badge-btn" aria-expanded="false" aria-controls="badge-panel">🏅 <span class="bb-word">Rozetler</span> <b id="badge-count">0/16</b> ▾</button></nav>
   </div>
 </header>
 <div class="season-menu" id="season-menu" hidden></div>
@@ -62,10 +62,10 @@
     </details>
   </div>
 </footer>
-<script src="assets/js/stats.js?v=261017163734"></script>
-<script src="assets/js/badges.js?v=261017163734"></script>
-<script src="assets/js/toon.js?v=261017163734"></script>
-<script src="assets/js/chapters.js?v=261017163734"></script>
+<script src="assets/js/stats.js?v=261017165932"></script>
+<script src="assets/js/badges.js?v=261017165932"></script>
+<script src="assets/js/toon.js?v=261017165932"></script>
+<script src="assets/js/chapters.js?v=261017165932"></script>
 <script>
 (() => {
   const B = window.Badges; if (!B) return;
@@ -172,6 +172,7 @@
       ${rare ? `<p class="st-rare">💎 En az bulunan gizli rozet: yalnızca <b>${fmt(rare.n)}</b> kişi buldu.</p>` : ''}`;
     if (window.Badges) window.Badges.paint(el);
   }
+  const ns = document.getElementById('nav-stats'); if (ns) ns.onclick = e => { e.preventDefault(); if (box.hidden) return; box.open = true; box.scrollIntoView({ behavior: 'smooth', block: 'start' }); };
   box.addEventListener('toggle', () => { if (box.open) load(box.querySelector('.st-tabs .on').dataset.p); });
   box.querySelectorAll('.st-tabs button').forEach(b => b.onclick = () => { box.querySelectorAll('.st-tabs button').forEach(x => x.classList.toggle('on', x === b)); load(b.dataset.p); });
 })();

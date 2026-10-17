@@ -216,3 +216,6 @@ button.bp-season:hover { background: #e3ecd5; }
 }
 .bp-recent .bp-mini:first-of-type[data-tip]:hover::after { left: 0; transform: none; }
 .bp-minis { overflow: visible; }
+.card-done { display: inline-block; margin: 6px 6px 0 0; font: .95rem var(--hand); background: #dfeccf; color: #3a6a3a; border-radius: 99px; padding: 1px 9px; }
+.nav-stats { font-size: 1.15rem; text-decoration: none; padding: 2px 4px; border-radius: 8px; }
+.nav-stats:hover { background: rgba(255,255,255,.7); }
