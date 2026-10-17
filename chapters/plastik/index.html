@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Plastik Çorba</title>
+<meta name="description" content="1950–2030: plastik çöp denize nasıl ulaşıyor, akıntılar onu nereye taşıyor? Temizlik mi, önleme mi? Oynayarak gör.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/css/badges.css?v=261017223915">
+<link rel="stylesheet" href="../../assets/css/chapter.css?v=261017223915">
+<style>
+  .sl.locked span { color: var(--ink-soft); }
+  #m-in { background: #b5543c; } #m-micro { background: #8a6fd8; } #m-turtle { background: #4f9a7a; }
+  .budget { font-family: var(--hand); font-size: 1.05rem; display: flex; align-items: center; gap: 8px; }
+  .bbar { display: flex; height: 10px; width: 120px; border-radius: 99px; overflow: hidden; background: #e6e2d4; }
+  .bbar i { display: block; height: 100%; }
+  #b-waste { background: #7aa7d6; } #b-tax { background: #e0b04a; } #b-clean { background: #4f9a7a; }
+</style>
+</head>
+<body class="dock">
+<script>if (/[?&]layout=klasik\b/.test(location.search)) document.body.classList.remove("dock");</script>
+<canvas id="world" aria-hidden="true"></canvas>
+
+<header class="bar">
+  <a class="bar-home" href="../../">← Biz Ne Yaptık?</a>
+  <button class="bar-btn" id="sound" aria-label="Sesi aç/kapat">🔊 <span>Ses</span></button>
+</header>
+
+<div class="slides">
+
+  <section class="slide" data-mode="title">
+    <div class="center-col"><div class="glass">
+      <div class="kicker">Biz Ne Yaptık? · Sezon 5 · Bölüm 1</div>
+      <h1 class="title">Plastik Çorba</h1>
+      <p class="sub">1950–2030 · oynama süresi ~5 dakika</p>
+      <button class="hbtn big" data-next>Başla →</button>
+    </div></div>
+  </section>
+
+  <section class="slide" data-mode="game">
+    <div class="narr game-intro" id="g-intro">
+      <p>Sen bir kıyı ülkesinin çevre bakanısın. <b>Bütçeyi sen bölüştürürsün.</b></p>
+      <p class="try">👉 Kaydırıcılarla bütçeyi dağıt. Dereden denize ne akıyor, izle.</p>
+    </div>
+    <div class="topbox">
+      <div class="yearbar" aria-live="polite"><div class="yb-year" id="yb-year">1950</div><div class="yb-sub" id="yb-sub">Plastik mucizesi</div><div class="yb-track"><i id="yb-fill"></i></div><span class="yb-harvest" id="yb-harvest"></span><span class="yb-speed" id="yb-speed" role="group" aria-label="Hız"><button type="button" data-s="1" class="on">1×</button><button type="button" data-s="2">2×</button><button type="button" data-s="4">4×</button></span><button type="button" class="yb-view" id="g-view">🗺️ Okyanus</button></div>
+      <div id="toasts" aria-live="polite"></div>
+    </div>
+    <aside class="gpanel" aria-label="Çevre bakanlığı masası">
+      <button class="gp-toggle" type="button" aria-expanded="false">⋯ Daha fazla</button>
+      <div class="gp-hud">
+      <div class="gp-top">
+        <div class="chip date" id="g-date">1950</div>
+        <div class="chip budget"><span>💰</span><span class="bbar"><i id="b-waste"></i><i id="b-tax"></i><i id="b-clean"></i></span><b id="g-budget">80 puan boşta</b></div>
+      </div>
+      <p class="goal gp-extra">🎯 <b>Hedef:</b> 2030'da denize giren plastiği tarihteki yarısına indir.</p>
+      <div class="gp-meters">
+        <div class="mrow"><span>🌊<em> Denize giren plastik</em></span><span class="track"><i id="m-in"></i></span></div>
+        <div class="mrow"><span>🔬<em> Mikroplastik</em></span><span class="track"><i id="m-micro"></i></span></div>
+        <div class="mrow"><span>🐢<em> Kaplumbağalar</em></span><span class="track"><i id="m-turtle"></i></span></div>
+        <div class="mrow trust"><span>🙂<em> Halkın desteği</em></span><span class="track"><i id="m-trust"></i></span></div>
+      </div>
+      </div>
+      <label class="sl big" id="w-waste"><span>🗑️ Atık yönetimi <b id="o-waste">20 puan</b></span><input type="range" id="g-waste" min="0" max="100" step="5" value="20"></label>
+      <label class="sl big locked" id="w-tax"><span>🛍️ Plastik vergisi <b id="o-tax">🔒 1990'da açılır</b></span><input type="range" id="g-tax" min="0" max="100" step="5" value="0" disabled></label>
+      <label class="sl big locked" id="w-clean"><span>🚢 Temizlik gemileri <b id="o-clean">🔒 2013'te açılır</b></span><input type="range" id="g-clean" min="0" max="100" step="5" value="0" disabled></label>
+      <div class="sb-ctrl gp-extra">
+        <button class="hbtn sm" id="g-pause">❚❚ Durdur</button>
+        <button class="hbtn sm" id="g-speed">1×</button>
+      </div>
+    </aside>
+    <div class="harvest" id="harvest" hidden></div>
+    <div class="modal" id="modal" hidden></div>
+  </section>
+
+  <section class="slide scroll" data-mode="result">
+    <div class="result" id="result"></div>
+  </section>
+
+  <section class="slide" data-mode="sandbox">
+    <aside class="sb-panel">
+      <h2>Simülasyon laboratuvarı</h2>
+      <p class="small">1950'den 2030'a kadar okyanus her yıl senin kurallarına göre değişir. Bütçe sınırı yok.</p>
+      <div class="presets">
+        <button class="pbtn" data-preset="history">Tarihteki gibi</button>
+        <button class="pbtn" data-preset="clean">Yalnız temizlik</button>
+        <button class="pbtn" data-preset="tap">Musluğu kapat</button>
+        <button class="pbtn" data-preset="all">Hepsi</button>
+      </div>
+      <label class="sl"><span>🗑️ Atık yönetimi <b id="o-pw"></b></span><input type="range" id="p-w" min="0" max="100" value="20"></label>
+      <label class="sl"><span>🛍️ Plastik vergisi <b id="o-pt"></b></span><input type="range" id="p-t" min="0" max="100" value="0"></label>
+      <label class="sl"><span>🚢 Temizlik gemileri <b id="o-pc"></b></span><input type="range" id="p-c" min="0" max="100" value="0"></label>
+      <canvas id="sb-chart" class="sb-chart"></canvas>
+      <div class="sb-stats"><span id="sb-year">1950</span><span id="sb-harvest">Denize giren: 0 Mt</span></div>
+      <div class="sb-ctrl">
+        <button class="hbtn sm" id="sb-play">❚❚ Durdur</button>
+        <button class="hbtn sm" id="sb-speed">1×</button>
+        <button class="hbtn sm" id="sb-reset">↺ Sıfırla</button>
+      </div>
+      <button class="hbtn" data-next>Gerçekte ne oldu? →</button>
+    </aside>
+  </section>
+
+  <section class="slide scroll" data-mode="facts">
+    <article class="paper">
+      <h2>Gerçekte ne oldu?</h2>
+      <ul class="facts">
+        <li><b>1950</b> Dünya yılda 2 milyon ton plastik üretiyordu. 2015'te bu sayı 400 milyon tona yaklaştı. Bugüne kadar oluşan plastik atığın yalnız %9'u geri dönüştürüldü.</li>
+        <li><b>1997</b> Kaptan Charles Moore, Kuzey Pasifik'te karadan çok uzakta plastikle dolu bir deniz buldu. Akıntıların ortasındaki bu <i>Büyük Pasifik Çöp Alanı</i> bugün 1,6 milyon km² (Türkiye'nin iki katı) ve en az 79.000 ton plastik taşıyor; parçaların %94'ü mikroplastik, kütlenin en az %46'sı balıkçı ağı.</li>
+        <li><b>Bugün</b> Okyanusa yılda kabaca 5–13 milyon ton plastik giriyor. 2018'de Çin atık ithalatını durdurunca Avrupa'nın plastik atığı Türkiye gibi ülkelere yöneldi. Türkiye 2019'da poşeti ücretli yaptı.</li>
+      </ul>
+      <div class="callout"><b>Ama "çöp adası" yok.</b> Üstünde yürünecek bir ada değil: suya dağılmış, çoğu göz ile zor görülen parçalardan oluşan bir çorba. Temizlik gemileri büyük parçaları toplayabilir, ama mikroplastiği toplamak neredeyse imkânsız. Asıl çözüm, plastiğin denize hiç girmemesi.</div>
+      <button class="hbtn" data-next>Peki ne öğrendik? →</button>
+    </article>
+  </section>
+
+  <section class="slide scroll" data-mode="lessons">
+    <article class="paper">
+      <h2>Ne öğrendik?</h2>
+      <div class="lessons"><div class="lcard"><h3>🚰 Önce musluğu kapat</h3><p>Taşan küveti paspasla kurutamazsın: önce giren plastiği azalt.</p></div><div class="lcard"><h3>🔬 Görünmeyen kalır</h3><p>Büyük parça toplanır, mikroplastik yüzyıllarca kalır.</p></div><div class="lcard"><h3>🧹 Halının altı yok</h3><p>Başka ülkeye satılan çöp de aynı okyanusa döner.</p></div></div>
+      <h2>Sen ne yapabilirsin?</h2>
+      <ul class="todo"><li>🛍️ Bez çanta ve matara kullan; tek kullanımlık şişe ve poşeti azalt.</li><li>🏖️ Sahilde ve derede gördüğün çöpü topla; ağ ve misinaya özellikle dikkat et.</li><li>♻️ Atığını ayrıştır; geri dönüşüm kutusuna temiz ve kuru at.</li></ul>
+      <details class="sources-fold"><summary>Kaynaklar ve model hakkında</summary><ul class="sources">
+        <li>J. R. Jambeck ve ark., "Plastic waste inputs from land into the ocean", <i>Science</i> 347 (2015).</li>
+        <li>L. Lebreton ve ark., "Evidence that the Great Pacific Garbage Patch is rapidly accumulating plastic", <i>Scientific Reports</i> 8 (2018).</li>
+        <li>R. Geyer, J. R. Jambeck, K. L. Law, "Production, use, and fate of all plastics ever made", <i>Science Advances</i> 3 (2017).</li>
+        <li>C. Moore, <i>Plastic Ocean</i>, Avery, 2011.</li>
+        <li>A. L. Brooks ve ark., "The Chinese import ban and its impact on global plastic waste trade", <i>Science Advances</i> 4 (2018); Eurostat atık ihracatı verileri (2020–2021).</li>
+      </ul><p class="small">Model yıllık bir plastik bütçesine dayanır: üretim → kötü yönetilen atık → okyanus; büyük parçalar yavaşça mikroplastiğe dönüşür. Sayılar 2010–2015 ölçümlerine göre ayarlandı ve temsilidir.</p></details>
+      <div class="end-nav">
+        <a class="hbtn" href="../../#bolumler">← Tüm bölümler</a>
+        <button class="hbtn" data-goto="game">↺ Tekrar oyna</button>
+      </div>
+    </article>
+  </section>
+</div>
+
+<nav class="dots" id="dots" aria-label="Bölüm adımları"></nav>
+
+<script src="../../assets/js/stats.js?v=261017223915"></script>
+<script src="../../assets/js/mission.js?v=261017223915"></script>
+<script src="../../assets/js/scene-utils.js?v=261017223915"></script>
+<script src="../../assets/js/badges.js?v=261017223915"></script>
+<script src="../../assets/js/toon.js?v=261017223915"></script>
+<script src="model.js?v=261017223915"></script>
+<script src="plastik.js?v=261017223915"></script>
+<script>/* gpToggle */document.querySelectorAll(".gp-toggle").forEach(b=>b.onclick=()=>{const p=b.closest(".gpanel");const o=p.classList.toggle("open");b.setAttribute("aria-expanded",o);b.textContent=o?"✕ Kapat":"⋯ Daha fazla";window.dispatchEvent(new Event("panel"));});</script>
+</body>
+</html>

@@ -785,3 +785,4 @@ p.goal { font-family: var(--hand); font-size: 1.05rem; color: var(--ink-soft); b
 .best-line { font-family: var(--hand); font-size: 1.1rem; text-align: center; margin: 2px 0 6px; color: var(--ink-soft); }
 .best-line b { color: var(--ink); font-weight: 400; }
 .best-line.new { color: #3a7a3a; font-size: 1.2rem; }
+@media (max-width: 760px) { .dock .yb-view { font-size: .78rem; padding: 0 6px; margin: 3px 0 0; order: 9; } }

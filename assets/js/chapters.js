@@ -66,7 +66,7 @@ window.SEASONS = [
       img: 'assets/img/cards/nelson-s-column-during-the-great-smog-of-1952.jpg', credit: 'N T Stobbs, CC BY-SA 2.0', src: 'File:Nelson\'s_Column_during_the_Great_Smog_of_1952.jpg' },
   ]},
   { icon: '🧴', title: 'Plastik Çağı', desc: 'Birkaç dakika kullan, yüzlerce yıl sakla.', chapters: [
-    { year: '1997', title: 'Plastik Çorba', status: 'soon', text: 'Bir kaptan Pasifik\'in ortasında, karadan çok uzakta, plastikle dolu bir deniz buluyor. Akıntılar şişeleri nereye taşıyor?',
+    { year: '1950', title: 'Plastik Çorba', status: 'live', href: 'chapters/plastik/', text: 'Bir kaptan Pasifik\'in ortasında, karadan çok uzakta, plastikle dolu bir deniz buluyor. Akıntılar şişeleri nereye taşıyor?',
       img: 'assets/img/cards/plastic-pollution-in-santa-luzia-cape-verde.jpg', soft: true, credit: 'CaptainDarwin, CC BY-SA 4.0', src: 'File:Plastic_Pollution_in_Santa_Luzia,_Cape_Verde.jpg' },
     { year: 'Bugün', title: 'Şişe Sofrana Döner', status: 'soon', text: 'Fabrikadan çıkıyor, birkaç dakika kullanılıyor, parçalanıp mikroplastik oluyor. Sonra balığa, oradan sofraya geliyor.',
       img: 'assets/img/cards/bales-of-pet-bottles-closeup.jpg', soft: true, credit: 'Grendelkhan, CC BY-SA 4.0', src: 'File:Bales_of_PET_bottles_closeup.jpg' },
