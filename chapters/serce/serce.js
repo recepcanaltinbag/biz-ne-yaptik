@@ -716,7 +716,7 @@
     gSpray.closest('.sl').classList.add('locked');
     document.querySelectorAll('.coach').forEach(uncoach);
     readGameSliders();
-    $('o-lie').textContent = '🔒 Ekim 1958';
+    $('o-lie').textContent = '🔒 ilk hasattan sonra';
     $('g-pause').textContent = '❚❚ Durdur'; $('g-speed').textContent = '1×';
     $('modal').hidden = true; $('harvest').hidden = true; $('toasts').innerHTML = ''; toastQueue.length = 0; lastToastAt = -1e9;
     $('g-intro').classList.remove('gone');
@@ -741,7 +741,7 @@
   // oyun akarken olayları adım adım anlatan kartlar
   const POSTER = 'https://upload.wikimedia.org/wikipedia/commons/6/6f/Kill_bird_and_insect.jpg';
   const STORY = [
-    [0, '🇨🇳', 'Çin · Mart 1958', 'Mao Zedong <b>Büyük İleri Atılım</b>ı başlattı. Hedef birkaç yılda sanayileşmek, tarımda rekor kırmak.', '', { pause: true }],
+    [0, '🇨🇳', 'Çin', 'Mao Zedong <b>Büyük İleri Atılım</b>ı başlattı. Hedef birkaç yılda sanayileşmek, tarımda rekor kırmak.', '', { pause: true }],
     [0, '', 'Dört Zararlı Kampanyası', 'Dört düşman ilan edildi: <b>fare, sinek, sivrisinek ve serçe</b>. Serçenin suçu tahıl yemek.', '', { img: POSTER, pause: true }],
     [13500, '🥁', 'Yöntem', 'Köylüler tencere çalınca serçeler konamıyor, yorulup düşüyor. Ne kadar çok tencere, o kadar az serçe.', '', { ms: 9000 }],
     [21000, '🌾', 'Tarladan not', 'Bu tarlada tahıl büyüyor, böcekler tahılı yiyor, serçeler de böcekleri. Bir de bunu aklında tut.', '', { ms: 9000 }],
@@ -854,7 +854,7 @@
     if (gs.m === 25 && game.campaign) {
       game.campaign = false; game.stoppedBy = 'auto'; game.stoppedAt = gs.m;
       gK.value = 0; gK.disabled = true; readGameSliders();
-      toast('📜', 'Pekin · Nisan 1960', 'Serçeler sessizce listeden çıkarıldı. Yerlerine tahtakuruları kondu.');
+      toast('📜', 'Pekin', 'Serçeler sessizce listeden çıkarıldı. Yerlerine tahtakuruları kondu.');
       renderQuota();
     }
     if (calMonth(gs.m - 1) === 9) showHarvest(gs.harvests.length - 1);

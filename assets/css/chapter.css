@@ -493,3 +493,33 @@ input[type=range]::-moz-range-thumb { width: 24px; height: 24px; border-radius: 
 }
 .coach-tip::after { content: ""; position: absolute; left: 50%; top: 100%; transform: translateX(-50%); border: 7px solid transparent; border-top-color: var(--ink); }
 @keyframes tipBob { 50% { transform: translateX(-50%) translateY(-4px); } }
+
+/* ===== Yıl + haber: tek, bağlantılı üst kutu ===== */
+.dock .slide[data-mode="game"] .topbox {
+  position: absolute; top: 54px; left: 0; right: 0; margin: 0 auto; width: min(600px, calc(100% - 36px));
+  display: flex; flex-direction: column; z-index: 2; pointer-events: none;
+}
+.dock .slide[data-mode="game"] .topbox .yearbar {
+  position: static !important; transform: none !important; left: auto !important; right: auto !important; top: auto !important;
+  width: auto; min-width: 0; margin: 0; border-radius: 16px; background: rgba(255,255,255,.82);
+}
+.dock .slide[data-mode="game"] .topbox #toasts {
+  position: static !important; transform: none !important; margin: 0 !important; left: auto !important; right: auto !important; top: auto !important;
+  width: auto !important; gap: 0; pointer-events: none;
+}
+.dock .slide[data-mode="game"] .topbox:has(#toasts .toast:not(.pause):not(.out)) .yearbar { border-radius: 16px 16px 0 0; }
+.dock .slide[data-mode="game"] .topbox .toast:not(.pause) {
+  border-radius: 0; margin: 0; background: rgba(255,255,255,.82); box-shadow: none;
+  border-top: 1px dashed rgba(43,58,46,.18); pointer-events: auto;
+}
+.dock .slide[data-mode="game"] .topbox .toast:not(.pause):last-child { border-radius: 0 0 16px 16px; }
+.dock .slide[data-mode="game"] .topbox .toast.bad:not(.pause) { box-shadow: inset 4px 0 0 var(--danger); }
+.dock .slide[data-mode="game"] .topbox .toast.warn:not(.pause) { box-shadow: inset 4px 0 0 var(--grain); }
+.dock .slide[data-mode="game"] .topbox .toast.good:not(.pause) { box-shadow: inset 4px 0 0 var(--green); }
+@media (max-width: 760px) {
+  .dock .slide[data-mode="game"] .topbox { top: 44px; left: 146px; right: 10px; width: auto; margin: 0; }
+  .dock .slide[data-mode="game"] .topbox .yearbar { display: flex; flex-wrap: wrap; justify-content: center; align-items: baseline; gap: 2px 8px; padding: 2px 12px 6px; }
+  .dock .slide[data-mode="game"] .topbox .yb-year { font-size: 1.5rem; }
+  .dock .slide[data-mode="game"] .topbox .yb-sub { margin: 0; }
+  .dock .slide[data-mode="game"] .topbox .yb-track { flex-basis: 100%; }
+}

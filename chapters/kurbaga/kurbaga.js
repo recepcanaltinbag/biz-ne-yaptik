@@ -420,7 +420,7 @@
     });
     Object.values(sliders).forEach(s => { s.value = 0; s.disabled = true; });
     document.querySelectorAll('.coach').forEach(uncoach);
-    ['collect', 'teach', 'fence'].forEach(k => { $('w-' + k).classList.add('locked'); $('o-' + k).textContent = '🔒 ' + UNLOCK[k]; });
+    ['collect', 'teach', 'fence'].forEach(k => { $('w-' + k).classList.add('locked'); $('o-' + k).textContent = '🔒 ' + UNLOCK[k] + "'de açılır"; });
     $('g-pause').textContent = '❚❚ Durdur'; $('g-speed').textContent = '1×';
     $('modal').hidden = true; $('milestone').hidden = true; $('toasts').innerHTML = ''; toastQueue.length = 0; lastToastAt = -1e9;
     fieldToads.length = 0; scientists.length = 0; bubbles.length = 0; sprites = []; volunteers = [];
@@ -475,7 +475,7 @@
     if (game.started) return;
     game.started = true; game.state = 'intro';
     const seq = [
-      ['🇦🇺', 'Queensland · Haziran 1935', 'Şeker kamışı tarlalarını <b>kamış böceği</b> kemiriyor. Yetişkinler yaprakları, larvalar kökleri yiyor.', '', { pause: true }],
+      ['🇦🇺', 'Queensland, Avustralya', 'Şeker kamışı tarlalarını <b>kamış böceği</b> kemiriyor. Yetişkinler yaprakları, larvalar kökleri yiyor.', '', { pause: true }],
       ['', 'Çözüm Hawaii\'den geliyor', 'Gemiyle 102 <b>kamış kurbağası</b> geldi. Plan basit: kurbağa böceği yer. Öyle değil mi?', '', { img: TOAD_IMG, pause: true }],
     ];
     const show = i => {
@@ -487,12 +487,12 @@
   }
 
   function askRelease() {
-    choice('Ağustos 1935', 'Yavrular hazır', 'Laboratuvarda binlerce yavru kurbağa büyüdü. Tarlalara salalım mı?', [
+    choice('Gordonvale deneme istasyonu', 'Yavrular hazır', 'Laboratuvarda binlerce yavru kurbağa büyüdü. Tarlalara salalım mı?', [
       { label: 'Salın!', sub: 'Doğal, ucuz, hızlı bir çözüm', fn: doRelease },
       { label: 'Önce araştıralım', sub: 'Kurbağa bu böceği gerçekten yer mi?', fn: () => {
         game.refused = 1;
         toast('🔬', 'Böcek bilimci Walter Froggatt', '"Kurbağa böceği değil, önüne gelen her şeyi yer. Salarsak geri toplayamayız."', '', { pause: true, then: () => {
-          choice('Eylül 1936', 'Şeker üreticileri bastırıyor', 'Hükümet yasağı kaldırmak istiyor. Böcekler kamışı yemeye devam ediyor. Kararın?', [
+          choice('Hükümet', 'Şeker üreticileri bastırıyor', 'Hükümet yasağı kaldırmak istiyor. Böcekler kamışı yemeye devam ediyor. Kararın?', [
             { label: 'Peki, salın', sub: 'Baskıya dayanamadın', fn: doRelease },
             { label: 'Hayır, kurbağa yok', sub: 'Böceği başka bir yolla çöz', fn: noRelease },
           ]);
