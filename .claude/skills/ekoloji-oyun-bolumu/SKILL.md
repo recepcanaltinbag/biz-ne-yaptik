@@ -23,7 +23,9 @@ Bu kurallar kullanıcının geri bildirimleriyle tek tek oturtuldu. Yeni bölüm
 - Bir çocuğun anlayacağı kadar basit, bilimi hafife almayan; hafif alaycı ama ciddi. Ağır siyasi jargon kullanma ("sağcı sapma" gibi ifadeler fazla bulundu).
 - **Bir bölüm, bir mekanizma.** Konuları karıştırma: serçe bölümünde ilaç/pestisit yok (o "Kuşlar Neden Sustu?" bölümünün konusu). Tarihte olmayan aracı oyuna koyma.
 - Olgular doğrulanmış olsun. Tartışmalı rakamlar aralıkla verilsin, belirsiz iddialar "belgelenmiş değil" diye işaretlensin. Gerekiyorsa "asıl sebep bu değildi" diye dürüst bir not düş.
-- "Gerçekte ne oldu?" kısa olsun: **üç madde** (yıl / sonra / bugün) ve **bir "ama" kutusu**. Uzun paragraf yazma.
+- "Gerçekte ne oldu?" kısa olsun: **üç madde** (yıl / sonra / bugün) ve **bir "ama" kutusu**. Uzun paragraf yazma. Madde etiketi solda, metindeki diğer kalın ifadeler satır içinde kalsın (ızgara hücresine bölünmesin).
+- "Ne öğrendik?" de öz olsun: **üç tek cümlelik ders kartı**, **"Sen ne yapabilirsin?" için üç tek satırlık öneri**, kaynaklar ve model notu `<details>` içinde katlı.
+- Laboratuvar paneli kaydırmasız sığar: kısa ekranlarda açıklama ve lejant gizlenir, telefonda başlık gizlenir, hazır ayarlar tek satırda.
 - Başlıklar merak uyandırsın ("Serçelere Savaş", "Kafatası Dağı", "Dans Eden Kediler"). Düz isim ("Bizon") olmasın.
 - Dersler bölümünde Türkiye'den örnek ve "sen ne yapabilirsin" kartları olsun.
 
@@ -94,7 +96,7 @@ Bu kurallar kullanıcının geri bildirimleriyle tek tek oturtuldu. Yeni bölüm
    - Kimse kaydırıcıyı oyuncudan habersiz değiştiriyor mu?
 2. **Ses ve görüntü tutarlılığı:** her ses ve her sahne için "bunu sahnede kim yapıyor?" sorusunun cevabı olmalı.
 3. **Akış logu:** gerçek hızda kart açılış ve kapanış zamanları loglanır. Arka arkaya kart, 15 saniyeden uzun boşluk ya da kendiliğinden kapanan önemli kart olmamalı.
-4. **Sığma:** 1440×900, 1024×768, 375×812 ve 360×640'ta her ekranda `scrollHeight <= innerHeight` olmalı (metin sayfaları hariç). Yatay taşma da olmamalı.
+4. **Sığma:** `tools/layout-audit.js` çalıştırılır. Bu betik her bölümün her slaytını 1440×900, 1024×768, 375×812 ve 360×640'ta açıp pencereden taşan öğeleri listeler (yerel sunucuda ana sayfayı aç, sonra `await eval(await (await fetch('/tools/layout-audit.js')).text())`). Çıktı **"sorun yok"** olmadan yayına çıkma. Metin sayfaları ve laboratuvar paneli dahil hiçbir ekran kaydırma gerektirmemeli.
 5. Bütün dosyalarda `node --check` çalıştırılır, konsolda hata kalmamalı. Ardından `?v=` sürümü artırılır, push edilir ve canlı sürüm curl ile kontrol edilir.
 
 ## Görsel ve ses

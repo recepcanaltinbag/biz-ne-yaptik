@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Inter:wght@400;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../../assets/css/chapter.css?v=202610171327">
+<link rel="stylesheet" href="../../assets/css/chapter.css?v=261017133259">
 <style>
   .gp-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; font-family: var(--hand); }
   .gp-stats div { background: #fff; border: 2px solid var(--line); border-radius: 12px; padding: 4px 10px; }
@@ -120,20 +120,10 @@
   <section class="slide scroll" data-mode="lessons">
     <article class="paper">
       <h2>Ne öğrendik?</h2>
-      <div class="lessons">
-        <div class="lcard"><h3>🔁 Salınan geri alınmaz</h3><p>Bir türü yeni bir yere salmak, geri dönüşü olmayan bir deneydir. Kurbağaları toplamak, salmaktan milyonlarca kat zor.</p></div>
-        <div class="lcard"><h3>🧪 Önce test et</h3><p>"Doğal çözüm" kulağa iyi geliyor. Ama kurbağanın böceği gerçekten yiyip yemediği hiç sınanmadı.</p></div>
-        <div class="lcard"><h3>🧬 Evrim şimdi ve burada</h3><p>Evrim milyonlarca yıl sürmek zorunda değil. Kurbağaların bacakları birkaç on yılda uzadı.</p></div>
-      </div>
-      <h2>Bugün ne yapılabilir?</h2>
-      <p>Avustralya bugün kıtaya giren her canlıyı sıkı biyogüvenlik kurallarıyla denetliyor. Bu hikâye Türkiye'den de tanıdık: <b>kızılkulak su kaplumbağası</b> ve <b>gümüşi havuz balığı</b> gibi türler insanların bıraktığı ya da kaçırdığı bireylerle göllere ve sulak alanlara yayıldı.</p>
-      <div class="lessons">
-        <div class="lcard"><h3>🐢 Evcil hayvanı doğaya bırakma</h3><p>Kaplumbağa, akvaryum balığı ya da başka bir canlıyı göle, dereye, parka bırakma. Barınaklara ve derneklere ulaş.</p></div>
-        <div class="lcard"><h3>🎣 Balığı taşıma</h3><p>Bir gölden aldığın balığı ya da yemi başka bir suya bırakma. İstilacı türler çoğu zaman böyle yayılır.</p></div>
-        <div class="lcard"><h3>📱 Gördüğünü bildir</h3><p>Tanımadığın bir türü iNaturalist'e kaydet. İstilacı türler ne kadar erken fark edilirse o kadar kolay durdurulur.</p></div>
-      </div>
-      <h2>Kaynaklar</h2>
-      <ul class="sources">
+      <div class="lessons"><div class="lcard"><h3>🔁 Salınan geri alınmaz</h3><p>Salmak bir gün sürdü; toplamaya bir asırdır devam ediliyor.</p></div><div class="lcard"><h3>🧪 Önce test et</h3><p>Kurbağanın bu böceği yiyip yemediği hiç sınanmadı.</p></div><div class="lcard"><h3>🧬 Evrim şimdi ve burada</h3><p>Kurbağaların bacakları birkaç on yılda uzadı.</p></div></div>
+      <h2>Sen ne yapabilirsin?</h2>
+      <ul class="todo"><li>🐢 Evcil hayvanı doğaya bırakma: kızılkulak kaplumbağası Türkiye'de böyle yayıldı.</li><li>🎣 Bir sudaki balığı ya da yemi başka bir suya taşıma.</li><li>📱 Tanımadığın bir türü iNaturalist'e kaydet; erken fark edilen istila durdurulabilir.</li></ul>
+      <details class="sources-fold"><summary>Kaynaklar ve model hakkında</summary><ul class="sources">
         <li>R. Shine, "The ecological impact of invasive cane toads (Bufo marinus) in Australia", <i>The Quarterly Review of Biology</i> 85 (2010).</li>
         <li>B. L. Phillips ve ark., "Invasion and the evolution of speed in toads", <i>Nature</i> 439 (2006).</li>
         <li>M. C. Urban ve ark., "A toad more traveled: the heterogeneous invasion dynamics of cane toads in Australia", <i>The American Naturalist</i> 171 (2008).</li>
@@ -141,8 +131,7 @@
         <li>D. Florance ve ark., "Excluding access to invasion hubs can contain the spread of an invasive vertebrate", <i>Proceedings of the Royal Society B</i> 278 (2011).</li>
         <li>N. Turvey, <i>Cane Toads: A Tale of Sugar, Politics and Flawed Science</i>, Sydney University Press, 2013.</li>
         <li>Fotoğraf: Charles J. Sharp, <a href="https://commons.wikimedia.org/wiki/File:Cane_toad_(Bufo_marinus).jpg" target="_blank" rel="noopener">Cane toad (Bufo marinus)</a>, CC BY-SA 4.0.</li>
-      </ul>
-      <p class="small">Simülasyon Avustralya'yı yaklaşık 55 km'lik karelere bölen basit bir yayılma modelidir. Zamanlama tarihî yayılma çizgisine göre ayarlandı, sayılar temsilidir.</p>
+      </ul><p class="small">Simülasyon Avustralya'yı ~55 km'lik karelere bölen basit bir yayılma modelidir; zamanlama tarihe göre ayarlandı.</p></details>
       <div class="end-nav">
         <a class="hbtn" href="../../#bolumler">← Tüm bölümler</a>
         <button class="hbtn" data-goto="game">↺ Tekrar oyna</button>
@@ -153,9 +142,9 @@
 
 <nav class="dots" id="dots" aria-label="Bölüm adımları"></nav>
 
-<script src="../../assets/js/toon.js?v=202610171327"></script>
-<script src="model.js?v=202610171327"></script>
-<script src="kurbaga.js?v=202610171327"></script>
+<script src="../../assets/js/toon.js?v=261017133259"></script>
+<script src="model.js?v=261017133259"></script>
+<script src="kurbaga.js?v=261017133259"></script>
 <script>/* gpToggle */document.querySelectorAll(".gp-toggle").forEach(b=>b.onclick=()=>{const p=b.closest(".gpanel");const o=p.classList.toggle("open");b.setAttribute("aria-expanded",o);b.textContent=o?"✕ Kapat":"⋯ Daha fazla";window.dispatchEvent(new Event("panel"));});</script>
 </body>
 </html>

@@ -1288,7 +1288,7 @@
     setTimeout(() => { if (mode === 'game') goTo(slideOf('result')); }, 1500);
   }
   resetGame();
-  if (/[?&]debug\b/.test(location.search)) window.__dbg = { game, gags, get gs() { return gs; }, get mode() { return mode; }, gag: () => { nextGag = 1; } };
+  if (/[?&]debug\b/.test(location.search)) window.__dbg = { game, gags, get gs() { return gs; }, get mode() { return mode; }, gag: () => { nextGag = 1; }, go: m => { maxSeen = slides.length; goTo(slideOf(m)); } };
 
 
   function renderResult() {

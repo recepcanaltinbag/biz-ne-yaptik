@@ -805,6 +805,6 @@
 
   window.addEventListener('resize', () => { resize(); buildField(); });
   resize(); buildField(); resetGame(); goTo(0);
-  if (/[?&]debug\b/.test(location.search)) window.__dbg = { game, sb, fieldToads, get mode() { return mode; } };
+  if (/[?&]debug\b/.test(location.search)) window.__dbg = { game, sb, fieldToads, get mode() { return mode; }, go: m => { maxSeen = slides.length; goTo(slideOf(m)); } };
   requestAnimationFrame(frame);
 })();
