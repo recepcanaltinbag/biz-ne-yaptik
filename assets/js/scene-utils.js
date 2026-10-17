@@ -81,5 +81,17 @@
     new MutationObserver(() => { b.textContent = /Devam/.test(gp.textContent) ? '▶' : '❚❚'; b.classList.toggle('on', /Devam/.test(gp.textContent)); }).observe(gp, { childList: true, characterData: true, subtree: true });
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', addPause); else addPause();
-  window.SceneUtils = { avoidHud, lineChart };
+  // kişisel rekor: sonuç ekranında "en iyi sonucun" ve "bu sefer"; yalnız tamamlanan oyunlar sayılır
+  function bestLine(id, score, label, ok = true) {
+    const key = 'bny-rekor-' + id;
+    let best = null; try { best = JSON.parse(localStorage.getItem(key) || 'null'); } catch (e) {}
+    const now = Math.round(score), rec = ok && (!best || now > best.score);
+    if (rec) { try { localStorage.setItem(key, JSON.stringify({ score: now, date: new Date().toISOString().slice(0, 10) })); } catch (e) {} }
+    const d = b => b.date.split('-').reverse().join('.');
+    if (!ok) return best ? `<p class="best-line">🏆 En iyi ${label}: <b>%${best.score}</b> (${d(best)})</p>` : '';
+    if (!best) return `<p class="best-line first">🏆 İlk rekorun: ${label} <b>%${now}</b>. Tekrar oyna, geçebilir misin?</p>`;
+    if (rec) return `<p class="best-line new">🎉 Yeni rekor! ${label}: <b>%${now}</b> (önceki: %${best.score})</p>`;
+    return `<p class="best-line">🏆 En iyi ${label}: <b>%${best.score}</b> (${d(best)}) · bu sefer: %${now}</p>`;
+  }
+  window.SceneUtils = { avoidHud, lineChart, bestLine };
 })();

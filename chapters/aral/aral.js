@@ -874,11 +874,12 @@
   function enterGame() {
     game.paused = false; $('g-pause').textContent = '❚❚ Durdur';
     if (game.started) return;
-    game.started = true; game.story = true;
+    game.started = true; game.story = !wasDone;
     const show = i => {
       if (mode !== 'game') return;
       if (i >= STORY.length) { game.story = false; return game.w <= 0.3 ? coach(gW, '👉 Kaydır: tarlaya daha çok su', 0) : null; }
-      const [ic, from, text, tone, opt] = STORY[i];
+      const [ic, from, text, tone, opt0] = STORY[i];
+      const opt = wasDone ? { ...opt0, pause: false, ms: 6000 } : opt0; // tekrar oynayışta hikâye durdurmaz
       toast(ic, from, text, tone, { ...opt, then: opt.pause ? () => show(i + 1) : undefined });
       if (!opt.pause) setTimeout(() => show(i + 1), 6500 / Math.max(1, FAST / 2));
     };
@@ -1043,6 +1044,7 @@
       <div class="kicker">${yEnd}${game.replaced ? ' · görevden alındın' : ' · görev süren doldu'}</div>
       <h2>${title}</h2>
       <p class="verdict">${text}</p>
+      ${window.SceneUtils ? window.SceneUtils.bestLine('aral', aY, 'göl alanı', !game.replaced) : ''}
       <div class="rgrid">
         <div><div class="y">Göl alanı</div><div class="v" style="color:${col(aY)}">%${aY}</div><div class="h">tarihte: %${aH}</div></div>
         <div><div class="y">Tuzluluk</div><div class="v" style="color:${last.sal < 20 ? 'var(--green)' : last.sal < 40 ? 'var(--grain)' : 'var(--danger)'}">${Math.round(last.sal)} g/L</div><div class="h">tarihte: ${Math.round(hy.sal)} g/L</div></div>

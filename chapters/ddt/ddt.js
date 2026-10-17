@@ -705,11 +705,12 @@
   function enterGame() {
     game.paused = false; $('g-pause').textContent = '❚❚ Durdur';
     if (game.started) return;
-    game.started = true; game.story = true;
+    game.started = true; game.story = !wasDone;
     const show = i => {
       if (mode !== 'game') return;
       if (i >= STORY.length) { game.story = false; return game.s <= 0.15 ? coach(gS, '👉 Kaydırıcıyı dene: ilaç ne değiştiriyor?', 12000) : null; }
-      const [ic, from, text, tone, opt] = STORY[i];
+      const [ic, from, text, tone, opt0] = STORY[i];
+      const opt = wasDone ? { ...opt0, pause: false, ms: 6000 } : opt0; // tekrar oynayışta hikâye durdurmaz
       toast(ic, from, text, tone, { ...opt, then: opt.pause ? () => show(i + 1) : undefined });
       if (!opt.pause) setTimeout(() => show(i + 1), 6500 / Math.max(1, FAST / 2));
     };
@@ -851,6 +852,7 @@
       <div class="kicker">${game.replaced ? (gs.y - 1) + ' · görevden alındın' : '1990 · görev süren doldu'}</div>
       <h2>${title}</h2>
       <p class="verdict">${text}</p>
+      ${window.SceneUtils ? window.SceneUtils.bestLine('ddt', Math.min(last.B, last.S) * 100, 'kuşların durumu', !game.replaced) : ''}
       <div class="rgrid">
         <div><div class="y">Kartallar</div><div class="v" style="color:${col(bY)}">%${bY}</div><div class="h">tarihte: %${bH}</div></div>
         <div><div class="y">Ortalama ürün</div><div class="v" style="color:${yY >= 95 ? 'var(--green)' : yY >= 85 ? 'var(--grain)' : 'var(--danger)'}">%${yY}</div><div class="h">tarihte: %${yH}</div></div>

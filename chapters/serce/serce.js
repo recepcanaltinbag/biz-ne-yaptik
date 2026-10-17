@@ -1168,7 +1168,8 @@
       const show = i => {
         if (mode !== 'game') return;
         if (i >= STORY.length) { game.quotaKnown = true; return; }
-        const [, ic, from, text, tone, opt] = STORY[i];
+        const [, ic, from, text, tone, opt0] = STORY[i];
+        const opt = wasDone ? { ...opt0, pause: false, ms: 6000 } : opt0; // tekrar oynayışta hikâye durdurmaz
         toast(ic, from, text, tone, { ...opt, then: opt.pause ? () => show(i + 1) : undefined });
         if (!opt.pause) setTimeout(() => show(i + 1), 9000 / Math.max(1, FAST / 2));
       };
@@ -1429,6 +1430,7 @@
       <div class="kicker">${game.replaced ? `${MONTHS[calMonth(Math.min(gs.m, TOTAL - 1))]} ${calYear(Math.min(gs.m, TOTAL - 1))} · görevden alındın` : 'Şubat 1961 · görev süren doldu'}</div>
       <h2>${title}</h2>
       <p class="verdict">${text}</p>
+      ${window.SceneUtils ? window.SceneUtils.bestLine('serce', avg, 'ortalama hasat', !game.replaced && done.length === 3) : ''}
       <div class="rgrid">${you.map((v, i) => `<div><div class="y">${1958 + i} hasadı</div><div class="v" style="color:${v === null ? 'var(--ink-soft)' : col(v)}">${v === null ? '—' : '%' + v}</div><div class="h">tarihte: %${his[i]}</div></div>`).join('')}</div>
       ${(window.Badges && window.Badges.session().length) ? `<div class="run-badges">${window.Badges.session().map(id => { const d = window.Badges.DEFS.find(x => x.id === id); return `<span class="${d.hidden ? 'secret' : ''}">${d.icon} ${d.name}</span>`; }).join('')}</div>` : ''}
       <p class="verdict">Düşürdüğün serçe: <b>${k}</b>. Gerçekte bu sayı yüz milyonlarcaydı.${game.food.some(f => f < 70) ? (game.lies ? ` Şişirilmiş raporlar yüzünden köylünün payı bir yıl normalin <b>%${Math.min(...game.food)}</b> düzeyine düştü. Gerçek kıtlığı en çok bu büyüttü.` : ` Hasat kötü olunca devletin aldığı pay yüzünden köylünün payı bir yıl normalin <b>%${Math.min(...game.food)}</b> düzeyine düştü.`) : ''}</p>

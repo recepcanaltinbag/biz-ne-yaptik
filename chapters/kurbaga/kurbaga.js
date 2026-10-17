@@ -969,6 +969,7 @@
       <div class="kicker">${game.noToads ? game.st.year + ' · kurbağa salınmadı' : '2025 · 90 yıl sonra'}</div>
       <h2>${title}</h2>
       <p class="verdict">${text}</p>
+      ${window.SceneUtils ? window.SceneUtils.bestLine('kurbaga', last.pred * 100, 'yerli yırtıcılar', !game.noToads) : ''}
       ${(window.Badges && window.Badges.session().length) ? `<div class="run-badges">${window.Badges.session().map(id => { const d = window.Badges.DEFS.find(x => x.id === id); return `<span class="${d.hidden ? 'secret' : ''}">${d.icon} ${d.name}</span>`; }).join('')}</div>` : ''}
       <div class="rgrid">
         <div><div class="y">Yayıldığı alan</div><div class="v">%${last.areaPct.toFixed(0)}</div><div class="h">tarihte: %${H_END.areaPct.toFixed(0)}</div></div>

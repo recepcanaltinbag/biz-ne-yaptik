@@ -782,3 +782,6 @@ p.goal { font-family: var(--hand); font-size: 1.05rem; color: var(--ink-soft); b
 .yb-speed .yb-pause { font-size: .8rem; }
 .yb-speed .yb-pause.on { background: var(--ink); color: #fff; }
 .yb-view { font-family: var(--hand); font-size: .95rem; border: 2px solid var(--ink); background: var(--paper); border-radius: 99px; padding: 0 9px; cursor: pointer; margin-left: 6px; }
+.best-line { font-family: var(--hand); font-size: 1.1rem; text-align: center; margin: 2px 0 6px; color: var(--ink-soft); }
+.best-line b { color: var(--ink); font-weight: 400; }
+.best-line.new { color: #3a7a3a; font-size: 1.2rem; }
