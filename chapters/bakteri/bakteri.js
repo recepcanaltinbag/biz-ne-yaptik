@@ -26,7 +26,7 @@
   // =====================================================================
   // SES
   // =====================================================================
-  let AC = null, master, noiseBuf, muted = /[?&](debug|hizli|sessiz)\b/.test(location.search); // test sırasında ses çıkmasın
+  let AC = null, master, noiseBuf, muted = /[?&](debug|hizli|sessiz)\b/.test(location.search) || (() => { try { return localStorage.getItem('bny-ses') === '0'; } catch (e) { return false; } })(); // test sırasında ya da oyuncu kapattıysa ses çıkmasın
   function initAudio() {
     if (AC) { if (AC.state === 'suspended') AC.resume(); return; }
     try {
@@ -54,6 +54,7 @@
   if (muted) $('sound').innerHTML = '🔇 <span>Ses</span>';
   $('sound').onclick = () => {
     muted = !muted; initAudio();
+    try { localStorage.setItem('bny-ses', muted ? '0' : '1'); } catch (e) {}
     if (AC) master.gain.setTargetAtTime(muted ? 0 : 0.8, AC.currentTime, 0.05);
     $('sound').innerHTML = muted ? '🔇 <span>Ses</span>' : '🔊 <span>Ses</span>';
   };
