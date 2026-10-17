@@ -244,7 +244,7 @@
   const view = { want: 'shore', k: 0, until: 0, user: false };
   function setView(v, ms) { view.want = v; view.user = !ms; view.until = ms ? performance.now() + ms : 0; const b = $('g-view'); if (b) b.textContent = v === 'map' ? '🏖️ Kıyı' : '🗺️ Okyanus'; }
   function mapGeom(G) {
-    const top = 104 * U, H2 = G.gb - top, Wm = Math.min(G.x1 * 0.96, H2 * 1.6), Hm = Wm / 1.6;
+    const top = 104 * U, H2 = Math.max(80, G.gb - top), Wm = Math.min(G.x1 * 0.96, H2 * 1.6), Hm = Wm / 1.6;
     return { ox: (G.x1 - Wm) / 2, oy: top + (H2 - Hm) / 2, Wm, Hm, cx: 0.5, cy: 0.48 };
   }
   function current(px, py) { // girdap: saat yönünde döner, yavaşça ortaya çeker
@@ -742,7 +742,7 @@
     mview.k = lerp(mview.k, mview.want, 1 - Math.pow(0.9, dt / 16));
     const L = layoutFor(mode);
     lay.gt = lerp(lay.gt, L.gt, k * 0.6); lay.gb = lerp(lay.gb, L.gb, k * 0.6); lay.x1 = lerp(lay.x1, L.x1, k * 0.6);
-    render(now, dt);
+    try { render(now, dt); } catch (e) { if (!frame.err) { frame.err = 1; console.error(e); } } // çizim hatası döngüyü durdurmasın
     if (mode === 'game') {
       const yy = String(Math.max(M.Y0, Math.min(gs.y - 1, M.Y1)));
       if ($('yb-year').textContent !== yy) { const el = $('yb-year'); el.textContent = yy; el.classList.remove('pulse'); void el.offsetWidth; el.classList.add('pulse'); }

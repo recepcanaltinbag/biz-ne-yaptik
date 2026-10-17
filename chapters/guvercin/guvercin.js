@@ -3,7 +3,7 @@
   'use strict';
   const MISSION = {
     title: 'Milyarlardan Sıfıra · 1860',
-    role: 'Eyaletin av komiserisin. Göçmen güvercinin avına kuralları sen koyarsın.',
+    role: 'Büyük Göller av komisyonunun başkanısın. Göçmen güvercin avının kurallarını sen koyarsın.',
     control: '🪺 <b class="inl">Yuva yasağı</b> baştan, 🛒 pazar yasağı 1870\'te, 🌳 orman koruma 1875\'te açılır. Telgraf dev bir koloni haber verince bekçi gönderip göndermeyeceğine sen karar verirsin.',
     goal: '1914\'te gökyüzünde en az <b>yarım milyar</b> güvercin uçsun.',
     watch: 'Güvercin yılda tek yumurta yapar ve yalnız kalabalık kolonide ürer. Sürü çizginin altına inerse koruma da yetmeyebilir.',
@@ -19,10 +19,11 @@
   const f1 = v => v.toFixed(1).replace('.', ',');
   const TOTAL = M.Y1 - M.Y0 + 1;
   const HISTORY = M.run(TOTAL, M.histP);
+  HISTORY.hist.forEach(h => { if (h.P * 1e9 < 40) h.P = 0; });
   const GOAL = 0.5, THR = 0.3; // hedef ve Allee eşiği (milyar)
   const popText = P => P >= 1 ? f1(P) + ' milyar' : P >= 0.001 ? Math.round(P * 1000) + ' milyon' : P >= 1e-6 ? Math.round(P * 1e6) + ' bin' : P > 0 ? Math.round(P * 1e9) + ' kuş' : 'yok';
   const popBar = P => clamp(Math.sqrt(P / 4.2));
-  const eraName = y => y < 1866 ? 'Kararan gökyüzü' : y < 1878 ? 'Demiryolu ve telgraf' : y < 1890 ? 'Son büyük koloniler' : y < 1900 ? 'Dağılan sürüler' : 'Son kuşlar';
+  const eraName = (y, P) => y < 1866 ? 'Kararan gökyüzü' : P >= THR ? (y < 1890 ? 'Demiryolu ve telgraf' : 'Sürüler direniyor') : P > 0 ? 'Dağılan sürüler' : 'Son kuşlar';
 
   // =====================================================================
   // SES
@@ -181,7 +182,7 @@
       ctx.strokeStyle = '#5a4a3a'; ctx.lineWidth = 2 * U; const poles = [];
       for (let x = x1 * 0.14; x < rx1; x += x1 * 0.11) { poles.push(x); ctx.beginPath(); ctx.moveTo(x, G.rail - 2 * U); ctx.lineTo(x, G.rail - 40 * U); ctx.moveTo(x - 6 * U, G.rail - 36 * U); ctx.lineTo(x + 6 * U, G.rail - 36 * U); ctx.stroke(); }
       if (poles.length > 1) { ctx.strokeStyle = 'rgba(60,50,40,.6)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(poles[0], G.rail - 36 * U); for (let i = 1; i < poles.length; i++) ctx.quadraticCurveTo((poles[i - 1] + poles[i]) / 2, G.rail - 30 * U, poles[i], G.rail - 36 * U); ctx.stroke(); }
-      tele.sx = poles.length ? poles[Math.floor(poles.length / 2)] : undefined; tele.sy = G.rail - 40 * U;
+      tele.poles = poles; tele.sx = poles.length ? poles[Math.floor(poles.length / 2)] : undefined; tele.sy = G.rail - 40 * U;
       if (tele.pulse >= 0) { tele.pulse += dt / 1800; const px = lerp(rx1, x1 * 0.14, clamp(tele.pulse)); ctx.fillStyle = '#e0b04a'; ctx.beginPath(); ctx.arc(px, G.rail - 36 * U, 5 * U, 0, 6.283); ctx.fill(); if (tele.pulse > 1) tele.pulse = -1; }
       // tren: av çoğaldıkça sık gelir
       const per = lerp(26000, 9000, clamp(vis.kill / 0.3));
@@ -210,7 +211,7 @@
     const nW = Math.round(clamp(Math.max(vis.n, vis.guard)) * wardens.length);
     wardens.forEach((p, i) => { p.on = lerp(p.on, i < nW ? 1 : 0, 0.05); if (p.on < 0.05) { p.sx = undefined; return; } p.f += p.dir * 0.000014 * dt; if (p.f < 0.6 || p.f > 0.94) p.dir *= -1; const x = x1 * p.f, y = gt + gh * (0.72 + (i % 2) * 0.12); p.sx = x; p.sy = y - 44 * U; ctx.globalAlpha = p.on; person(x, y, U * (mobile ? 0.8 : 0.95), { dir: p.dir, shirt: '#4f7a5a', hat: '#3a5a3a', badge: true, step: Math.sin(t * 0.02 + p.ph) * 3 }); ctx.globalAlpha = 1; });
     // hayvanat bahçesi kafesi: yabani sürü bitince son kuşlar burada
-    if (mode === 'game' && (game.wildGone || gs.y > 1898)) {
+    if (mode === 'game' && (game.wildGone || (gs.y > 1898 && vis.P < THR))) {
       const zx = x1 * 0.42, zy = gt + gh * 0.5; zoo.sx = zx; zoo.sy = zy - 30 * U;
       ctx.strokeStyle = '#4a4a4a'; ctx.lineWidth = 1.5; ctx.strokeRect(zx - 24 * U, zy - 36 * U, 48 * U, 36 * U); for (let k = 1; k < 6; k++) { ctx.beginPath(); ctx.moveTo(zx - 24 * U + k * 8 * U, zy - 36 * U); ctx.lineTo(zx - 24 * U + k * 8 * U, zy); ctx.stroke(); }
       const nz = gs.y >= 1914 ? 1 : Math.max(1, Math.round(lerp(6, 1, clamp((gs.y - 1900) / 14))));
@@ -252,7 +253,7 @@
   const RAILS = [['ny', 'det', 0.1], ['det', 'chi', 0.25], ['chi', 'cin', 0.4], ['det', 'pet', 0.65], ['chi', 'pet', 0.8]];
   const colonies = [];
   function mapGeom(G) {
-    const top = 150 * U, H2 = G.gb - top - 10 * U, Wm = Math.min(G.x1 * 0.94, H2 * 1.5), Hm = Wm / 1.5;
+    const top = 150 * U, H2 = Math.max(80, G.gb - top - 10 * U), Wm = Math.min(G.x1 * 0.94, H2 * 1.5), Hm = Wm / 1.5;
     return { ox: (G.x1 - Wm) / 2, oy: top + (H2 - Hm) / 2, Wm, Hm };
   }
   function drawMap(G, t, dt, alpha) {
@@ -286,8 +287,7 @@
     while (mapBirds.length > want) mapBirds.pop();
     mapBirds.forEach(b => { b.a += rnd(-0.1, 0.1); b.x = clamp(b.x + Math.cos(b.a) * dt * 0.00004, 0.1, 0.9); b.y = clamp(b.y + Math.sin(b.a) * dt * 0.00004, 0.1, 0.9); bird(X(b.x), Y(b.y), U * 0.8, t * 0.02 + b.a, '#4a5a7a'); });
     Object.values(CITY).forEach(([x, y, n]) => { ctx.fillStyle = rgb(PAL.ink); ctx.beginPath(); ctx.arc(X(x), Y(y), 4 * U, 0, 6.283); ctx.fill(); tag(X(x), Y(y) - 6 * U, n, { fs: 11, a: 0.85 }); });
-    tag(X(0.5), Y(0) - 4 * U, `🗺️ Büyük Göller · demiryolu ${Math.round(reach * 100)}% · orman %${Math.round(vis.F * 100)}`, { fs: 13 });
-    tag(X(0.5), Y(0.99), 'Dokun: ormana dön', { fs: 12 });
+    tag(X(0.5), Y(1.0), `🗺️ Büyük Göller · demiryolu %${Math.round(reach * 100)} · orman %${Math.round(vis.F * 100)} · dokun: ormana dön`, { fs: 12 });
     ctx.restore();
   }
 
@@ -313,7 +313,7 @@
     hunters.forEach(p => add(p.sx, p.sy, 'hunter'));
     wardens.forEach(p => add(p.sx, p.sy, 'warden'));
     trees.forEach(tr => { if (tr.nx !== undefined) add(tr.nx, tr.ny, 'tree', () => award('guv-yumurta')); });
-    add(tele.sx, tele.sy, 'tele', () => { tick(); if (tapCount('tele') >= 3) award('guv-telgraf'); });
+    (tele.poles || []).forEach(px => add(px, tele.sy, 'tele', () => { tick(); if (tapCount('tele') >= 3) award('guv-telgraf'); }));
     add(zoo.sx, zoo.sy, 'zoo', () => award('guv-martha'));
     if (official && official.x) add(official.x, official.y, 'official');
     if (!c.length) return false;
@@ -461,11 +461,11 @@
   const award = id => (window.Badges ? window.Badges.award(id) : false);
   const choiceQ = [];
   const curHist = () => { const s = mode === 'sandbox' ? sb.st : gs; return s.hist.length ? s.hist[s.hist.length - 1] : null; };
-  const PLACES = { Wisconsin: [0.22, 0.3], 'Michigan ormanı': [0.47, 0.42], Pennsylvania: [0.8, 0.72], 'New York eyaleti': [0.86, 0.5], Ontario: [0.64, 0.2] };
+  const PLACES = { Wisconsin: [0.22, 0.3], 'Michigan ormanı': [0.47, 0.42], Pennsylvania: [0.8, 0.72], 'New York eyaleti': [0.86, 0.5], Ohio: [0.6, 0.78] };
 
   function makeWorld() {
     const mast = []; while (mast.length < 2) { const y = 1864 + Math.floor(Math.random() * 40); if (mast.every(x => Math.abs(x - y) > 5) && Math.abs(y - 1878) > 1 && Math.abs(y - 1870) > 1 && Math.abs(y - 1875) > 1) mast.push(y); }
-    const col = []; for (let y = 1863 + Math.floor(Math.random() * 3); y < 1906; y += 4 + Math.floor(Math.random() * 3)) if (Math.abs(y - 1878) > 1 && !mast.includes(y)) col.push(y);
+    const col = []; for (let y = 1867 + Math.floor(Math.random() * 3); y < 1906; y += 4 + Math.floor(Math.random() * 3)) if (Math.abs(y - 1878) > 1 && !mast.includes(y)) col.push(y);
     return { mast, col };
   }
   function resetGame() {
@@ -519,6 +519,7 @@
   const STORY = [
     ['🕊️', '1860', 'Gökyüzü kararıyor: Kuzey Amerika\'da <b>4 milyar</b> göçmen güvercin var. Bir sürünün geçişi günler sürüyor.', '', { pause: true }],
     ['🪺', 'Doğa bilimci', 'Bu kuş yılda <b>tek yumurta</b> yapar ve yalnız dev kolonilerde ürer. Kalabalık, onun hayatta kalma yolu.', '', { pause: true }],
+    ['📜', 'Senato raporu (1857)', 'Ohio: "Göçmen güvercinin korunmaya ihtiyacı yok. Bu kadar bereketli bir kuşu sıradan bir av azaltamaz."', '', { pause: false, ms: 8000 }],
   ];
   function enterGame() {
     game.paused = false; $('g-pause').textContent = '❚❚ Durdur';
@@ -572,7 +573,7 @@
     const col = colonies[colonies.length - 1];
     setView('map', 7000);
     comeOfficial('tel', 'Tık tık! Telgraf var.');
-    choice('Telgrafçı', big ? 'Petoskey: dev koloni!' : `${name}: yeni koloni`, big ? '"Michigan\'ın kuzeyinde görülmüş en büyük koloni! Bütün avcılar trene biniyor. Günde <b>50.000 kuş</b> avlayacaklar."' : '"Telgraf haber verdi: dev bir koloni yuva yapıyor. Avcılar yarın trenle oraya varır."', [
+    choice('Telgrafçı', big ? 'Petoskey: dev koloni!' : `${name}: yeni koloni`, big ? '"Michigan\'ın kuzeyinde görülmüş en büyük koloni! Bütün avcılar trene biniyor. Günde <b>50.000 kuş</b> avlayacaklar."' : pick(['"Telgraf haber verdi: dev bir koloni yuva yapıyor. Avcılar yarın trenle oraya varır."', '"Tık tık tık! Ağaçlar yuvadan görünmüyor diyorlar. İstasyonda ağlar yükleniyor."', '"Kasabadan haber: kuşlar ormana indi. Tüccarlar boş varil ısmarladı bile."']), [
       { label: '🛡️ Bekçi gönder', sub: 'Bu yıl koloni korunur; meclis masrafa kızar', fn: () => { game.guard = 1; game.guards++; col.guard = true; if (big) { game.petoskey = true; award('guv-petoskey'); } if (game.guards >= 4) award('guv-bekci'); toast('🛡️', 'Bekçiler', 'Bekçiler koloniye vardı. Ağlar toplandı.', 'good'); } },
       { label: '🚂 Avcılar gelsin', sub: 'Kasabalar kazanır; koloni ağır av görür', fn: () => { game.guard = 0; toast('🚂', 'İstasyon', 'Varillerle dolu trenler şehre gidiyor.', 'bad'); } },
     ], 'tel');
@@ -592,33 +593,37 @@
     // meclis desteği: yasaklar kasabaları ve pazarı kızdırır; ani artış daha çok kızdırır, zamanla alışılır
     const lvl = (game.p.nest * 1.6 + game.p.quota * 2.2 + game.p.forest * 1.6) / 5.4, press = 0.4 + 0.8 * h.reach / 0.31;
     const shock = Math.max(0, lvl - game.habit); game.habit += (lvl - game.habit) * 0.15;
-    if (!game.replaced) game.sat = clamp(game.sat + 1.0 - lvl * press * 3 - shock * shock * 40 - (guard ? 3 : 0) + (colony && !guard ? 2 : 0), 0, 100);
-    if (shock > 0.15) once('shock' + Math.floor(y / 5), () => toast('😠', 'Kasabalar', 'Yasaklar <b>birden</b> sıkılaştı, herkes kızgın. Yavaş artırırsan alışırlar.', 'warn'));
+    const lastLvl = game.lastLvl; game.lastLvl = lvl;
+    if (!game.replaced) game.sat = clamp(game.sat + 1.0 - lvl * press * 2 - shock * shock * 40 - (guard ? 1.5 : 0) + (colony && !guard ? 2 : 0), 0, 100);
+    if (shock > 0.15 && lvl - (lastLvl || 0) > 0.08) once('shock' + Math.floor(y / 5), () => toast('😠', 'Kasabalar', 'Yasaklar <b>birden</b> sıkılaştı, herkes kızgın. Yavaş artırırsan alışırlar.', 'warn'));
     $('yb-harvest').textContent = `🕊️ ${popText(h.P)}`; $('yb-harvest').style.color = h.P >= GOAL ? 'var(--green)' : h.P >= THR ? 'var(--grain)' : 'var(--danger)';
     // olaylar
-    if (y === 1861) toast('📜', 'Senato raporu (1857)', 'Ohio: "Göçmen güvercinin korunmaya ihtiyacı yok. Bu kadar bereketli bir kuşu sıradan bir av azaltamaz."', '', { keep: true });
     if (y === 1866) { pulseAt(() => [tele.sx, tele.sy]); milestone('🚂', 'Demiryolu ve telgraf', 'Avcılar koloninin yerini <b>telgrafla</b> öğrenip <b>trenle</b> geliyor. Vurulan kuşlar buzlu varillerle şehre gidiyor.', 'warn'); }
     if (y === 1870) unlock('quota', 'Şehirde bir düzine güvercin elli sent. <b>Pazar yasağı</b> satışı sınırlar. Ama şehirde et pahalanır, tüccarlar kızar.');
     if (y === 1875) unlock('forest', 'Çiftçiler ve keresteciler ormanı kesiyor. <b>Orman koruma</b> palamut ve kayın yemişini korur. Ama çiftçi ve kereste ustası kızar.');
-    if (W0.mast.includes(y + 1)) milestone('🌰', 'Ormancı', '<b>Gelecek yıl</b> kayın yemişi az olacak: yuvalar zor dolar. Bu yıl koloniler daha çok korumaya muhtaç.', 'warn');
+    if (W0.mast.includes(y + 1)) milestone('🌰', 'Ormancı', '<b>Gelecek yıl</b> kayın yemişi az olacak: yuvaların çoğu boş kalacak. O yıl avı azaltmak (pazar ve yuva yasağı) kayıpları sınırlar.', 'warn');
     if (W0.mast.includes(y)) toast('🌰', 'Orman', 'Yemiş kıt: yuvaların çoğu boş kaldı.', 'bad');
     const nextCol = W0.col.includes(y + 1) || y + 1 === 1878;
     if (nextCol && gs.P > 0.05) { game.colonyNow = 1; colonyAlert(y + 1, y + 1 === 1878 ? 'Petoskey' : pick(Object.keys(PLACES))); }
     else if (nextCol && gs.P > 0) once('nocol', () => toast('🪺', 'Telgrafçı', 'Artık dev koloni haberi gelmiyor. Kuşlar küçük gruplara dağılmış.', 'bad'));
-    if (h.P > 0 && h.P < 0.6) once('allee1', () => { pulseAt(() => [geo().x1 * 0.78, geo().gt + 40 * U]); toast('🪺', 'Doğa bilimci', 'Koloniler küçülüyor. Kuşlar kalabalık olmadan yuva yapmıyor (<i>Allee etkisi</i>).', 'warn'); });
+    if (h.P > 0 && h.P < 0.6) once('allee1', () => { pulseAt(() => [geo().x1 * 0.78, geo().gt + 40 * U]); milestone('🪺', 'Doğa bilimci', 'Koloniler küçülüyor. Kuşlar kalabalık olmadan yuva yapmıyor (<i>Allee etkisi</i>). Çizgiye yaklaşıyorsun.', 'warn'); });
     if (h.P > 0 && h.P < THR) once('allee2', () => milestone('⚠️', 'Eşik geçildi', 'Sürü <b>çizginin altına</b> indi. Artık her yıl daha az yavru çıkıyor; tam koruma bile yetmeyebilir.', 'bad'));
-    if (game.wildGone === y) toast('🕊️', 'Son yabani kuş', y >= 1898 ? 'Ohio\'da bir çocuk son yabani güvercini vurdu. Gökyüzü boş.' : 'Yabani sürü bitti. Geriye yalnız hayvanat bahçesindeki birkaç kuş kaldı.', 'bad', { keep: true });
+    if (game.wildGone === y) toast('🕊️', 'Son yabani kuş', y >= 1898 && y <= 1902 ? 'Ohio\'da bir çocuk son yabani güvercini vurdu. Gökyüzü boş.' : 'Yabani sürü bitti. Geriye yalnız hayvanat bahçesindeki birkaç kuş kaldı.', 'bad', { keep: true });
+    if (y === 1900) toast('⚖️', 'ABD Kongresi', '<b>Lacey Yasası</b>: yasa dışı avlanan hayvanı eyaletten eyalete satmak artık federal suç.', '', { keep: true });
+    if (y === 1913) toast('⚖️', 'ABD Kongresi', 'Göçmen kuşlar artık federal koruma altında (<b>Weeks–McLean Yasası</b>).', h.P > 0 ? 'good' : '', { keep: true });
+    if (y === 1906 && h.P >= THR) toast('🕊️', 'Gazeteler', 'Gökyüzü hâlâ kararıyor: başka ülkelerden doğa bilimciler sürüleri görmeye geliyor.', 'good');
     if (y === 1897 && h.P < THR && h.P > 0) toast('📜', 'Eyalet meclisi', 'Michigan tam av yasağını tartışıyor. Ama kuşlar artık çok az.', '', { keep: true });
     if (game.sat < 25 && !game.replaced) once('warn-sat' + Math.floor(y / 10), () => toast('🏛️', 'Meclis', 'Kasabalar ve tüccarlar şikâyetçi. Meclisin desteği düşüyor.', 'warn'));
     if (game.sat <= 0 && !game.replaced && gs.y >= game.lockUntil && (game.p.nest + game.p.quota + game.p.forest) > 0.4) lobby();
-    if (y === M.Y1) { if (h.P >= GOAL) award('guv-gokyuzu'); if (h.F >= 0.75) award('guv-orman'); }
+    if (y === M.Y1) { if (h.P >= GOAL) award('guv-gokyuzu'); if (h.F >= 0.6) award('guv-orman'); }
     if (gs.y > M.Y1 && game.state === 'play') endGame(); else if (gs.y > M.Y1) game.endAfter = true;
   }
   function lobby() {
     if (game.replaced || game.state === 'choice') return;
-    game.lobbies++; const second = game.lobbies > 1, yrs = second ? 8 : 6;
+    game.lobbies++; const second = game.lobbies === 2, yrs = game.lobbies > 1 ? 8 : 6;
+    if (game.lobbies >= 3) { comeOfficial('lobby', 'Sözünü yine tutmadın.'); game.replaced = true; toast('📜', 'Meclis', 'Üçüncü kez yasaklar yüzünden kriz çıktı: görevden alındın.', 'bad'); endGame(); return; }
     comeOfficial('lobby', second ? 'Yine mi siz?' : 'Bu yasaklar bizi batırıyor!');
-    choice('Tüccarlar ve meclis', second ? 'Son uyarı' : 'Yasaklar gevşesin!', `"Kasabalar avcılıkla geçiniyor, pazar boş kaldı. ${yrs} yıl boyunca yasakları <b>gevşet</b> (yuva %30, pazar %20, orman %30), yoksa seni görevden alırız."`, [
+    choice('Tüccarlar ve meclis', second ? 'Son uyarı: bir daha olmaz' : 'Yasaklar gevşesin!', `"Kasabalar avcılıkla geçiniyor, pazar boş kaldı. ${yrs} yıl boyunca yasakları <b>gevşet</b> (yuva %30, pazar %20, orman %30), yoksa seni görevden alırız."`, [
       { label: 'Tamam, gevşetiyorum', sub: `${yrs} yıl yasaklar sınırlı`, fn: () => { game.lockUntil = gs.y + yrs; readPolicy(); game.sat = 40; game.habit = 0.25; } },
       { label: 'Hayır, yasa kalıyor', sub: 'Görevden alınırsın, oyun biter', fn: () => { game.replaced = true; toast('📜', 'Meclis', 'Görevden alındın. Yerine gelen ilk iş yasakları kaldırdı.', 'bad'); endGame(); } },
     ], 'lobby');
@@ -640,7 +645,7 @@
     const score = Math.round(clamp(P / 4.2) * 100);
     let title, text;
     if (game.replaced) { title = 'Görevden alındın'; text = 'Yasaları savundun, ama kasabalar ve tüccarlar kazandı. Gerçekte de yuva yasağı vardı, ama kimse uygulamadı.'; }
-    else if (P >= GOAL) { title = 'Gökyüzü hâlâ kararıyor'; text = `1914'te ${popText(P)} güvercin uçuyor. Erken davrandın, sürüyü eşiğin üstünde tuttun. Martha'nın yalnızlığını yaşamadın.`; }
+    else if (P >= GOAL) { title = 'Gökyüzü hâlâ kararıyor'; text = `1914'te ${popText(P)} güvercin uçuyor. Erken davrandın, sürüyü eşiğin üstünde tuttun. Martha hiç yalnız kalmadı.`; }
     else if (P > 0) { title = 'Son sürüler'; text = `1914'te ${popText(P)} kuş kaldı. Yaşıyorlar, ama çizginin altındalar: koloniler ürememeye devam ederse sonları yakın.`; }
     else if (game.maxLate > 1.2) { title = 'Çok geçti'; text = `Sonunda yasaları sıkılaştırdın, ama sürü eşiğin altına inmişti. Kuşlar ürüyemedi: son yabani kuş ${game.wildGone}'de gitti.`; }
     else { title = 'Martha\'nın yalnızlığı'; text = `Tarih tekrarlandı: milyarlarca kuş elli yılda bitti. Son yabani güvercin ${game.wildGone}'de gitti, Martha 1914'te öldü.`; }
@@ -651,7 +656,7 @@
       <p class="verdict">${text}</p>
       ${window.SceneUtils ? window.SceneUtils.bestLine('guvercin', score, 'kalan sürü', !game.replaced) : ''}
       <div class="rgrid">
-        <div><div class="y">Sürü (${game.replaced ? last.y : 1914})</div><div class="v" style="color:${col(P)}">${popText(P)}</div><div class="h">tarihte: yok</div></div>
+        <div><div class="y">Sürü (${game.replaced ? last.y : 1914})</div><div class="v" style="color:${col(P)}">${popText(P)}</div><div class="h">tarihte: ${popText(hh[hh.length - 1].P)}</div></div>
         <div><div class="y">En düşük</div><div class="v" style="color:${col(Pmin)}">${popText(Pmin)}</div><div class="h">eşik: 300 milyon</div></div>
         <div><div class="y">Orman</div><div class="v">%${Math.round(last.F * 100)}</div><div class="h">tarihte: %${Math.round(hh[hh.length - 1].F * 100)}</div></div>
       </div>
@@ -678,7 +683,7 @@
     $('o-pn').textContent = '%' + $('p-n').value; $('o-pq').textContent = '%' + $('p-q').value; $('o-pf').textContent = '%' + $('p-f').value;
   }
   ['p-n', 'p-q', 'p-f'].forEach(id => $(id).addEventListener('input', () => { readSliders(); sb.preset = null; document.querySelectorAll('.pbtn').forEach(b => b.classList.remove('on')); }));
-  const PRESETS = { history: null, nest: [100, 0, 0], late: null, all: [60, 40, 50] };
+  const PRESETS = { history: null, nest: [100, 0, 0], late: null, all: [90, 70, 60] };
   document.querySelectorAll('.pbtn').forEach(b => b.onclick = () => {
     const v = PRESETS[b.dataset.preset]; sb.preset = b.dataset.preset;
     if (v) ['p-n', 'p-q', 'p-f'].forEach((id, i) => $(id).value = v[i]);
@@ -731,11 +736,11 @@
     view.k = lerp(view.k, view.want === 'map' ? 1 : 0, 1 - Math.pow(0.9, dt / 16));
     const L = layoutFor(mode);
     lay.gt = lerp(lay.gt, L.gt, k * 0.6); lay.gb = lerp(lay.gb, L.gb, k * 0.6); lay.x1 = lerp(lay.x1, L.x1, k * 0.6);
-    render(now, dt);
+    try { render(now, dt); } catch (e) { if (!frame.err) { frame.err = 1; console.error(e); } } // çizim hatası döngüyü durdurmasın
     if (mode === 'game') {
-      const yy = String(Math.max(M.Y0, Math.min(gs.y - 1, M.Y1)));
+      const yy = String(Math.max(M.Y0, Math.min(gs.y - 1, M.Y1))), hh0 = curHist();
       if ($('yb-year').textContent !== yy) { const el = $('yb-year'); el.textContent = yy; el.classList.remove('pulse'); void el.offsetWidth; el.classList.add('pulse'); }
-      $('yb-sub').textContent = eraName(Number(yy)); $('g-date').textContent = yy;
+      $('yb-sub').textContent = eraName(Number(yy), hh0 ? hh0.P : 4.2); $('g-date').textContent = yy;
       $('yb-fill').style.width = clamp((gs.hist.length + game.frac) / TOTAL) * 100 + '%';
       const hh = curHist();
       $('g-pop').textContent = '🕊️ ' + popText(hh ? hh.P : 4.2);

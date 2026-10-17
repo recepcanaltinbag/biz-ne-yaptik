@@ -9,24 +9,24 @@
   // nest: yuva koruması, quota: pazar yasağı/av sınırı, forest: orman koruma (0–1)
   // guard: o yıl koloniye bekçi gönderildi mi (0/1), colony: o yılki koloninin büyüklük çarpanı, mast: palamut-kayın yemişi bolluğu
   const DEF = { nest: 0, quota: 0, forest: 0, guard: 0, colony: 1, mast: 1 };
-  const allee = P => smooth(0.03, 0.6, P);
+  const allee = P => smooth(0.1, 0.9, P);
   function newState() { return { y: Y0, P: 4.2, F: 0.95, hist: [] }; }
   function step(st, p0 = DEF) {
     const y = st.y, p = { ...DEF, ...p0 };
     // demiryolu ve telgraf: avcılar koloniye kuşlarla birlikte varır
     const reach = 0.04 + 0.27 * smooth(1866, 1890, y);
-    // yuva yasağı tek başına yetmez: telgrafla haber alınan dev kolonide bekçi yoksa avcılar yasağı çiğner
-    const enforce = clamp(p.guard ? 0.95 : p.nest * (p.colony > 1 ? 0.35 : 0.8));
+    // kâğıt yasa: bekçisiz yuva yasağı ancak yarı yarıya uygulanır; telgrafla haber alınan dev kolonide bekçi yoksa avcılar yasağı çiğner
+    const enforce = clamp(p.guard ? 0.95 : p.nest * (p.colony > 1 ? 0.25 : 0.55));
     // avın %60'ı yuvalarda (yuva yasağıyla azalır), %40'ı göç yolunda (yalnız av sınırıyla azalır)
-    const kill = reach * (1 - 0.8 * clamp(p.quota)) * (0.4 + 0.6 * (1 - enforce)) * (p.colony > 1 && !p.guard ? 1.5 : 1);
+    const kill = reach * (1 - 0.6 * clamp(p.quota)) * (0.4 + 0.6 * (1 - enforce)) * (p.colony > 1 && !p.guard ? 1.5 : 1);
     const nest = clamp(1 - 0.7 * clamp(reach / 0.31) * (1 - enforce) * (1 - 0.6 * clamp(p.quota))) * p.mast; // avcı yuvayı bozar
-    const K = 8.5 * (0.3 + 0.7 * st.F);
+    const K = 8.5 * (0.15 + 0.85 * st.F);
     const births = 0.58 * st.P * allee(st.P) * nest * Math.max(0, 1 - st.P / K);
     const deaths = 0.22 * st.P + kill * st.P;
     st.P = Math.max(0, st.P + births - deaths);
     if (st.P < 1e-9) st.P = 0;
-    const clear = (0.004 + 0.011 * smooth(1855, 1890, y)) * (1 - 0.75 * clamp(p.forest));
-    st.F = Math.max(0.3, st.F - clear);
+    const clear = (0.004 + 0.013 * smooth(1855, 1890, y)) * (1 - 0.75 * clamp(p.forest));
+    st.F = Math.max(0.2, st.F - clear);
     st.hist.push({ y, P: st.P, F: st.F, kill: kill * st.P, killRate: kill, nest, reach, allee: allee(st.P) });
     st.y++;
     return st;

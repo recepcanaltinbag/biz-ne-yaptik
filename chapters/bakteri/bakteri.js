@@ -793,7 +793,7 @@
     mview.k = lerp(mview.k, mview.want, 1 - Math.pow(0.9, dt / 16));
     const L = layoutFor(mode);
     lay.gt = lerp(lay.gt, L.gt, k * 0.6); lay.gb = lerp(lay.gb, L.gb, k * 0.6); lay.x1 = lerp(lay.x1, L.x1, k * 0.6);
-    render(now, dt);
+    try { render(now, dt); } catch (e) { if (!frame.err) { frame.err = 1; console.error(e); } } // çizim hatası döngüyü durdurmasın
     if (mode === 'game') {
       // yıl çubuğu son işlenen yılı gösterir; kartlar da o yıla aittir
       const yy = String(Math.max(M.Y0, Math.min(gs.y - 1, M.Y1)));

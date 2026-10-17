@@ -1120,7 +1120,9 @@
   // DÖNGÜ
   // =====================================================================
   let last = performance.now(), tick = 0, badness = 0, lastBg = '';
-  function frame(now) {
+  // çizim hatası döngüyü durdurmasın
+  function frame(now) { try { frame0(now); } catch (e) { if (!frame.err) { frame.err = 1; console.error(e); } requestAnimationFrame(frame); } }
+  function frame0(now) {
     const dt = Math.min(FAST > 1 ? 1000 : 50, now - last); last = now;
     updateGame(dt); updateSandbox(dt);
     ctx.clearRect(0, 0, W, H);

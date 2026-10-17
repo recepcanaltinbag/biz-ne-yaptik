@@ -15,6 +15,7 @@ window.__e2e = { done: false, log: [] };
     const W = f.contentWindow, d = f.contentDocument, errs = [];
     W.addEventListener('error', e => errs.push(e.message + ' @' + (e.filename || '').split('/').pop() + ':' + e.lineno));
     W.addEventListener('unhandledrejection', e => errs.push('promise: ' + e.reason));
+    const ce = W.console.error.bind(W.console); W.console.error = (...a) => { errs.push('console: ' + a.map(String).join(' ').slice(0, 160)); ce(...a); };
     await new Promise(r => setTimeout(r, 300));
     W.__dbg.go('game');
     let lastY = null, stuck = 0, t0 = Date.now(), choices = 0;
