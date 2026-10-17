@@ -126,6 +126,9 @@ Bu kurallar kullanıcının geri bildirimleriyle tek tek oturtuldu. Yeni bölüm
 - Menüde "Sezonlar ▾" açılır listesi vardır. Liste `window.SEASONS`'tan üretilir, her sezon bölümü `id="sezon-N"` ile işaretlenir. Kaydırınca düğme bulunulan sezonu gösterir (scroll-spy: "🌊 Sezon 2"). Oynanabilir bölümü olan sezonlarda "▶ oynanabilir" yazar. Yeni sezon eklenince ek kod gerekmez.
 - Açılır paneller (sezon, rozet) `position: fixed` olur, biri açılınca öteki kapanır. Dışarı tıklayınca ve Esc ile kapanırlar. Telefonda rozet paneli alttan çıkan sayfa olur, sezon menüsü tam genişlikte açılır.
 - Telefonda üst menü tek satır kalmalı (`white-space: nowrap`, çok dar ekranda "Rozetler" kelimesi gizlenir). 375 px'de `scrollWidth == innerWidth` olduğunu ölç.
+- **Rozet paneli büyümeye hazır (akordeon):** bölümler `window.SEASONS`'tan gelir ve sezon başlıklarıyla gruplanır. Her bölüm tek satırdır: ad, kazanılan rozetlerin minik madalyonları, ilerleme çubuğu, g/n. Satıra dokununca yalnız o bölümün 8 kartı açılır, aynı anda tek bölüm açık kalır. Varsayılan olarak son rozetin kazanıldığı bölüm açılır. En üstte "Son kazanılanlar" şeridi durur. Yeni bölüm için panel koduna dokunulmaz.
+- **İstatistik paneli:** `Stat.get(path, start)` GoatCounter'ın açık sayaç arayüzünü okur (`TOTAL`, `basla-<bölüm>`, `bitti-<bölüm>`, `rozet-<id>`; dönem `week`/`month`). 404 sıfır, hata `null` döner. Gizli rozetler oyuncu kazanmadıkça istatistikte de "???" görünür.
+
 ## Tekrar oynama
 - Bölüm bir kez bitince `localStorage['bny-bitti-<bölüm>'] = 1` yazılır. Sonraki ziyaretlerde alttaki noktaların hepsi seçilebilir olur (`maxSeen = slides.length - 1`). Başlık kartında "Bu bölümü bitirdin. Doğrudan geç:" ve Laboratuvar / Gerçekte ne oldu? / Ne öğrendik? kısayolları çıkar (`replayNav()`). Yeni bölümde de aynı kalıp (`DONE_KEY`, `paintDots`, `replayNav`) kullanılır.
 
