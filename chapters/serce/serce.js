@@ -483,14 +483,20 @@
     bubbles.length = Math.min(bubbles.length, 1);
     bubbles.push({ obj, x: obj.x, y: obj.y - oy, oy, text: lines(kind), life: 1 });
   }
+  // dokununca ekrandaki en yakın karakter konuşur (mesafe sınırı yok)
   function talkAt(x, y) {
     const cands = [];
-    birds.forEach(b => { if (!b.fallen) cands.push([Math.hypot(b.x - x, b.y - y), () => { bubbles.push({ bird: b, x: b.x, y: b.y, text: lines('bird'), life: 1 }); chirp(b.x); }]); });
-    villagers.forEach(v => cands.push([Math.hypot(v.x - x, v.y - 30 * U - y), () => say(v, 'villager', 46 * U)]));
-    farmers.forEach(fm => { if (fm.sx !== undefined) cands.push([Math.hypot(fm.sx - x, fm.sy - y), () => say({ get x() { return fm.sx; }, get y() { return fm.sy; } }, 'farmer', 8 * U)]); });
+    const add = (cx, cy, fn) => cands.push([Math.hypot(cx - x, cy - y), fn]);
+    birds.forEach(b => { if (!b.fallen && !b.leave) add(b.x, b.y, () => { bubbles.length = 0; bubbles.push({ bird: b, x: b.x, y: b.y, text: lines('bird'), life: 1 }); chirp(b.x); }); });
+    villagers.forEach(v => { if (!(v.hidden > performance.now())) add(v.x, v.y - 30 * U, () => say(v, 'villager', 46 * U)); });
+    leavers.forEach(v => add(v.x, v.y - 30 * U, () => { bubbles.length = 0; bubbles.push({ obj: v, x: v.x, y: v.y, oy: 46 * U, text: pick(['Eve gidiyorum,\nrahatsız etme!', 'Yarın yine\ntencere mi?']), life: 1 }); }));
+    farmers.forEach(fm => { if (fm.sx !== undefined) add(fm.sx, fm.sy, () => say({ get x() { return fm.sx; }, get y() { return fm.sy; } }, 'farmer', 8 * U)); });
+    if (official && official.x !== undefined) add(official.x, official.y, () => { bubbles.length = 0; bubbles.push({ obj: official, x: official.x, y: official.y, text: pick(['Rakamlar, yoldaş.\nRakamlar!', 'Pekin bekliyor.']), life: 1 }); });
+    if (nest.x !== undefined && vis.S > 0.06) add(nest.x, nest.y, () => { bubbles.length = 0; bubbles.push({ obj: { get x() { return nest.x; }, get y() { return nest.y; } }, x: 0, y: 0, text: game.campaign && game.k > 0.25 ? 'Anne, yemek yok mu?' : pick(['Cik cik! Annem\nböcek getirdi!', 'Daha çok çekirge!']), life: 1 }); chirp(nest.x); });
+    if (!cands.length) return false;
     cands.sort((a, b) => a[0] - b[0]);
-    if (cands.length && cands[0][0] < 55 * U) { if (bubbles.length > 1) bubbles.shift(); cands[0][1](); return true; }
-    return false;
+    cands[0][1]();
+    return true;
   }
   let nextChat = 0;
   function ambientChat(t) {

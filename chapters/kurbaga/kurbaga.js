@@ -832,6 +832,8 @@
     toad: ['Böcek nerede? Yukarıda mı?\nO kadar zıplayamam.', 'Ben böcek değil,\nher şeyi yerim!', 'Vrrrrr! Burası\nçok güzelmiş.'],
     beetle: ['Ben tepedeyim, larvalarım\ntoprağın altında. Bol şans!', 'Kurbağa mı? Hiç\nyukarı bakmıyor ki.'],
     sci: ['Kurbağa böceği yer.\nBasit biyoloji!', 'Hawaii\'de işe yaradı.\nGaliba.', 'Bu kurbağalar neden\nböceğe bakmıyor?'],
+    ship: ['Düüüt! Hawaii\'den\n102 yolcu getirdim.', 'Dönüş biletleri\nalınmadı galiba...'],
+    truck: ['Batıya bedava\nyolculuk!', 'Şoför fark etmedi\nbile!'],
     mtoad: ['30 bin yumurta daha!', 'Bacaklarım her\nnesilde uzuyor!', 'Batıya! Hep batıya!', 'Vrrrrr!'],
     vol: ['Bu gece 800 kurbağa\ntopladık!', 'Topladıkça yenileri\ngeliyor...', 'Fener, kova, eldiven.\nHazırım!'],
   };
@@ -846,6 +848,8 @@
       volunteers.forEach(v => out.push([v.x, v.y, 'vol', v]));
       SITES.forEach(s => out.push([s.x, s.y, 'site', s]));
     }
+    if (game.phase === 'field' && mode === 'game' && ship.x !== undefined) out.push([ship.x, ship.y, 'ship', ship]);
+    gags.forEach(g => { if (g.kind === 'truck' && g.x !== undefined) out.push([g.x, g.y, 'truck', g]); });
     return out.filter(c => c[0] !== undefined);
   }
   function talk(c) {
@@ -858,7 +862,7 @@
   cv.addEventListener('pointerdown', e => {
     initAudio();
     if (mode !== 'game' && mode !== 'sandbox' && mode !== 'title') return;
-    const cs = candidates(); let best = null, bd = 60 * U;
+    const cs = candidates(); let best = null, bd = Infinity; // en yakın karakter, mesafe sınırı yok
     for (const c of cs) { const d = Math.hypot(c[0] - e.clientX, c[1] - e.clientY); if (d < bd) { bd = d; best = c; } }
     if (best) talk(best);
   });
