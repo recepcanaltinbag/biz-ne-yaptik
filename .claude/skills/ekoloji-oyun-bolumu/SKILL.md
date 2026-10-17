@@ -79,6 +79,24 @@ Bu kurallar kullanıcının geri bildirimleriyle tek tek oturtuldu. Yeni bölüm
 - **Abartı ödüllendirilsin:** oyuncu bir kaydırıcıyı uca götürünce ona özel, büyük bir sahne gelsin (ör. %70 üstü seferberlikte 5 kişilik tencere rock grubu).
 - **Hareket akıcı olsun:** kuşlarda rastgele titreme yok; yavaş dönen yön (wander), seyir hızına yumuşak yaklaşma, ivme sınırı, dönüşte yatma, tırmanırken hızlı çırpma ve alçalırken süzülme. İnsanlar birbirinin içinden geçmez, gruplar yan yana yürür. Figür çevirirken yalnız yatay ölçekle (`scale(dir * s, s)`), dikeyi asla ters çevirme.
 
+## Tutarlılık kuralları (kullanıcının yakaladığı hatalardan, bir daha yapma)
+- **Oyuncunun kararını asla gizlice ezme.** Sistem baskısı (güven, kota) bir karar anına dönüşsün: karakter gelir, sorar, oyuncu seçer. Kaydırıcıyı oyuncu habersizce değiştirmek yok. Direnmeyi seçerse oyun dürüstçe biter ("görevden alındın" sonucu).
+- **Her değişimin ekranda görünür bir nedeni olsun.** Bir gösterge düşüyorsa bunu yapan karakter ya da olay sahnede görünmeli ve bir kartla söylenmeli.
+- **Ses ve görüntü modelle tutarlı olsun.** Tencere çalan yoksa tencere sesi yok. Kaydırıcıya bağlı sahneler (grup, konser, çocuklar) kaydırıcı inince hemen biter.
+- **İpucu bağlama uysun.** Kaydırıcı zaten yüksekken "artır" deme.
+- **Figürler doğru yöne baksın.** Yalnız yatayda çevir, ters yürüyen ya da baş aşağı çizilen karakter olmasın.
+- **Kartlar okunmadan kapanmasın.** Önemli kartlar dokununca geçer.
+
+## Yayından önce kontrol listesi (zorunlu)
+1. **Uç değer testleri** (node ya da `?debug&hizli` ile): her kaydırıcı %0 ve %100'de baştan sona oynatılır. Sonra şu sorular sorulur:
+   - Kaydırıcı %0'dayken "olmaması gereken" bir şey oluyor mu? (ör. seferberlik %0'da serçe azalmamalı: `minS == 1`)
+   - Hep-maksimum stratejisi kazanıyor mu? Kazanmamalı.
+   - Kimse kaydırıcıyı oyuncudan habersiz değiştiriyor mu?
+2. **Ses ve görüntü tutarlılığı:** her ses ve her sahne için "bunu sahnede kim yapıyor?" sorusunun cevabı olmalı.
+3. **Akış logu:** gerçek hızda kart açılış ve kapanış zamanları loglanır. Arka arkaya kart, 15 saniyeden uzun boşluk ya da kendiliğinden kapanan önemli kart olmamalı.
+4. **Sığma:** 1440×900, 1024×768, 375×812 ve 360×640'ta her ekranda `scrollHeight <= innerHeight` olmalı (metin sayfaları hariç). Yatay taşma da olmamalı.
+5. Bütün dosyalarda `node --check` çalıştırılır, konsolda hata kalmamalı. Ardından `?v=` sürümü artırılır, push edilir ve canlı sürüm curl ile kontrol edilir.
+
 ## Görsel ve ses
 - Palet: doğal yeşil (`#e9f0de`). Ekosistem bozuldukça arka plan `#f4dbd1` tonuna kayar. Yazıların arkasında yarı saydam beyaz zemin olur.
 - Fotoğraflar Wikimedia Commons'tan (kamu malı veya CC) alınır, atıflı kullanılır ve `toon.js` ile işlenir. Fotoğraf seçerken kırpma ve içerik uyumuna dikkat et (ör. morina bölümünde balık görseli olsun).

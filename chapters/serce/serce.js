@@ -80,6 +80,7 @@
   }
   function clang(x) {
     if (!AC) return;
+    if (mode === 'game' && (!game.campaign || game.k <= 0)) return; // tencere çalan yoksa ses de yok
     const t = AC.currentTime, out = pan(x);
     [[523, .2], [1187, .11], [1873, .07], [2650, .04]].forEach(([f, g], i) => {
       const o = AC.createOscillator(), e = AC.createGain();
@@ -651,7 +652,8 @@
     }
     for (let i = gags.length - 1; i >= 0; i--) {
       const g = gags[i], p = (t - g.t0) / g.dur;
-      if (p >= 1) { gags.splice(i, 1); continue; }
+      // oyuncu kaydırıcıyı indirince ona bağlı sahne de biter
+      if (p >= 1 || (g.kind === 'band' && game.k < 0.7) || (g.kind === 'concert' && game.k < 0.3) || (g.kind === 'kids' && game.k <= 0)) { gags.splice(i, 1); continue; }
       if (g.kind === 'kids') {
         const X = q => g.dir > 0 ? lerp(-40, x1 + 40, q) : lerp(x1 + 40, -40, q);
         const bx = X(p + 0.12), by = g.y - 70 * U + Math.sin(t * 0.01) * 10 * U;
@@ -1006,7 +1008,7 @@
     Object.assign(game, {
       started: false, paused: false, state: 'play', frac: 0, campaign: true, quota: 25, yearKills: 0, totalKills: 0,
       fired: new Set(), hist: [], stoppedBy: null, stoppedAt: undefined, sAtStop: 0,
-      k: 0, lies: 0, food: [], trust: 70, replaced: false, speed: 1, touched: false, reading: 0,
+      k: 0, lies: 0, food: [], inspected: false, trust: 70, replaced: false, speed: 1, touched: false, reading: 0,
     });
     gK.value = 10; gK.disabled = false;
     document.querySelectorAll('.coach').forEach(uncoach);
@@ -1117,11 +1119,28 @@
     if (game.frac >= 1) { game.frac -= 1; monthTick(); }
   }
 
+  // güven sıfırlanınca müfettiş gelir; karar yine oyuncunundur
   function replaceMinister() {
-    game.replaced = true; game.trust = 0;
-    gK.value = 100; gK.disabled = true; readGameSliders();
-    toast('📜', 'Pekin', 'Görevden alındın. Yerine gelen bakan kampanyayı sonuna kadar açtı.', 'bad');
+    if (game.inspected) return;
+    game.inspected = true; game.state = 'visit'; if (game.speed > 1) setSpeed(1);
+    const m = $('modal');
+    m.innerHTML = `<div class="card talk"><div class="who"></div><div><div class="from">Pekin'den müfettiş</div><h2>Pekin'in sabrı tükendi</h2><p class="speech">"Yoldaş, köyün kampanyada en geride. Seferberliği hemen artırmazsan görevden alınacaksın."</p><div class="opts"></div></div></div>`;
+    m.querySelector('.who').appendChild(officialPortrait());
+    const box = m.querySelector('.opts');
+    [
+      { label: 'Tamam, artırıyorum', sub: 'Seferberlik en az %60 olur, oyun sürer', fn: () => {
+        gK.value = Math.max(Number(gK.value), 60); readGameSliders(); game.trust = 35; game.state = 'play';
+        toast('📣', 'Köy hoparlörü', 'Seferberlik artırıldı. Müfettiş memnun ayrıldı.', 'warn');
+      } },
+      { label: 'Hayır, serçelere dokunmayacağım', sub: 'Görevden alınırsın ve oyun burada biter', fn: () => {
+        game.replaced = true; game.state = 'play';
+        toast('📜', 'Pekin', 'Görevden alındın. Ama vicdanın rahat.', 'bad');
+        endGame();
+      } },
+    ].forEach(o => { const btn = document.createElement('button'); btn.className = 'opt'; btn.innerHTML = `${o.label}<small>${o.sub}</small>`; btn.onclick = () => { m.hidden = true; o.fn(); }; box.appendChild(btn); });
+    m.hidden = false;
   }
+
 
   function monthTick() {
     const cm = calMonth(gs.m);
@@ -1131,7 +1150,7 @@
 
     // Pekin'in güveni: kampanya kısıldıkça düşer
     if (game.campaign && !game.replaced) {
-      game.trust = clamp(game.trust + (game.k - 0.45) * 14, 0, 100);
+      game.trust = clamp(game.trust + (game.k - 0.35) * 8, 0, 100);
       if (game.k < 0.3 && game.trust < 60) once('warn1-' + yearKey(), () => toast('📞', 'Parti sekreteri', 'Tencereler neden bu kadar sessiz? Komşu köyler kotayı çoktan doldurdu.', 'warn'));
       if (game.trust < 40 && game.k < 0.6) once('coach-trust', () => coach(gK, '👉 Pekin kızıyor: seferberliği artır'));
       if (game.trust < 25) once('warn2', () => toast('⚠️', 'Pekin', 'Pekin\'den sert bir mektup geldi: "Kampanyayı ciddiye alın." Son uyarı.', 'bad'));
@@ -1221,7 +1240,7 @@
     game.state = 'play';
     if (!game.campaign) return;
     const met = game.yearKills >= game.quota;
-    if (!met && !game.replaced) { game.trust = clamp(game.trust - 20, 0, 100); if (game.trust <= 0) replaceMinister(); }
+    if (!met && !game.replaced) { game.trust = clamp(game.trust - 10, 0, 100); if (game.trust <= 0) replaceMinister(); }
     if (i === 0) toast('📻', 'Pekin', met ? 'Kooperatiflerden "rekor hasat" raporları yağıyor. 1959 kotası 40 serçe!' : 'Kotanın gerisinde kaldın. 1959 kotası yine de 40 serçe.', met ? '' : 'warn');
     game.quota = 40; game.yearKills = 0; renderQuota();
   }
@@ -1273,11 +1292,11 @@
 
 
   function renderResult() {
-    if (gs.harvests.length < 3) { $('result').innerHTML = '<h2>Önce oyunu bitir</h2><button class="hbtn" data-g="3">← Oyuna dön</button>'; $('result').querySelector('button').onclick = () => goTo(slideOf('game')); return; }
-    const you = [0, 1, 2].map(i => hIdx(gs, i, BASE)), his = [0, 1, 2].map(i => hIdx(HISTORY, i, BASE));
-    const avg = you.reduce((a, b) => a + b) / 3, k = game.totalKills;
+    if (gs.harvests.length < 3 && !game.replaced) { $('result').innerHTML = '<h2>Önce oyunu bitir</h2><button class="hbtn" data-g="3">← Oyuna dön</button>'; $('result').querySelector('button').onclick = () => goTo(slideOf('game')); return; }
+    const you = [0, 1, 2].map(i => gs.harvests[i] === undefined ? null : hIdx(gs, i, BASE)), his = [0, 1, 2].map(i => hIdx(HISTORY, i, BASE));
+    const done = you.filter(v => v !== null), avg = done.length ? done.reduce((a, b) => a + b) / done.length : 100, k = game.totalKills;
     let title, text;
-    if (game.replaced) { title = 'Görevden alındın'; text = 'Kuşbilimcileri dinledin ve koltuğunu kaybettin. Yerine gelen bakan tarihi tekrarladı. Doğru şeyi bilmek yetmiyor; sistemin de dinlemesi gerekiyor.'; }
+    if (game.replaced) { title = 'Görevden alındın'; text = 'Doğru bildiğini yaptın ve koltuğunu kaybettin. Tarihte kampanya yine de sürdü; itiraz edenler çoğu zaman susturuldu. Doğru şeyi bilmek yetmiyor, sistemin de dinlemesi gerekiyor.'; }
     else if (k === 0) { title = 'Tencereni hiç çalmadın'; text = 'Kota tutmadı ve Pekin\'in güvenini zor korudun. Ama ambarların doldu, kuşlar hâlâ ötüyor. Tarih kitapları seni yazmayacak ve en iyi sonuç bu.'; }
     else if (avg >= 93) { title = 'Erken durdun'; text = 'Kampanyaya katıldın ama ekosistemi kırmadan bıraktın. Bazen en iyi politika bir şey yapmamaktır, ama bunun için kimse heykel dikmez.'; }
     else if (avg >= 78) { title = 'Geç de olsa fark ettin'; text = 'Serçeler geri dönüyor ama acele etmiyorlar: yılda yalnızca bir iki kez kuluçkaya yatarlar. Bazı köyler yine de aç kaldı.'; }
@@ -1285,10 +1304,10 @@
     if (game.lies >= 2) text += ' Raporları şişirerek Pekin\'i mutlu ettin; bedelini köylüler ödedi.';
     const col = v => v >= 90 ? 'var(--green)' : v >= 70 ? 'var(--grain)' : 'var(--danger)';
     $('result').innerHTML = `
-      <div class="kicker">Şubat 1961 · görev süren doldu</div>
+      <div class="kicker">${game.replaced ? `${MONTHS[calMonth(Math.min(gs.m, TOTAL - 1))]} ${calYear(Math.min(gs.m, TOTAL - 1))} · görevden alındın` : 'Şubat 1961 · görev süren doldu'}</div>
       <h2>${title}</h2>
       <p class="verdict">${text}</p>
-      <div class="rgrid">${you.map((v, i) => `<div><div class="y">${1958 + i} hasadı</div><div class="v" style="color:${col(v)}">%${v}</div><div class="h">tarihte: %${his[i]}</div></div>`).join('')}</div>
+      <div class="rgrid">${you.map((v, i) => `<div><div class="y">${1958 + i} hasadı</div><div class="v" style="color:${v === null ? 'var(--ink-soft)' : col(v)}">${v === null ? '—' : '%' + v}</div><div class="h">tarihte: %${his[i]}</div></div>`).join('')}</div>
       <p class="verdict">Düşürdüğün serçe: <b>${k}</b>. Gerçekte bu sayı yüz milyonlarcaydı.${game.food.some(f => f < 70) ? ` Şişirilmiş raporlar yüzünden köylünün payı bir yıl normalin <b>%${Math.min(...game.food)}</b>'ine düştü. Gerçek kıtlığı en çok bu büyüttü.` : ''}</p>
       <canvas class="rchart" id="rchart"></canvas>
       <div class="legend"><span style="--c:var(--bird)">Serçe</span><span style="--c:var(--bug)">Böcek</span><span style="--c:var(--grain)">Tahıl</span><span style="--c:#9aa59a">Tarihteki serçe (kesikli)</span></div>
