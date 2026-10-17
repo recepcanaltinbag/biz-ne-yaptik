@@ -419,6 +419,7 @@
       st: M.newState(), frac: 0, speed: 1, paused: false, reading: 0, fired: new Set(), hist: [], fade: 0, unlocked: {},
     });
     Object.values(sliders).forEach(s => { s.value = 0; s.disabled = true; });
+    document.querySelectorAll('.coach').forEach(uncoach);
     ['collect', 'teach', 'fence'].forEach(k => { $('w-' + k).classList.add('locked'); $('o-' + k).textContent = '🔒 ' + UNLOCK[k]; });
     $('g-pause').textContent = '❚❚ Durdur'; $('g-speed').textContent = '1×';
     $('modal').hidden = true; $('milestone').hidden = true; $('toasts').innerHTML = ''; toastQueue.length = 0; lastToastAt = -1e9;
@@ -427,6 +428,15 @@
     readPolicy(); updatePanel();
   }
   function once(key, fn) { if (!game.fired.has(key)) { game.fired.add(key); fn(); } }
+  // rehber ipucu: yeni açılan aracı parlatır
+  function coach(input, text, ms = 14000) {
+    const card = input.closest('.sl'); if (!card || input.disabled) return;
+    uncoach(card); card.classList.add('coach');
+    const tip = document.createElement('div'); tip.className = 'coach-tip'; tip.textContent = text; card.appendChild(tip);
+    const done = () => uncoach(card);
+    input.addEventListener('input', done, { once: true }); card._coachT = setTimeout(done, ms);
+  }
+  function uncoach(card) { card.classList.remove('coach'); card.querySelectorAll('.coach-tip').forEach(t => t.remove()); clearTimeout(card._coachT); }
 
   function readPolicy(changed) {
     // ortak bütçe: toplam 100 puanı aşamaz
@@ -518,7 +528,7 @@
   function unlock(k, text) {
     game.unlocked[k] = true;
     sliders[k].disabled = false; $('w-' + k).classList.remove('locked'); readPolicy();
-    toast(k === 'collect' ? '🪣' : k === 'teach' ? '🎓' : '🚧', 'Yeni araç açıldı', text, 'good', { pause: true });
+    toast(k === 'collect' ? '🪣' : k === 'teach' ? '🎓' : '🚧', 'Yeni araç açıldı', text, 'good', { pause: true, then: () => coach(sliders[k], k === 'collect' ? '👉 Bütçeden pay ayır' : '👉 Bunu da dene') });
     blip(1000);
   }
 

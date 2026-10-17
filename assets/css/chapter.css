@@ -481,3 +481,15 @@ input[type=range]::-moz-range-thumb { width: 24px; height: 24px; border-radius: 
 @media (max-width: 760px) { .facts li { grid-template-columns: 1fr; gap: 0; } }
 .dock .gp-hud #g-phase { display: none; }
 @media (max-width: 760px) { .dock .slide[data-mode="game"] .gpanel .gp-hud .goal { display: none; } }
+
+/* Rehber ipucu: oyuncuya ne yapacağını gösteren parlayan kaydırıcı ve balon */
+.sl { position: relative; }
+.coach { animation: coachPulse 1.3s ease-in-out infinite; }
+@keyframes coachPulse { 50% { box-shadow: 0 4px 0 var(--ink), 0 0 0 7px rgba(79,122,74,.35); } }
+.coach-tip {
+  position: absolute; left: 50%; bottom: calc(100% + 12px); transform: translateX(-50%); z-index: 3;
+  background: var(--ink); color: #fff; font: 1.05rem var(--hand); padding: 4px 12px; border-radius: 10px; white-space: nowrap;
+  pointer-events: none; animation: tipBob 1.3s ease-in-out infinite;
+}
+.coach-tip::after { content: ""; position: absolute; left: 50%; top: 100%; transform: translateX(-50%); border: 7px solid transparent; border-top-color: var(--ink); }
+@keyframes tipBob { 50% { transform: translateX(-50%) translateY(-4px); } }

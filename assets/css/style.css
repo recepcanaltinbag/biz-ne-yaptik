@@ -65,3 +65,4 @@ footer ul { padding-left: 18px; }
 .card:hover .thumb img.toon-layer { opacity: 0; }
 .card.soon .thumb img.toon-layer { filter: grayscale(.3); }
 .thumb img.fit-contain { object-fit: contain; background: #f4f1e6; padding: 10px; }
+footer .byline { margin-top: 14px; font-size: .8rem; opacity: .75; }

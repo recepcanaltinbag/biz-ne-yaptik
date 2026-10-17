@@ -712,7 +712,11 @@
       fired: new Set(), hist: [], stoppedBy: null, stoppedAt: undefined, sAtStop: 0,
       k: 0, lie: 0, food: [], trust: 70, replaced: false, speed: 1, touched: false, reading: 0,
     });
-    gK.value = 0; gSpray.value = 0; gK.disabled = false; readGameSliders();
+    gK.value = 10; gSpray.value = 0; gK.disabled = false; gSpray.disabled = true;
+    gSpray.closest('.sl').classList.add('locked');
+    document.querySelectorAll('.coach').forEach(uncoach);
+    readGameSliders();
+    $('o-lie').textContent = '🔒 Ekim 1958';
     $('g-pause').textContent = '❚❚ Durdur'; $('g-speed').textContent = '1×';
     $('modal').hidden = true; $('harvest').hidden = true; $('toasts').innerHTML = ''; toastQueue.length = 0; lastToastAt = -1e9;
     $('g-intro').classList.remove('gone');
@@ -723,7 +727,7 @@
 
   function readGameSliders() {
     game.k = gK.value / 100; game.lie = gSpray.value / 100;
-    $('o-k').textContent = '%' + gK.value; $('o-lie').textContent = '%' + gSpray.value;
+    $('o-k').textContent = '%' + gK.value; if (!gSpray.disabled) $('o-lie').textContent = '%' + gSpray.value;
   }
   [gK, gSpray].forEach(el => el.addEventListener('input', () => {
     initAudio(); readGameSliders();
@@ -744,6 +748,18 @@
     [28000, '📻', 'Pekin', 'Kampanya başladı. 1958 kotası: köy başına <b>25 serçe</b>. Seferberliği sen ayarla.', 'warn', { ms: 9000 }],
   ];
 
+  // rehber ipucu: bir kaydırıcıyı parlatır, üstüne kısa bir yönerge koyar
+  function coach(input, text, ms = 14000) {
+    const card = input.closest('.sl'); if (!card || input.disabled) return;
+    uncoach(card);
+    card.classList.add('coach');
+    const tip = document.createElement('div'); tip.className = 'coach-tip'; tip.textContent = text; card.appendChild(tip);
+    const done = () => uncoach(card);
+    input.addEventListener('input', done, { once: true });
+    card._coachT = setTimeout(done, ms);
+  }
+  function uncoach(card) { card.classList.remove('coach'); card.querySelectorAll('.coach-tip').forEach(t => t.remove()); clearTimeout(card._coachT); }
+
   function once(key, fn) { if (!game.fired.has(key)) { game.fired.add(key); fn(); } }
   const yearKey = () => calYear(Math.min(gs.m, TOTAL - 1));
 
@@ -752,7 +768,8 @@
     if (!game.started) {
       game.started = true;
       const show = i => {
-        if (i >= STORY.length || mode !== 'game') return;
+        if (mode !== 'game') return;
+        if (i >= STORY.length) return coach(gK, '👉 Kaydır: daha çok tencere');
         const [, ic, from, text, tone, opt] = STORY[i];
         toast(ic, from, text, tone, { ...opt, then: opt.pause ? () => show(i + 1) : undefined });
         if (!opt.pause) setTimeout(() => show(i + 1), 9000 / Math.max(1, FAST / 2));
@@ -815,6 +832,7 @@
     if (game.campaign && !game.replaced) {
       game.trust = clamp(game.trust + (game.k - 0.45) * 14 + game.lie * 7, 0, 100);
       if (game.k < 0.3 && game.trust < 60) once('warn1-' + yearKey(), () => toast('📞', 'Parti sekreteri', 'Tencereler neden bu kadar sessiz? Komşu köyler kotayı çoktan doldurdu.', 'warn'));
+      if (game.trust < 40) once('coach-trust', () => coach(gSpray.disabled ? gK : gSpray, gSpray.disabled ? '👉 Pekin kızıyor: seferberliği artır' : '👉 Ya seferberliği artır ya raporu şişir'));
       if (game.trust < 25) once('warn2', () => toast('⚠️', 'Pekin', 'Hakkında "sağcı sapma" raporu yazıldı. Son uyarı.', 'bad'));
       if (game.trust <= 0) replaceMinister();
     }
@@ -874,6 +892,10 @@
     if (!game.campaign) return;
     const met = game.yearKills >= game.quota;
     if (!met && !game.replaced) { game.trust = clamp(game.trust - 20, 0, 100); if (game.trust <= 0) replaceMinister(); }
+    if (i === 0 && gSpray.disabled) {
+      gSpray.disabled = false; gSpray.closest('.sl').classList.remove('locked'); readGameSliders();
+      toast('📝', 'Yeni seçenek: Rapordaki abartı', 'Hasadı olduğundan büyük yazabilirsin. Pekin sevinir, güveni artar. Ama devlet tahılı bu rakama göre toplar ve köylüye daha az kalır.', '', { pause: true, then: () => coach(gSpray, '👉 İstersen dene: raporu şişir') });
+    }
     if (i === 0) toast('📻', 'Pekin', met ? 'Kooperatiflerden "rekor hasat" raporları yağıyor. 1959 kotası 40 serçe!' : 'Kotanın gerisinde kaldın. 1959 kotası yine de 40 serçe.', met ? '' : 'warn');
     if (i === 1 && v < 85) toast('📝', 'Rapor', 'Ambarlar yarı boş ama Pekin\'e giden raporda "rekor hasat" yazıyor.', 'warn');
     game.quota = 40; game.yearKills = 0; renderQuota();
@@ -884,6 +906,7 @@
     setTimeout(() => { if (mode === 'game') goTo(slideOf('result')); }, 1500);
   }
   resetGame();
+  if (/[?&]debug\b/.test(location.search)) window.__dbg = { game, get gs() { return gs; }, get mode() { return mode; } };
 
 
   function renderResult() {
