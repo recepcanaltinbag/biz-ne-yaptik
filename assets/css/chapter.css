@@ -535,3 +535,20 @@ input[type=range]::-moz-range-thumb { width: 24px; height: 24px; border-radius: 
 .yearbar:not(.dock *) .yb-speed { display: none; }
 @media (max-width: 760px) { .yb-speed { right: 6px; font-size: .9rem; padding: 0 8px; } }
 @media (max-width: 760px) { .dock .slide[data-mode="game"] .topbox .yearbar { padding-right: 58px; } }
+/* yılın yanında son hasat */
+.yb-harvest { position: absolute; left: 12px; top: 50%; transform: translateY(-60%); font: 1.1rem var(--hand); }
+@media (max-width: 760px) { .yb-harvest { position: static; transform: none; font-size: .9rem; order: 3; } }
+/* hasat kartı */
+.harvest .hcard {
+  background: var(--paper) !important; border: 2px solid var(--ink); border-radius: 20px; box-shadow: 0 6px 0 var(--ink), 0 30px 80px rgba(43,58,46,.2);
+  padding: 18px 34px 16px !important; min-width: min(380px, 86vw); animation: cardIn2 .45s ease both;
+}
+@keyframes cardIn2 { from { opacity: 0; transform: translateY(14px) scale(.96); } }
+.harvest .sheaves { font-size: 2rem; letter-spacing: 4px; margin: 2px 0 -6px; }
+.harvest .hbar { position: relative; height: 12px; border-radius: 99px; background: rgba(43,58,46,.12); margin: 8px 0 8px; overflow: visible; }
+.harvest .hbar i { display: block; height: 100%; border-radius: 99px; transition: width .1s linear; }
+.harvest .hbar b { position: absolute; top: -5px; bottom: -5px; left: calc(100% / 1.2); width: 3px; background: var(--ink); border-radius: 2px; }
+.harvest { background: rgba(43,58,46,.12); }
+@media (max-width: 760px) { .harvest .sheaves { font-size: 1.5rem; } .harvest .hcard { padding: 14px 20px 12px !important; } }
+@media (max-width: 760px) { .dock .slide[data-mode="game"] .topbox .yb-harvest { order: 1; } .dock .slide[data-mode="game"] .topbox .yb-track { order: 2; } }
+.slide[data-mode="game"] .harvest, .slide[data-mode="game"] .modal { z-index: 20; }

@@ -309,29 +309,29 @@
     // arka tepe
     const hillC = mixC(PAL.hill, PAL.hillBad, vis.bad);
     ctx.fillStyle = rgb(winter ? mixC(hillC, PAL.grassWinter, 0.5) : hillC);
-    ctx.beginPath(); ctx.moveTo(0, gb);
+    ctx.beginPath(); ctx.moveTo(0, H);
     for (let x = 0; x <= x1 + 10; x += 12) ctx.lineTo(x, gt - 26 * U - Math.sin(x * 0.004 + 0.8) * 22 * U - Math.sin(x * 0.011) * 8 * U);
-    ctx.lineTo(x1, gb); ctx.closePath(); ctx.fill();
+    ctx.lineTo(x1, H); ctx.closePath(); ctx.fill();
 
     // tarla
     let grass = mixC(PAL.grass, PAL.grassBad, clamp(vis.bad * 1.1));
     if (winter) grass = mixC(grass, PAL.grassWinter, 0.6);
     ctx.fillStyle = rgb(grass);
-    ctx.beginPath(); ctx.moveTo(0, gb);
+    ctx.beginPath(); ctx.moveTo(0, H);
     for (let x = 0; x <= x1 + 10; x += 10) ctx.lineTo(x, groundY(x));
-    ctx.lineTo(x1, gb); ctx.closePath(); ctx.fill();
+    ctx.lineTo(x1, H); ctx.closePath(); ctx.fill();
     ctx.strokeStyle = rgb(PAL.ink, 0.5); ctx.lineWidth = 2;
     ctx.beginPath(); for (let x = 0; x <= x1 + 10; x += 10) x ? ctx.lineTo(x, groundY(x)) : ctx.moveTo(x, groundY(x)); ctx.stroke();
 
     // başaklar: arkadan öne sıralar
-    const rows = [0.1, 0.26, 0.44, 0.64, 0.86], bandH = gb - gt;
+    const rows = [0.06, 0.16, 0.28, 0.41, 0.55, 0.7, 0.86], bandH = gb - gt, stalkH = Math.max(bandH, H - gt);
     let stem = mixC(PAL.stem, PAL.stemRipe, ripe); stem = mixC(stem, PAL.stemDry, clamp(dmg * 0.9));
     const head = mixC(PAL.head, PAL.stemDry, clamp(dmg * 0.8));
     const headK = smooth(0.45, 0.85, g) * (0.45 + 0.55 * clamp(vis.Fr));
     ctx.lineCap = 'round';
     rows.forEach((rf, ri) => {
       const sc = (0.65 + rf * 0.75) * U, gap = 15 * sc;
-      const y0 = gt + rf * bandH;
+      const y0 = gt + rf * stalkH;
       ctx.strokeStyle = rgb(g < 0.04 ? PAL.stubble : stem); ctx.lineWidth = 2.2 * sc;
       ctx.beginPath();
       const tips = [];
@@ -814,7 +814,7 @@
     document.querySelectorAll('.coach').forEach(uncoach);
     readGameSliders();
     $('g-pause').textContent = '❚❚ Durdur'; if (typeof setSpeed === 'function') setSpeed(1);
-    $('modal').hidden = true; $('harvest').hidden = true; $('toasts').innerHTML = ''; toastQueue.length = 0; lastToastAt = -1e9;
+    $('modal').hidden = true; $('harvest').hidden = true; if ($('yb-harvest')) $('yb-harvest').textContent = ''; $('toasts').innerHTML = ''; toastQueue.length = 0; lastToastAt = -1e9;
     $('g-intro').classList.remove('gone');
     birds.forEach(b => { if (b.fallen) b.a = 0; });
     villagers.length = 0; official = null; if (typeof gags !== 'undefined') { gags.length = 0; nextGag = 0; }
@@ -859,7 +859,7 @@
     const tip = document.createElement('div'); tip.className = 'coach-tip'; tip.textContent = text; card.appendChild(tip);
     const done = () => uncoach(card);
     input.addEventListener('input', done, { once: true });
-    card._coachT = setTimeout(done, ms);
+    if (ms) card._coachT = setTimeout(done, ms);
   }
   function uncoach(card) { card.classList.remove('coach'); card.querySelectorAll('.coach-tip').forEach(t => t.remove()); clearTimeout(card._coachT); }
 
@@ -872,7 +872,7 @@
       game.started = true;
       const show = i => {
         if (mode !== 'game') return;
-        if (i >= STORY.length) return coach(gK, '👉 Kaydır: daha çok tencere');
+        if (i >= STORY.length) return coach(gK, '👉 Kaydır: daha çok tencere', 0);
         const [, ic, from, text, tone, opt] = STORY[i];
         toast(ic, from, text, tone, { ...opt, then: opt.pause ? () => show(i + 1) : undefined });
         if (!opt.pause) setTimeout(() => show(i + 1), 9000 / Math.max(1, FAST / 2));
@@ -936,7 +936,7 @@
       game.trust = clamp(game.trust + (game.k - 0.45) * 14, 0, 100);
       if (game.k < 0.3 && game.trust < 60) once('warn1-' + yearKey(), () => toast('📞', 'Parti sekreteri', 'Tencereler neden bu kadar sessiz? Komşu köyler kotayı çoktan doldurdu.', 'warn'));
       if (game.trust < 40) once('coach-trust', () => coach(gK, '👉 Pekin kızıyor: seferberliği artır'));
-      if (game.trust < 25) once('warn2', () => toast('⚠️', 'Pekin', 'Hakkında "sağcı sapma" raporu yazıldı. Son uyarı.', 'bad'));
+      if (game.trust < 25) once('warn2', () => toast('⚠️', 'Pekin', 'Pekin\'den sert bir mektup geldi: "Kampanyayı ciddiye alın." Son uyarı.', 'bad'));
       if (game.trust <= 0) replaceMinister();
     }
     if (game.campaign && isWarm(cm)) {
@@ -969,13 +969,19 @@
     const v = hIdx(gs, i, BASE);
     const el = $('harvest');
     const col = v >= 90 ? 'var(--green)' : v >= 70 ? 'var(--grain)' : 'var(--danger)';
-    el.innerHTML = `<div><div class="k">${1958 + i} hasadı</div><div class="n" style="color:${col}">%<span id="hv-n">0</span></div><div class="s">normal bir yılın yüzdesi olarak</div><div class="tap">devam etmek için dokun</div></div>`;
+    const sheaves = Array.from({ length: 5 }, (_, k) => `<span style="opacity:${clamp(v / 100 * 5 - k, 0.15, 1)}">🌾</span>`).join('');
+    el.innerHTML = `<div class="hcard"><div class="k">${1958 + i} hasadı</div><div class="sheaves">${sheaves}</div>
+      <div class="n" style="color:${col}">%<span id="hv-n">0</span></div>
+      <div class="hbar"><i style="width:0;background:${col}" id="hv-bar"></i><b title="normal yıl"></b></div>
+      <div class="s">normal bir yılın yüzdesi · çizgi: normal yıl</div><div class="tap">devam etmek için dokun</div></div>`;
+    $('yb-harvest').textContent = `🌾 %${v}`; $('yb-harvest').style.color = col;
     el.hidden = false;
     const t0 = performance.now();
     (function count() {
       const k = clamp((performance.now() - t0) / 1100);
       const n = $('hv-n'); if (!n) return;
       n.textContent = Math.round(v * (1 - Math.pow(1 - k, 3)));
+      const bar = $('hv-bar'); if (bar) bar.style.width = Math.min(100, (v / 120) * 100 * (1 - Math.pow(1 - k, 3))) + '%';
       if (k < 1) requestAnimationFrame(count);
     })();
     let done = false;
