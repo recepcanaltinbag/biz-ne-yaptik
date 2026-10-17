@@ -102,3 +102,32 @@ footer .byline { margin-top: 14px; font-size: .8rem; opacity: .75; }
   .badge-panel { position: fixed; left: 8px; right: 8px; top: auto; bottom: 0; width: auto; max-height: 80vh; border-radius: 18px 18px 0 0; box-shadow: 0 -10px 40px rgba(43,58,46,.2); }
   .bp-grid { grid-template-columns: 1fr 1fr; }
 }
+
+/* yapışık üst menü + sezon menüsü */
+.topbar { position: sticky; top: 0; z-index: 45; background: rgba(233,240,222,.86); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); transition: box-shadow .25s, background .25s; }
+.topbar.scrolled { background: rgba(244,247,238,.94); box-shadow: 0 6px 20px rgba(43,58,46,.10); }
+.topbar .wrap { height: 56px; }
+.season { scroll-margin-top: 70px; }
+.season-btn { font: 1.1rem var(--hand); color: var(--ink); background: none; border: 0; cursor: pointer; padding: 4px 6px; border-radius: 10px; white-space: nowrap; }
+.season-btn:hover { background: rgba(255,255,255,.7); }
+.season-menu { position: fixed; z-index: 50; top: 58px; right: max(150px, calc((100vw - 1120px) / 2 + 150px)); width: min(380px, calc(100vw - 24px)); background: #fffdf6; border-radius: 16px; box-shadow: 0 14px 40px rgba(43,58,46,.2); padding: 8px; display: flex; flex-direction: column; max-height: calc(100vh - 80px); overflow-y: auto; }
+.season-menu[hidden] { display: none; }
+.season-menu a { display: grid; grid-template-columns: 70px 1fr auto; align-items: center; gap: 6px; padding: 8px 10px; border-radius: 10px; color: var(--ink); text-decoration: none; font: 1.12rem var(--hand); }
+.season-menu a span { font: 600 .66rem var(--sans); letter-spacing: .12em; text-transform: uppercase; color: var(--ink-soft); }
+.season-menu a em { font: .75rem var(--sans); font-style: normal; color: var(--green); }
+.season-menu a:hover, .season-menu a.on { background: #eef3e4; }
+.badge-panel { position: fixed; top: 58px; }
+@media (max-width: 760px) {
+  .season-menu { left: 8px; right: 8px; width: auto; top: 56px; }
+  .season-menu a { grid-template-columns: 62px 1fr; }
+  .season-menu a em { display: none; }
+  .season-btn { font-size: 1rem; }
+  .badge-panel { top: auto; }
+}
+.brand, .badge-btn { white-space: nowrap; }
+@media (max-width: 760px) {
+  .brand { font-size: 1.12rem; }
+  .topnav { gap: 6px; }
+  .badge-btn { font-size: .95rem; padding: 3px 9px; }
+}
+@media (max-width: 370px) { .badge-btn .bb-word { display: none; } }

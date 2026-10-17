@@ -75,7 +75,7 @@ window.SEASONS = [
   const badge = { live: '<span class="badge live">Oyna</span>', soon: '<span class="badge">Yakında</span>', hope: '<span class="badge hope">Umut · yakında</span>' };
   const root = document.getElementById('seasons');
   root.innerHTML = window.SEASONS.map((s, i) => `
-    <section class="season">
+    <section class="season" id="sezon-${i + 1}">
       <header class="season-head"><span class="num">Sezon ${i + 1}</span><h2>${s.icon} ${esc(s.title)}</h2><p>${esc(s.desc)}</p></header>
       <div class="grid">${s.chapters.map(c => {
         const tag = c.status === 'live' ? `a class="card" href="${c.href}"` : 'div class="card soon"';

@@ -8,17 +8,18 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Inter:wght@400;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/css/badges.css?v=261017143041">
-<link rel="stylesheet" href="assets/css/style.css?v=261017143041">
+<link rel="stylesheet" href="assets/css/badges.css?v=261017143916">
+<link rel="stylesheet" href="assets/css/style.css?v=261017143916">
 </head>
 <body>
 
 <header class="topbar">
   <div class="wrap">
     <a class="brand" href="./">Biz Ne Yaptık?</a>
-    <nav class="topnav"><a href="#bolumler">Bölümler</a><button class="badge-btn" id="badge-btn" aria-expanded="false" aria-controls="badge-panel">🏅 Rozetler <b id="badge-count">0/16</b> ▾</button></nav>
+    <nav class="topnav"><button class="season-btn" id="season-btn" aria-expanded="false" aria-controls="season-menu"><span id="season-now">Sezonlar</span> ▾</button><button class="badge-btn" id="badge-btn" aria-expanded="false" aria-controls="badge-panel">🏅 <span class="bb-word">Rozetler</span> <b id="badge-count">0/16</b> ▾</button></nav>
   </div>
 </header>
+<div class="season-menu" id="season-menu" hidden></div>
 <div class="badge-panel" id="badge-panel" hidden>
   <div class="bp-head"><h2>Rozetler</h2><button class="bp-close" id="badge-close" aria-label="Kapat">✕</button></div>
   <div id="badge-groups"></div>
@@ -53,9 +54,9 @@
     <p class="byline">Hazırlayan: Recep Can Altınbağ</p>
   </div>
 </footer>
-<script src="assets/js/badges.js?v=261017143041"></script>
-<script src="assets/js/toon.js?v=261017143041"></script>
-<script src="assets/js/chapters.js?v=261017143041"></script>
+<script src="assets/js/badges.js?v=261017143916"></script>
+<script src="assets/js/toon.js?v=261017143916"></script>
+<script src="assets/js/chapters.js?v=261017143916"></script>
 <script>
 (() => {
   const B = window.Badges; if (!B) return;
@@ -85,6 +86,30 @@
   document.getElementById('badge-copy').onclick = async () => { const c = B.exportCode(); try { await navigator.clipboard.writeText(c); msg('Kod kopyalandı. Diğer cihazda "Kod yapıştır" ile aç.'); } catch (e) { prompt('Rozet kodun:', c); } };
   document.getElementById('badge-paste').onclick = () => { const c = prompt('Rozet kodunu yapıştır:'); if (!c) return; msg(B.importCode(c) ? 'Rozetler yüklendi.' : 'Bu kod okunamadı.'); render(); };
   render();
+})();
+</script>
+<script>
+(() => {
+  const bar = document.querySelector('.topbar'), btn = document.getElementById('season-btn'), menu = document.getElementById('season-menu'), now = document.getElementById('season-now');
+  const secs = [...document.querySelectorAll('.season')];
+  menu.innerHTML = (window.SEASONS || []).map((s, i) => `<a href="#sezon-${i + 1}" data-i="${i}"><span>Sezon ${i + 1}</span>${s.icon} ${s.title}<em>${s.chapters.filter(c => c.status === 'live').length ? '▶ oynanabilir' : ''}</em></a>`).join('');
+  const open = v => { menu.hidden = !v; btn.setAttribute('aria-expanded', v); };
+  btn.onclick = e => { e.stopPropagation(); const bp = document.getElementById('badge-panel'); if (bp) bp.hidden = true; open(menu.hidden); };
+  menu.onclick = e => { if (e.target.closest('a')) open(false); };
+  document.addEventListener('click', e => { if (!menu.hidden && !menu.contains(e.target) && !btn.contains(e.target)) open(false); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') open(false); });
+  document.getElementById('badge-btn').addEventListener('click', () => open(false));
+  let ticking = false;
+  function spy() {
+    ticking = false;
+    bar.classList.toggle('scrolled', scrollY > 8);
+    let k = -1; secs.forEach((s, i) => { if (s.getBoundingClientRect().top < 140) k = i; });
+    const S = window.SEASONS || [];
+    now.textContent = k >= 0 && S[k] ? `${S[k].icon} Sezon ${k + 1}` : 'Sezonlar';
+    menu.querySelectorAll('a').forEach((a, i) => a.classList.toggle('on', i === k));
+  }
+  addEventListener('scroll', () => { if (!ticking) { ticking = true; requestAnimationFrame(spy); } }, { passive: true });
+  spy();
 })();
 </script>
 </body>
