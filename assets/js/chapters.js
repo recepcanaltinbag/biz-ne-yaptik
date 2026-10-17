@@ -5,7 +5,7 @@ window.SEASONS = [
   { icon: '🐦', title: 'Doğayla Oynamak', desc: 'Bir türü ekle ya da çıkar. Ne olabilir ki?', chapters: [
     { year: '1958', title: 'Serçelere Savaş', status: 'live', href: 'chapters/serce/', text: 'Çin tahılını kurtarmak için serçeleri yok etmeye karar veriyor. Çekirgeler buna çok seviniyor.',
       img: C + '6/6f/Kill_bird_and_insect.jpg', pos: '50% 20%', credit: 'Kampanya afişi, kamu malı', src: 'File:Kill_bird_and_insect.jpg' },
-    { year: '1935', title: 'Kurtarıcı Kurbağa', status: 'soon', text: 'Avustralya şeker kamışı böceğine karşı kurbağa getiriyor. Kurbağa böceği yemiyor, kıtayı ele geçiriyor.',
+    { year: '1935', title: 'Kurtarıcı Kurbağa', status: 'live', href: 'chapters/kurbaga/', text: 'Avustralya şeker kamışı böceğine karşı kurbağa getiriyor. Kurbağa böceği yemiyor, kıtayı ele geçiriyor.',
       img: C + 'thumb/2/2b/Cane_toad_%28Bufo_marinus%29.jpg/960px-Cane_toad_%28Bufo_marinus%29.jpg', credit: 'Charles J. Sharp, CC BY-SA 4.0', src: 'File:Cane_toad_(Bufo_marinus).jpg' },
     { year: '1859', title: '24 Tavşanlık Felaket', status: 'soon', text: 'Bir çiftlik sahibi avlanmak için 24 tavşan salıyor. Birkaç on yıl sonra yüz milyonlarca tavşan kıtanın otlarını kemiriyor.',
       img: C + 'thumb/1/14/CSIRO_ScienceImage_2232_Releasing_the_Myxoma_Virus_for_Rabbits.jpg/960px-CSIRO_ScienceImage_2232_Releasing_the_Myxoma_Virus_for_Rabbits.jpg', credit: 'CSIRO Arşivi, CC BY 3.0', src: 'File:CSIRO_ScienceImage_2232_Releasing_the_Myxoma_Virus_for_Rabbits.jpg' },

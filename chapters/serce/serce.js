@@ -20,7 +20,7 @@
   const isWarm = cm => cm >= 3 && cm <= 8;
   const DEF = { hunt: 0, pest: 0, nest: 0, heat: 1 };
 
-  const newState = () => ({ m: 0, S: 1, P: 0.5, F: 1, tox: 0, harvests: [], hist: [] });
+  const newState = () => ({ m: 0, S: 1, P: 0.5, F: 1, tox: 0, res: 0, harvests: [], hist: [] });
 
   function applyPesticide(st) {
     st.P *= 0.35; st.S *= 0.88; st.tox = Math.min(1, st.tox + 0.35);
@@ -34,10 +34,14 @@
     st.S -= p.hunt * 0.2 * st.S;
     st.S -= st.tox * 0.04 * st.S;
     st.tox = Math.min(1, st.tox + p.pest * 0.1);
-    if (isWarm(cm)) st.P += 0.5 * p.heat * st.P * (1 - st.P / 4) - 0.4 * st.S * st.P - (st.tox * 0.15 + p.pest * 0.3) * st.P;
+    // ilaç zamanla etkisini yitirir: hayatta kalan böcekler dirençli olanlardır
+    st.res = Math.min(0.85, st.res + p.pest * 0.035);
+    const kill = (st.tox * 0.12 + p.pest * 0.3) * (1 - st.res);
+    if (isWarm(cm)) st.P += 0.5 * p.heat * st.P * (1 - st.P / 4) - 0.4 * st.S * st.P - kill * st.P;
     else st.P = Math.max(0.08, st.P * 0.8);
     if (isWarm(cm)) st.F -= st.F * 0.055 * st.P;
     if (cm >= 6 && cm <= 8) st.F -= st.F * 0.025 * st.S;
+    if (isWarm(cm)) st.F -= st.F * 0.03 * st.tox; // kirlilik: toprak, su, tozlaşma
     if (cm === 9) st.harvests.push(st.F);
     st.tox *= 0.92;
     st.S = clamp(st.S); st.P = Math.max(0.05, st.P); st.F = clamp(st.F);
@@ -693,10 +697,13 @@
     const el = document.createElement('div');
     el.className = 'toast ' + tone + (opt.img ? ' story' : '');
     el.innerHTML = (opt.img ? `<img src="${opt.img}" alt="">` : `<div class="ic">${ic}</div>`) +
-      `<div><span class="from">${from}</span>${text}${opt.img ? '<span class="x">dokun: kapat</span>' : ''}</div>`;
+      `<div><span class="from">${from}</span>${text}${opt.pause ? '<button class="go">Devam →</button>' : '<span class="x">dokun: kapat</span>'}</div>`;
+    if (opt.pause) { el.classList.add('pause'); game.reading = (game.reading || 0) + 1; }
     const close = () => {
       if (el.classList.contains('out')) return;
       el.classList.add('out');
+      if (opt.pause) game.reading = Math.max(0, (game.reading || 1) - 1);
+      if (opt.then) setTimeout(opt.then, 900);
       setTimeout(() => { el.remove(); if (toastQueue.length && mode === 'game') toast(...toastQueue.shift()); }, 400);
     };
     el.onclick = close;
@@ -704,7 +711,9 @@
     box.appendChild(el);
     while (box.children.length > 3) box.firstChild.remove();
     if (toastQueue.length > 4) toastQueue.splice(0, toastQueue.length - 4);
-    setTimeout(close, (opt.ms || 7500) * (mobile ? 0.75 : 1));
+    // okuma süresi metnin uzunluğuna göre; durduran kartlar oyuncu kapatana kadar kalır
+    const plain = text.replace(/<[^>]+>/g, '');
+    if (!opt.pause) setTimeout(close, Math.min(16000, Math.max(opt.ms || 0, 4500 + plain.length * 65)));
   }
 
   // =====================================================================
@@ -714,14 +723,14 @@
   const MONTH_WARM = 5200 / FAST, MONTH_COLD = 2600 / FAST;
   let gs = newState();
   const game = {};
-  const gK = $('g-k'), gSpray = $('g-spray');
+  const gK = $('g-k'), gSpray = $('g-lie');
 
   function resetGame() {
     gs = newState();
     Object.assign(game, {
       started: false, paused: false, state: 'play', frac: 0, campaign: true, quota: 25, yearKills: 0, totalKills: 0,
       fired: new Set(), hist: [], usedPesticide: false, stoppedBy: null, stoppedAt: undefined, sAtStop: 0,
-      k: 0, spray: 0, trust: 70, replaced: false, speed: 1, touched: false,
+      k: 0, spray: 0, lie: 0, food: [], trust: 70, replaced: false, speed: 1, touched: false, reading: 0,
     });
     gK.value = 0; gSpray.value = 0; gK.disabled = false; readGameSliders();
     $('g-pause').textContent = '❚❚ Durdur'; $('g-speed').textContent = '1×';
@@ -733,14 +742,13 @@
   }
 
   function readGameSliders() {
-    game.k = gK.value / 100; game.spray = gSpray.value / 100;
-    $('o-k').textContent = '%' + gK.value; $('o-spray').textContent = '%' + gSpray.value;
-    if (game.spray > 0) game.usedPesticide = true;
+    game.k = gK.value / 100; game.lie = gSpray.value / 100; game.spray = 0;
+    $('o-k').textContent = '%' + gK.value; $('o-lie').textContent = '%' + gSpray.value;
   }
   [gK, gSpray].forEach(el => el.addEventListener('input', () => {
     initAudio(); readGameSliders();
     if (!game.touched) { game.touched = true; setTimeout(() => $('g-intro').classList.add('gone'), 2500); }
-    if (el === gSpray && game.spray > 0) once('plane', () => toast('✈️', 'Tarım bakanlığı', 'İlaç uçakları kalkıyor. Böcekler azalacak... kuşlar da.', 'warn'));
+    if (el === gSpray && game.lie > 0) once('lie', () => toast('📝', 'Rapor masası', 'Hasadı olduğundan büyük yazıyorsun. Pekin sevinecek. Ama devlet tahılı bu rakama göre toplayacak.', 'warn'));
     if (el === gK && game.k > 0) once('start-k', () => toast('📣', 'Köy hoparlörü', 'Herkes tencere başına! Serçeler konamasın!'));
   }));
   $('g-pause').onclick = () => { game.paused = !game.paused; $('g-pause').textContent = game.paused ? '▶ Devam' : '❚❚ Durdur'; };
@@ -749,8 +757,8 @@
   // oyun akarken olayları adım adım anlatan kartlar
   const POSTER = 'https://upload.wikimedia.org/wikipedia/commons/6/6f/Kill_bird_and_insect.jpg';
   const STORY = [
-    [600, '🇨🇳', 'Çin · Mart 1958', 'Mao Zedong <b>Büyük İleri Atılım</b>ı başlattı. Hedef birkaç yılda sanayileşmek, tarımda rekor kırmak.', '', { ms: 9000 }],
-    [6500, '', 'Dört Zararlı Kampanyası', 'Dört düşman ilan edildi: <b>fare, sinek, sivrisinek ve serçe</b>. Serçenin suçu tahıl yemek.', '', { img: POSTER, ms: 11000 }],
+    [0, '🇨🇳', 'Çin · Mart 1958', 'Mao Zedong <b>Büyük İleri Atılım</b>ı başlattı. Hedef birkaç yılda sanayileşmek, tarımda rekor kırmak.', '', { pause: true }],
+    [0, '', 'Dört Zararlı Kampanyası', 'Dört düşman ilan edildi: <b>fare, sinek, sivrisinek ve serçe</b>. Serçenin suçu tahıl yemek.', '', { img: POSTER, pause: true }],
     [13500, '🥁', 'Yöntem', 'Köylüler tencere çalınca serçeler konamıyor, yorulup düşüyor. Ne kadar çok tencere, o kadar az serçe.', '', { ms: 9000 }],
     [21000, '🌾', 'Tarladan not', 'Bu tarlada tahıl büyüyor, böcekler tahılı yiyor, serçeler de böcekleri. Bir de bunu aklında tut.', '', { ms: 9000 }],
     [28000, '📻', 'Pekin', 'Kampanya başladı. 1958 kotası: köy başına <b>25 serçe</b>. Seferberliği sen ayarla.', 'warn', { ms: 9000 }],
@@ -763,7 +771,13 @@
     game.paused = false; $('g-pause').textContent = '❚❚ Durdur';
     if (!game.started) {
       game.started = true;
-      STORY.forEach(([ms, ...args]) => setTimeout(() => { if (mode === 'game' && game.started) toast(...args); }, ms / Math.max(1, FAST / 2)));
+      const show = i => {
+        if (i >= STORY.length || mode !== 'game') return;
+        const [, ic, from, text, tone, opt] = STORY[i];
+        toast(ic, from, text, tone, { ...opt, then: opt.pause ? () => show(i + 1) : undefined });
+        if (!opt.pause) setTimeout(() => show(i + 1), 7000 / Math.max(1, FAST / 2));
+      };
+      setTimeout(() => show(0), 500);
     }
   }
 
@@ -797,8 +811,9 @@
   function monthDur() { return (isWarm(calMonth(gs.m)) ? MONTH_WARM : MONTH_COLD) * (gs.m < 2 ? 1.7 : 1) / game.speed; }
 
   function updateGame(dt) {
-    if (mode !== 'game' || game.paused || game.state !== 'play' || gs.m >= TOTAL) return;
-    game.frac += dt / monthDur();
+    if (mode !== 'game' || game.paused || game.reading || game.state !== 'play' || gs.m >= TOTAL) return;
+    const reading = $('toasts').querySelector('.toast:not(.out)') ? 1.6 : 1;
+    game.frac += dt / (monthDur() * reading);
     if (game.frac >= 1) { game.frac -= 1; monthTick(); }
   }
 
@@ -816,7 +831,7 @@
 
     // Pekin'in güveni: kampanya kısıldıkça düşer
     if (game.campaign && !game.replaced) {
-      game.trust = clamp(game.trust + (game.k - 0.45) * 14, 0, 100);
+      game.trust = clamp(game.trust + (game.k - 0.45) * 14 + game.lie * 7, 0, 100);
       if (game.k < 0.3 && game.trust < 60) once('warn1-' + yearKey(), () => toast('📞', 'Parti sekreteri', 'Tencereler neden bu kadar sessiz? Komşu köyler kotayı çoktan doldurdu.', 'warn'));
       if (game.trust < 25) once('warn2', () => toast('⚠️', 'Pekin', 'Hakkında "sağcı sapma" raporu yazıldı. Son uyarı.', 'bad'));
       if (game.trust <= 0) replaceMinister();
@@ -833,8 +848,6 @@
     if (gs.P > 1.3) once('p13', () => toast('🍃', 'Tarla raporu', 'Yapraklarda küçük delikler var. Önemsiz, herhalde.', 'warn'));
     if (gs.P > 2.2) once('p22', () => toast('🦗', 'Tarla raporu', 'Tarlada bir hışırtı var. Bir değil, binlerce.', 'bad'));
     if (gs.P > 3) once('p30', () => toast('⚠️', 'Acil', 'Çekirge sürüleri gökyüzünü karartıyor!', 'bad'));
-    if (gs.tox > 0.3) once('tox', () => toast('🐟', 'Nehir', 'Nehirde ölü balıklar görüldü. Herhalde tesadüftür.', 'bad'));
-    if (gs.tox > 0.25 && gs.P > 1.2) once('treadmill', () => toast('🔁', 'Tarla raporu', 'İlaç böcekleri öldürüyor, ama böcek yiyen kuşları da. İlaç durunca böcekler daha hızlı dönüyor.', 'warn'));
     if ((!game.campaign || game.k === 0) && gs.S > 0.45 && game.hist.length > 6 && gs.S > Math.min(...game.hist.map(h => h.S)) + 0.15)
       once('back', () => toast('🐣', 'Gözlem', 'Serçeler dönüyor. Yavaş ama dönüyorlar.', 'good'));
 
@@ -869,6 +882,11 @@
   }
 
   function afterHarvest(i, v) {
+    // devlet, raporlanan hasadın üçte birini alır; abartı arttıkça köylüye kalan azalır
+    const reported = v * (1 + game.lie), left = Math.max(0, v - 0.33 * reported), food = Math.round(left / 0.67);
+    game.food[i] = food;
+    if (food < 60) toast('🍚', 'Köy ambarı', `Devlet raporlanan hasadın üçte birini aldı. Köylünün payı normalin %${food}'i. Kış zor geçecek.`, 'bad');
+    else if (game.lie > 0.2) toast('🍚', 'Köy ambarı', `Şişirilmiş rapor yüzünden fazla tahıl teslim edildi. Köylünün payı: normalin %${food}'i.`, 'warn');
     if (gs.m >= TOTAL) return endGame();
     game.state = 'play';
     if (!game.campaign) return;
@@ -895,14 +913,14 @@
     else if (avg >= 93) { title = 'Erken durdun'; text = 'Kampanyaya katıldın ama ekosistemi kırmadan bıraktın. Bazen en iyi politika bir şey yapmamaktır, ama bunun için kimse heykel dikmez.'; }
     else if (avg >= 78) { title = 'Geç de olsa fark ettin'; text = 'Serçeler geri dönüyor ama acele etmiyorlar: yılda yalnızca bir iki kez kuluçkaya yatarlar. Bazı köyler yine de aç kaldı.'; }
     else { title = 'Serçelere karşı savaşı kazandın'; text = 'Çekirgeler de kazandı. Kaybeden sadece insanlar oldu. Tebrikler, tarihi başarıyla tekrarladın.'; }
-    if (game.usedPesticide) text += ' Üstelik geride ilaç kirliliği bıraktın.';
+    if (game.lie > 0.3) text += ' Raporları şişirerek koltuğunu korudun; bedelini köylüler ödedi.';
     const col = v => v >= 90 ? 'var(--green)' : v >= 70 ? 'var(--grain)' : 'var(--danger)';
     $('result').innerHTML = `
       <div class="kicker">Şubat 1961 · görev süren doldu</div>
       <h2>${title}</h2>
       <p class="verdict">${text}</p>
       <div class="rgrid">${you.map((v, i) => `<div><div class="y">${1958 + i} hasadı</div><div class="v" style="color:${col(v)}">%${v}</div><div class="h">tarihte: %${his[i]}</div></div>`).join('')}</div>
-      <p class="verdict">Düşürdüğün serçe: <b>${k}</b>. Gerçekte bu sayı yüz milyonlarcaydı.</p>
+      <p class="verdict">Düşürdüğün serçe: <b>${k}</b>. Gerçekte bu sayı yüz milyonlarcaydı.${game.food.some(f => f < 70) ? ` Şişirilmiş raporlar yüzünden köylünün payı bir yıl normalin <b>%${Math.min(...game.food)}</b>'ine düştü. Gerçek kıtlığı en çok bu büyüttü.` : ''}</p>
       <canvas class="rchart" id="rchart"></canvas>
       <div class="legend"><span style="--c:var(--bird)">Serçe</span><span style="--c:var(--bug)">Böcek</span><span style="--c:var(--grain)">Tahıl</span><span style="--c:#9aa59a">Tarihteki serçe (kesikli)</span></div>
       <div class="rbtns"><button class="hbtn" id="r-again">↺ Tekrar oyna</button><button class="hbtn" id="r-next">Kendin dene →</button></div>`;
@@ -941,18 +959,18 @@
   // LABORATUVAR
   // =====================================================================
   const sb = { running: false, speed: 1, frac: 0, st: newState(), p: { ...DEF }, hist: [], lastH: null };
-  const SL = { hunt: 'p-hunt', pest: 'p-pest', nest: 'p-nest', heat: 'p-heat' };
+  const SL = { hunt: 'p-hunt', nest: 'p-nest', heat: 'p-heat' };
   function readSliders() {
-    sb.p.hunt = $('p-hunt').value / 100; sb.p.pest = $('p-pest').value / 100;
+    sb.p.hunt = $('p-hunt').value / 100; sb.p.pest = 0;
     sb.p.nest = $('p-nest').value / 100; sb.p.heat = $('p-heat').value / 100;
-    $('o-hunt').textContent = '%' + $('p-hunt').value; $('o-pest').textContent = '%' + $('p-pest').value;
+    $('o-hunt').textContent = '%' + $('p-hunt').value;
     $('o-nest').textContent = '%' + $('p-nest').value; $('o-heat').textContent = '×' + (sb.p.heat).toFixed(1);
   }
   Object.values(SL).forEach(id => $(id).addEventListener('input', () => { readSliders(); document.querySelectorAll('.pbtn').forEach(b => b.classList.remove('on')); }));
-  const PRESETS = { history: [80, 0, 0, 100], none: [0, 0, 0, 100], spray: [60, 60, 0, 100], nature: [0, 0, 70, 100] };
+  const PRESETS = { history: [80, 0, 100], none: [0, 0, 100], nature: [0, 70, 100], hot: [40, 0, 140] };
   document.querySelectorAll('.pbtn').forEach(b => b.onclick = () => {
     const v = PRESETS[b.dataset.preset];
-    ['p-hunt', 'p-pest', 'p-nest', 'p-heat'].forEach((id, i) => $(id).value = v[i]);
+    ['p-hunt', 'p-nest', 'p-heat'].forEach((id, i) => $(id).value = v[i]);
     readSliders();
     document.querySelectorAll('.pbtn').forEach(x => x.classList.toggle('on', x === b));
   });
@@ -1051,7 +1069,8 @@
       $('m-s').style.width = vis.S * 100 + '%';
       $('m-p').style.width = clamp(vis.P / 4) * 100 + '%';
       $('m-f').style.width = clamp(vis.Fr) * 100 + '%';
-      $('m-t').style.width = clamp(vis.tox) * 100 + '%';
+      const lastFood = game.food.length ? game.food[game.food.length - 1] : 100;
+      $('m-t').style.width = clamp(lastFood / 100) * 100 + '%';
       $('m-trust').style.width = game.trust + '%';
       $('m-trust').parentElement.parentElement.classList.toggle('low', game.trust < 30);
     }

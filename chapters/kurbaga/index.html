@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Kurtarıcı Kurbağa</title>
+<meta name="description" content="Avustralya, 1935: şeker kamışı böceğine karşı 102 kurbağa getirildi. Bugün 200 milyonu aşkın. Oynanabilir bir ekoloji hikâyesi.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/css/chapter.css?v=202610171223">
+<style>
+  .gp-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; font-family: var(--hand); }
+  .gp-stats div { background: #fff; border: 2px solid var(--line); border-radius: 12px; padding: 4px 10px; }
+  .gp-stats small { display: block; color: var(--ink-soft); font-size: .9rem; }
+  .gp-stats b { font-weight: 400; font-size: 1.35rem; }
+  .goal { font-family: var(--hand); font-size: 1.05rem; color: var(--ink-soft); border-left: 4px solid var(--green); padding-left: 10px; }
+  .budget { font-family: var(--hand); font-size: 1.1rem; display: flex; justify-content: space-between; }
+  .sl.locked span { color: var(--ink-soft); }
+  .sl .lock { font-size: .95rem; color: var(--ink-soft); }
+  #m-pred { background: var(--green); }
+  @media (max-width: 760px) { .gp-stats b { font-size: 1.1rem; } .goal { display: none; } }
+</style>
+</head>
+<body>
+<canvas id="world" aria-hidden="true"></canvas>
+
+<header class="bar">
+  <a class="bar-home" href="../../">← Biz Ne Yaptık?</a>
+  <button class="bar-btn" id="sound" aria-label="Sesi aç/kapat">🔊 <span>Ses</span></button>
+</header>
+
+<div class="slides">
+
+  <section class="slide" data-mode="title">
+    <div class="center-col"><div class="glass">
+      <div class="kicker">Biz Ne Yaptık? · Bölüm 2</div>
+      <h1 class="title">Kurtarıcı Kurbağa</h1>
+      <p class="sub">Avustralya, 1935 · oynama süresi ~5 dakika</p>
+      <button class="hbtn big" data-next>Başla →</button>
+    </div></div>
+  </section>
+
+  <section class="slide" data-mode="game">
+    <aside class="gpanel" aria-label="Kontrol masası">
+      <div class="gp-top"><div class="chip date" id="g-year">1935</div><div class="chip" id="g-phase">Kamış tarlası</div></div>
+      <div class="gp-stats">
+        <div><small>Kurbağa</small><b id="s-toads">102</b></div>
+        <div><small>Yayıldığı alan</small><b id="s-area">%0</b></div>
+      </div>
+      <div class="gp-meters">
+        <div class="mrow"><span>🦎 Yerli avcılar</span><span class="track"><i id="m-pred"></i></span></div>
+      </div>
+      <p class="goal" id="g-goal">Hedef: 2025'e kadar yerli avcıları <b>%45'in</b> üstünde tut.</p>
+      <div class="budget"><span>💰 Bütçe</span><span id="g-budget">100 / 100</span></div>
+      <label class="sl big locked" id="w-collect"><span>🪣 Gönüllü toplama <b id="o-collect">🔒 1980</b></span><input type="range" id="g-collect" min="0" max="100" step="5" value="0" disabled></label>
+      <label class="sl big locked" id="w-teach"><span>🎓 Öğretmen kurbağa <b id="o-teach">🔒 2008</b></span><input type="range" id="g-teach" min="0" max="100" step="5" value="0" disabled></label>
+      <label class="sl big locked" id="w-fence"><span>🚧 Su noktası çiti <b id="o-fence">🔒 2010</b></span><input type="range" id="g-fence" min="0" max="100" step="5" value="0" disabled></label>
+      <div class="sb-ctrl">
+        <button class="hbtn sm" id="g-pause">❚❚ Durdur</button>
+        <button class="hbtn sm" id="g-speed">1×</button>
+      </div>
+    </aside>
+    <div id="toasts" aria-live="polite"></div>
+    <div class="harvest" id="milestone" hidden></div>
+    <div class="modal" id="modal" hidden></div>
+  </section>
+
+  <section class="slide scroll" data-mode="result">
+    <div class="result" id="result"></div>
+  </section>
+
+  <section class="slide" data-mode="sandbox">
+    <aside class="sb-panel">
+      <h2>Simülasyon laboratuvarı</h2>
+      <p class="small">Bütçe sınırı yok, zaman 2100'e kadar akıyor. Kuralları değiştir, kıtanın nasıl değiştiğini izle.</p>
+      <div class="presets">
+        <button class="pbtn" data-preset="history">Tarihteki gibi</button>
+        <button class="pbtn" data-preset="all">Her şeyi dene</button>
+        <button class="pbtn" data-preset="noevo">Evrim olmasaydı</button>
+        <button class="pbtn" data-preset="warm">Isınan dünya</button>
+      </div>
+      <label class="sl"><span>🦵 Bacak evrimi (hızlanma) <b id="o-evo"></b></span><input type="range" id="p-evo" min="0" max="100" value="100"></label>
+      <label class="sl"><span>🪣 Gönüllü toplama <b id="o-pcollect"></b></span><input type="range" id="p-collect" min="0" max="100" value="0"></label>
+      <label class="sl"><span>🎓 Öğretmen kurbağa <b id="o-pteach"></b></span><input type="range" id="p-teach" min="0" max="100" value="0"></label>
+      <label class="sl"><span>🚧 Su noktası çiti <b id="o-pfence"></b></span><input type="range" id="p-fence" min="0" max="100" value="0"></label>
+      <label class="sl"><span>🌡️ Isınma <b id="o-warm"></b></span><input type="range" id="p-warm" min="0" max="30" value="0"></label>
+      <canvas id="sb-chart" class="sb-chart"></canvas>
+      <div class="legend"><span style="--c:#8a7a3a">Alan</span><span style="--c:#4f7a4a">Yerli avcılar</span></div>
+      <div class="sb-stats"><span id="sb-year">1935</span><span id="sb-area">Alan: %0</span></div>
+      <div class="sb-ctrl">
+        <button class="hbtn sm" id="sb-play">❚❚ Durdur</button>
+        <button class="hbtn sm" id="sb-speed">1×</button>
+        <button class="hbtn sm" id="sb-reset">↺ Sıfırla</button>
+      </div>
+      <button class="hbtn" data-next>Gerçekte ne oldu? →</button>
+    </aside>
+  </section>
+
+  <section class="slide scroll" data-mode="facts">
+    <article class="paper">
+      <h2>Gerçekte ne oldu?</h2>
+      <p>Haziran 1935'te Hawaii'den Queensland'e <b>102 kamış kurbağası</b> getirildi. Gordonvale yakınındaki deneme istasyonunda üretilen binlerce yavru, kamış böceğiyle savaşmak için şeker bölgelerine salındı.</p>
+      <p>Plan baştan sorunluydu. Yetişkin kamış böcekleri kamışın üst kısımlarında yaşar, larvaları ise toprağın altında kökleri yer. Kurbağa ikisine de ulaşamadı. Böcek bilimci <b>Walter Froggatt</b> kurbağanın "önüne gelen her şeyi" yiyeceği uyarısını yaptı. Salımlar kısa bir süre durduruldu, sonra 1936'da yeniden başladı.</p>
+      <p>Kamış böceği sonunda kurbağalarla değil, kimyasal ilaçlar ve tarım yöntemleriyle kontrol altına alındı. Kurbağalar ise kaldı. Bir dişi bir seferde <b>30 bine kadar yumurta</b> bırakabiliyor. Bugün Avustralya'da <b>200 milyonu aşkın</b> kurbağa olduğu tahmin ediliyor ve kapladıkları alan 1,2 milyon km²'yi geçti.</p>
+      <p>Daha da şaşırtıcısı, kurbağalar yayılırken evrimleşti. Cephenin en önündeki kurbağaların bacakları daha uzun. En hızlılar öne geçiyor ve birbirleriyle çiftleşiyor. Yayılma hızı başlarda yılda 10 km civarındayken, 2000'lerde kuzeyde yılda 50 km'yi aştı.</p>
+      <div class="callout">
+        <b>Asıl kurbanlar:</b> Kurbağanın derisindeki zehir (bufadienolidler) onu yiyen yerli avcıları öldürüyor. Kuzey kedisi (quoll), bazı goanna kertenkeleleri, tatlı su timsahları ve yılanlar çok etkilendi. Bazı bölgelerde goanna nüfusu %90'ın üzerinde düştü. Bazı türler zamanla kurbağadan kaçınmayı öğrendi ya da direnç geliştirdi; ama bu on yıllar sürüyor.
+      </div>
+      <p>Oyundaki araçlar gerçek araştırmalara dayanıyor. <b>Öğretmen kurbağa</b> yöntemi, avcılara kusturucu bir ilaçla işlenmiş küçük kurbağa parçaları ya da yavru kurbağalar verip tadından tiksinmelerini öğretiyor; kuzey kedileriyle yapılan denemelerde hayatta kalmayı artırdı. <b>Su noktası çiti</b> fikri, kurak bölgelerde kurbağaların çiftlik göletlerine muhtaç olmasına dayanıyor: göletler çitlenirse kurbağalar çölü geçemeyebilir.</p>
+      <button class="hbtn" data-next>Peki ne öğrendik? →</button>
+    </article>
+  </section>
+
+  <section class="slide scroll" data-mode="lessons">
+    <article class="paper">
+      <h2>Ne öğrendik?</h2>
+      <div class="lessons">
+        <div class="lcard"><h3>🔁 Salınan geri alınmaz</h3><p>Bir türü yeni bir yere salmak, geri dönüşü olmayan bir deneydir. Kurbağaları toplamak, salmaktan milyonlarca kat zor.</p></div>
+        <div class="lcard"><h3>🧪 Önce test et</h3><p>"Doğal çözüm" kulağa iyi geliyor. Ama kurbağanın böceği gerçekten yiyip yemediği hiç sınanmadı.</p></div>
+        <div class="lcard"><h3>🧬 Evrim şimdi ve burada</h3><p>Evrim milyonlarca yıl sürmek zorunda değil. Kurbağaların bacakları birkaç on yılda uzadı.</p></div>
+      </div>
+      <h2>Bugün ne yapılabilir?</h2>
+      <p>Avustralya bugün kıtaya giren her canlıyı sıkı biyogüvenlik kurallarıyla denetliyor. Bu hikâye Türkiye'den de tanıdık: <b>kızılkulak su kaplumbağası</b> ve <b>gümüşi havuz balığı</b> gibi türler insanların bıraktığı ya da kaçırdığı bireylerle göllere ve sulak alanlara yayıldı.</p>
+      <div class="lessons">
+        <div class="lcard"><h3>🐢 Evcil hayvanı doğaya bırakma</h3><p>Kaplumbağa, akvaryum balığı ya da başka bir canlıyı göle, dereye, parka bırakma. Barınaklara ve derneklere ulaş.</p></div>
+        <div class="lcard"><h3>🎣 Balığı taşıma</h3><p>Bir gölden aldığın balığı ya da yemi başka bir suya bırakma. İstilacı türler çoğu zaman böyle yayılır.</p></div>
+        <div class="lcard"><h3>📱 Gördüğünü bildir</h3><p>Tanımadığın bir türü iNaturalist'e kaydet. İstilacı türler ne kadar erken fark edilirse o kadar kolay durdurulur.</p></div>
+      </div>
+      <h2>Kaynaklar</h2>
+      <ul class="sources">
+        <li>R. Shine, "The ecological impact of invasive cane toads (Bufo marinus) in Australia", <i>The Quarterly Review of Biology</i> 85 (2010).</li>
+        <li>B. L. Phillips ve ark., "Invasion and the evolution of speed in toads", <i>Nature</i> 439 (2006).</li>
+        <li>M. C. Urban ve ark., "A toad more traveled: the heterogeneous invasion dynamics of cane toads in Australia", <i>The American Naturalist</i> 171 (2008).</li>
+        <li>S. O'Donnell, J. K. Webb, R. Shine, "Conditioned taste aversion enhances the survival of an endangered predator imperilled by a toxic invader", <i>Journal of Applied Ecology</i> 47 (2010).</li>
+        <li>D. Florance ve ark., "Excluding access to invasion hubs can contain the spread of an invasive vertebrate", <i>Proceedings of the Royal Society B</i> 278 (2011).</li>
+        <li>N. Turvey, <i>Cane Toads: A Tale of Sugar, Politics and Flawed Science</i>, Sydney University Press, 2013.</li>
+        <li>Fotoğraf: Charles J. Sharp, <a href="https://commons.wikimedia.org/wiki/File:Cane_toad_(Bufo_marinus).jpg" target="_blank" rel="noopener">Cane toad (Bufo marinus)</a>, CC BY-SA 4.0.</li>
+      </ul>
+      <p class="small">Simülasyon Avustralya'yı yaklaşık 55 km'lik karelere bölen basit bir yayılma modelidir. Zamanlama tarihî yayılma çizgisine göre ayarlandı, sayılar temsilidir.</p>
+      <div class="end-nav">
+        <a class="hbtn" href="../../#bolumler">← Tüm bölümler</a>
+        <button class="hbtn" data-goto="game">↺ Tekrar oyna</button>
+      </div>
+    </article>
+  </section>
+</div>
+
+<nav class="dots" id="dots" aria-label="Bölüm adımları"></nav>
+
+<script src="../../assets/js/toon.js?v=202610171223"></script>
+<script src="model.js?v=202610171223"></script>
+<script src="kurbaga.js?v=202610171223"></script>
+</body>
+</html>

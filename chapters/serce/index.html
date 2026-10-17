@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Inter:wght@400;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../../assets/css/chapter.css?v=202610171211">
+<link rel="stylesheet" href="../../assets/css/chapter.css?v=202610171223">
 </head>
 <body>
 <canvas id="world" aria-hidden="true"></canvas>
@@ -33,7 +33,7 @@
   <!-- 3. Oyun -->
   <section class="slide" data-mode="game">
     <div class="narr game-intro" id="g-intro">
-      <p>Sen Tarım Bakanısın. Tencereleri köylüler çalar, ilacı uçaklar sıkar. <b>Kararı sen verirsin.</b></p>
+      <p>Sen Tarım Bakanısın. Tencereleri köylüler çalar, raporları memurlar yazar. <b>Kararı sen verirsin.</b></p>
       <p class="try">👉 Kaydırıcılarla kampanyayı ayarla. Pekin seni izliyor.</p>
     </div>
     <aside class="gpanel" aria-label="Bakanlık masası">
@@ -45,11 +45,11 @@
         <div class="mrow"><span>🐦 Serçe</span><span class="track"><i id="m-s"></i></span></div>
         <div class="mrow"><span>🦗 Böcek</span><span class="track"><i id="m-p"></i></span></div>
         <div class="mrow"><span>🌾 Tahıl</span><span class="track"><i id="m-f"></i></span></div>
-        <div class="mrow"><span>☠️ Kirlilik</span><span class="track"><i id="m-t"></i></span></div>
+        <div class="mrow"><span>🍚 Köylünün payı</span><span class="track"><i id="m-t"></i></span></div>
         <div class="mrow trust"><span>🏛️ Pekin'in güveni</span><span class="track"><i id="m-trust"></i></span></div>
       </div>
       <label class="sl big"><span>📣 Tencere seferberliği <b id="o-k">%0</b></span><input type="range" id="g-k" min="0" max="100" step="5" value="0"></label>
-      <label class="sl big"><span>✈️ İlaç uçakları <b id="o-spray">%0</b></span><input type="range" id="g-spray" min="0" max="100" step="5" value="0"></label>
+      <label class="sl big"><span>📝 Rapordaki abartı <b id="o-lie">%0</b></span><input type="range" id="g-lie" min="0" max="100" step="5" value="0"></label>
       <div class="sb-ctrl">
         <button class="hbtn sm" id="g-pause">❚❚ Durdur</button>
         <button class="hbtn sm" id="g-speed">1×</button>
@@ -74,12 +74,11 @@
       <div class="presets">
         <button class="pbtn" data-preset="history">Tarihteki gibi</button>
         <button class="pbtn" data-preset="none">Hiç dokunma</button>
-        <button class="pbtn" data-preset="spray">İlaçla çöz</button>
         <button class="pbtn" data-preset="nature">Doğayla çalış</button>
+        <button class="pbtn" data-preset="hot">Sıcak yıllar</button>
       </div>
 
       <label class="sl"><span>🥁 Serçe avı <b id="o-hunt"></b></span><input type="range" id="p-hunt" min="0" max="100" value="0"></label>
-      <label class="sl"><span>🧪 Böcek ilacı <b id="o-pest"></b></span><input type="range" id="p-pest" min="0" max="100" value="0"></label>
       <label class="sl"><span>🏡 Kuş yuvası desteği <b id="o-nest"></b></span><input type="range" id="p-nest" min="0" max="100" value="0"></label>
       <label class="sl"><span>☀️ Sıcak yıl (böcek üremesi) <b id="o-heat"></b></span><input type="range" id="p-heat" min="50" max="150" value="100"></label>
 
@@ -116,7 +115,7 @@
       <div class="lessons">
         <div class="lcard"><h3>🕸️ "Zararlı" diye bir şey yoktur</h3><p>Ekosistemde türler tek başına değil, ilişkileriyle var olur. Bir halkayı çıkarınca boşluk kalmaz, onu başka biri doldurur. Çoğu zaman da sevmediğin biri.</p></div>
         <div class="lcard"><h3>🔬 Uzmanı susturmak pahalıya patlar</h3><p>Bilim insanlarını susturan bir sistem, doğanın verdiği sinyalleri de duymaz.</p></div>
-        <div class="lcard"><h3>🧪 Hızlı çözümün faturası sonra gelir</h3><p>İlaç böceği hızla öldürür ama kuşu, arıyı ve suyu da etkiler. Rachel Carson bunu 1962'de <i>Sessiz Bahar</i>'da anlattı.</p></div>
+        <div class="lcard"><h3>📝 Şişirilmiş rapor açlık getirir</h3><p>Rakamlar güzel göründükçe kimse sorunu görmedi. Devlet olmayan tahılı topladı; asıl kıtlığı bu büyüttü.</p></div>
       </div>
       <h2>Bugün ne yapılabilir?</h2>
       <p>Modern tarım bu dersi <b>Entegre Zararlı Yönetimi</b> adıyla uyguluyor: önce doğal düşmanlar, ilaç en son çare. İsrail ve Ürdün'de çiftçiler fareyle mücadelede zehir yerine binlerce peçeli baykuş yuvası kullanıyor.</p>
@@ -143,7 +142,7 @@
 
 <nav class="dots" id="dots" aria-label="Bölüm adımları"></nav>
 
-<script src="../../assets/js/toon.js?v=202610171211"></script>
-<script src="serce.js?v=202610171211"></script>
+<script src="../../assets/js/toon.js?v=202610171223"></script>
+<script src="serce.js?v=202610171223"></script>
 </body>
 </html>
