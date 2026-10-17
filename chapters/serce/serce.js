@@ -777,24 +777,77 @@
   }
   function blipHit() { if (!AC) return; const t = AC.currentTime, o = AC.createOscillator(), e = AC.createGain(); o.frequency.setValueAtTime(900, t); o.frequency.exponentialRampToValueAtTime(400, t + 0.08); o.connect(e); e.connect(master); e.gain.setValueAtTime(0.06, t); e.gain.exponentialRampToValueAtTime(0.0001, t + 0.12); o.start(t); o.stop(t + 0.13); }
 
+
+  // tarlanın kenarındaki köy evleri
+  const leavers = [];
+  function drawHouses(t, gt, gb, x1) {
+    const xs = mobile ? [0.07, 0.93] : [0.04, 0.5, 0.96];
+    const out = xs.map((fx, k) => {
+      const x = x1 * fx, y = gt + 30 * U, s = U * (mobile ? 0.85 : 1);
+      ctx.save(); ctx.translate(x, y); ctx.scale(s, s);
+      ctx.fillStyle = 'rgba(0,0,0,.12)'; ctx.beginPath(); ctx.ellipse(0, 2, 34, 5, 0, 0, 6.283); ctx.fill();
+      ctx.fillStyle = '#e6d3ac'; ctx.fillRect(-28, -34, 56, 36);
+      ctx.fillStyle = '#a0583a'; ctx.beginPath(); ctx.moveTo(-34, -32); ctx.lineTo(0, -56); ctx.lineTo(34, -32); ctx.closePath(); ctx.fill();
+      ctx.fillStyle = '#7a5a3a'; ctx.fillRect(-7, -20, 14, 22);
+      ctx.fillStyle = vis.warm > 0.5 ? '#f3d27a' : '#f7c75a'; ctx.fillRect(12, -24, 10, 9);
+      ctx.fillStyle = '#7a5a3a'; ctx.fillRect(14, -58, 7, 14);
+      ctx.restore();
+      if (Math.random() < 0.03) floats.push({ x: x + 17 * s, y: y - 60 * s, text: '·', life: 0.8, col: [150, 150, 150] });
+      return { x, y: y + 2 * U };
+    });
+    return out;
+  }
+  function drawLeavers(t, dt) {
+    const f = dt / 16.67;
+    for (let i = leavers.length - 1; i >= 0; i--) {
+      const v = leavers[i], dx = v.tx - v.x, dy = v.ty - v.y, d = Math.hypot(dx, dy);
+      if (d < 4) { leavers.splice(i, 1); continue; }
+      const sp = 1.6 * U * f; v.x += dx / d * Math.min(sp, d); v.y += dy / d * Math.min(sp, d);
+      const s = U, bob = Math.abs(Math.sin(t * 0.02 + v.ph)) * 3 * U;
+      ctx.save(); ctx.translate(v.x, v.y - bob); ctx.scale(s * (dx < 0 ? -1 : 1), s);
+      ctx.fillStyle = rgb(v.hue); ctx.beginPath(); ctx.roundRect ? ctx.roundRect(-8, -26, 16, 24, 7) : ctx.rect(-8, -26, 16, 24); ctx.fill();
+      ctx.fillStyle = '#f2d2b0'; ctx.beginPath(); ctx.arc(0, -33, 8, 0, 6.283); ctx.fill();
+      ctx.fillStyle = '#8b9096'; ctx.beginPath(); ctx.ellipse(10, -16, 6, 3.5, 0, 0, 6.283); ctx.fill();
+      ctx.restore();
+      if (v.zz && Math.random() < 0.03) floats.push({ x: v.x + 8 * U, y: v.y - 46 * U, text: 'z', life: 1 });
+    }
+  }
+
   // köylüler tencere çalar: kampanya kaydırıcısına bağlı
   function drawCampaign(t, dt, gt, gb, x1) {
     const f = dt / 16.67;
     const want = game.campaign ? Math.round(game.k * 9) : 0;
+    const houses = drawHouses(t, gt, gb, x1);
+    const door = x => houses.reduce((a, h) => Math.abs(h.x - x) < Math.abs(a.x - x) ? h : a, houses[0]);
+    const HUES = [[196, 72, 52], [64, 110, 160], [92, 130, 70], [170, 120, 50], [120, 90, 160]];
+    // kampanya artınca köylüler evlerden çıkıp yürüyerek gelir, azalınca evlerine döner
     while (villagers.length < want) {
-      const i = villagers.length;
-      villagers.push({ x: 0, y: 0, slot: i, ph: rnd(0, 6.28), next: t + rnd(200, 1200), hue: [[196, 72, 52], [64, 110, 160], [92, 130, 70], [170, 120, 50]][i % 4] });
+      const i = villagers.length, slotX = x1 * (0.08 + 0.84 * ((i + 0.5) / Math.max(want, 1))), h = door(slotX);
+      villagers.push({ x: h.x, y: h.y, ph: rnd(0, 6.28), next: t + rnd(200, 1200), hue: pick(HUES) });
     }
-    villagers.length = want;
+    while (villagers.length > want) { const v = villagers.pop(); const h = door(v.x); leavers.push({ ...v, tx: h.x, ty: h.y }); }
+    // vardiya değişimi: biri eve gidip uyur, yerine başkası çıkar
+    if (game.campaign && villagers.length >= 2 && game.state === 'play' && t > (game.nextShift || (game.nextShift = t + 22000))) {
+      game.nextShift = t + rnd(20000, 32000);
+      const k = Math.floor(Math.random() * villagers.length), v = villagers[k], h = door(v.x);
+      leavers.push({ ...v, tx: h.x, ty: h.y, zz: true });
+      if (!bubbles.length) bubbles.push({ obj: leavers[leavers.length - 1], x: v.x, y: v.y, oy: 46 * U, text: pick(['Vardiya bitti,\nben yatıyorum!', 'Kolum koptu,\nbiraz uyuyacağım.', 'Sıra sende komşu!']), life: 1 });
+      const h2 = pick(houses);
+      villagers[k] = { x: h2.x, y: h2.y, ph: rnd(0, 6.28), next: t + 2000, hue: pick(HUES) };
+    }
+    drawLeavers(t, dt);
     villagers.forEach((v, i) => {
       const slots = Math.max(want, 1);
-      v.x = x1 * (0.08 + 0.84 * ((i + 0.5) / slots)) + Math.sin(v.ph) * 10 * U;
-      v.y = gt + (gb - gt) * (i % 2 ? 0.2 : 0.08) + 34 * U;
+      const tx = x1 * (0.08 + 0.84 * ((i + 0.5) / slots)) + Math.sin(v.ph) * 10 * U;
+      const ty = gt + (gb - gt) * (i % 2 ? 0.2 : 0.08) + 34 * U;
+      const dx = tx - v.x, dy = ty - v.y, d = Math.hypot(dx, dy), sp = 1.6 * U * f;
+      v.walking = d > 3;
+      if (v.walking) { v.x += dx / d * Math.min(sp, d); v.y += dy / d * Math.min(sp, d); } else { v.x = tx; v.y = ty; }
       if (v.hidden > t) return;
       const asleep = v.sleep > t, pothead = v.pothead > t;
-      const bang = !asleep && Math.sin(t * 0.025 + v.ph) > 0.2;
+      const bang = !asleep && !v.walking && Math.sin(t * 0.025 + v.ph) > 0.2;
       const s = U * (1 + (i % 2) * 0.12);
-      ctx.save(); ctx.translate(v.x, v.y); if (asleep) ctx.rotate(0.35);
+      ctx.save(); ctx.translate(v.x, v.y - (v.walking ? Math.abs(Math.sin(t * 0.02 + v.ph)) * 3 * U : 0)); if (asleep) ctx.rotate(0.35);
       ctx.fillStyle = 'rgba(0,0,0,.12)'; ctx.beginPath(); ctx.ellipse(0, 2 * s, 12 * s, 3 * s, 0, 0, 6.283); ctx.fill();
       ctx.fillStyle = rgb(v.hue); ctx.beginPath(); ctx.roundRect ? ctx.roundRect(-8 * s, -26 * s, 16 * s, 24 * s, 7 * s) : ctx.rect(-8 * s, -26 * s, 16 * s, 24 * s); ctx.fill();
       ctx.fillStyle = '#f2d2b0'; ctx.beginPath(); ctx.arc(0, -33 * s, 8 * s, 0, 6.283); ctx.fill();
@@ -807,7 +860,7 @@
       ctx.strokeStyle = '#6b4a2b'; ctx.lineWidth = 2.4 * s; ctx.beginPath(); ctx.moveTo(8 * s, -18 * s); ctx.lineTo(-6 * s, bang ? -24 * s : -32 * s); ctx.stroke();
       ctx.restore();
       if (asleep && Math.random() < 0.02) floats.push({ x: v.x + 10 * U, y: v.y - 46 * U, text: 'z', life: 1 });
-      if (t > v.next && !asleep) {
+      if (t > v.next && !asleep && !v.walking) {
         v.next = t + rnd(500, 1300) / (0.4 + game.k);
         rings.push({ x: v.x - 13 * U, y: v.y - 20 * U, r: 4, life: 0.8, big: false });
         if (Math.random() < 0.25) clang(v.x);
@@ -998,7 +1051,7 @@
   // OYUN
   // =====================================================================
   const FAST = /[?&]hizli\b/.test(location.search) ? 8 : 1; // test için: ?hizli
-  const MONTH_WARM = 5200 / FAST, MONTH_COLD = 2600 / FAST;
+  const MONTH_WARM = 4700 / FAST, MONTH_COLD = 2300 / FAST;
   let gs = newState();
   const game = {};
   const gK = $('g-k');
@@ -1017,7 +1070,7 @@
     $('modal').hidden = true; $('harvest').hidden = true; if ($('yb-harvest')) $('yb-harvest').textContent = ''; $('toasts').innerHTML = ''; toastQueue.length = 0; lastToastAt = -1e9;
     $('g-intro').classList.remove('gone');
     birds.forEach(b => { if (b.fallen) b.a = 0; });
-    villagers.length = 0; official = null; if (typeof gags !== 'undefined') { gags.length = 0; nextGag = 0; }
+    villagers.length = 0; leavers.length = 0; game.nextShift = 0; official = null; if (typeof gags !== 'undefined') { gags.length = 0; nextGag = 0; }
     renderQuota();
   }
 
@@ -1114,7 +1167,7 @@
     if (mode !== 'game' || game.paused || game.reading || game.state !== 'play' || gs.m >= TOTAL) return;
     // kart okunurken zaman yavaşlar; yapılacak bir şey yokken hızlanır
     const visible = $('toasts').querySelector('.toast:not(.out)');
-    const pace = visible ? 1.5 : toastQueue.length ? 1 : 0.55;
+    const pace = visible ? 1.5 : toastQueue.length ? 0.9 : 0.42;
     game.frac += dt / (monthDur() * pace);
     if (game.frac >= 1) { game.frac -= 1; monthTick(); }
   }

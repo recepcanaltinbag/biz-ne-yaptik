@@ -55,7 +55,7 @@ Bu kurallar kullanıcının geri bildirimleriyle tek tek oturtuldu. Yeni bölüm
   - durduran kartlar sırada öne geçer;
   - kuyruk 6'yı aşarsa en eski küçük haber atılır.
 - Bir kartın ekranda kalma süresi = 4,5 sn + metin uzunluğu × 65 ms (en fazla 16 sn).
-- Kart açıkken zaman ×1,5 yavaşlar, ekranda hiçbir şey yokken ×0,55 hızlanır. İlk aylar biraz daha yavaş akar.
+- Kart açıkken zaman ×1,5 yavaşlar, sırada kart varken ×0,9, ekranda hiçbir şey yokken ×0,42 hızlanır (kullanıcı boş anlarda daha hızlı istedi). İlk aylar biraz daha yavaş akar.
 - Yılın yanında **[1×][2×][4×]** üç düğmeli hız seçici bulunur. Yeni bir olay, hasat ya da dönüm noktası gelince hız 1×'e döner.
 - Hasat, dönüm noktası ve karar kartları **kendiliğinden kapanmaz**; oyuncu dokunur ya da "Devam →" der.
 - Kart başlıklarında yılı tekrar etme, yıl zaten üstte görünüyor.
@@ -79,6 +79,8 @@ Bu kurallar kullanıcının geri bildirimleriyle tek tek oturtuldu. Yeni bölüm
 - **Karar anında karakter yanına gelir:** karar kartı, kararı soran karakterin portresiyle (sahnedeki çizimden canvas'a) ve konuşma balonuyla açılır. Karakter sahnede de yürüyüp yanında durur, kartın arkasında kalmayacak şekilde konumlanır.
 - **Kalıcı duygusal öğe:** sahnede sürekli duran ve politikaya tepki veren küçük bir hikâye (ör. ağaçtaki yuva: kampanya yüksekken anne konamaz, yavrular "Anne, yemek yok mu?" der; serçe tükenince yuva sessizleşir).
 - **Abartı ödüllendirilsin:** oyuncu bir kaydırıcıyı uca götürünce ona özel, büyük bir sahne gelsin (ör. %70 üstü seferberlikte 5 kişilik tencere rock grubu).
+- **Karakterler ışınlanmaz.** Sahnede bir yer (ev, iskele, kapı) olsun. Kaydırıcı artınca karakterler oradan yürüyerek gelir, azalınca yürüyerek geri döner. Arada vardiya değişimi gibi küçük döngüler olsun ("Vardiya bitti, ben yatıyorum!").
+- **Hikâyenin ilk cümlesi sahnede canlansın.** Kart "gemiyle geldi" diyorsa gemi gerçekten yanaşsın, kasalar insin. Kartta anlatılan her şey mümkünse sahnede de görünsün.
 - **Hareket akıcı olsun:** kuşlarda rastgele titreme yok; yavaş dönen yön (wander), seyir hızına yumuşak yaklaşma, ivme sınırı, dönüşte yatma, tırmanırken hızlı çırpma ve alçalırken süzülme. İnsanlar birbirinin içinden geçmez, gruplar yan yana yürür. Figür çevirirken yalnız yatay ölçekle (`scale(dir * s, s)`), dikeyi asla ters çevirme.
 
 ## Tutarlılık kuralları (kullanıcının yakaladığı hatalardan, bir daha yapma)

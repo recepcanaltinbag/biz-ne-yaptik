@@ -212,19 +212,65 @@
   // SAHNE 1: KAMIŞ TARLASI
   // =====================================================================
   const stalks = [], beetles = [], fieldToads = [], scientists = [];
+  const field = { seaW: 0, gt: 0, floor: 0 };
+  const ship = { t0: 0, docked: false, smoke: [] };
   function buildField() {
     stalks.length = 0; beetles.length = 0;
     for (let row = 0; row < 2; row++) for (let x = 20 + row * 30; x < W + 20; x += 62 * U) stalks.push({ x: x + rnd(-8, 8), row, h: rnd(0.85, 1.1), ph: rnd(0, 6.28) });
-    for (let i = 0; i < Math.round(W / 140); i++) { const s = pick(stalks); beetles.push({ st: s, dy: rnd(0.02, 0.15), ph: rnd(0, 6.28) }); }
+    const fieldStalks = stalks.filter(s => s.x > W * (mobile ? 0.3 : 0.22) + 40 * U);
+    for (let i = 0; i < Math.round(W / 140); i++) { const s = pick(fieldStalks); beetles.push({ st: s, dy: rnd(0.02, 0.15), ph: rnd(0, 6.28) }); }
   }
+
+  // Hawaii'den gelen gemi: oyun başında yanaşır, kasaları indirir
+  function drawShip(t, seaW, gt) {
+    if (!ship.t0) ship.t0 = t;
+    const q = smooth(0, 1, (t - ship.t0) / 5200);
+    const x = lerp(-260 * U, seaW - 175 * U, q), y = gt + 6 * U + Math.sin(t * 0.0025) * 2.5 * U, s = U * (mobile ? 0.8 : 1);
+    if (q >= 1 && !ship.docked) { ship.docked = true; horn(); }
+    ctx.save(); ctx.translate(x, y); ctx.scale(s, s);
+    ctx.fillStyle = '#b04a3a'; ctx.beginPath(); ctx.moveTo(-10, -18); ctx.lineTo(170, -18); ctx.lineTo(150, 6); ctx.lineTo(10, 6); ctx.closePath(); ctx.fill(); // gövde
+    ctx.fillStyle = '#2b3a2e'; ctx.fillRect(-6, -22, 172, 5);
+    ctx.fillStyle = '#f3ecd8'; ctx.fillRect(90, -46, 48, 24); ctx.fillStyle = '#9cc8d8'; [96, 110, 124].forEach(wx => ctx.fillRect(wx, -40, 8, 8)); // köprü üstü
+    ctx.fillStyle = '#2b3a2e'; ctx.fillRect(112, -66, 12, 20); ctx.fillStyle = '#c0503a'; ctx.fillRect(112, -66, 12, 5); // baca
+    ctx.fillStyle = '#b8894f'; [[16, -36], [40, -36], [28, -50]].forEach(([cx, cy]) => { ctx.fillRect(cx, cy, 22, 14); ctx.strokeStyle = '#7a5a30'; ctx.strokeRect(cx, cy, 22, 14); }); // kasalar
+    ctx.fillStyle = rgb(INK); ctx.font = '11px "Patrick Hand"'; ctx.fillText('HAWAII', 30, -4);
+    ctx.restore();
+    if (Math.random() < 0.08) ship.smoke.push({ x: x + 118 * s, y: y - 66 * s, r: 5 * s, a: 0.6 });
+    for (let i = ship.smoke.length - 1; i >= 0; i--) {
+      const p = ship.smoke[i]; p.y -= 0.5 * U; p.x += 0.3 * U; p.r += 0.15; p.a -= 0.006;
+      if (p.a <= 0) { ship.smoke.splice(i, 1); continue; }
+      ctx.fillStyle = `rgba(120,120,120,${p.a})`; ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, 6.283); ctx.fill();
+    }
+    ship.x = x + 80 * s; ship.y = y - 70 * s;
+  }
+  function horn() {
+    if (!AC) return;
+    const t0 = AC.currentTime, o = AC.createOscillator(), e = AC.createGain();
+    o.type = 'sawtooth'; o.frequency.value = 110; o.connect(e); e.connect(master);
+    e.gain.setValueAtTime(0, t0); e.gain.linearRampToValueAtTime(0.06, t0 + 0.1); e.gain.setValueAtTime(0.06, t0 + 0.9); e.gain.exponentialRampToValueAtTime(0.0001, t0 + 1.4);
+    o.start(t0); o.stop(t0 + 1.5);
+  }
+
   function drawField(t, dt, crowd) {
     const pnl = (mobile || document.body.classList.contains('dock')) && mode === 'game' ? document.querySelector('.slide.active .gpanel') : null;
     const floor = pnl ? pnl.getBoundingClientRect().top - 6 : H;
     const gt = mobile ? Math.min(H * 0.46, floor - 150) : Math.min(H * 0.74, floor - 170), sh = H * (mobile ? 0.24 : 0.34);
-    ctx.fillStyle = '#c9b48a'; ctx.fillRect(0, gt, W, H - gt);
-    ctx.strokeStyle = rgb(INK, 0.5); ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(0, gt); ctx.lineTo(W, gt); ctx.stroke();
-    ctx.fillStyle = 'rgba(120,90,50,.18)'; for (let i = 0; i < 6; i++) ctx.fillRect(0, gt + 14 + i * i * 6, W, 2);
+    const seaW = W * (mobile ? 0.3 : 0.22);
+    field.seaW = seaW; field.gt = gt; field.floor = floor;
+    // deniz ve dalgalar
+    ctx.fillStyle = '#9cc8d8'; ctx.fillRect(0, gt - 6 * U, seaW, H - gt + 6 * U);
+    ctx.strokeStyle = 'rgba(255,255,255,.7)'; ctx.lineWidth = 2;
+    for (let k = 0; k < 7; k++) { const y = gt + k * 22 * U + 4 * U; ctx.beginPath(); for (let x = 0; x <= seaW; x += 10) { const yy = y + Math.sin(x * 0.05 + t * 0.002 + k) * 3 * U; x ? ctx.lineTo(x, yy) : ctx.moveTo(x, yy); } ctx.stroke(); }
+    // kıyı ve tarla
+    ctx.fillStyle = '#c9b48a'; ctx.fillRect(seaW, gt, W - seaW, H - gt);
+    ctx.strokeStyle = rgb(INK, 0.5); ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(seaW, gt); ctx.lineTo(W, gt); ctx.stroke();
+    ctx.fillStyle = 'rgba(120,90,50,.18)'; for (let i = 0; i < 6; i++) ctx.fillRect(seaW, gt + 14 + i * i * 6, W - seaW, 2);
+    // iskele
+    ctx.fillStyle = '#9a7247'; ctx.fillRect(seaW - 70 * U, gt - 4 * U, 80 * U, 8 * U);
+    ctx.fillStyle = '#7a5a3a'; for (let k = 0; k < 3; k++) ctx.fillRect(seaW - 66 * U + k * 26 * U, gt + 4 * U, 5 * U, 26 * U);
+    drawShip(t, seaW, gt);
     for (const s of stalks) {
+      if (s.x < seaW + 30 * U) continue;
       const base = gt + (s.row ? 18 : 4) * U, top = base - sh * s.h * (s.row ? 1 : 0.9);
       const sw = Math.sin(t * 0.0012 + s.x * 0.01) * 4 * U;
       ctx.strokeStyle = s.row ? '#7aa257' : '#93b56a'; ctx.lineWidth = 6 * U; ctx.lineCap = 'round';
@@ -243,18 +289,18 @@
     if (game.released) {
       scientists.length = 2;
       scientists[0] = scientists[0] || { ph: 0 }; scientists[1] = scientists[1] || { ph: 2 };
-      scientists.forEach((p, i) => { p.x = W * (mobile ? 0.25 : 0.18) + i * 70 * U; p.y = gt + 46 * U; drawPerson(p.x, p.y, 1.3 * U, '#f4f4f0', t, p.ph, 'crate'); });
+      scientists.forEach((p, i) => { p.x = seaW + (30 + i * 70) * U; p.y = gt + 46 * U; drawPerson(p.x, p.y, 1.3 * U, '#f4f4f0', t, p.ph, 'crate'); if (p.toadHat > t) drawToad(p.x, p.y - 50 * U, 0.8 * U, t, 1, 1, 2); });
     }
     // kurbağalar
     const want = crowd;
     while (fieldToads.length < want) {
       const sx = scientists[0] ? scientists[0].x + 30 * U : W * 0.2;
-      fieldToads.push({ x: sx + rnd(-30, 90) * U, y: gt + rnd(26, Math.max(40, (floor - gt) * 0.85)), tx: rnd(20, W - (mobile || document.body.classList.contains('dock') ? 20 : 380)), ph: rnd(0, 6.28), hop: 0, s: rnd(0.9, 1.25), jump: 0 });
+      fieldToads.push({ x: sx + rnd(-30, 90) * U, y: gt + rnd(26, Math.max(40, (floor - gt) * 0.85)), tx: rnd(seaW + 20, W - (mobile || document.body.classList.contains('dock') ? 20 : 380)), ph: rnd(0, 6.28), hop: 0, s: rnd(0.9, 1.25), jump: 0 });
     }
     fieldToads.length = Math.max(0, want);
     const f = dt / 16.67;
     for (const td of fieldToads) {
-      if (Math.abs(td.tx - td.x) < 4) td.tx = rnd(20, W - (mobile || document.body.classList.contains('dock') ? 20 : 380));
+      if (Math.abs(td.tx - td.x) < 4) td.tx = rnd(seaW + 20, W - (mobile || document.body.classList.contains('dock') ? 20 : 380));
       td.x += Math.sign(td.tx - td.x) * 0.5 * U * f;
       td.hop = Math.max(0, Math.sin(t * 0.006 + td.ph * 3)) * 6 * U;
       if (!td.jump && Math.random() < 0.0006 * f) td.jump = 1;
@@ -335,6 +381,53 @@
     let sum = 0, n = 0;
     for (const c of M.G.cells) { if (Math.abs(M.G.lon[c] - s.lon) < 1.2 && Math.abs(M.G.lat[c] - s.lat) < 1.2) { sum += st.pred[c]; n++; } }
     return n ? sum / n : 1;
+  }
+
+
+  // ---- mizahi küçük sahneler (tarla ve harita) ----
+  const gags = [];
+  let nextGag = 0;
+  const ROUTE = [[146.8, -19.3], [143.5, -20.5], [139.5, -20.7], [134.2, -19.6], [132.3, -14.5]];
+  function gagTick(t) {
+    if (mode !== 'game' || game.state !== 'play' || game.paused || game.reading || game.noToads || !game.released) return;
+    if (!nextGag) nextGag = t + 9000;
+    if (t < nextGag || gags.length) return;
+    nextGag = t + rnd(16000, 26000);
+    const opts = [];
+    if (game.phase === 'field') { if (scientists.length) opts.push('toadhat'); if (fieldToads.length) opts.push('jumpfail', 'jumpfail'); }
+    else { opts.push('truck', 'truck', 'chorus'); if (volunteers.length) opts.push('volunteer'); }
+    if (!opts.length) return;
+    const kind = pick(opts);
+    if (kind === 'toadhat') { const p = pick(scientists); p.toadHat = t + 6500; say({ get x() { return p.x; }, get y() { return p.y - 70 * U; } }, pick(['Kafamda bir şey\nmi var?', 'Bu deney planda\nyoktu...'])); }
+    if (kind === 'jumpfail') {
+      const td = pick(fieldToads); td.jump = 1;
+      say({ get x() { return td.sx; }, get y() { return td.sy - 14 * U; } }, pick(['Az kaldı!..\nDeğil.', 'Böcek, gel aşağı\nkonuşalım!']));
+      const b = pick(beetles); setTimeout(() => { if (b && b.x !== undefined) say({ get x() { return b.x; }, get y() { return b.y; } }, pick(['Hah! Yine ıskaladı.', 'Ben buradayım,\nyukarıda!'])); }, 3200);
+    }
+    if (kind === 'truck') gags.push({ kind, t0: t, dur: 11000 });
+    if (kind === 'chorus' && sprites.length) { gags.push({ kind, t0: t, dur: 6000 }); const sp = pick(sprites); say(sp, pick(['Gece konseri!\nVrrrrr!', 'Hep bir ağızdan:\nVRRRR!'])); trill(); }
+    if (kind === 'volunteer') { const v = pick(volunteers); say(v, pick(['Bu gece bin kurbağa\ntopladık... yarın iki bin!', 'Kovam doldu,\nkurbağa bitmedi.'])); }
+  }
+  function drawGagsMap(t) {
+    for (let i = gags.length - 1; i >= 0; i--) {
+      const g = gags[i], p = (t - g.t0) / g.dur;
+      if (p >= 1 || game.phase !== 'map') { gags.splice(i, 1); continue; }
+      if (g.kind === 'truck') {
+        // kurbağalar araçlarla da taşındı: kamyon üstünde otostop
+        const seg = Math.min(ROUTE.length - 2, Math.floor(p * (ROUTE.length - 1))), q = p * (ROUTE.length - 1) - seg;
+        const lon = lerp(ROUTE[seg][0], ROUTE[seg + 1][0], q), lat = lerp(ROUTE[seg][1], ROUTE[seg + 1][1], q);
+        const [x, y] = P(lon, lat), dir = ROUTE[seg + 1][0] < ROUTE[seg][0] ? -1 : 1, s = U;
+        ctx.save(); ctx.translate(x, y); ctx.scale(dir * s, s);
+        ctx.fillStyle = '#c0503a'; ctx.fillRect(-18, -16, 26, 14); ctx.fillStyle = '#4a5866'; ctx.fillRect(8, -12, 10, 10);
+        ctx.fillStyle = '#9cc8d8'; ctx.fillRect(10, -10, 6, 4);
+        ctx.fillStyle = rgb(INK); [-12, 2, 13].forEach(wx => { ctx.beginPath(); ctx.arc(wx, -1, 3.2, 0, 6.283); ctx.fill(); });
+        ctx.restore();
+        drawToad(x - 4 * dir * s, y - 18 * s, 0.6 * U, t, 0, dir);
+        g.x = x; g.y = y - 30 * U;
+        if (!g.said && p > 0.08) { g.said = 1; say(g, pick(['Batıya bedava\nyolculuk!', 'Otostop çekmek\nyürümekten iyi!'])); }
+      }
+      if (g.kind === 'chorus' && Math.random() < 0.15 && sprites.length) { const sp = pick(sprites); floats.push({ x: sp.x, y: sp.y - 10 * U, text: pick(['♪', 'vrr']), life: 1 }); }
+    }
   }
 
   // =====================================================================
@@ -424,7 +517,7 @@
     ['collect', 'teach', 'fence'].forEach(k => { $('w-' + k).classList.add('locked'); $('o-' + k).textContent = '🔒 ' + UNLOCK[k] + "'de açılır"; });
     $('g-pause').textContent = '❚❚ Durdur'; if (typeof setSpeed === 'function') setSpeed(1);
     $('modal').hidden = true; $('milestone').hidden = true; $('toasts').innerHTML = ''; toastQueue.length = 0; lastToastAt = -1e9;
-    fieldToads.length = 0; scientists.length = 0; bubbles.length = 0; sprites = []; volunteers = [];
+    fieldToads.length = 0; scientists.length = 0; bubbles.length = 0; sprites = []; volunteers = []; gags.length = 0; nextGag = 0;
     SITES.forEach(s => { s.hit = false; });
     readPolicy(); updatePanel();
   }
@@ -466,10 +559,29 @@
   $('g-speed').onclick = nextSpeed;
   $('yb-speed').querySelectorAll('button').forEach(b => b.onclick = e => { e.stopPropagation(); initAudio(); setSpeed(Number(b.dataset.s)); });
 
-  function choice(from, title, text, opts) {
+  // konuşan karakterin portresi (kartın solunda)
+  function portrait(kind) {
+    const c = document.createElement('canvas'), dpr = Math.min(2, window.devicePixelRatio || 1), w = 120, h = 150;
+    c.width = w * dpr; c.height = h * dpr; c.className = 'portrait';
+    const g = c.getContext('2d'); g.setTransform(dpr, 0, 0, dpr, 0, 0); g.translate(w / 2, h - 6);
+    const coat = kind === 'gov' ? '#4a5866' : kind === 'froggatt' ? '#6b5a44' : '#f4f4f0';
+    g.fillStyle = coat; g.beginPath(); g.roundRect ? g.roundRect(-34, -70, 68, 72, 22) : g.rect(-34, -70, 68, 72); g.fill();
+    g.strokeStyle = 'rgba(43,58,46,.35)'; g.lineWidth = 2; g.stroke();
+    g.fillStyle = '#f2d2b0'; g.beginPath(); g.arc(0, -96, 30, 0, 6.283); g.fill();
+    g.fillStyle = rgb(INK); g.beginPath(); g.arc(-10, -98, 3.4, 0, 6.283); g.arc(10, -98, 3.4, 0, 6.283); g.fill();
+    g.strokeStyle = rgb(INK); g.lineWidth = 3; g.beginPath(); g.arc(0, -88, 10, 0.25, 2.9); g.stroke();
+    if (kind === 'sci') { g.lineWidth = 2.4; g.beginPath(); g.arc(-10, -98, 8, 0, 6.283); g.arc(10, -98, 8, 0, 6.283); g.moveTo(-2, -98); g.lineTo(2, -98); g.stroke(); }
+    if (kind === 'froggatt') { g.fillStyle = '#2b3a2e'; g.beginPath(); g.ellipse(0, -122, 34, 7, 0, 0, 6.283); g.fill(); g.fillRect(-20, -146, 40, 26); g.fillStyle = '#e8dcc0'; g.fillRect(-28, -10, 22, 8); }
+    if (kind === 'gov') { g.fillStyle = '#2b3a2e'; g.beginPath(); g.ellipse(0, -124, 30, 8, 0, 0, 6.283); g.fill(); g.fillStyle = '#c0503a'; g.fillRect(-4, -60, 8, 30); }
+    return c;
+  }
+  function choice(from, title, text, opts, who) {
     game.state = 'choice';
     const m = $('modal');
-    m.innerHTML = `<div class="card"><div class="from">${from}</div><h2>${title}</h2><p>${text}</p><div class="opts"></div></div>`;
+    m.innerHTML = who
+      ? `<div class="card talk"><div class="who"></div><div><div class="from">${from}</div><h2>${title}</h2><p class="speech">${text}</p><div class="opts"></div></div></div>`
+      : `<div class="card"><div class="from">${from}</div><h2>${title}</h2><p>${text}</p><div class="opts"></div></div>`;
+    if (who) m.querySelector('.who').appendChild(portrait(who));
     const box = m.querySelector('.opts');
     opts.forEach(o => {
       const b = document.createElement('button'); b.className = 'opt';
@@ -482,7 +594,7 @@
 
   function enterGame() {
     if (game.started) return;
-    game.started = true; game.state = 'intro';
+    game.started = true; game.state = 'intro'; ship.t0 = 0; ship.docked = false;
     const seq = [
       ['🇦🇺', 'Queensland, Avustralya', 'Şeker kamışı tarlalarını <b>kamış böceği</b> kemiriyor. Yetişkinler yaprakları, larvalar kökleri yiyor.', '', { pause: true }],
       ['', 'Çözüm Hawaii\'den geliyor', 'Gemiyle 102 <b>kamış kurbağası</b> geldi. Plan basit: kurbağa böceği yer. Öyle değil mi?', '', { img: TOAD_IMG, pause: true }],
@@ -496,18 +608,18 @@
   }
 
   function askRelease() {
-    choice('Gordonvale deneme istasyonu', 'Yavrular hazır', 'Laboratuvarda binlerce yavru kurbağa büyüdü. Tarlalara salalım mı?', [
+    choice('Gordonvale deneme istasyonu · bilim insanı', 'Yavrular hazır', '"Laboratuvarda binlerce yavru kurbağa büyüdü. Tarlalara salalım mı?"', [
       { label: 'Salın!', sub: 'Doğal, ucuz, hızlı bir çözüm', fn: doRelease },
       { label: 'Önce araştıralım', sub: 'Kurbağa bu böceği gerçekten yer mi?', fn: () => {
         game.refused = 1;
-        toast('🔬', 'Böcek bilimci Walter Froggatt', '"Kurbağa böceği değil, önüne gelen her şeyi yer. Salarsak geri toplayamayız."', '', { pause: true, then: () => {
-          choice('Hükümet', 'Şeker üreticileri bastırıyor', 'Hükümet yasağı kaldırmak istiyor. Böcekler kamışı yemeye devam ediyor. Kararın?', [
+        setTimeout(() => choice('Böcek bilimci Walter Froggatt', 'Bir uyarı', '"Kurbağa böceği değil, önüne gelen her şeyi yer. Salarsak bir daha geri toplayamayız."', [
+          { label: 'Anladım →', sub: 'Peki şimdi ne olacak?', fn: () => setTimeout(() => choice('Hükümet yetkilisi', 'Şeker üreticileri bastırıyor', '"Böcekler kamışı yemeye devam ediyor. Yasağı kaldırmamız isteniyor. Kararın?"', [
             { label: 'Peki, salın', sub: 'Baskıya dayanamadın', fn: doRelease },
             { label: 'Hayır, kurbağa yok', sub: 'Böceği başka bir yolla çöz', fn: noRelease },
-          ]);
-        } });
+          ], 'gov'), 400) },
+        ], 'froggatt'), 300);
       } },
-    ]);
+    ], 'sci');
   }
   function doRelease() {
     game.released = true; game.state = 'play';
@@ -524,7 +636,7 @@
     let ms = game.phase === 'field' ? 6500 : y < 1975 ? 900 : 1700;
     if (game.noToads) ms = 900;
     // kart okunurken zaman yavaşlar; yapılacak bir şey yokken hızlanır
-    ms *= $('toasts').querySelector('.toast:not(.out)') ? 1.5 : toastQueue.length ? 1 : 0.6;
+    ms *= $('toasts').querySelector('.toast:not(.out)') ? 1.5 : toastQueue.length ? 0.9 : 0.48;
     return ms / game.speed / FAST;
   }
 
@@ -754,7 +866,7 @@
   function ambientChat(t) {
     if (mode !== 'game' || game.state !== 'play' || game.paused || game.reading) return;
     if (!nextChat) nextChat = t + 8000;
-    if (t < nextChat || bubbles.length) return;
+    if (t < nextChat || bubbles.length || gags.length) return;
     nextChat = t + rnd(9000, 15000);
     const cs = candidates().filter(c => c[2] !== 'site'); if (cs.length) talk(pick(cs));
   }
@@ -771,7 +883,7 @@
     if (mode === 'game' || mode === 'result') st = game.st;
     if (mode === 'sandbox') st = sb.st;
     const showMap = st && (mode === 'sandbox' || mode === 'result' || game.phase === 'map');
-    if (showMap) drawMap(st, now, dt);
+    if (showMap) { drawMap(st, now, dt); if (mode === 'game') drawGagsMap(now); }
     else {
       const crowd = mode === 'game' && game.released ? Math.min(70, 8 + Math.floor((game.st.year - 1935 + game.frac) * 20)) : mode === 'title' ? 6 : 0;
       drawField(now, dt, crowd);
@@ -788,7 +900,7 @@
       if (bb.life <= 0) { bubbles.splice(i, 1); continue; }
       drawBubble(bb);
     }
-    ambientChat(now);
+    ambientChat(now); gagTick(now);
     if (mode === 'game' && ++tick % 4 === 0) updatePanel();
 
     // arka plan: yerli avcılar azaldıkça kırmızıya kayar
