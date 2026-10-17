@@ -42,7 +42,7 @@ Bu kurallar kullanıcının geri bildirimleriyle tek tek oturtuldu. Yeni bölüm
 - İkilemleri **oyun içi bir karakterle karar kartına** dönüştür. Örnek: hasattan sonra devlet yetkilisi gelir ve sorar; seçenekler "Gerçeği yaz / Biraz yuvarla / Rekor yaz!". Kaydırıcı kalabalığından iyidir.
 - Bir **baskı ölçeği** kullan (Pekin'in güveni gibi). Ölçek sıfırlanınca kontrol oyuncudan alınır, böylece sistemle ilgili ders oyunun içinde yaşanır.
 - Net bir **hedef** cümlesi koy ("2025'e kadar yerli avcıları %45'in üstünde tut"). Ortak bütçe ödünleşim yaratır.
-- **Etkiler gözle görülür olsun:** zincirleme sonuç (serçe azalınca böcek patlaması) dramatik ve okunur olmalı; göstergeler ve sahne bunu açıkça yansıtmalı.
+- **Etkiler abartılı ve gözle görülür olsun** (simülasyon oyunu, kullanıcı abartı istedi): zincirleme sonuç (serçe azalınca böcek patlaması) dramatik ve okunur olmalı; göstergeler ve sahne bunu açıkça yansıtmalı.
 - **Hile kontrolü:** her aracın gerçekçi bir bedeli olsun. "Hep maksimum" stratejisi kazanmamalı. Node ile senaryo tablosu çıkarıp kontrol et.
 
 ## Tempo (bildirimler)
@@ -69,7 +69,7 @@ Bu kurallar kullanıcının geri bildirimleriyle tek tek oturtuldu. Yeni bölüm
 - Sade, ncase tarzı çizimler (yuvarlak kafa, iki nokta göz). Konuşma balonları el yazısı fontuyla.
 - Ortam sohbeti 9–16 sn'de bir gelir. Dokununca en yakın karakter konuşur.
 - Replikler duruma göre değişen havuzlardan seçilsin, her durumda en az üç seçenek olsun. Esprili olsun ("Annemin tenceresini ödünç aldım.").
-- **Mizahi sahne (gag) sistemi:** 17–27 sn'de bir, duruma uygun küçük bir sahne. Örnekler: sapanlı çocukların taşı birbirine çarpar, tencere kafaya geçer, serçe şapka kapar, köylü uyuya kalır, çiftçi süpürgeyle çekirge kovalar. Şiddet içermeyen, çizgi film tarzı şakalar olsun.
+- **Mizahi sahne (gag) sistemi:** 17–27 sn'de bir, duruma uygun küçük bir sahne. Örnekler: sapanlı çocukların taşı birbirine çarpar, tencere kafaya geçer, serçe şapka kapar, köylü uyuya kalır, çiftçi süpürgeyle çekirge kovalar, tencere konseri, takılıp düşen köylü, serçe kovalayan köpek, ekmeği yiyen çekirgeler, yavrularını besleyen serçe. Havuz geniş olsun, duruma göre seçilsin. Şiddet içermeyen, çizgi film tarzı şakalar olsun.
 
 ## Görsel ve ses
 - Palet: doğal yeşil (`#e9f0de`). Ekosistem bozuldukça arka plan `#f4dbd1` tonuna kayar. Yazıların arkasında yarı saydam beyaz zemin olur.

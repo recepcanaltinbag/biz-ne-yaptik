@@ -19,6 +19,7 @@
   const calYear = m => 1958 + Math.floor((2 + m) / 12);
   const isWarm = cm => cm >= 3 && cm <= 8;
   const DEF = { hunt: 0, nest: 0, heat: 1 };
+  const PK = 6; // böcek taşıma kapasitesi (serçe yokken ulaşılabilecek en yüksek seviye)
 
   const newState = () => ({ m: 0, S: 1, P: 0.5, F: 1, harvests: [], hist: [] });
 
@@ -28,9 +29,9 @@
     // serçeler Nisan–Temmuz arası ürer; yuvalar hem üremeyi hem dışarıdan gelişi artırır
     if (cm >= 3 && cm <= 6) st.S += (0.15 + 0.2 * p.nest) * st.S * (1 - st.S) + 0.004 * (1 + 3 * p.nest) * (1 - st.S);
     st.S -= p.hunt * 0.2 * st.S;
-    if (isWarm(cm)) st.P += 0.65 * p.heat * st.P * (1 - st.P / 4) - 0.5 * st.S * st.P;
+    if (isWarm(cm)) st.P += 0.85 * p.heat * st.P * (1 - st.P / PK) - 0.62 * st.S * st.P;
     else st.P = Math.max(0.08, st.P * 0.8);
-    if (isWarm(cm)) st.F -= st.F * 0.045 * st.P;
+    if (isWarm(cm)) st.F -= st.F * 0.05 * st.P;
     if (cm >= 6 && cm <= 8) st.F -= st.F * 0.025 * st.S;
     if (cm === 9) st.harvests.push(st.F);
     st.S = clamp(st.S); st.P = Math.max(0.05, st.P); st.F = clamp(st.F);
@@ -240,8 +241,8 @@
   }
 
   function drawBug(g, t, air) {
-    const sc = (air ? 1.1 : 0.7 + g.d * 0.7) * U;
-    const col = vis.P > 1.8 ? PAL.locust : PAL.bug;
+    const sc = (air ? 1.1 + smooth(2.5, 5, vis.P) * 0.6 : 0.7 + g.d * 0.7) * U;
+    const col = vis.P > 2.2 ? PAL.locust : PAL.bug;
     ctx.save(); ctx.translate(g.x, g.y); if (g.dir < 0) ctx.scale(-1, 1);
     if (air) {
       ctx.fillStyle = 'rgba(255,255,255,.55)';
@@ -291,8 +292,8 @@
     const dmg = clamp(1 - vis.Fr) * 1.4;
 
     // çekirge sürüsü gökyüzünü karartır
-    const dark = smooth(1.8, 3.6, vis.P) * vis.warm;
-    if (dark > 0.01) { ctx.fillStyle = `rgba(110,84,40,${dark * 0.18})`; ctx.fillRect(0, 0, x1, gt); }
+    const dark = smooth(1.8, 5, vis.P) * vis.warm * 1.6;
+    if (dark > 0.01) { ctx.fillStyle = `rgba(100,76,34,${Math.min(0.42, dark * 0.2)})`; ctx.fillRect(0, 0, x1, gt); }
 
     // güneş ve bulutlar
     ctx.fillStyle = rgb(PAL.sun, winter ? 0.55 : 0.95);
@@ -328,6 +329,7 @@
     let stem = mixC(PAL.stem, PAL.stemRipe, ripe); stem = mixC(stem, PAL.stemDry, clamp(dmg * 0.9));
     const head = mixC(PAL.head, PAL.stemDry, clamp(dmg * 0.8));
     const headK = smooth(0.45, 0.85, g) * (0.45 + 0.55 * clamp(vis.Fr));
+    const bare = clamp((1 - vis.Fr) * 1.4 - 0.12, 0, 0.8); // böceklerin yediği başaklar
     ctx.lineCap = 'round';
     rows.forEach((rf, ri) => {
       const sc = (0.65 + rf * 0.75) * U, gap = 15 * sc;
@@ -337,7 +339,8 @@
       const tips = [];
       for (let x = (ri % 2) * gap * 0.5 + 4; x < x1; x += gap) {
         const y = y0 + Math.sin(x * 0.37 + ri) * 3 * sc;
-        if (g < 0.04) { ctx.moveTo(x, y); ctx.lineTo(x + 1, y - 4 * sc); continue; }
+        const eaten = ((Math.sin(x * 12.9898 + ri * 78.233) * 43758.5453) % 1 + 1) % 1 < bare;
+        if (g < 0.04 || eaten) { ctx.moveTo(x, y); ctx.lineTo(x + 1, y - 4 * sc); continue; }
         const h = (6 + 30 * g) * sc * (0.55 + 0.45 * clamp(vis.Fr));
         const sw = Math.sin(t * 0.0012 + x * 0.008 - ri * 0.6) * (1 + 3 * g) * sc;
         ctx.moveTo(x, y); ctx.quadraticCurveTo(x, y - h * 0.6, x + sw, y - h);
@@ -354,13 +357,13 @@
 
 
     // böcekler
-    const bugTarget = Math.round(clamp(vis.P / 4) * (mode === 'sandbox' ? 170 : 230) * vis.warm);
+    const bugTarget = Math.round(clamp(vis.P / PK) * (mode === 'sandbox' ? 240 : 340) * vis.warm);
     while (bugs.length < bugTarget) {
       const d = Math.random();
       bugs.push({ x: rnd(4, x1 - 4), d, y: gt + (0.08 + d * 0.88) * bandH, ph: rnd(0, 6.28), r: Math.random(), dir: Math.random() < 0.5 ? 1 : -1, ax: rnd(0, x1), ay: rnd(0.3, 1) });
     }
     if (bugs.length > bugTarget) bugs.splice(0, Math.min(bugs.length - bugTarget, 6));
-    const airFrac = smooth(1.6, 3.2, vis.P) * 0.55;
+    const airFrac = smooth(1.8, 4.5, vis.P) * 0.7;
     for (const bg of bugs) {
       if (bg.r < airFrac) {
         bg.ax += (1.2 + Math.sin(t * 0.002 + bg.ph)) * U * bg.dir; if (bg.ax > x1 + 10) bg.ax = -10; if (bg.ax < -10) bg.ax = x1 + 10;
@@ -461,7 +464,7 @@
   // ---- karakterler ara ara konuşur; dokununca da konuşurlar ----
   const pick = a => a[Math.floor(Math.random() * a.length)];
   function lines(kind) {
-    const pests = vis.P > 1.6, fewBirds = vis.S < 0.4, campaign = game.campaign && game.k > 0.2;
+    const pests = vis.P > 2, fewBirds = vis.S < 0.4, campaign = game.campaign && game.k > 0.2;
     if (kind === 'bird') return pick(campaign ? ['Konacak yer yok!\nKanatlarım yandı!', 'Bu gürültü de ne?!', 'Tencere konseri mi var?', 'Ben sadece bir serçeyim!', 'Tahıl mı? Ben böcek\nyemeye gelmiştim!', 'Bir dakika otursam...']
       : fewBirds ? ['Arkadaşlarım nerede?', 'Burası çok sessiz...', 'Son serçe ben miyim?']
       : ['Cik! Bugün yüzlerce\nböcek yakaladım.', 'Yavrularım böceğe bayılır!', 'Bu çekirgeyi kim\nısmarladı? Ben!', 'Cik cik! Yavrular aç.', 'Biraz tahıl, bol böcek.']);
@@ -521,7 +524,11 @@
     if (villagers.length) opts.push('pothead');
     if (villagers.length >= 2) opts.push('sleepy');
     if (farmers.some(f => f.sx !== undefined) && birds.some(b => !b.fallen)) opts.push('hat');
-    if (vis.P > 1.6 && farmers.some(f => f.sx !== undefined)) opts.push('broom');
+    if (vis.P > 2 && farmers.some(f => f.sx !== undefined)) opts.push('broom', 'lunch');
+    if (villagers.length >= 2 && game.k > 0.3) opts.push('concert');
+    if (villagers.length) opts.push('tumble');
+    if (birds.some(b => !b.fallen)) opts.push('dog');
+    if ((!game.campaign || game.k < 0.2) && vis.S > 0.4 && vis.warm > 0.5) opts.push('nest', 'nest');
     if (!opts.length) return;
     const kind = pick(opts);
     if (kind === 'kids') {
@@ -539,6 +546,24 @@
       f.hatGone = t + 6500;
       gags.push({ kind, t0: t, dur: 6500, f, sx: f.sx, sy: f.sy });
       sayAt(() => [f.sx, f.sy], 'Hey! Şapkam!');
+    } else if (kind === 'concert') {
+      const [a, b] = villagers.slice(0, 2);
+      gags.push({ kind, t0: t, dur: 7000, a, b });
+      sayAt(() => [a.x, a.y - 46 * U], pick(['Bu ritim fena değil!\nGrup kuralım!', 'Bir, iki, üç... BANG!']));
+    } else if (kind === 'tumble') {
+      const v = pick(villagers);
+      gags.push({ kind, t0: t, dur: 3200, v, x: v.x, y: v.y });
+      v.hidden = t + 3200;
+      sayAt(() => [v.x, v.y - 30 * U], pick(['Ayak! Ayağım!', 'Kim koydu bu\ntaşı buraya?!', 'İyiyim, iyiyim!']));
+    } else if (kind === 'dog') {
+      const dir = Math.random() < 0.5 ? 1 : -1;
+      gags.push({ kind, t0: t, dur: 7000, dir, y: fieldY + 10 * U, x1 });
+    } else if (kind === 'lunch') {
+      const f = farmers.find(fm => fm.sx !== undefined);
+      gags.push({ kind, t0: t, dur: 6000, f, x: f.sx + 26 * U, y: f.sy + 40 * U });
+      sayAt(() => [f.sx, f.sy], 'Ekmeğim! Ekmeğimi\nyiyorlar!');
+    } else if (kind === 'nest') {
+      gags.push({ kind, t0: t, dur: 8000, x: x1 * rnd(0.15, 0.85), y: gt - 30 * U });
     } else if (kind === 'broom') {
       const f = farmers.find(fm => fm.sx !== undefined);
       f.broom = t + 6000;
@@ -576,6 +601,53 @@
             sayAt(() => g.k2 ? [g.k2[0], g.k2[1] - 34 * U] : [0, 0], pick(['Ayy! Bana değil!', 'Serçe orada,\nben burdayım!', 'Annemeee söylicem!']));
           }
         }
+      } else if (g.kind === 'concert') {
+        if (Math.random() < 0.12) { const v = Math.random() < 0.5 ? g.a : g.b; floats.push({ x: v.x + rnd(-10, 10) * U, y: v.y - 50 * U, text: pick(['♪', '♫', '♬']), life: 1, col: [192, 80, 58] }); if (Math.random() < 0.3) clang(v.x); }
+        if (p > 0.5 && !g.said) { g.said = 1; sayAt(() => [g.b.x, g.b.y - 46 * U], pick(['Turneye çıkalım!', 'Serçeler bile\ndans ediyor!'])); }
+      } else if (g.kind === 'tumble') {
+        // takılıp yuvarlanan köylü
+        const q = p, x = g.x + q * 90 * U, y = g.y - Math.abs(Math.sin(q * Math.PI * 2)) * 18 * U;
+        ctx.save(); ctx.translate(x, y - 16 * U); ctx.rotate(q * Math.PI * 4);
+        ctx.fillStyle = rgb(g.v.hue); ctx.beginPath(); ctx.arc(0, 0, 12 * U, 0, 6.283); ctx.fill();
+        ctx.fillStyle = '#f2d2b0'; ctx.beginPath(); ctx.arc(0, -12 * U, 7 * U, 0, 6.283); ctx.fill();
+        ctx.restore();
+        if (q > 0.85 && !g.said) { g.said = 1; floats.push({ x, y: y - 40 * U, text: 'pat!', life: 1 }); blipHit(); }
+      } else if (g.kind === 'dog') {
+        const X = q => g.dir > 0 ? lerp(-60, g.x1 + 60, q) : lerp(g.x1 + 60, -60, q);
+        const bx = X(p + 0.1), by = g.y - 80 * U + Math.sin(t * 0.012) * 12 * U;
+        drawBird({ x: bx, y: by, vx: g.dir, sz: 1, ph: 0, panic: 30, hits: 0, a: 1, fallen: false }, t);
+        const dx = X(p), dy = g.y, hop = Math.abs(Math.sin(t * 0.03)) * 6 * U;
+        ctx.save(); ctx.translate(dx, dy - hop); ctx.scale(g.dir * U * 1.1, U * 1.1);
+        ctx.fillStyle = '#9a6a3c'; ctx.beginPath(); ctx.ellipse(0, -10, 16, 8, 0, 0, 6.283); ctx.fill();
+        ctx.beginPath(); ctx.arc(15, -18, 7, 0, 6.283); ctx.fill();
+        ctx.fillStyle = '#6b4a2b'; ctx.beginPath(); ctx.ellipse(13, -24, 3, 6, -0.4, 0, 6.283); ctx.fill();
+        ctx.strokeStyle = '#9a6a3c'; ctx.lineWidth = 3; ctx.lineCap = 'round';
+        const l = Math.sin(t * 0.04) * 5;
+        ctx.beginPath(); ctx.moveTo(-10, -4); ctx.lineTo(-12 - l, 4); ctx.moveTo(10, -4); ctx.lineTo(12 + l, 4); ctx.moveTo(-15, -12); ctx.lineTo(-23, -20); ctx.stroke();
+        ctx.fillStyle = rgb(PAL.ink); ctx.beginPath(); ctx.arc(18, -19, 1.4, 0, 6.283); ctx.fill();
+        ctx.restore();
+        if (Math.random() < 0.02) floats.push({ x: dx + 20 * U * g.dir, y: dy - 40 * U, text: 'hav!', life: 1 });
+        if (p > 0.35 && !g.said) { g.said = 1; sayAt(() => [bx, by], pick(['Köpek de mi\nkampanyada?!', 'Cik! Yakalayamazsın!'])); }
+      } else if (g.kind === 'lunch') {
+        // çekirge bulutu ekmeği kemirir
+        const sz = (1 - p) * 12 * U;
+        ctx.fillStyle = '#d9a95a'; ctx.beginPath(); ctx.ellipse(g.x, g.y - 6 * U, Math.max(0, sz * 1.4), Math.max(0, sz * 0.6), 0, 0, 6.283); ctx.fill();
+        ctx.fillStyle = rgb(PAL.locust);
+        for (let k = 0; k < 18; k++) { const a = t * 0.01 + k; ctx.fillRect(g.x + Math.cos(a * 1.3) * 22 * U, g.y - 10 * U + Math.sin(a) * 12 * U, 3 * U, 2 * U); }
+        if (p > 0.6 && !g.said) { g.said = 1; floats.push({ x: g.x, y: g.y - 30 * U, text: 'çıtır çıtır', life: 1, col: PAL.locust }); }
+      } else if (g.kind === 'nest') {
+        // ağaç dalında yuva: serçe yavrulara böcek taşır
+        ctx.strokeStyle = '#7a5a3a'; ctx.lineWidth = 6 * U; ctx.lineCap = 'round';
+        ctx.beginPath(); ctx.moveTo(g.x - 60 * U, g.y + 8 * U); ctx.lineTo(g.x + 40 * U, g.y - 4 * U); ctx.stroke();
+        ctx.fillStyle = '#a8865a'; ctx.beginPath(); ctx.ellipse(g.x, g.y, 18 * U, 9 * U, 0, 0, Math.PI); ctx.fill();
+        for (let k = -1; k <= 1; k++) {
+          const open = Math.sin(t * 0.015 + k) > 0;
+          ctx.fillStyle = '#c9a07a'; ctx.beginPath(); ctx.arc(g.x + k * 8 * U, g.y - 2 * U, 5 * U, 0, 6.283); ctx.fill();
+          ctx.fillStyle = '#e8a03c'; ctx.beginPath(); ctx.moveTo(g.x + k * 8 * U - 2 * U, g.y - 6 * U); ctx.lineTo(g.x + k * 8 * U, g.y - (open ? 14 : 9) * U); ctx.lineTo(g.x + k * 8 * U + 2 * U, g.y - 6 * U); ctx.fill();
+        }
+        const q = (p * 3) % 1, bx = lerp(g.x + 160 * U, g.x + 14 * U, Math.min(1, q * 1.6)), by = lerp(g.y - 90 * U, g.y - 12 * U, Math.min(1, q * 1.6));
+        drawBird({ x: bx, y: by, vx: -1, sz: 1, ph: 0, panic: 0, hits: 0, a: 1, fallen: false }, t);
+        if (!g.said) { g.said = 1; sayAt(() => [g.x, g.y - 20 * U], pick(['Ağzınızı açın,\nböcek geliyor!', 'Bugünkü menü:\nçekirge!'])); }
       } else if (g.kind === 'hat') {
         // serçe şapkayı kapıp gökyüzüne götürür
         const hx = g.sx + (p * 220 - 40) * U, hy = g.sy - p * 140 * U - Math.sin(p * 9) * 8 * U;
@@ -600,6 +672,7 @@
       const slots = Math.max(want, 1);
       v.x = x1 * (0.08 + 0.84 * ((i + 0.5) / slots)) + Math.sin(v.ph) * 10 * U;
       v.y = gt + (gb - gt) * (i % 2 ? 0.2 : 0.08) + 34 * U;
+      if (v.hidden > t) return;
       const asleep = v.sleep > t, pothead = v.pothead > t;
       const bang = !asleep && Math.sin(t * 0.025 + v.ph) > 0.2;
       const s = U * (1 + (i % 2) * 0.12);
@@ -681,7 +754,7 @@
       // böcek avı: sağlıklı tarlada serçeler zaman zaman tarlaya dalar
       if (!b.dive && !b.panic && !b.leave && vis.warm > 0.5 && bugs.length && Math.random() < 0.0016 * f) {
         const bg = bugs[Math.floor(Math.random() * bugs.length)];
-        if (bg && bg.r >= smooth(1.6, 3.2, vis.P) * 0.55) b.dive = bg;
+        if (bg && bg.r >= smooth(1.8, 4.5, vis.P) * 0.7) b.dive = bg;
       }
       if (b.dive) {
         const bg = b.dive, dx = bg.x - b.x, dy = bg.y - 6 * U - b.y, d = Math.hypot(dx, dy);
@@ -948,9 +1021,9 @@
     if (gs.S < 0.75) once('zheng', () => toast('🔬', 'Kuşbilimci Zheng', 'Serçeler yavrularını böcekle besler. Bunu yapmasak mı?'));
     if (gs.S < 0.5) once('s50', () => toast('🐦', 'Gözlem', 'Gökyüzü seyreldi. Serçeler yarı yarıya azaldı.'));
     if (gs.S < 0.2) once('s20', () => toast('🔇', 'Gözlem', 'Sabahları artık kuş sesi gelmiyor.', 'bad'));
-    if (gs.P > 1.3) once('p13', () => toast('🍃', 'Tarla raporu', 'Yapraklarda küçük delikler var. Önemsiz, herhalde.', 'warn'));
-    if (gs.P > 2.2) once('p22', () => toast('🦗', 'Tarla raporu', 'Tarlada bir hışırtı var. Bir değil, binlerce.', 'bad'));
-    if (gs.P > 3) once('p30', () => toast('⚠️', 'Acil', 'Çekirge sürüleri gökyüzünü karartıyor!', 'bad'));
+    if (gs.P > 1.6) once('p13', () => toast('🍃', 'Tarla raporu', 'Yapraklarda küçük delikler var. Önemsiz, herhalde.', 'warn'));
+    if (gs.P > 2.8) once('p22', () => toast('🦗', 'Tarla raporu', 'Tarlada bir hışırtı var. Bir değil, binlerce.', 'bad'));
+    if (gs.P > 4) once('p30', () => toast('⚠️', 'Acil', 'Çekirge sürüleri gökyüzünü karartıyor!', 'bad'));
     if ((!game.campaign || game.k === 0) && gs.S > 0.45 && game.hist.length > 6 && gs.S > Math.min(...game.hist.map(h => h.S)) + 0.15)
       once('back', () => toast('🐣', 'Gözlem', 'Serçeler dönüyor. Yavaş ama dönüyorlar.', 'good'));
 
@@ -1062,7 +1135,7 @@
     setTimeout(() => { if (mode === 'game') goTo(slideOf('result')); }, 1500);
   }
   resetGame();
-  if (/[?&]debug\b/.test(location.search)) window.__dbg = { game, get gs() { return gs; }, get mode() { return mode; } };
+  if (/[?&]debug\b/.test(location.search)) window.__dbg = { game, gags, get gs() { return gs; }, get mode() { return mode; }, gag: () => { nextGag = 1; } };
 
 
   function renderResult() {
@@ -1112,7 +1185,7 @@
     lineChart($('rchart'), [
       { data: HISTORY.hist.map(d => d.S), color: '#9aa59a', dash: true },
       { data: game.hist.map(d => d.Fr), color: '#c29a2e' },
-      { data: game.hist.map(d => d.P / 4), color: '#b5543c' },
+      { data: game.hist.map(d => d.P / PK), color: '#b5543c' },
       { data: game.hist.map(d => d.S), color: '#9c6b47' },
     ], TOTAL);
   }
@@ -1163,7 +1236,7 @@
   function drawSbChart() {
     lineChart($('sb-chart'), [
       { data: sb.hist.map(d => d.Fr), color: '#c29a2e' },
-      { data: sb.hist.map(d => d.P / 4), color: '#b5543c' },
+      { data: sb.hist.map(d => d.P / PK), color: '#b5543c' },
       { data: sb.hist.map(d => d.S), color: '#9c6b47' },
     ], 72);
   }
@@ -1216,7 +1289,7 @@
     vis.S = lerp(vis.S, target.S, k * 1.5 > 1 ? 1 : k * 1.5);
     vis.P = lerp(vis.P, target.P, k * 0.6); vis.Fr = lerp(vis.Fr, target.Fr, k * 0.6);
     vis.warm = lerp(vis.warm, target.warm, k * 0.25);
-    const health = 0.45 * clamp(vis.Fr) + 0.35 * vis.S + 0.2 * (1 - clamp(vis.P / 4));
+    const health = 0.45 * clamp(vis.Fr) + 0.35 * vis.S + 0.2 * (1 - clamp(vis.P / PK));
     vis.bad = lerp(vis.bad, smooth(0.08, 0.6, 1 - health), k * 0.5);
 
     const L = layoutFor(mode);
@@ -1233,7 +1306,7 @@
       $('yb-sub').textContent = MONTHS[calMonth(mm)];
       $('yb-fill').style.width = clamp((gs.m + game.frac) / TOTAL) * 100 + '%';
       $('m-s').style.width = vis.S * 100 + '%';
-      $('m-p').style.width = clamp(vis.P / 4) * 100 + '%';
+      $('m-p').style.width = clamp(vis.P / PK) * 100 + '%';
       $('m-f').style.width = clamp(vis.Fr) * 100 + '%';
       const lastFood = game.food.length ? game.food[game.food.length - 1] : 100;
       $('m-t').style.width = clamp(lastFood / 100) * 100 + '%';
