@@ -8,32 +8,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Inter:wght@400;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="serce.css?v=202610171159">
+<link rel="stylesheet" href="../../assets/css/chapter.css?v=202610171211">
 </head>
 <body>
-<svg width="0" height="0" style="position:absolute" aria-hidden="true">
-  <filter id="toon" color-interpolation-filters="sRGB">
-    <feColorMatrix type="saturate" values="0.7" result="sat"/>
-    <feComponentTransfer in="sat" result="post">
-      <feFuncR type="discrete" tableValues="0.14 0.32 0.52 0.72 0.88 0.97"/>
-      <feFuncG type="discrete" tableValues="0.18 0.36 0.56 0.75 0.9 0.98"/>
-      <feFuncB type="discrete" tableValues="0.14 0.3 0.48 0.66 0.82 0.92"/>
-    </feComponentTransfer>
-    <feColorMatrix in="SourceGraphic" type="saturate" values="0" result="gray"/>
-    <feGaussianBlur in="gray" stdDeviation="1.8" result="soft"/>
-    <feConvolveMatrix in="soft" order="3" kernelMatrix="-1 -1 -1 -1 8 -1 -1 -1 -1" preserveAlpha="true" result="edge"/>
-    <feColorMatrix in="edge" type="matrix" values="0 0 0 0 0.17  0 0 0 0 0.23  0 0 0 0 0.18  5 5 5 0 -0.5" result="ink"/>
-    <feComposite in="ink" in2="post" operator="over"/>
-  </filter>
-  <filter id="toon-soft" color-interpolation-filters="sRGB">
-    <feColorMatrix type="saturate" values="0.75" result="sat"/>
-    <feComponentTransfer in="sat">
-      <feFuncR type="discrete" tableValues="0.14 0.32 0.52 0.72 0.88 0.97"/>
-      <feFuncG type="discrete" tableValues="0.18 0.36 0.56 0.75 0.9 0.98"/>
-      <feFuncB type="discrete" tableValues="0.14 0.3 0.48 0.66 0.82 0.92"/>
-    </feComponentTransfer>
-  </filter>
-</svg>
 <canvas id="world" aria-hidden="true"></canvas>
 
 <header class="bar">
@@ -53,49 +30,31 @@
     </div></div>
   </section>
 
-  <!-- 1. Denge -->
-  <section class="slide" data-mode="intro">
-    <div class="narr top">
-      <p>Bu bir tarla.</p>
-      <p>Tahıl büyür. <b class="c-bug">Böcekler</b> tahılı yer. <b class="c-bird">Serçeler</b> de böcekleri yer.</p>
-      <p>Serçeler biraz tahıl da yer. Ama yavrularını büyütürken onlara çoğunlukla böcek taşırlar. Herkes bir şeyler yer ve kimse tamamen kazanmaz. Buna <b>denge</b> diyoruz.</p>
-      <p class="try">👆 Bir serçeye dokun.</p>
-      <button class="hbtn" data-next>Peki sorun ne? →</button>
-    </div>
-  </section>
-
-  <!-- 2. 1958 -->
-  <section class="slide" data-mode="poster">
-    <div class="two-col">
-      <figure class="polaroid">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/6/6f/Kill_bird_and_insect.jpg" alt="1950'ler Çin kampanya afişi: kuşlar ve böceklerle mücadele" loading="lazy">
-        <figcaption>Dönemin kampanya afişi · Wikimedia Commons, kamu malı</figcaption>
-      </figure>
-      <div class="narr">
-        <p><b>1958.</b> Mao Zedong <b>Büyük İleri Atılım</b>ı başlatıyor. Hedef birkaç yılda sanayileşmek ve tarımda rekor kırmak.</p>
-        <p>Dört düşman ilan ediliyor: <b>fare, sinek, sivrisinek ve serçe</b>.</p>
-        <p>Serçenin suçu tahıl yemek. Hesap basit: serçe ölürse tahıl insana kalır.</p>
-        <p>Yöntem de basit: <b>tencere çalmak</b>. Serçe konacak yer bulamaz, yorulur ve düşer.</p>
-        <button class="hbtn" data-next>Kampanyaya katıl →</button>
-      </div>
-    </div>
-  </section>
-
   <!-- 3. Oyun -->
   <section class="slide" data-mode="game">
-    <div class="game-hud">
-      <div class="chip date" id="g-date">Mart 1958</div>
-      <div class="chip quota" id="g-quota"><span class="lbl">Kota</span> <b id="q-n">0</b>/<span id="q-t">25</span> <span class="track"><i id="q-bar"></i></span></div>
-      <div class="chip meters">
-        <span title="Serçe">🐦<span class="track"><i id="m-s"></i></span></span>
-        <span title="Böcek">🦗<span class="track"><i id="m-p"></i></span></span>
-        <span title="Tahıl">🌾<span class="track"><i id="m-f"></i></span></span>
-      </div>
-    </div>
     <div class="narr game-intro" id="g-intro">
-      <p>Bir köy kooperatifinin başkanısın. Pekin'in 1958 kotası <b>25 serçe</b>.</p>
-      <p class="try">👆 Ekrana dokun ve tencereyi çal. Aynı serçeyi kısa sürede iki kez yakalarsan yorulup düşer.</p>
+      <p>Sen Tarım Bakanısın. Tencereleri köylüler çalar, ilacı uçaklar sıkar. <b>Kararı sen verirsin.</b></p>
+      <p class="try">👉 Kaydırıcılarla kampanyayı ayarla. Pekin seni izliyor.</p>
     </div>
+    <aside class="gpanel" aria-label="Bakanlık masası">
+      <div class="gp-top">
+        <div class="chip date" id="g-date">Mart 1958</div>
+        <div class="chip quota" id="g-quota"><span class="lbl">Kota</span> <b id="q-n">0</b>/<span id="q-t">25</span> <span class="track"><i id="q-bar"></i></span></div>
+      </div>
+      <div class="gp-meters">
+        <div class="mrow"><span>🐦 Serçe</span><span class="track"><i id="m-s"></i></span></div>
+        <div class="mrow"><span>🦗 Böcek</span><span class="track"><i id="m-p"></i></span></div>
+        <div class="mrow"><span>🌾 Tahıl</span><span class="track"><i id="m-f"></i></span></div>
+        <div class="mrow"><span>☠️ Kirlilik</span><span class="track"><i id="m-t"></i></span></div>
+        <div class="mrow trust"><span>🏛️ Pekin'in güveni</span><span class="track"><i id="m-trust"></i></span></div>
+      </div>
+      <label class="sl big"><span>📣 Tencere seferberliği <b id="o-k">%0</b></span><input type="range" id="g-k" min="0" max="100" step="5" value="0"></label>
+      <label class="sl big"><span>✈️ İlaç uçakları <b id="o-spray">%0</b></span><input type="range" id="g-spray" min="0" max="100" step="5" value="0"></label>
+      <div class="sb-ctrl">
+        <button class="hbtn sm" id="g-pause">❚❚ Durdur</button>
+        <button class="hbtn sm" id="g-speed">1×</button>
+      </div>
+    </aside>
     <div id="toasts" aria-live="polite"></div>
     <div class="harvest" id="harvest" hidden></div>
     <div class="modal" id="modal" hidden></div>
@@ -176,7 +135,7 @@
       <p class="small">Simülasyon basit bir avcı–av modeline (Lotka–Volterra benzeri) dayanır. Sayılar temsilidir. Amaç tarihî rakamları üretmek değil, sebep-sonuç zincirini hissettirmektir.</p>
       <div class="end-nav">
         <a class="hbtn" href="../../#bolumler">← Tüm bölümler</a>
-        <button class="hbtn" data-goto="3">↺ Tekrar oyna</button>
+        <button class="hbtn" data-goto="game">↺ Tekrar oyna</button>
       </div>
     </article>
   </section>
@@ -184,6 +143,7 @@
 
 <nav class="dots" id="dots" aria-label="Bölüm adımları"></nav>
 
-<script src="serce.js?v=202610171159"></script>
+<script src="../../assets/js/toon.js?v=202610171211"></script>
+<script src="serce.js?v=202610171211"></script>
 </body>
 </html>

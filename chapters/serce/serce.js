@@ -138,7 +138,7 @@
     const L = { gt: 0.66, gb: 1, x1: 1 };
     if (m === 'intro') L.gt = 0.6;
     if (m === 'poster') L.gt = 0.82;
-    if (m === 'game') L.gt = 0.58;
+    if (m === 'game') { if (mobile) { L.gt = 0.3; L.gb = 0.54; } else { L.gt = 0.6; L.x1 = (W - 366) / W; } }
     if (m === 'result' || m === 'facts' || m === 'lessons') L.gt = 0.9;
     if (m === 'sandbox') { if (mobile) { L.gt = 0.3; L.gb = 0.47; } else { L.gt = 0.58; L.x1 = (W - 380) / W; } }
     return L;
@@ -155,7 +155,7 @@
     bug: [88, 118, 48], locust: [128, 112, 40], sun: [246, 210, 104],
   };
 
-  const birds = [], bugs = [], rings = [], floats = [], bubbles = [];
+  const birds = [], bugs = [], rings = [], floats = [], bubbles = [], villagers = [], planes = [], mist = [];
   const clouds = Array.from({ length: 4 }, (_, i) => ({ x: rnd(0, 1), y: rnd(0.12, 0.3), s: rnd(0.7, 1.2), v: rnd(0.000006, 0.000014) }));
   const vis = { S: 1, P: 0.6, Fr: 1, tox: 0, c: 6.3, warm: 1, bad: 0 };
 
@@ -374,10 +374,7 @@
       }
     }
 
-    // ülke çapında kampanya: ufukta uzak tencere halkaları
-    if (mode === 'game' && game.campaign && game.state === 'play' && Math.random() < 0.012 * (dt / 16)) {
-      rings.push({ x: rnd(30, x1 - 30), y: gt - rnd(0, 18) * U, r: 2, life: 1, big: false });
-    }
+    if (mode === 'game') { drawFarmers(t, dt, gt, gb, x1); drawCampaign(t, dt, gt, gb, x1); ambientChat(t); }
 
     // serçeler
     updateBirds(t, dt, gt, gb, x1);
@@ -413,6 +410,7 @@
     for (let i = bubbles.length - 1; i >= 0; i--) {
       const bb = bubbles[i]; bb.life -= 0.0045 * (dt / 16);
       if (bb.bird && !bb.bird.fallen) { bb.x = bb.bird.x; bb.y = bb.bird.y; }
+      if (bb.obj) { bb.x = bb.obj.x; bb.y = bb.obj.y - (bb.oy || 0); }
       if (bb.life <= 0) { bubbles.splice(i, 1); continue; }
       drawBubble(bb);
     }
@@ -422,6 +420,149 @@
       ctx.strokeStyle = rgb(PAL.ink, 0.25); ctx.lineWidth = 1.5; ctx.setLineDash([4, 6]);
       ctx.beginPath(); ctx.arc(pointer.x, pointer.y, 95 * U, 0, 6.283); ctx.stroke(); ctx.setLineDash([]);
     }
+  }
+
+
+
+  // ---- çiftçiler: mevsime göre sürer, çapalar, biçer ----
+  const farmers = [{ x: 0.25, dir: 1, ph: 0 }, { x: 0.7, dir: -1, ph: 2 }];
+  function drawFarmers(t, dt, gt, gb, x1) {
+    const c = ((vis.c % 12) + 12) % 12;
+    const job = c >= 2 && c < 3 ? 'plough' : c >= 3 && c < 8.3 ? 'hoe' : c >= 8.3 && c < 10 ? 'reap' : null;
+    if (!job) { farmers.forEach(fm => { fm.sx = undefined; }); return; }
+    const f = dt / 16.67;
+    farmers.forEach((fm, i) => {
+      fm.x += fm.dir * (job === 'plough' ? 0.00045 : 0.00018) * f;
+      if (fm.x > 0.92) fm.dir = -1; if (fm.x < 0.08) fm.dir = 1;
+      const x = fm.x * x1, y = gt + (gb - gt) * (0.42 + i * 0.22), s = U * (1.05 + i * 0.15);
+      fm.sx = x; fm.sy = y - 40 * s; // baloncuk için
+      ctx.save(); ctx.translate(x, y); ctx.scale(fm.dir * s, s);
+      if (job === 'plough') { // öküz ve saban
+        ctx.fillStyle = '#8a5a3a';
+        ctx.beginPath(); ctx.ellipse(34, -16, 20, 11, 0, 0, 6.283); ctx.fill();
+        ctx.beginPath(); ctx.ellipse(55, -20, 8, 7, 0, 0, 6.283); ctx.fill();
+        ctx.strokeStyle = '#8a5a3a'; ctx.lineWidth = 4;
+        const st = Math.sin(t * 0.008 + fm.ph) * 4;
+        [22, 30, 40, 46].forEach((lx, k) => { ctx.beginPath(); ctx.moveTo(lx, -8); ctx.lineTo(lx + (k % 2 ? st : -st), 4); ctx.stroke(); });
+        ctx.strokeStyle = '#e8dcc0'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(52, -26); ctx.lineTo(48, -33); ctx.moveTo(58, -26); ctx.lineTo(62, -33); ctx.stroke();
+        ctx.strokeStyle = '#6b4a2b'; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.moveTo(14, -12); ctx.lineTo(4, -2); ctx.lineTo(-4, 4); ctx.stroke();
+      }
+      // gövde, şapka
+      const bob = Math.sin(t * 0.006 + fm.ph) * 1.5;
+      ctx.fillStyle = '#4f6f8f'; ctx.beginPath(); ctx.roundRect ? ctx.roundRect(-7, -26 + bob, 14, 22, 6) : ctx.rect(-7, -26, 14, 22); ctx.fill();
+      ctx.fillStyle = '#f2d2b0'; ctx.beginPath(); ctx.arc(0, -32 + bob, 7, 0, 6.283); ctx.fill();
+      ctx.fillStyle = '#d9b45a'; ctx.beginPath(); ctx.moveTo(-12, -35 + bob); ctx.lineTo(0, -45 + bob); ctx.lineTo(12, -35 + bob); ctx.closePath(); ctx.fill();
+      ctx.strokeStyle = '#6b4a2b'; ctx.lineWidth = 2.4;
+      if (job === 'hoe') { const a = Math.sin(t * 0.006 + fm.ph); ctx.beginPath(); ctx.moveTo(4, -20); ctx.lineTo(18, -4 + a * 8); ctx.stroke(); ctx.beginPath(); ctx.moveTo(18, -4 + a * 8); ctx.lineTo(22, 0 + a * 8); ctx.stroke(); }
+      if (job === 'reap') { const a = Math.sin(t * 0.01 + fm.ph) * 0.6; ctx.save(); ctx.translate(6, -16); ctx.rotate(a); ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(10, 0); ctx.stroke(); ctx.beginPath(); ctx.arc(14, -4, 6, -0.3, 2.6); ctx.stroke(); ctx.restore(); }
+      ctx.restore();
+    });
+  }
+
+  // ---- karakterler ara ara konuşur; dokununca da konuşurlar ----
+  const pick = a => a[Math.floor(Math.random() * a.length)];
+  function lines(kind) {
+    const pests = vis.P > 1.6, fewBirds = vis.S < 0.4, campaign = game.campaign && game.k > 0.2, tox = vis.tox > 0.2;
+    if (kind === 'bird') return pick(campaign ? ['Konacak yer yok!\nKanatlarım yandı!', 'Bu gürültü de ne?!', 'Hiç dinlenemiyorum...']
+      : fewBirds ? ['Arkadaşlarım nerede?', 'Burası çok sessiz...'] : ['Cik! Bugün yüzlerce\nböcek yakaladım.', 'Yavrularım böceğe bayılır!', 'Biraz tahıl, bol böcek.']);
+    if (kind === 'villager') return pick(fewBirds ? ['Kuş kalmadı ki\nneye vuruyoruz?', 'Kotayı nasıl dolduracağız?'] : ['Kolum koptu\nama kota kota!', 'Bang! Bang! Bang!', 'Komşu köy 2 katını yapmış!']);
+    if (kind === 'farmer') return pick(pests ? ['Yapraklar delik deşik...', 'Böcekler her yerde!\nNereden çıktılar?', 'Bu yıl ambar dolmaz.']
+      : tox ? ['Bu ilacın kokusu\nbaşımı döndürüyor.', 'Kuyudaki su tuhaf.'] : fewBirds ? ['Serçe yok, şimdilik\ntahıl bize kalır.', 'Kuşlar gidince\nbiraz rahatladık mı?'] : ['Hava güzel,\nbaşaklar dolgun.', 'Serçeler biraz yer,\nama dert değil.']);
+  }
+  function say(obj, kind, oy) {
+    bubbles.length = Math.min(bubbles.length, 1);
+    bubbles.push({ obj, x: obj.x, y: obj.y - oy, oy, text: lines(kind), life: 1 });
+  }
+  function talkAt(x, y) {
+    const cands = [];
+    birds.forEach(b => { if (!b.fallen) cands.push([Math.hypot(b.x - x, b.y - y), () => { bubbles.push({ bird: b, x: b.x, y: b.y, text: lines('bird'), life: 1 }); chirp(b.x); }]); });
+    villagers.forEach(v => cands.push([Math.hypot(v.x - x, v.y - 30 * U - y), () => say(v, 'villager', 46 * U)]));
+    farmers.forEach(fm => { if (fm.sx !== undefined) cands.push([Math.hypot(fm.sx - x, fm.sy - y), () => say({ get x() { return fm.sx; }, get y() { return fm.sy; } }, 'farmer', 8 * U)]); });
+    cands.sort((a, b) => a[0] - b[0]);
+    if (cands.length && cands[0][0] < 55 * U) { if (bubbles.length > 1) bubbles.shift(); cands[0][1](); return true; }
+    return false;
+  }
+  let nextChat = 0;
+  function ambientChat(t) {
+    if (mode !== 'game' || game.state !== 'play' || game.paused) return;
+    if (!nextChat) nextChat = t + 9000;
+    if (t < nextChat || bubbles.length) return;
+    nextChat = t + rnd(9000, 16000);
+    const opts = [];
+    const alive = birds.filter(b => !b.fallen && !b.leave);
+    if (alive.length) opts.push(() => { const b = pick(alive); bubbles.push({ bird: b, x: b.x, y: b.y, text: lines('bird'), life: 1 }); });
+    if (villagers.length) opts.push(() => { const v = pick(villagers); say(v, 'villager', 46 * U); });
+    farmers.forEach(fm => { if (fm.sx !== undefined) opts.push(() => say({ get x() { return fm.sx; }, get y() { return fm.sy; } }, 'farmer', 8 * U)); });
+    if (opts.length) pick(opts)();
+  }
+
+  // köylüler tencere çalar, uçaklar ilaç püskürtür: hepsi oyuncunun kaydırıcılarına bağlı
+  function drawCampaign(t, dt, gt, gb, x1) {
+    const f = dt / 16.67;
+    const want = game.campaign ? Math.round(game.k * 9) : 0;
+    while (villagers.length < want) {
+      const i = villagers.length;
+      villagers.push({ x: 0, y: 0, slot: i, ph: rnd(0, 6.28), next: t + rnd(200, 1200), hue: [[196, 72, 52], [64, 110, 160], [92, 130, 70], [170, 120, 50]][i % 4] });
+    }
+    villagers.length = want;
+    villagers.forEach((v, i) => {
+      const slots = Math.max(want, 1);
+      v.x = x1 * (0.08 + 0.84 * ((i + 0.5) / slots)) + Math.sin(v.ph) * 10 * U;
+      v.y = gt + (gb - gt) * (i % 2 ? 0.2 : 0.08) + 34 * U;
+      const bang = Math.sin(t * 0.025 + v.ph) > 0.2;
+      const s = U * (1 + (i % 2) * 0.12);
+      ctx.save(); ctx.translate(v.x, v.y);
+      ctx.fillStyle = 'rgba(0,0,0,.12)'; ctx.beginPath(); ctx.ellipse(0, 2 * s, 12 * s, 3 * s, 0, 0, 6.283); ctx.fill();
+      ctx.fillStyle = rgb(v.hue); ctx.beginPath(); ctx.roundRect ? ctx.roundRect(-8 * s, -26 * s, 16 * s, 24 * s, 7 * s) : ctx.rect(-8 * s, -26 * s, 16 * s, 24 * s); ctx.fill();
+      ctx.fillStyle = '#f2d2b0'; ctx.beginPath(); ctx.arc(0, -33 * s, 8 * s, 0, 6.283); ctx.fill();
+      ctx.fillStyle = rgb(PAL.ink); ctx.beginPath(); ctx.arc(-2.6 * s, -34 * s, 1.3 * s, 0, 6.283); ctx.arc(2.6 * s, -34 * s, 1.3 * s, 0, 6.283); ctx.fill();
+      ctx.strokeStyle = rgb(PAL.ink); ctx.lineWidth = 1.6 * s; ctx.beginPath(); ctx.arc(0, -31 * s, 3 * s, 0.2, 2.9); ctx.stroke();
+      // tencere ve kaşık
+      ctx.fillStyle = '#8b9096'; ctx.beginPath(); ctx.ellipse(-13 * s, -20 * s, 7 * s, 4 * s, 0, 0, 6.283); ctx.fill();
+      ctx.strokeStyle = '#6b4a2b'; ctx.lineWidth = 2.4 * s; ctx.beginPath(); ctx.moveTo(8 * s, -18 * s); ctx.lineTo(-6 * s, bang ? -24 * s : -32 * s); ctx.stroke();
+      ctx.restore();
+      if (t > v.next) {
+        v.next = t + rnd(500, 1300) / (0.4 + game.k);
+        rings.push({ x: v.x - 13 * U, y: v.y - 20 * U, r: 4, life: 0.8, big: false });
+        if (Math.random() < 0.25) clang(v.x);
+        for (const b of birds) if (!b.fallen && Math.hypot(b.x - v.x, b.y - v.y) < 140 * U) { b.panic = 40; b.vy -= 1.2 * U; }
+      }
+    });
+
+    // ilaç uçakları
+    if (game.spray > 0 && game.state === 'play' && !game.paused && planes.length < 1 + Math.round(game.spray) && Math.random() < 0.004 * f * (0.3 + game.spray)) {
+      const dir = Math.random() < 0.5 ? 1 : -1;
+      planes.push({ x: dir > 0 ? -80 : x1 + 80, y: lerp(90, gt - 70 * U, Math.random() * 0.5), dir, v: rnd(2.6, 3.4) * U });
+    }
+    for (let i = planes.length - 1; i >= 0; i--) {
+      const p = planes[i];
+      p.x += p.dir * p.v * f;
+      if (p.x < -120 || p.x > x1 + 120) { planes.splice(i, 1); continue; }
+      if (p.x > 0 && p.x < x1) for (let k = 0; k < 2; k++) mist.push({ x: p.x - p.dir * 22 * U + rnd(-4, 4), y: p.y + 8 * U, vx: rnd(-0.3, 0.3), vy: rnd(0.6, 1.4) * U, life: 1, r: rnd(3, 7) * U });
+      drawPlane(p, t);
+    }
+    for (let i = mist.length - 1; i >= 0; i--) {
+      const m = mist[i];
+      m.x += m.vx * f; m.y += m.vy * f; m.r += 0.08 * f; m.life -= 0.006 * f;
+      if (m.y > gt + 20 * U) { m.vy *= 0.9; m.life -= 0.01 * f; }
+      if (m.life <= 0) { mist.splice(i, 1); continue; }
+      ctx.fillStyle = `rgba(150,105,205,${m.life * 0.28})`;
+      ctx.beginPath(); ctx.arc(m.x, m.y, m.r, 0, 6.283); ctx.fill();
+    }
+  }
+
+  function drawPlane(p, t) {
+    const s = 1.2 * U;
+    ctx.save(); ctx.translate(p.x, p.y); ctx.scale(p.dir * s, s);
+    ctx.fillStyle = '#d8d2c0'; ctx.strokeStyle = rgb(PAL.ink); ctx.lineWidth = 2 / s;
+    ctx.beginPath(); ctx.ellipse(0, 0, 30, 8, 0, 0, 6.283); ctx.fill(); ctx.stroke();           // gövde
+    ctx.fillStyle = '#c0503a';
+    ctx.beginPath(); ctx.roundRect ? ctx.roundRect(-10, -16, 18, 6, 2) : ctx.rect(-10, -16, 18, 6); ctx.fill(); ctx.stroke(); // üst kanat
+    ctx.beginPath(); ctx.roundRect ? ctx.roundRect(-12, 4, 22, 6, 2) : ctx.rect(-12, 4, 22, 6); ctx.fill(); ctx.stroke();   // alt kanat
+    ctx.beginPath(); ctx.moveTo(-26, -2); ctx.lineTo(-36, -14); ctx.lineTo(-30, 0); ctx.closePath(); ctx.fill(); ctx.stroke(); // kuyruk
+    ctx.strokeStyle = rgb(PAL.ink); ctx.beginPath(); ctx.moveTo(31, -9 * Math.sin(t * 0.08)); ctx.lineTo(31, 9 * Math.sin(t * 0.08)); ctx.stroke(); // pervane
+    ctx.fillStyle = '#6aa7d8'; ctx.beginPath(); ctx.arc(8, -3, 4, 0, 6.283); ctx.fill();
+    ctx.restore();
   }
 
   function updateBirds(t, dt, gt, gb, x1) {
@@ -434,8 +575,19 @@
       if (birds.length < 3) for (let i = 0; i < target - 1; i++) spawnBird(true);
     }
     if (alive.length > target) {
-      const b = alive[Math.floor(Math.random() * alive.length)];
-      if (vis.tox > 0.08 && mode !== 'title') fallBird(b, false); else b.leave = true;
+      if (mode === 'game' && (game.k > 0 || vis.tox > 0.05)) {
+        const byPot = game.campaign && game.k > 0 && Math.random() < game.k / (game.k + vis.tox * 0.8 + 0.001);
+        let b = alive[Math.floor(Math.random() * alive.length)];
+        if (byPot && villagers.length) {
+          const v = villagers[Math.floor(Math.random() * villagers.length)];
+          b = alive.reduce((best, o) => Math.hypot(o.x - v.x, o.y - v.y) < Math.hypot(best.x - v.x, best.y - v.y) ? o : best, alive[0]);
+          rings.push({ x: v.x + 12 * U, y: v.y - 30 * U, r: 6, life: 1, big: true });
+        }
+        fallBird(b, byPot);
+      } else {
+        const b = alive[Math.floor(Math.random() * alive.length)];
+        if (vis.tox > 0.08 && mode !== 'title') fallBird(b, false); else b.leave = true;
+      }
     }
     const top = 80, bottom = Math.max(top + 40, gt - 34 * U);
     const R = 70 * U;
@@ -523,7 +675,8 @@
     }
   }
   document.querySelectorAll('[data-next]').forEach(b => b.addEventListener('click', () => { initAudio(); goTo(cur + 1); }));
-  document.querySelectorAll('[data-goto]').forEach(b => b.addEventListener('click', () => { resetGame(); goTo(Number(b.dataset.goto)); }));
+  const slideOf = m => slides.findIndex(x => x.dataset.mode === m);
+  document.querySelectorAll('[data-goto]').forEach(b => b.addEventListener('click', () => { resetGame(); goTo(slideOf(b.dataset.goto)); }));
   window.addEventListener('keydown', e => {
     if (e.key === 'ArrowRight' && cur < maxSeen) goTo(cur + 1);
     if (e.key === 'ArrowLeft' && cur > 0) goTo(cur - 1);
@@ -532,45 +685,85 @@
   // =====================================================================
   // BİLDİRİMLER
   // =====================================================================
-  function toast(ic, from, text, tone = '') {
+  const toastQueue = [];
+  function toast(ic, from, text, tone = '', opt = {}) {
     const box = $('toasts');
+    // telefonda sahneyi kapatmamak için kartlar sırayla, tek tek gelir
+    if (mobile && box.querySelector('.toast:not(.out)')) { toastQueue.push([ic, from, text, tone, opt]); return; }
     const el = document.createElement('div');
-    el.className = 'toast ' + tone;
-    el.innerHTML = `<div class="ic">${ic}</div><div><span class="from">${from}</span>${text}</div>`;
+    el.className = 'toast ' + tone + (opt.img ? ' story' : '');
+    el.innerHTML = (opt.img ? `<img src="${opt.img}" alt="">` : `<div class="ic">${ic}</div>`) +
+      `<div><span class="from">${from}</span>${text}${opt.img ? '<span class="x">dokun: kapat</span>' : ''}</div>`;
+    const close = () => {
+      if (el.classList.contains('out')) return;
+      el.classList.add('out');
+      setTimeout(() => { el.remove(); if (toastQueue.length && mode === 'game') toast(...toastQueue.shift()); }, 400);
+    };
+    el.onclick = close;
+    if (opt.img && window.Toon) window.Toon.process(opt.img, { maxW: 320 }).then(u => { const im = el.querySelector('img'); if (im) im.src = u; }).catch(() => {});
     box.appendChild(el);
     while (box.children.length > 3) box.firstChild.remove();
-    setTimeout(() => { el.classList.add('out'); setTimeout(() => el.remove(), 400); }, 6500);
+    if (toastQueue.length > 4) toastQueue.splice(0, toastQueue.length - 4);
+    setTimeout(close, (opt.ms || 7500) * (mobile ? 0.75 : 1));
   }
 
   // =====================================================================
   // OYUN
   // =====================================================================
   const FAST = /[?&]hizli\b/.test(location.search) ? 8 : 1; // test için: ?hizli
-  const MONTH_WARM = 5200 / FAST, MONTH_COLD = 2400 / FAST;
-  const BMAX_GAME = 40;
+  const MONTH_WARM = 5200 / FAST, MONTH_COLD = 2600 / FAST;
   let gs = newState();
   const game = {};
+  const gK = $('g-k'), gSpray = $('g-spray');
+
   function resetGame() {
     gs = newState();
     Object.assign(game, {
       started: false, paused: false, state: 'play', frac: 0, campaign: true, quota: 25, yearKills: 0, totalKills: 0,
-      lastTap: performance.now(), fired: new Set(), hist: [], usedPesticide: false, stoppedBy: null, stoppedAt: undefined, sAtStop: 0, firstTap: false,
+      fired: new Set(), hist: [], usedPesticide: false, stoppedBy: null, stoppedAt: undefined, sAtStop: 0,
+      k: 0, spray: 0, trust: 70, replaced: false, speed: 1, touched: false,
     });
-    $('modal').hidden = true; $('harvest').hidden = true; $('toasts').innerHTML = '';
+    gK.value = 0; gSpray.value = 0; gK.disabled = false; readGameSliders();
+    $('g-pause').textContent = '❚❚ Durdur'; $('g-speed').textContent = '1×';
+    $('modal').hidden = true; $('harvest').hidden = true; $('toasts').innerHTML = ''; toastQueue.length = 0;
     $('g-intro').classList.remove('gone');
     birds.forEach(b => { if (b.fallen) b.a = 0; });
+    villagers.length = 0; planes.length = 0; mist.length = 0;
     renderQuota();
   }
-  resetGame();
+
+  function readGameSliders() {
+    game.k = gK.value / 100; game.spray = gSpray.value / 100;
+    $('o-k').textContent = '%' + gK.value; $('o-spray').textContent = '%' + gSpray.value;
+    if (game.spray > 0) game.usedPesticide = true;
+  }
+  [gK, gSpray].forEach(el => el.addEventListener('input', () => {
+    initAudio(); readGameSliders();
+    if (!game.touched) { game.touched = true; setTimeout(() => $('g-intro').classList.add('gone'), 2500); }
+    if (el === gSpray && game.spray > 0) once('plane', () => toast('✈️', 'Tarım bakanlığı', 'İlaç uçakları kalkıyor. Böcekler azalacak... kuşlar da.', 'warn'));
+    if (el === gK && game.k > 0) once('start-k', () => toast('📣', 'Köy hoparlörü', 'Herkes tencere başına! Serçeler konamasın!'));
+  }));
+  $('g-pause').onclick = () => { game.paused = !game.paused; $('g-pause').textContent = game.paused ? '▶ Devam' : '❚❚ Durdur'; };
+  $('g-speed').onclick = () => { game.speed = game.speed === 1 ? 2 : 1; $('g-speed').textContent = game.speed + '×'; };
+
+  // oyun akarken olayları adım adım anlatan kartlar
+  const POSTER = 'https://upload.wikimedia.org/wikipedia/commons/6/6f/Kill_bird_and_insect.jpg';
+  const STORY = [
+    [600, '🇨🇳', 'Çin · Mart 1958', 'Mao Zedong <b>Büyük İleri Atılım</b>ı başlattı. Hedef birkaç yılda sanayileşmek, tarımda rekor kırmak.', '', { ms: 9000 }],
+    [6500, '', 'Dört Zararlı Kampanyası', 'Dört düşman ilan edildi: <b>fare, sinek, sivrisinek ve serçe</b>. Serçenin suçu tahıl yemek.', '', { img: POSTER, ms: 11000 }],
+    [13500, '🥁', 'Yöntem', 'Köylüler tencere çalınca serçeler konamıyor, yorulup düşüyor. Ne kadar çok tencere, o kadar az serçe.', '', { ms: 9000 }],
+    [21000, '🌾', 'Tarladan not', 'Bu tarlada tahıl büyüyor, böcekler tahılı yiyor, serçeler de böcekleri. Bir de bunu aklında tut.', '', { ms: 9000 }],
+    [28000, '📻', 'Pekin', 'Kampanya başladı. 1958 kotası: köy başına <b>25 serçe</b>. Seferberliği sen ayarla.', 'warn', { ms: 9000 }],
+  ];
 
   function once(key, fn) { if (!game.fired.has(key)) { game.fired.add(key); fn(); } }
   const yearKey = () => calYear(Math.min(gs.m, TOTAL - 1));
 
   function enterGame() {
-    game.paused = false;
+    game.paused = false; $('g-pause').textContent = '❚❚ Durdur';
     if (!game.started) {
-      game.started = true; game.lastTap = performance.now();
-      setTimeout(() => toast('📻', 'Köy hoparlörü', 'Dört Zararlı Kampanyası başladı! Herkes tencere başına!'), 900);
+      game.started = true;
+      STORY.forEach(([ms, ...args]) => setTimeout(() => { if (mode === 'game' && game.started) toast(...args); }, ms / Math.max(1, FAST / 2)));
     }
   }
 
@@ -578,7 +771,7 @@
     const q = $('g-quota');
     if (!game.campaign) {
       q.classList.add('off'); q.classList.remove('done');
-      q.innerHTML = `<span class="lbl">${game.stoppedBy === 'auto' ? 'Serçeler listeden çıkarıldı' : 'Kampanya durduruldu'}</span>`;
+      q.innerHTML = `<span class="lbl">${game.stoppedBy === 'auto' ? 'Serçeler listeden çıkarıldı' : 'Kampanya bitti'}</span>`;
       return;
     }
     if (!$('q-n')) q.innerHTML = '<span class="lbl">Kota</span> <b id="q-n">0</b>/<span id="q-t">25</span> <span class="track"><i id="q-bar"></i></span>';
@@ -588,50 +781,52 @@
     q.classList.toggle('done', game.yearKills >= game.quota);
   }
 
+  // köylülerin tenceresiyle düşen her serçe kotaya yazılır
   function onKill(b) {
-    if (mode === 'sandbox') { sb.st.S = Math.max(0, sb.st.S - 1 / 34); return; }
-    if (mode !== 'game') return;
-    gs.S = Math.max(0, gs.S - 1 / BMAX_GAME);
+    if (mode !== 'game' || !game.campaign) return;
     game.totalKills++; game.yearKills++;
     floats.push({ x: b.x, y: b.y - 14 * U, text: '+1', life: 1 });
     renderQuota();
     const y = yearKey(), q = game.quota;
-    once('first', () => toast('🏅', 'Kooperatif', 'İlk serçe düştü. Tebrikler, örnek vatandaş!', 'good'));
+    once('first', () => toast('🏅', 'Kooperatif', 'İlk serçe düştü. Köylüler sevinç içinde!', 'good'));
     if (game.yearKills === Math.ceil(q / 2)) once('half' + y, () => toast('📻', 'Köy hoparlörü', 'Kotanın yarısı doldu. Hoparlörden marşlar çalıyor.'));
-    if (game.yearKills === q) once('full' + y, () => toast('🏆', 'Pekin', 'Kota doldu! Adın övgü listesine yazıldı.', 'good'));
-    if (game.yearKills === q + 5) once('over' + y, () => toast('📈', 'Rapor', 'Kotayı aştın. Pekin\'e "iki katı" diye rapor edilecek.'));
+    if (game.yearKills === q) once('full' + y, () => { game.trust = Math.min(100, game.trust + 15); toast('🏆', 'Pekin', 'Kota doldu! Adın övgü listesine yazıldı.', 'good'); });
+    if (game.yearKills === q + 6) once('over' + y, () => toast('📈', 'Rapor', 'Kotayı aştın. Pekin\'e "iki katı" diye rapor edilecek.'));
   }
 
-  function gameTap(x, y) {
-    game.lastTap = performance.now();
-    if (!game.firstTap) { game.firstTap = true; $('g-intro').classList.add('gone'); }
-    if (!game.campaign) {
-      rings.push({ x, y, r: 4, life: 0.6, big: false });
-      once('calm' + yearKey(), () => toast('🕊️', 'İç ses', 'Kampanya bitti. Bırak kuşlar dönsün.'));
-      return;
-    }
-    scare(x, y, true);
-    if (y > lay.gt * H && vis.P > 1.5) once('bugs', () => toast('🦗', 'Gözlem', 'Çekirgeler tencereden korkmuyor.'));
-  }
-
-  function monthDur() { return isWarm(calMonth(gs.m)) ? MONTH_WARM : MONTH_COLD; }
+  function monthDur() { return (isWarm(calMonth(gs.m)) ? MONTH_WARM : MONTH_COLD) * (gs.m < 2 ? 1.7 : 1) / game.speed; }
 
   function updateGame(dt) {
     if (mode !== 'game' || game.paused || game.state !== 'play' || gs.m >= TOTAL) return;
     game.frac += dt / monthDur();
     if (game.frac >= 1) { game.frac -= 1; monthTick(); }
-    const now = performance.now(), y = yearKey(), cm = calMonth(gs.m);
-    if (game.campaign && isWarm(cm) && game.yearKills < game.quota && now - game.lastTap > 16000)
-      once('idle' + y, () => toast('📞', 'Parti sekreteri', 'Tencereler neden sustu? Kota bekliyor.', 'warn'));
-    const alive = birds.filter(b => !b.fallen && !b.leave).length;
-    if (game.campaign && game.quota - game.yearKills > alive + 1)
-      once('impossible' + y, () => toast('🤷', 'Rapor', 'Kotayı dolduracak kadar serçe kalmadı. Raporda yine de "aşıldı" yazacak.'));
+  }
+
+  function replaceMinister() {
+    game.replaced = true; game.trust = 0;
+    gK.value = 100; gK.disabled = true; readGameSliders();
+    toast('📜', 'Pekin', 'Görevden alındın. Yerine gelen bakan kampanyayı sonuna kadar açtı.', 'bad');
   }
 
   function monthTick() {
-    step(gs, DEF);
+    const cm = calMonth(gs.m);
+    step(gs, { ...DEF, hunt: game.campaign ? game.k : 0, pest: game.spray });
     const base = BASE.hist[gs.m - 1].F;
     game.hist.push({ S: gs.S, P: gs.P, Fr: clamp(gs.F / base) });
+
+    // Pekin'in güveni: kampanya kısıldıkça düşer
+    if (game.campaign && !game.replaced) {
+      game.trust = clamp(game.trust + (game.k - 0.45) * 14, 0, 100);
+      if (game.k < 0.3 && game.trust < 60) once('warn1-' + yearKey(), () => toast('📞', 'Parti sekreteri', 'Tencereler neden bu kadar sessiz? Komşu köyler kotayı çoktan doldurdu.', 'warn'));
+      if (game.trust < 25) once('warn2', () => toast('⚠️', 'Pekin', 'Hakkında "sağcı sapma" raporu yazıldı. Son uyarı.', 'bad'));
+      if (game.trust <= 0) replaceMinister();
+    }
+    if (game.campaign && isWarm(cm)) {
+      const alive = birds.filter(b => !b.fallen && !b.leave).length;
+      if (game.quota - game.yearKills > alive + 1)
+        once('impossible' + yearKey(), () => toast('🤷', 'Rapor', 'Kotayı dolduracak kadar serçe kalmadı. Raporda yine de "aşıldı" yazacak.'));
+    }
+
     if (gs.S < 0.75) once('zheng', () => toast('🔬', 'Kuşbilimci Zheng', 'Serçeler yavrularını böcekle besler. Bunu yapmasak mı?'));
     if (gs.S < 0.5) once('s50', () => toast('🐦', 'Gözlem', 'Gökyüzü seyreldi. Serçeler yarı yarıya azaldı.'));
     if (gs.S < 0.2) once('s20', () => toast('🔇', 'Gözlem', 'Sabahları artık kuş sesi gelmiyor.', 'bad'));
@@ -639,11 +834,13 @@
     if (gs.P > 2.2) once('p22', () => toast('🦗', 'Tarla raporu', 'Tarlada bir hışırtı var. Bir değil, binlerce.', 'bad'));
     if (gs.P > 3) once('p30', () => toast('⚠️', 'Acil', 'Çekirge sürüleri gökyüzünü karartıyor!', 'bad'));
     if (gs.tox > 0.3) once('tox', () => toast('🐟', 'Nehir', 'Nehirde ölü balıklar görüldü. Herhalde tesadüftür.', 'bad'));
-    if (!game.campaign && gs.S > 0.45 && game.stoppedAt !== undefined && gs.S > game.sAtStop + 0.15)
+    if (gs.tox > 0.25 && gs.P > 1.2) once('treadmill', () => toast('🔁', 'Tarla raporu', 'İlaç böcekleri öldürüyor, ama böcek yiyen kuşları da. İlaç durunca böcekler daha hızlı dönüyor.', 'warn'));
+    if ((!game.campaign || game.k === 0) && gs.S > 0.45 && game.hist.length > 6 && gs.S > Math.min(...game.hist.map(h => h.S)) + 0.15)
       once('back', () => toast('🐣', 'Gözlem', 'Serçeler dönüyor. Yavaş ama dönüyorlar.', 'good'));
 
     if (gs.m === 25 && game.campaign) {
-      game.campaign = false; game.stoppedBy = 'auto'; game.stoppedAt = gs.m; game.sAtStop = gs.S;
+      game.campaign = false; game.stoppedBy = 'auto'; game.stoppedAt = gs.m;
+      gK.value = 0; gK.disabled = true; readGameSliders();
       toast('📜', 'Pekin · Nisan 1960', 'Serçeler sessizce listeden çıkarıldı. Yerlerine tahtakuruları kondu.');
       renderQuota();
     }
@@ -666,70 +863,35 @@
       if (k < 1) requestAnimationFrame(count);
     })();
     let done = false;
-    const next = () => { if (done) return; done = true; el.hidden = true; afterHarvest(i); };
+    const next = () => { if (done) return; done = true; el.hidden = true; afterHarvest(i, v); };
     el.onpointerdown = next;
     setTimeout(next, 4200);
   }
 
-  function choice(from, title, text, opts) {
-    game.state = 'choice';
-    const m = $('modal');
-    m.innerHTML = `<div class="card"><div class="from">${from}</div><h2>${title}</h2><p>${text}</p><div class="opts"></div></div>`;
-    const box = m.querySelector('.opts');
-    opts.forEach(o => {
-      const b = document.createElement('button'); b.className = 'opt';
-      b.innerHTML = `${o.label}<small>${o.sub}</small>`;
-      b.onclick = () => { m.hidden = true; game.state = 'play'; game.lastTap = performance.now(); o.fn(); renderQuota(); };
-      box.appendChild(b);
-    });
-    m.hidden = false;
-  }
-
-  function stopCampaign(msg) {
-    game.campaign = false; game.stoppedBy = 'player'; game.stoppedAt = gs.m; game.sAtStop = gs.S;
-    toast('🕊️', 'Karar', msg, 'good');
-  }
-  function newYear(q) { game.quota = q; game.yearKills = 0; }
-
-  function afterHarvest(i) {
+  function afterHarvest(i, v) {
     if (gs.m >= TOTAL) return endGame();
-    if (i === 0 && game.campaign) {
-      if (game.yearKills >= 5) {
-        choice('Ekim 1958', 'Pekin hasattan memnun', 'Kooperatiflerden "rekor hasat" raporları yağıyor. 1959 kotası 40 serçeye çıkarıldı.', [
-          { label: 'Kampanyaya devam', sub: 'Kota: 40 serçe', fn: () => newYear(40) },
-          { label: 'Kuşbilimcileri dinle', sub: 'Kampanyayı durdurmayı öner', fn: () => stopCampaign('Önerin "sağcı sapma" olarak dosyana işlendi. Ama tarlalar sana teşekkür edecek.') },
-        ]);
-      } else {
-        choice('Ekim 1958', 'Pekin memnun değil', 'Kotanın çok gerisinde kaldın. Komşu köyler serçe torbalarıyla övünüyor.', [
-          { label: 'Bu yıl daha çok çalışacağım', sub: 'Kota: 40 serçe', fn: () => newYear(40) },
-          { label: 'Serçelere dokunmayacağım', sub: 'Kampanyadan çekil', fn: () => stopCampaign('Adın "geri kalmış köyler" listesine yazıldı. Serçelerin umurunda değil.') },
-        ]);
-      }
-      return;
-    }
-    if (i === 1 && game.campaign) {
-      choice('Ekim 1959', gs.P > 1.5 ? 'Çekirgeler geldi' : 'Tarlada bir tuhaflık var',
-        'Serçeler azaldı, böcekler arttı. Raporlar hâlâ "rekor" diyor ama ambarlar başka bir şey söylüyor.', [
-          { label: 'Böcek ilacı sık', sub: 'Hızlı çözüm. Kuşlar ve su da etkilenir.', fn: () => { applyPesticide(gs); game.usedPesticide = true; newYear(40); toast('✈️', 'Tarım bakanlığı', 'İlaç uçakları kalktı. Böcekler azaldı... kuşlar da.', 'warn'); } },
-          { label: 'Kampanyayı durdur', sub: 'Serçeler dönsün', fn: () => stopCampaign('Geç de olsa durdun. Serçeler dönecek ama acele etmeyecekler.') },
-          { label: 'Tencereye devam', sub: 'Kota kotadır', fn: () => newYear(40) },
-        ]);
-      return;
-    }
     game.state = 'play';
+    if (!game.campaign) return;
+    const met = game.yearKills >= game.quota;
+    if (!met && !game.replaced) { game.trust = clamp(game.trust - 20, 0, 100); if (game.trust <= 0) replaceMinister(); }
+    if (i === 0) toast('📻', 'Pekin', met ? 'Kooperatiflerden "rekor hasat" raporları yağıyor. 1959 kotası 40 serçe!' : 'Kotanın gerisinde kaldın. 1959 kotası yine de 40 serçe.', met ? '' : 'warn');
+    if (i === 1 && v < 85) toast('📝', 'Rapor', 'Ambarlar yarı boş ama Pekin\'e giden raporda "rekor hasat" yazıyor.', 'warn');
+    game.quota = 40; game.yearKills = 0; renderQuota();
   }
 
   function endGame() {
     game.state = 'end';
-    setTimeout(() => { if (mode === 'game') goTo(4); }, 1500);
+    setTimeout(() => { if (mode === 'game') goTo(slideOf('result')); }, 1500);
   }
+  resetGame();
 
   function renderResult() {
-    if (gs.harvests.length < 3) { $('result').innerHTML = '<h2>Önce oyunu bitir</h2><button class="hbtn" data-g="3">← Oyuna dön</button>'; $('result').querySelector('button').onclick = () => goTo(3); return; }
+    if (gs.harvests.length < 3) { $('result').innerHTML = '<h2>Önce oyunu bitir</h2><button class="hbtn" data-g="3">← Oyuna dön</button>'; $('result').querySelector('button').onclick = () => goTo(slideOf('game')); return; }
     const you = [0, 1, 2].map(i => hIdx(gs, i, BASE)), his = [0, 1, 2].map(i => hIdx(HISTORY, i, BASE));
     const avg = you.reduce((a, b) => a + b) / 3, k = game.totalKills;
     let title, text;
-    if (k === 0) { title = 'Tencereni hiç çalmadın'; text = 'Kota tutmadı ve adın övgü listesine girmedi. Ama ambarların doldu, kuşlar hâlâ ötüyor. Tarih kitapları seni yazmayacak ve en iyi sonuç bu.'; }
+    if (game.replaced) { title = 'Görevden alındın'; text = 'Kuşbilimcileri dinledin ve koltuğunu kaybettin. Yerine gelen bakan tarihi tekrarladı. Doğru şeyi bilmek yetmiyor; sistemin de dinlemesi gerekiyor.'; }
+    else if (k === 0) { title = 'Tencereni hiç çalmadın'; text = 'Kota tutmadı ve Pekin\'in güvenini zor korudun. Ama ambarların doldu, kuşlar hâlâ ötüyor. Tarih kitapları seni yazmayacak ve en iyi sonuç bu.'; }
     else if (avg >= 93) { title = 'Erken durdun'; text = 'Kampanyaya katıldın ama ekosistemi kırmadan bıraktın. Bazen en iyi politika bir şey yapmamaktır, ama bunun için kimse heykel dikmez.'; }
     else if (avg >= 78) { title = 'Geç de olsa fark ettin'; text = 'Serçeler geri dönüyor ama acele etmiyorlar: yılda yalnızca bir iki kez kuluçkaya yatarlar. Bazı köyler yine de aç kaldı.'; }
     else { title = 'Serçelere karşı savaşı kazandın'; text = 'Çekirgeler de kazandı. Kaybeden sadece insanlar oldu. Tebrikler, tarihi başarıyla tekrarladın.'; }
@@ -744,8 +906,8 @@
       <canvas class="rchart" id="rchart"></canvas>
       <div class="legend"><span style="--c:var(--bird)">Serçe</span><span style="--c:var(--bug)">Böcek</span><span style="--c:var(--grain)">Tahıl</span><span style="--c:#9aa59a">Tarihteki serçe (kesikli)</span></div>
       <div class="rbtns"><button class="hbtn" id="r-again">↺ Tekrar oyna</button><button class="hbtn" id="r-next">Kendin dene →</button></div>`;
-    $('r-again').onclick = () => { resetGame(); goTo(3); };
-    $('r-next').onclick = () => goTo(5);
+    $('r-again').onclick = () => { resetGame(); goTo(slideOf('game')); };
+    $('r-next').onclick = () => goTo(slideOf('sandbox'));
     requestAnimationFrame(drawResultChart);
   }
 
@@ -835,7 +997,7 @@
   cv.addEventListener('pointerdown', e => {
     const x = e.clientX, y = e.clientY;
     initAudio();
-    if (mode === 'game') { if (game.state === 'play') gameTap(x, y); return; }
+    if (mode === 'game') { if (!talkAt(x, y)) rings.push({ x, y, r: 4, life: 0.5, big: false }); return; }
     if (mode === 'sandbox') { if (x < lay.x1 * W) scare(x, y, true); return; }
     if (mode === 'intro') {
       let best = null, bd = 50 * U;
@@ -889,6 +1051,9 @@
       $('m-s').style.width = vis.S * 100 + '%';
       $('m-p').style.width = clamp(vis.P / 4) * 100 + '%';
       $('m-f').style.width = clamp(vis.Fr) * 100 + '%';
+      $('m-t').style.width = clamp(vis.tox) * 100 + '%';
+      $('m-trust').style.width = game.trust + '%';
+      $('m-trust').parentElement.parentElement.classList.toggle('low', game.trust < 30);
     }
     if (++bgTick % 6 === 0) {
       const bg = rgb(mixC(PAL.bgOk, PAL.bgBad, vis.bad));

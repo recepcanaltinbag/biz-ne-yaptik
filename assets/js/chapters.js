@@ -81,11 +81,12 @@ window.SEASONS = [
         const tag = c.status === 'live' ? `a class="card" href="${c.href}"` : 'div class="card soon"';
         const end = c.status === 'live' ? 'a' : 'div';
         return `<${tag}>
-          <div class="thumb"><img src="${c.img}" alt="${esc(c.title)}" loading="lazy"${c.pos ? ` style="object-position:${c.pos}"` : ''}${c.fit || c.soft ? ` class="${c.fit ? 'fit-' + c.fit : ''}${c.soft ? ' soft' : ''}"` : ''}>${badge[c.status]}<span class="year">${esc(c.year)}</span></div>
+          <div class="thumb"><img src="${c.img}" data-toon="${c.img}"${c.soft ? ' data-soft' : ''} alt="${esc(c.title)}" loading="lazy"${c.pos ? ` style="object-position:${c.pos}"` : ''}${c.fit ? ` class="fit-${c.fit}"` : ''}>${badge[c.status]}<span class="year">${esc(c.year)}</span></div>
           <div class="body"><h3>${esc(c.title)}</h3><p>${esc(c.text)}</p></div>
         </${end}>`;
       }).join('')}</div>
     </section>`).join('');
+  if (window.Toon) window.Toon.apply(root);
   const credits = document.getElementById('credits');
   if (credits) credits.innerHTML = window.SEASONS.flatMap(s => s.chapters).map(c =>
     `<li>${esc(c.title)}: ${esc(c.credit)} · <a href="https://commons.wikimedia.org/wiki/${encodeURI(c.src)}" target="_blank" rel="noopener">Wikimedia Commons</a></li>`).join('');

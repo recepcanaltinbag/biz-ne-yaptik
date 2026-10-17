@@ -59,11 +59,9 @@ footer ul { padding-left: 18px; }
 .season-head p { margin: 0; font: 1.15rem var(--hand); color: var(--ink-soft); }
 .season .grid { padding-bottom: 0; }
 
-/* Fotoğraflara ortak çizgi film/baskı görünümü */
-.thumb img { filter: url(#toon) contrast(1.12); }
-a.card:hover .thumb img, .card:hover .thumb img { filter: none; }
-.card.soon .thumb img { filter: url(#toon) contrast(1.05) grayscale(.35); }
+
+/* Fotoğraflar: canvas ile işlenmiş "baskı" katmanı aslının üstünde durur, üzerine gelince aslı görünür */
+.thumb img.toon-layer { position: absolute; inset: 0; transition: opacity .35s ease, transform .5s ease; }
+.card:hover .thumb img.toon-layer { opacity: 0; }
+.card.soon .thumb img.toon-layer { filter: grayscale(.3); }
 .thumb img.fit-contain { object-fit: contain; background: #f4f1e6; padding: 10px; }
-.thumb img.soft { filter: url(#toon-soft) contrast(1.12); }
-.card.soon .thumb img.soft { filter: url(#toon-soft) contrast(1.05) grayscale(.35); }
-.card:hover .thumb img.soft { filter: none; }

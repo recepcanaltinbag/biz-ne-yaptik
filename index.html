@@ -8,33 +8,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Inter:wght@400;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/css/style.css?v=202610171159">
+<link rel="stylesheet" href="assets/css/style.css?v=202610171211">
 </head>
 <body>
-<!-- Fotoğrafları ortak bir "baskı" görünümüne çeviren filtre: kontrast, posterize, mürekkep kenarları -->
-<svg width="0" height="0" style="position:absolute" aria-hidden="true">
-  <filter id="toon" color-interpolation-filters="sRGB">
-    <feColorMatrix type="saturate" values="0.7" result="sat"/>
-    <feComponentTransfer in="sat" result="post">
-      <feFuncR type="discrete" tableValues="0.14 0.32 0.52 0.72 0.88 0.97"/>
-      <feFuncG type="discrete" tableValues="0.18 0.36 0.56 0.75 0.9 0.98"/>
-      <feFuncB type="discrete" tableValues="0.14 0.3 0.48 0.66 0.82 0.92"/>
-    </feComponentTransfer>
-    <feColorMatrix in="SourceGraphic" type="saturate" values="0" result="gray"/>
-    <feGaussianBlur in="gray" stdDeviation="1.8" result="soft"/>
-    <feConvolveMatrix in="soft" order="3" kernelMatrix="-1 -1 -1 -1 8 -1 -1 -1 -1" preserveAlpha="true" result="edge"/>
-    <feColorMatrix in="edge" type="matrix" values="0 0 0 0 0.17  0 0 0 0 0.23  0 0 0 0 0.18  5 5 5 0 -0.5" result="ink"/>
-    <feComposite in="ink" in2="post" operator="over"/>
-  </filter>
-  <filter id="toon-soft" color-interpolation-filters="sRGB">
-    <feColorMatrix type="saturate" values="0.75" result="sat"/>
-    <feComponentTransfer in="sat">
-      <feFuncR type="discrete" tableValues="0.14 0.32 0.52 0.72 0.88 0.97"/>
-      <feFuncG type="discrete" tableValues="0.18 0.36 0.56 0.75 0.9 0.98"/>
-      <feFuncB type="discrete" tableValues="0.14 0.3 0.48 0.66 0.82 0.92"/>
-    </feComponentTransfer>
-  </filter>
-</svg>
 
 <header class="topbar">
   <div class="wrap">
@@ -64,6 +40,7 @@
     </details>
   </div>
 </footer>
-<script src="assets/js/chapters.js?v=202610171159"></script>
+<script src="assets/js/toon.js?v=202610171211"></script>
+<script src="assets/js/chapters.js?v=202610171211"></script>
 </body>
 </html>
