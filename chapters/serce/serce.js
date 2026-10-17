@@ -1358,7 +1358,7 @@
 
   function awardEnd() {
     const A = (window.Badges ? window.Badges.award : () => {});
-    if (game.replaced) { A('serce-vicdan'); return; }
+    if (game.replaced) { A('serce-vicdan'); if (game.totalKills === 0) A('serce-dost'); return; }
     if (gs.harvests.length < 3) return;
     if (game.totalKills === 0) A('serce-dost');
     if (game.food.length === 3 && game.lies === 0) A('serce-durust');

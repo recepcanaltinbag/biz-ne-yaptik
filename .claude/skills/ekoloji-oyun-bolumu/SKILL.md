@@ -109,6 +109,7 @@ Bu kurallar kullanıcının geri bildirimleriyle tek tek oturtuldu. Yeni bölüm
 - Ortak sistem `assets/js/badges.js` (+ `assets/css/badges.css`). Her bölümde **4 açık rozet** (iyi senaryolar, ipucu görünür) ve **4 kapalı rozet** (gizli; tek dokunuş, 2–3 dokunuş ya da sürpriz oyun anı). Her rozet gerçek bir "Biliyor muydun?" bilgisiyle gelir. "Yakında" bölümlere rozet konmaz.
 - Rozet koşulları **sahnede görüneni** izlesin (ör. Kakadu annesi bir kez kaybolursa geri gelmez, rozet de gelmez). Eşikler oyun içinde her yerde aynı olsun (ör. öğretmen kurbağa ≥ 25 puan).
 - **Her rozet kazanılabilir olmalı:** node ya da `?debug&hizli` ile her rozet için bir senaryo oynatılıp gerçekten açıldığı doğrulanır. Ayrıca rozetin yanlışlıkla açılmadığı da kontrol edilir (ör. yalan söyleyen "Dürüst bakan" almamalı).
+- **Rozet ahlaki çelişki yaratmasın:** "iyi" bir rozete yalnız "kötü" bir yolla (ör. yalan raporla) ulaşılabiliyorsa koşulu düzelt. Dürüst yolun da bir çıkışı olsun (ör. görevden alınsan bile hiç serçe düşürmediysen "Serçelerin dostu").
 - Sistem testleri: tekrar kazanım `false` döner, bilinmeyen kimlik reddedilir, kodla dışa ve içe aktarma çalışır, bozuk kod reddedilir, panel 16 kart çizer, gizliler "???" görünür.
 
 ## Görsel ve ses
