@@ -69,6 +69,33 @@ Bu kurallar kullanıcının geri bildirimleriyle tek tek oturtuldu. Yeni bölüm
 - **Görev kartı:** oyun başlamadan `Mission.show()` ile "Sen / Kontrolün / Hedefin / Dikkat" kartı gösterilir (sayfa başına bir kez). HUD'da sürekli bir "🎯 Hedef" satırı bulunur. Kullanıcı "oyuna girerken ne görevi olduğu anlaşılmıyor" dedi.
 - **Dokunma testi:** her karakter için baloncuğun izleyeceği nesnede `x` ve `y` olmalı. Nesneyi `{ get x(), get y() }` ile sar, yoksa baloncuk NaN olur ve karakter "konuşmaz" (Aral'daki işçi hatası).
 
+## Ortak altyapı ve görsel kurallar (testçi raporlarından)
+- **`assets/js/scene-utils.js` her bölümde yüklenir:**
+  - `SceneUtils.avoidHud()`: baloncuk ve sahne etiketleri sol üstteki gösterge panelinin altına girmez.
+  - `SceneUtils.lineChart(c, series, n, { y0, step, xLabel })`: grafiklerde her çizginin ucunda **adı ve değeri** yazar (`label`, `fmt`), altta **yıl ekseni** olur. Grafikte neyin ne olduğu tek bakışta anlaşılmalı.
+  - Telefonda yıl çubuğuna kendiliğinden bir ❚❚ duraklat düğmesi ekler.
+- **Küçük pencere, dokununca tam ekran:** her bölümde en az bir "büyütülebilir" görünüm olur:
+  - Aral: uydu kutusu kuşbakışı haritaya açılır.
+  - DDT: besin zinciri şeridi tam ekran "zehrin tırmanışı" basamaklarına açılır (yumurta kabuğu kesitiyle).
+  - Bakteri: mikroskop merceği ekranı kaplar.
+  - Bu görünümler önemli anlarda kendiliğinden açılır. Kart okunurken süreleri işlemez. "dokun: büyüt" ve "dokun: geri dön" yazar.
+- **Bayat kart yok:** kuyruğa giren küçük haber doğduğu yılı taşır (`args.born`). 2 oyun yılından eski olan atılır. Yıla bağlı olaylar `milestone()` ile hemen açılır. Yıl çubuğu son işlenen yılı gösterir (`gs.y - 1`), böylece kartın yılı ile çubuk aynı olur.
+- **Açılış hikâyesi bitmeden zaman akmaz** (`game.story`, son karta kadar).
+- **Tasarım dengesi:** "hiçbir şey yapmamak" en iyi sonucu vermemeli. Örnek: DDT'de ilaçsız tarla %84 ürün verir. Akıllı yolun da bir bedeli olsun. Örnek: Aral'da kanal onarımı birkaç yıl pamuğu düşürür. Varsayılan ayar oyuncuyu cezalandırmasın; baskı kartı ancak gerçekten uç bir ayarda gelsin.
+- **Kaçırılmaması gereken açıklık:** bir aracın açıldığı yılla ilk değerlendirme arasında en az 2–3 yıl olsun. Değerlendirme kartı bir sonraki hedefi söylesin.
+- **Seçenek metni duruma uysun:** göl %100'ken "göl ölüyor" demek yok.
+- Ortak `.goal` stili yalnız `p.goal` içindir; çubuk gibi başka öğelere sınıf adıyla sızmasın.
+
+## Yeniden oynama (her yeni bölümde düşün)
+- Kullanıcı "ikinci oyunda sıkılmasınlar" dedi. Plan `ROADMAP.md` → "Yeniden oynama" bölümünde:
+  - kişisel rekor;
+  - her turda rastgele olay kartları ve tohum;
+  - bitirince açılan meydan okumalar ve zor mod;
+  - farklı rol;
+  - günün dünyası;
+  - hızlı başla.
+- Yeni bölüm tasarlarken en az iki farklı kazanma yolu ve bir "bunu da dene" hedefi olsun. Tek baskın strateji olmasın; testçi bunu her bölümde arıyor.
+
 ## Oyuncunun rolü
 - **Karakterler eylemi kendileri yapar** (köylüler tencere çalar, yetkili gelir, gönüllüler toplar). Oyuncu **politikayı** kaydırıcılarla yönetir. Doğrudan dokunarak öldürme ya da refleks isteyen mekanik kullanma; "zorladı, içine çekmedi" geri bildirimi geldi.
 - En fazla **1–3 kaydırıcı.** Başlangıç değeri sıfır olmasın (ör. %10), sahne ilk saniyede canlı görünsün.

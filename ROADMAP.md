@@ -77,3 +77,16 @@ Durum: ✅ hazır · 🔜 sırada · 📝 plan
 - Ortak dil: el yazısı fontu, yeşil zemin, ekosistem bozuldukça kırmızıya kayan arka plan, oyun içi bildirim kartları.
 - Test için `?hizli` parametresi zamanı 8 kat hızlandırır.
 - Fotoğraflar yalnızca kamu malı veya CC lisanslı kaynaklardan, atıflarıyla birlikte kullanılır.
+
+## Yeniden oynama (bütün bölümler için plan)
+- **Kişisel rekor:** sonuç ekranında "En iyi sonucun" ve "bu sefer" karşılaştırması. Bölüm kartında da en iyi sonuç görünür.
+- **Her oyun biraz farklı:** her turda rastgele 2–3 olay kartı (kurak yıl, salgın, yeni teknoloji, fiyat düşüşü vb.) ve değişen başlangıç koşulları. Aynı strateji her seferinde aynı sonucu vermez.
+- **Meydan okumalar:** bölüm bir kez bitince açılır, ör. "Zor mod" (baskı daha sert, bütçe daha az) ve bölüme özel "Bunu da dene" görevleri ("Moskova'yı hiç kızdırmadan gölü %50'de tut"). Rozetlerin bir kısmı buraya bağlanır.
+- **Farklı rol:** ikinci turda karşı tarafın gözünden oyna. Aral'da balıkçılar kooperatifi, DDT'de kimya şirketi, Bakteri'de hastane başhekimi.
+- **Günün dünyası:** aynı güne aynı rastgele tohum. Arkadaşlar aynı oyunu oynayıp sonuç karşılaştırabilir (paylaşılabilir sonuç kartı).
+- **Hızlı tekrar:** ikinci oyunda görev kartı ve açılış hikâyesi atlanabilir; "Hızlı başla" düğmesi.
+
+## Bekleyen iyileştirmeler (testçi raporlarından)
+- Kurbağa: kilometre taşı kartı kamera odağını örtmesin; bütçe doluyken "önce başka araçtan puan çek" uyarısı; 1950–60'larda küçük bir karar.
+- Aral: telefonda sahne alt yarıda kalıyor, üst yarı boş; ilk dakikada etiket kalabalığı (kademeli gösterilsin).
+- DDT ve Bakteri: laboratuvar grafiği büyüsün; laboratuvarda DDT için "Nereye?" seçimi.
