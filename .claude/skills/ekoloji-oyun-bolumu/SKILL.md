@@ -113,10 +113,17 @@ Bu kurallar kullanıcının geri bildirimleriyle tek tek oturtuldu. Yeni bölüm
 - Sistem testleri: tekrar kazanım `false` döner, bilinmeyen kimlik reddedilir, kodla dışa ve içe aktarma çalışır, bozuk kod reddedilir, panel 16 kart çizer, gizliler "???" görünür.
 
 - **Rozet görselleri bölüme özel:** düz emoji kutusu değil, madalyon kullanılır. Madalyon bölüm fotoğrafının `toon.js` ile işlenmiş, rozete özel bir kesitinden yapılır (`ART` tablosu: fotoğraf, konum, yakınlık, çerçeve rengi). Simge sağ alttaki rozet kapağında durur. Kilitli rozet gri ve bulanık görünür, gizli rozet daha da bulanık ve "?" simgelidir. Yeni bölümde `badges.js` içindeki `IMG` ve `ART` tablolarına o bölümün 8 rozeti eklenir. Bildirim ve panel aynı `Badges.medal()` ve `Badges.paint()` fonksiyonlarını kullanır.
+- **İpuçları üstü kapalı (bilmece gibi):** açık rozetin ipucu ne yapılacağını doğrudan söylemez, ima eder. Örnek: "Hiç serçe düşürmeden bitir" yerine "Gökyüzünde tek bir kanat bile eksilmesin"; "Müfettişe hayır de" yerine "Bazen en cesur cevap tek kelimedir"; "Kurbağaları hiç salma" yerine "Bazı kasalar hiç açılmasa daha iyi". İpucu oyunda görülen bir şeye (çizgi, kasa, aile) gönderme yapsın ki çözülebilsin. Kelime oyunu yaparken gerçeği kontrol et ("iki harfli" deyip "hayır"ı kastetme).
 - **İpuçları biraz gizli:** paneldeki açık rozet ipucu bulanık durur. Üstüne gelince ya da dokununca (👁 ipucu) okunur. Sonuç ekranında kaçan rozetlerin nedeni yazılmaz, keşif oyuncuya kalır.
 - Rozetler `localStorage` içinde saklanır (`bny-rozetler-v1`). Güncelleme yayınlamak onları silmez. **Anahtarın adını asla değiştirme**; şema değişecekse eski veriyi okuyup taşı. Yalnız tarayıcı verisi silinirse ya da gizli pencerede kaybolurlar, bunun için rozet kodu var.
 - **Rozet kaçtı şikâyeti gelince önce sürümü kontrol et:** düzeltme yeni yayınlandıysa oyuncu muhtemelen eski sürümle oynamıştır. Sonra senaryoyu `?debug&hizli` ile oyuncunun anlattığı gibi yeniden oyna (ör. "kaydırıcıyı baştan %0'a çektim, müfettişe hayır dedim"). Oyuncunun oyun başlamadan yapabileceği bir şeyi (kaydırıcıyı %0'a çekmek) koşuldan muaf tutmaya gerek yok.
 
+
+## Ana sayfa
+- Üst menü yapışıktır (`.topbar { position: sticky }`). Sayfa kayınca hafif gölge alır (`.scrolled`).
+- Menüde "Sezonlar ▾" açılır listesi vardır. Liste `window.SEASONS`'tan üretilir, her sezon bölümü `id="sezon-N"` ile işaretlenir. Kaydırınca düğme bulunulan sezonu gösterir (scroll-spy: "🌊 Sezon 2"). Oynanabilir bölümü olan sezonlarda "▶ oynanabilir" yazar. Yeni sezon eklenince ek kod gerekmez.
+- Açılır paneller (sezon, rozet) `position: fixed` olur, biri açılınca öteki kapanır. Dışarı tıklayınca ve Esc ile kapanırlar. Telefonda rozet paneli alttan çıkan sayfa olur, sezon menüsü tam genişlikte açılır.
+- Telefonda üst menü tek satır kalmalı (`white-space: nowrap`, çok dar ekranda "Rozetler" kelimesi gizlenir). 375 px'de `scrollWidth == innerWidth` olduğunu ölç.
 ## Tekrar oynama
 - Bölüm bir kez bitince `localStorage['bny-bitti-<bölüm>'] = 1` yazılır. Sonraki ziyaretlerde alttaki noktaların hepsi seçilebilir olur (`maxSeen = slides.length - 1`). Başlık kartında "Bu bölümü bitirdin. Doğrudan geç:" ve Laboratuvar / Gerçekte ne oldu? / Ne öğrendik? kısayolları çıkar (`replayNav()`). Yeni bölümde de aynı kalıp (`DONE_KEY`, `paintDots`, `replayNav`) kullanılır.
 
