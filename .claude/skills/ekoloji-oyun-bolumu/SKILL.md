@@ -1,0 +1,91 @@
+---
+name: ekoloji-oyun-bolumu
+description: "Biz Ne Yaptık?" ekoloji oyunu sitesine (~/Documents/ekoloji-oyunu) yeni oynanabilir bölüm eklerken ya da mevcut bölümün oynanışını, akışını, düzenini veya metinlerini düzenlerken kullan. Serçelere Savaş ve Kurtarıcı Kurbağa bölümlerinde kullanıcıyla birlikte oturtulan oynanış, tempo, düzen, ton, karakter, model ve test kurallarını içerir.
+---
+
+# Biz Ne Yaptık? · Bölüm yapma rehberi
+
+Bu kurallar kullanıcının geri bildirimleriyle tek tek oturtuldu. Yeni bölümde baştan uygula; sapacaksan kullanıcıya sor.
+
+## Proje
+- Kod: `~/Documents/ekoloji-oyunu` · Repo: `recepcanaltinbag/biz-ne-yaptik` · Yayın: https://recepcanaltinbag.github.io/biz-ne-yaptik/ (GitHub Pages, `main` / kök).
+- Push keychain'deki HTTPS kimliğiyle çalışır (`GIT_TERMINAL_PROMPT=0 git push`). `gh` oturumu yok.
+- Yapı:
+  - `assets/css/chapter.css`: bütün bölümlerin ortak stili (slaytlar, HUD, bildirimler, kaydırıcılar, laboratuvar, metin sayfaları).
+  - `assets/js/chapters.js`: ana sayfadaki sezon/bölüm kartlarının verisi. Yeni bölüm açılınca `status: 'live', href:` yap.
+  - `assets/js/toon.js`: fotoğrafları canvas ile "baskı/çizgi film" görünümüne çevirir (SVG filtresi kullanma, Safari'de kayar).
+  - `chapters/<ad>/index.html`, `<ad>.js`, gerekirse `model.js` (node ile test edilebilir, `module.exports` destekli).
+  - `ROADMAP.md`: sezonlar ve bölüm fikirleri. Durumu güncelle.
+- Her yayından önce bütün `?v=` sürüm parametrelerini artır (tarayıcı önbelleği yüzünden eski CSS ile yeni HTML karışınca sayfa "kayıyor"):
+  `V=$(date +%Y%m%d%H%M) && sed -i '' -E "s#\?v=[0-9]+\"#?v=$V\"#g" index.html chapters/*/index.html`
+
+## Ton ve içerik
+- Bir çocuğun anlayacağı kadar basit, bilimi hafife almayan; hafif alaycı ama ciddi. Ağır siyasi jargon kullanma ("sağcı sapma" gibi ifadeler fazla bulundu).
+- **Bir bölüm, bir mekanizma.** Konuları karıştırma: serçe bölümünde ilaç/pestisit yok (o "Kuşlar Neden Sustu?" bölümünün konusu). Tarihte olmayan aracı oyuna koyma.
+- Olgular doğrulanmış olsun. Tartışmalı rakamlar aralıkla verilsin, belirsiz iddialar "belgelenmiş değil" diye işaretlensin. Gerekiyorsa "asıl sebep bu değildi" diye dürüst bir not düş.
+- "Gerçekte ne oldu?" kısa olsun: **üç madde** (yıl / sonra / bugün) ve **bir "ama" kutusu**. Uzun paragraf yazma.
+- Başlıklar merak uyandırsın ("Serçelere Savaş", "Kafatası Dağı", "Dans Eden Kediler"). Düz isim ("Bizon") olmasın.
+- Dersler bölümünde Türkiye'den örnek ve "sen ne yapabilirsin" kartları olsun.
+
+## Akış
+1. Başlık slaytı → **doğrudan oyun.** Ayrı tanıtım slaytı yok.
+2. Olaylar oyun akarken **hikâye kartlarıyla** anlatılır. İlk bir iki kart oyunu durdurur ("Devam →"), gerisi akarken gelir.
+3. Sonuç (sen ve tarih karşılaştırması, grafik) → Laboratuvar (kaydırıcılı serbest simülasyon) → Gerçekte ne oldu → Dersler ve kaynaklar.
+- Oyun toplamda **3–4 dakika** sürsün. Sıkıcı dönemler hızlı geçsin, önemli anlarda kısa durulsun.
+- Hikâyenin ölçeği değişince **sahne değiştir** (ör. kamış tarlası → Avustralya haritası) ve geçişi bir kartla anlat.
+
+## Oyuncunun rolü
+- **Karakterler eylemi kendileri yapar** (köylüler tencere çalar, yetkili gelir, gönüllüler toplar). Oyuncu **politikayı** kaydırıcılarla yönetir. Doğrudan dokunarak öldürme ya da refleks isteyen mekanik kullanma; "zorladı, içine çekmedi" geri bildirimi geldi.
+- En fazla **1–3 kaydırıcı.** Başlangıç değeri sıfır olmasın (ör. %10), sahne ilk saniyede canlı görünsün.
+- Seçenekleri **kademeli aç.** Kilitli araç "🔒 1980'de açılır" diye görünür (telefonda gizli). Açılınca durduran bir kartla tanıtılır ve ardından rehber ipucu gösterilir.
+- **Rehber ipucu (coach):** yalnız anlamlıysa göster (kaydırıcı zaten yüksekken "artır" deme). kaydırıcı nabız gibi parlar, üstünde "👉 Kaydır: …" balonu çıkar. İlk ipucu oyuncu dokunana kadar kalır, diğerleri ~14 sn kalır. Kritik anlarda (ör. güven düşünce) yeniden gösterilir.
+- İkilemleri **oyun içi bir karakterle karar kartına** dönüştür. Örnek: hasattan sonra devlet yetkilisi gelir ve sorar; seçenekler "Gerçeği yaz / Biraz yuvarla / Rekor yaz!". Kaydırıcı kalabalığından iyidir.
+- Bir **baskı ölçeği** kullan (Pekin'in güveni gibi). Ölçek sıfırlanınca kontrol oyuncudan alınır, böylece sistemle ilgili ders oyunun içinde yaşanır.
+- Net bir **hedef** cümlesi koy ("2025'e kadar yerli avcıları %45'in üstünde tut"). Ortak bütçe ödünleşim yaratır.
+- **Etkiler gözle görülür olsun:** zincirleme sonuç (serçe azalınca böcek patlaması) dramatik ve okunur olmalı; göstergeler ve sahne bunu açıkça yansıtmalı.
+- **Hile kontrolü:** her aracın gerçekçi bir bedeli olsun. "Hep maksimum" stratejisi kazanmamalı. Node ile senaryo tablosu çıkarıp kontrol et.
+
+## Tempo (bildirimler)
+- Kartlar kuyruğa girer:
+  - iki kart arası en az **9 sn**;
+  - bir kart kapandıktan sonra en az **5 sn**;
+  - ekranda masaüstünde en fazla 2, telefonda 1 kart;
+  - durduran kartlar sırada öne geçer;
+  - kuyruk 6'yı aşarsa en eski küçük haber atılır.
+- Bir kartın ekranda kalma süresi = 4,5 sn + metin uzunluğu × 65 ms (en fazla 16 sn).
+- Kart açıkken zaman ×1,5 yavaşlar, ekranda hiçbir şey yokken ×0,55 hızlanır. İlk aylar biraz daha yavaş akar.
+- Yılın yanında **⏩ 1×/2×/4×** düğmesi bulunur. Yeni bir olay, hasat ya da dönüm noktası gelince hız 1×'e döner.
+- Kart başlıklarında yılı tekrar etme, yıl zaten üstte görünüyor.
+
+## Düzen ("dock")
+- **Üst orta:** büyük yıl, zeminsiz ve beyaz parıltılı. Altında ay/sahne adı, zaman çizgisi, solda son sonuç (ör. "🌾 %97"), sağda hız düğmesi. Hemen altında ince haber şeridi olur ve bu ikisi `.topbox` içinde birlikte durur.
+- **Sol üst:** zeminsiz HUD (kota, göstergeler, istatistikler). Telefonda 128 px genişliğinde ve yalnızca simgeli.
+- **Alt:** yalnız kaydırıcılar, ayrı beyaz kartlarda. Sahne (toprak, başaklar) ekranın en altına kadar uzanır, kontroller sahnenin üzerinde yüzer.
+- **Orta:** durduran hikâye kartları, hasat kartı (başaklar ve "normal yıl" çizgili çubuk) ve karar kartları. Bu katmanlar `z-index` ile haber kutusunun üstünde durmalı.
+- `position: fixed` kartın atalarında `transform` ya da `backdrop-filter` olmasın, yoksa kart ekran yerine kutuya göre konumlanır.
+- Telefonda: kilitli araçlar ve durdur düğmesi gizli, yazılar küçük. 375×812 ve 360×640'ta mutlaka bak.
+
+## Karakterler ve mizah
+- Sade, ncase tarzı çizimler (yuvarlak kafa, iki nokta göz). Konuşma balonları el yazısı fontuyla.
+- Ortam sohbeti 9–16 sn'de bir gelir. Dokununca en yakın karakter konuşur.
+- Replikler duruma göre değişen havuzlardan seçilsin, her durumda en az üç seçenek olsun. Esprili olsun ("Annemin tenceresini ödünç aldım.").
+- **Mizahi sahne (gag) sistemi:** 17–27 sn'de bir, duruma uygun küçük bir sahne. Örnekler: sapanlı çocukların taşı birbirine çarpar, tencere kafaya geçer, serçe şapka kapar, köylü uyuya kalır, çiftçi süpürgeyle çekirge kovalar. Şiddet içermeyen, çizgi film tarzı şakalar olsun.
+
+## Görsel ve ses
+- Palet: doğal yeşil (`#e9f0de`). Ekosistem bozuldukça arka plan `#f4dbd1` tonuna kayar. Yazıların arkasında yarı saydam beyaz zemin olur.
+- Fotoğraflar Wikimedia Commons'tan (kamu malı veya CC) alınır, atıflı kullanılır ve `toon.js` ile işlenir. Fotoğraf seçerken kırpma ve içerik uyumuna dikkat et (ör. morina bölümünde balık görseli olsun).
+- Ses Web Audio ile sentezlenir (ortam, cıvıltı, koro, tık). "Ses" düğmesiyle kapatılabilir.
+
+## Model
+- Basit ve açıklanabilir bir model yaz. Zamanlamayı **tarihî noktalara göre ayarla** (ör. kurbağada Darwin 2005, Batı Avustralya 2009) ve bunu node ile doğrula.
+- Bir `HISTORY` senaryosu tut. Sonuç ekranı ve grafik oyuncunun sonucunu tarihle karşılaştırsın.
+- Laboratuvar daha uzun zaman ufku ve ek "ya olsaydı?" kaydırıcıları sunsun (ör. ısınma, evrim).
+
+## Test
+- `?hizli` zamanı hızlandırır, `?debug` `window.__dbg` nesnesini açar, `?layout=klasik` eski düzeni gösterir.
+- Tarayıcı paneli gizliyken `requestAnimationFrame` çalışmaz. Çözüm: rAF'ı `setTimeout` ya da MessageChannel ile sür, sonra bir ekran görüntüsü alarak ilk kareyi tetikle. Ekran görüntüleri bazen bayat çıkar; DOM'u JS ile ölç.
+- Akışı gerçek hızda test et: kart açılış ve kapanış zamanlarını bir MutationObserver ile logla. Sıkıcı boşluk ya da üst üste kart var mı bak.
+- Her değişiklikten sonra `node --check` çalıştır. Yayından sonra `curl` ile yeni sürümün canlıya çıktığını doğrula.
+
+## Yayın
+`git add -A && git commit` (mesaj Türkçe, sonunda `Co-Authored-By` satırı) → `GIT_TERMINAL_PROMPT=0 git push -q origin main` → curl ile canlı sürüm kontrolü.

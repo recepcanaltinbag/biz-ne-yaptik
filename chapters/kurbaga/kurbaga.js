@@ -460,11 +460,11 @@
   function setSpeed(v) {
     game.speed = v;
     $('g-speed').textContent = v + '×';
-    const b = $('yb-speed'); b.textContent = (v > 1 ? '⏩ ' : '⏩ ') + v + '×'; b.classList.toggle('on', v > 1);
+    $('yb-speed').querySelectorAll('button').forEach(b => b.classList.toggle('on', Number(b.dataset.s) === v));
   }
   const nextSpeed = () => setSpeed(game.speed === 1 ? 2 : game.speed === 2 ? 4 : 1);
   $('g-speed').onclick = nextSpeed;
-  $('yb-speed').onclick = e => { e.stopPropagation(); initAudio(); nextSpeed(); };
+  $('yb-speed').querySelectorAll('button').forEach(b => b.onclick = e => { e.stopPropagation(); initAudio(); setSpeed(Number(b.dataset.s)); });
 
   function choice(from, title, text, opts) {
     game.state = 'choice';

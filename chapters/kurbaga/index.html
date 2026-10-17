@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Inter:wght@400;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../../assets/css/chapter.css?v=202610171304">
+<link rel="stylesheet" href="../../assets/css/chapter.css?v=202610171307">
 <style>
   .gp-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; font-family: var(--hand); }
   .gp-stats div { background: #fff; border: 2px solid var(--line); border-radius: 12px; padding: 4px 10px; }
@@ -44,7 +44,7 @@
 
   <section class="slide" data-mode="game">
     <div class="topbox">
-      <div class="yearbar" aria-live="polite"><div class="yb-year" id="yb-year">1935</div><div class="yb-sub" id="yb-sub">Kamış tarlası</div><div class="yb-track"><i id="yb-fill"></i></div><button class="yb-speed" id="yb-speed" type="button" aria-label="Hız">⏩ 1×</button></div>
+      <div class="yearbar" aria-live="polite"><div class="yb-year" id="yb-year">1935</div><div class="yb-sub" id="yb-sub">Kamış tarlası</div><div class="yb-track"><i id="yb-fill"></i></div><span class="yb-speed" id="yb-speed" role="group" aria-label="Hız"><button type="button" data-s="1" class="on">1×</button><button type="button" data-s="2">2×</button><button type="button" data-s="4">4×</button></span></div>
       <div id="toasts" aria-live="polite"></div>
     </div>
     <aside class="gpanel" aria-label="Kontrol masası">
@@ -153,9 +153,9 @@
 
 <nav class="dots" id="dots" aria-label="Bölüm adımları"></nav>
 
-<script src="../../assets/js/toon.js?v=202610171304"></script>
-<script src="model.js?v=202610171304"></script>
-<script src="kurbaga.js?v=202610171304"></script>
+<script src="../../assets/js/toon.js?v=202610171307"></script>
+<script src="model.js?v=202610171307"></script>
+<script src="kurbaga.js?v=202610171307"></script>
 <script>/* gpToggle */document.querySelectorAll(".gp-toggle").forEach(b=>b.onclick=()=>{const p=b.closest(".gpanel");const o=p.classList.toggle("open");b.setAttribute("aria-expanded",o);b.textContent=o?"✕ Kapat":"⋯ Daha fazla";window.dispatchEvent(new Event("panel"));});</script>
 </body>
 </html>

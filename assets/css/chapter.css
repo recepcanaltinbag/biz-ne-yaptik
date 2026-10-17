@@ -552,3 +552,29 @@ input[type=range]::-moz-range-thumb { width: 24px; height: 24px; border-radius: 
 @media (max-width: 760px) { .harvest .sheaves { font-size: 1.5rem; } .harvest .hcard { padding: 14px 20px 12px !important; } }
 @media (max-width: 760px) { .dock .slide[data-mode="game"] .topbox .yb-harvest { order: 1; } .dock .slide[data-mode="game"] .topbox .yb-track { order: 2; } }
 .slide[data-mode="game"] .harvest, .slide[data-mode="game"] .modal { z-index: 20; }
+/* yıl zeminsiz: sahnenin üstünde parıltılı yazı; haber altında kendi kutusunda */
+.dock .slide[data-mode="game"] .topbox .yearbar {
+  background: transparent !important; -webkit-backdrop-filter: none !important; backdrop-filter: none !important; box-shadow: none;
+  text-shadow: 0 0 10px rgba(255,255,255,.95), 0 0 3px rgba(255,255,255,.9);
+}
+.dock .slide[data-mode="game"] .topbox .yb-track { background: rgba(43,58,46,.18); max-width: 260px; margin-left: auto; margin-right: auto; }
+.dock .slide[data-mode="game"] .topbox:has(#toasts .toast:not(.pause):not(.out)) .yearbar { border-radius: 16px; }
+.dock .slide[data-mode="game"] .topbox .toast:not(.pause), .dock .slide[data-mode="game"] .topbox .toast:not(.pause):last-child {
+  border-radius: 14px; border-top: 0; margin-top: 6px; box-shadow: 0 2px 12px rgba(43,58,46,.12);
+}
+.dock .slide[data-mode="game"] .topbox .toast.bad:not(.pause) { box-shadow: inset 4px 0 0 var(--danger), 0 2px 12px rgba(43,58,46,.12); }
+.dock .slide[data-mode="game"] .topbox .toast.warn:not(.pause) { box-shadow: inset 4px 0 0 var(--grain), 0 2px 12px rgba(43,58,46,.12); }
+.dock .slide[data-mode="game"] .topbox .toast.good:not(.pause) { box-shadow: inset 4px 0 0 var(--green), 0 2px 12px rgba(43,58,46,.12); }
+/* hız seçici: yılın yanında üç düğme */
+.yb-speed { display: inline-flex; gap: 0; padding: 0 !important; background: none !important; border: 0 !important; box-shadow: none !important; }
+.yb-speed button {
+  font: 1rem var(--hand); color: var(--ink); background: rgba(255,255,255,.9); border: 2px solid var(--ink); border-left-width: 0;
+  padding: 1px 9px; cursor: pointer; text-shadow: none;
+}
+.yb-speed button:first-child { border-left-width: 2px; border-radius: 999px 0 0 999px; }
+.yb-speed button:last-child { border-radius: 0 999px 999px 0; }
+.yb-speed button.on { background: var(--ink); color: #fff; }
+@media (max-width: 760px) {
+  .yb-speed button { font-size: .82rem; padding: 0 6px; border-width: 1.5px; }
+  .dock .slide[data-mode="game"] .topbox .yearbar { padding-right: 96px; }
+}

@@ -28,9 +28,9 @@
     // serçeler Nisan–Temmuz arası ürer; yuvalar hem üremeyi hem dışarıdan gelişi artırır
     if (cm >= 3 && cm <= 6) st.S += (0.15 + 0.2 * p.nest) * st.S * (1 - st.S) + 0.004 * (1 + 3 * p.nest) * (1 - st.S);
     st.S -= p.hunt * 0.2 * st.S;
-    if (isWarm(cm)) st.P += 0.5 * p.heat * st.P * (1 - st.P / 4) - 0.4 * st.S * st.P;
+    if (isWarm(cm)) st.P += 0.65 * p.heat * st.P * (1 - st.P / 4) - 0.5 * st.S * st.P;
     else st.P = Math.max(0.08, st.P * 0.8);
-    if (isWarm(cm)) st.F -= st.F * 0.055 * st.P;
+    if (isWarm(cm)) st.F -= st.F * 0.045 * st.P;
     if (cm >= 6 && cm <= 8) st.F -= st.F * 0.025 * st.S;
     if (cm === 9) st.harvests.push(st.F);
     st.S = clamp(st.S); st.P = Math.max(0.05, st.P); st.F = clamp(st.F);
@@ -835,11 +835,11 @@
   function setSpeed(v) {
     game.speed = v;
     $('g-speed').textContent = v + '×';
-    const b = $('yb-speed'); b.textContent = (v > 1 ? '⏩ ' : '⏩ ') + v + '×'; b.classList.toggle('on', v > 1);
+    $('yb-speed').querySelectorAll('button').forEach(b => b.classList.toggle('on', Number(b.dataset.s) === v));
   }
   const nextSpeed = () => setSpeed(game.speed === 1 ? 2 : game.speed === 2 ? 4 : 1);
   $('g-speed').onclick = nextSpeed;
-  $('yb-speed').onclick = e => { e.stopPropagation(); initAudio(); nextSpeed(); };
+  $('yb-speed').querySelectorAll('button').forEach(b => b.onclick = e => { e.stopPropagation(); initAudio(); setSpeed(Number(b.dataset.s)); });
 
   // oyun akarken olayları adım adım anlatan kartlar
   const POSTER = 'https://upload.wikimedia.org/wikipedia/commons/6/6f/Kill_bird_and_insect.jpg';
@@ -872,7 +872,7 @@
       game.started = true;
       const show = i => {
         if (mode !== 'game') return;
-        if (i >= STORY.length) return coach(gK, '👉 Kaydır: daha çok tencere', 0);
+        if (i >= STORY.length) return gK.value <= 20 ? coach(gK, '👉 Kaydır: daha çok tencere', 0) : null;
         const [, ic, from, text, tone, opt] = STORY[i];
         toast(ic, from, text, tone, { ...opt, then: opt.pause ? () => show(i + 1) : undefined });
         if (!opt.pause) setTimeout(() => show(i + 1), 9000 / Math.max(1, FAST / 2));
@@ -935,7 +935,7 @@
     if (game.campaign && !game.replaced) {
       game.trust = clamp(game.trust + (game.k - 0.45) * 14, 0, 100);
       if (game.k < 0.3 && game.trust < 60) once('warn1-' + yearKey(), () => toast('📞', 'Parti sekreteri', 'Tencereler neden bu kadar sessiz? Komşu köyler kotayı çoktan doldurdu.', 'warn'));
-      if (game.trust < 40) once('coach-trust', () => coach(gK, '👉 Pekin kızıyor: seferberliği artır'));
+      if (game.trust < 40 && game.k < 0.6) once('coach-trust', () => coach(gK, '👉 Pekin kızıyor: seferberliği artır'));
       if (game.trust < 25) once('warn2', () => toast('⚠️', 'Pekin', 'Pekin\'den sert bir mektup geldi: "Kampanyayı ciddiye alın." Son uyarı.', 'bad'));
       if (game.trust <= 0) replaceMinister();
     }
