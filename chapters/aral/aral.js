@@ -235,10 +235,10 @@
     }
     // dağlar (Pamir): nehirler buradan doğar
     ctx.fillStyle = rgb(PAL.mount);
-    ctx.beginPath(); ctx.moveTo(0, gt); ctx.lineTo(0, gt - gh * 0.55); ctx.lineTo(x1 * 0.05, gt - gh * 0.75); ctx.lineTo(x1 * 0.1, gt - gh * 0.4); ctx.lineTo(x1 * 0.15, gt - gh * 0.62); ctx.lineTo(x1 * 0.22, gt); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(x1 * 0.04, gt); ctx.lineTo(x1 * 0.1, gt - gh * 0.42); ctx.lineTo(x1 * 0.15, gt - gh * 0.24); ctx.lineTo(x1 * 0.2, gt - gh * 0.38); ctx.lineTo(x1 * 0.27, gt); ctx.fill();
     ctx.fillStyle = rgb(PAL.snow, 0.95);
-    ctx.beginPath(); ctx.moveTo(x1 * 0.035, gt - gh * 0.68); ctx.lineTo(x1 * 0.05, gt - gh * 0.75); ctx.lineTo(x1 * 0.066, gt - gh * 0.67); ctx.fill();
-    ctx.beginPath(); ctx.moveTo(x1 * 0.137, gt - gh * 0.56); ctx.lineTo(x1 * 0.15, gt - gh * 0.62); ctx.lineTo(x1 * 0.165, gt - gh * 0.55); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(x1 * 0.087, gt - gh * 0.36); ctx.lineTo(x1 * 0.1, gt - gh * 0.42); ctx.lineTo(x1 * 0.113, gt - gh * 0.36); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(x1 * 0.188, gt - gh * 0.33); ctx.lineTo(x1 * 0.2, gt - gh * 0.38); ctx.lineTo(x1 * 0.212, gt - gh * 0.33); ctx.fill();
 
     // bozkır zemini
     ctx.fillStyle = rgb(mixC(PAL.steppe, PAL.steppeDry, dustK)); ctx.fillRect(0, gt, x1, gh + (H - gb));
