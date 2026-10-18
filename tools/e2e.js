@@ -36,6 +36,11 @@ window.__e2e = { done: false, log: [] };
           const ox = Math.min(ra.right, rb.right) - Math.max(ra.left, rb.left), oy = Math.min(ra.bottom, rb.bottom) - Math.max(ra.top, rb.top);
           if (ox > 4 && oy > 4) overlaps.add(qa + ' × ' + qb);
         }
+        // kanvas etiketleri: birbirleriyle ve yıl çubuğu / bant / kartlarla
+        const P = (W.SceneUtils && W.SceneUtils.placed) ? W.SceneUtils.placed.slice() : [];
+        const dom = els.filter(([q]) => /yb-|ticker|toast|gp-hud|adv/.test(q)).map(([q, el]) => [q, el.getBoundingClientRect()]);
+        const hit = (a, b) => Math.min(a[0] + a[2], b[0] + b[2]) - Math.max(a[0], b[0]) > 4 && Math.min(a[1] + a[3], b[1] + b[3]) - Math.max(a[1], b[1]) > 4;
+        for (let i = 0; i < P.length; i++) { for (let j = i + 1; j < P.length; j++) if (hit(P[i], P[j])) overlaps.add('etiket × etiket'); dom.forEach(([q, r]) => { if (hit(P[i], [r.left, r.top, r.width, r.height])) overlaps.add('etiket × ' + q); }); }
       }
       const y = yearOf();
       if (y === lastY) stuck++; else { stuck = 0; lastY = y; }

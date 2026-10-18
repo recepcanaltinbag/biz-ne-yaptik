@@ -185,6 +185,9 @@
   }
   function show(def) {
     const box = toastEl();
+    // oyundaysa kaydırıcı panelinin ve ipucu balonunun üstünde dursun (hiçbir şeyi örtmesin)
+    const pnl = document.querySelector('.slide.active[data-mode="game"] .gpanel');
+    if (pnl) { box.style.top = 'auto'; box.style.bottom = (innerHeight - pnl.getBoundingClientRect().top + 48) + 'px'; } else { box.style.top = ''; box.style.bottom = ''; }
     const t = document.createElement('div');
     t.className = 'badge-toast' + (def.hidden ? ' secret' : '');
     t.innerHTML = `<div class="bt-ic">${medal(def, true)}</div><div><div class="bt-k">${def.hidden ? 'Gizli rozet bulundu!' : 'Rozet kazanıldı'}</div><div class="bt-n">${def.name}</div><div class="bt-f">🔍 ${def.fact}</div></div>`;

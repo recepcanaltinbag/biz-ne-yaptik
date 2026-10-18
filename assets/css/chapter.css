@@ -887,3 +887,5 @@ body.fullview .slide.active .gp-hud, body.fullview .slide.active .chain, body.fu
 .zoom-out { position: fixed; left: 50%; bottom: calc(env(safe-area-inset-bottom, 0px) + 150px); transform: translate(-50%, 10px); z-index: 45; font: 1rem var(--hand); background: #fffdf6; border: 2px solid var(--ink); border-radius: 99px; padding: 4px 14px; box-shadow: 0 3px 0 var(--ink); opacity: 0; pointer-events: none; transition: opacity .3s, transform .3s; cursor: pointer; }
 .zoom-out.on { opacity: 1; transform: translate(-50%, 0); pointer-events: auto; }
 @media (max-width: 760px) { .zoom-out { bottom: 210px; } }
+@media (max-width: 760px) { .dock .slide[data-mode="game"] .gpanel .coach-tip { display: none; } } /* telefonda ipucu balonu yerine yalnız parlama; ne yapılacağını 💡 satırı söyler */
+@media (max-width: 760px) { .ticker { white-space: normal; } .ticker .tx { overflow: visible; } }

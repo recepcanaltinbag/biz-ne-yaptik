@@ -1411,7 +1411,7 @@
   }
   resetGame();
   if (wasDone) { paintDots(); replayNav(); }
-  if (/[?&]debug\b/.test(location.search)) window.__dbg = { game, gags, nest, sunPos, birds, bubbles, get gs() { return gs; }, get mode() { return mode; }, gag: () => { nextGag = 1; }, go: m => { maxSeen = slides.length; goTo(slideOf(m)); } };
+  if (/[?&]debug\b/.test(location.search)) window.__dbg = { game, gags, nest, sunPos, birds, bubbles, villagers, leavers, get gs() { return gs; }, get mode() { return mode; }, gag: () => { nextGag = 1; }, go: m => { maxSeen = slides.length; goTo(slideOf(m)); } };
 
 
   function renderResult() {

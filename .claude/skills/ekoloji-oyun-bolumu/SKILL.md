@@ -149,6 +149,10 @@ Her yeni bölüm ve her elden geçirme **`AKIS.md`** (repo kökünde) şablonuna
 - **Atmosfer:** `SceneUtils.atmo` (eski yıllar sepya ve grenli, kriz büyüdükçe kenarlar kararır) ve `SceneUtils.decade` (on yıl geçişinde büyük "1950'ler" + tek satır doğru manşet; emin değilsen boş bırak).
 - **Çizim hatası döngüyü durdurmasın:** `try { render(now, dt); } catch (e) { … }`. Kanvas, negatif yarıçap gibi tek bir hatada bütün oyunu dondurur. Boyutları `Math.max(…)` ile sınırla.
 - **Arka plan sekmesinde zamanlayıcılar kısılır:** uzun e2e testini öndeki sekmede çalıştır.
+- **Görünmez Chromium testi (asıl yöntem):** `~/Documents/ekoloji-oyunu-test/` (Playwright + Chromium, repo dışında). Yerel sunucu açıkken:
+  - `node play.js 1024 768` ve `node play.js 375 812` her bölümü `?hizli` ile baştan sona oynatır. Çıktı: hata, takılma, çakışma (sayfa öğeleri + kanvas etiketleri). Hepsi `[]` olmadan yayına çıkma.
+  - `node run.js seq <url> adimlar.json <w> <h>` adım adım JS çalıştırıp ekran görüntüsü alır (görsel kontrol).
+  - Tarayıcı paneli gizliyken zamanlayıcılar kısılır; panel testine güvenme.
 - **Uçtan uca duman testi:** `tools/e2e.js` her bölümü `?debug&hizli&sessiz&e2e` ile baştan sona otomatik oynatır, hataları ve takılmaları raporlar. `?e2e`, gizli pencerede de kareleri sürer. Yayından önce çalıştır.
 
 ## Yeniden oynama (her yeni bölümde düşün)

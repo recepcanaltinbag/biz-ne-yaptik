@@ -170,7 +170,7 @@
     for (let i = 0; i < tufts; i++) { const x = ((i * 97) % 1000) / 1000 * x1, y = G.Y(((i * 61) % 100) / 100), h = 6 * U * vis.G; ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x - 2 * U, y - h); ctx.moveTo(x, y); ctx.lineTo(x + 2 * U, y - h * 1.1); ctx.stroke(); }
     // çiftlik evi ve Thomas Austin (ilk yıllarda)
     const hx = x1 * (mobile ? 0.04 : 0.26); ctx.fillStyle = '#c8a880'; ctx.fillRect(hx, gt - 34 * U, x1 * 0.1, 34 * U); ctx.fillStyle = '#8a4a3a'; ctx.beginPath(); ctx.moveTo(hx - x1 * 0.01, gt - 34 * U); ctx.lineTo(hx + x1 * 0.05, gt - 52 * U); ctx.lineTo(hx + x1 * 0.11, gt - 34 * U); ctx.fill();
-    if (mode === 'game' && gs.y < 1872) { const ax = x1 * (mobile ? 0.2 : 0.4), ay = G.Y(0.2); austin.sx = ax; austin.sy = ay - 44 * U; person(ax, ay, U, { shirt: '#5a6a4a', hat: '#3a2a1a', gun: true }); } else austin.sx = undefined;
+    if (mode === 'game' && (curHist() || { y: gs.y }).y < 1872) { const ax = x1 * (mobile ? 0.2 : 0.4), ay = G.Y(0.2); austin.sx = ax; austin.sy = ay - 44 * U; person(ax, ay, U, { shirt: '#5a6a4a', hat: '#3a2a1a', gun: true }); } else austin.sx = undefined;
     // çit (kurulduysa): arkada; bakım azsa delikli
     if (game.fenceY) {
       const fy = G.Y(0.02), holes = 1 - vis.fence;
@@ -547,7 +547,8 @@
     game.replay = { i: 0, phase: 'play', then }; game.story = true;
     Object.values(SL).forEach(el => el.closest('.sl').classList.add('replaying'));
     const b = document.createElement('div'); b.className = 'rbanner'; b.innerHTML = '<span>📼 <b>Önce tarih:</b> gerçekte ne oldu? (hızlı)</span><button type="button">Geç ⏭</button>';
-    document.body.appendChild(b); game.replay.el = b; b.querySelector('button').onclick = () => endReplay(true);
+    document.body.appendChild(b); game.replay.el = b;
+    const pnl = document.querySelector('.slide.active .gpanel'); if (pnl) b.style.bottom = (innerHeight - pnl.getBoundingClientRect().top + 10) + 'px'; // panelin hemen üstünde b.querySelector('button').onclick = () => endReplay(true);
     setView('scene');
   }
   function endReplay(skip) {
@@ -775,6 +776,7 @@
     const pol = mode === 'sandbox' ? sb.p : game.replay ? M.histP(h ? h.y : 1859) : game.p;
     if (h) Object.assign(target, { R: h.R, G: h.G, N: h.N, A: h.A, trap: pol.trap, fence: mode === 'game' ? game.p.fence : 0, kV: h.kV + h.kV2, v: h.v, q: h.q, rain: mode === 'game' ? (game.hist[game.hist.length - 1] || {}).rain || 1 : sb.p.rain });
     else if (mode === 'game') Object.assign(target, { R: 0.000024, G: 1, N: 1, A: 0.0005, trap: 0, fence: 0, kV: 0, v: 0, q: 0, rain: 1 });
+    else if (mode === 'title') Object.assign(target, { R: 0.000024, G: 1, N: 1, A: 0.0005, trap: 0, fence: 0, kV: 0, v: 0, q: 0, rain: 1 });
     else Object.assign(target, { R: 50, G: 0.9, N: 0.9, A: 0.3, trap: 0, fence: 0, kV: 0, v: 0, q: 0, rain: 1 });
     const k = 1 - Math.pow(0.93, dt / 16);
     for (const key of Object.keys(target)) vis[key] = key === 'R' ? Math.exp(lerp(Math.log(vis.R + 1e-7), Math.log(target.R + 1e-7), k * 0.5)) : lerp(vis[key], target[key], k * 0.5);

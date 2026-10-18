@@ -1,8 +1,9 @@
 // test kancası: ?e2e ile, gizli pencerede de karelerin akması için requestAnimationFrame zamanlayıcıyla sürülür
 if (/[?&]e2e\b/.test(location.search)) {
-  const ch = new MessageChannel(); let q = [];
-  ch.port1.onmessage = () => { const l = q; q = []; const t = performance.now(); l.forEach(f => f(t)); };
-  window.requestAnimationFrame = f => { q.push(f); setTimeout(() => ch.port2.postMessage(0), 16); return 1; };
+  // tek bekleyen zamanlayıcı: kareler yavaşlayınca zamanlayıcılar birikmesin
+  const ch = new MessageChannel(); let q = [], pending = false;
+  ch.port1.onmessage = () => { pending = false; const l = q; q = []; const t = performance.now(); l.forEach(f => f(t)); };
+  window.requestAnimationFrame = f => { q.push(f); if (!pending) { pending = true; setTimeout(() => ch.port2.postMessage(0), 16); } return 1; };
 }
 // Bölümlerin ortak sahne yardımcıları
 // - SceneUtils.avoidHud(x, y, w, h): baloncuk/etiket sol üstteki gösterge panelinin altına girmesin
@@ -24,16 +25,20 @@ if (/[?&]e2e\b/.test(location.search)) {
   let obsT = 0, obs = [];
   function obstacles() {
     const now = performance.now(); if (now - obsT < 120) return obs; obsT = now;
-    const sel = ['.slide.active .yearbar', '.ticker.on', '.slide.active #toasts .toast:not(.out)'];
+    const sel = ['.slide.active .yearbar', '.ticker', '.slide.active #toasts .toast:not(.out)'];
     const list = []; const hr = hudRect(); if (hr) list.push(hr);
-    sel.forEach(q => document.querySelectorAll(q).forEach(el => { const r = el.getBoundingClientRect(); if (r.width > 0 && r.height > 0) list.push(r); }));
+    sel.forEach(q => document.querySelectorAll(q).forEach(el => { if (q === '.ticker' && !el.textContent) return; const r = el.getBoundingClientRect(); if (r.width > 0 && r.height > 0) list.push(r); }));
     obs = list; return obs;
   }
+  // test için: bu karede yerleştirilen kanvas etiketleri (e2e çakışma denetimi okur)
+  const placed = []; let placedT = 0;
+  function place(x, y, w, h) { placedT = performance.now(); placed.push([x, y, w, h]); }
   function avoidHud(x, y, w, h) {
-    const list = obstacles(), pad = 6, maxY = (() => { const p = document.querySelector('.slide.active .gpanel'); return p ? p.getBoundingClientRect().top - h - 4 : innerHeight - h - 4; })();
+    if (performance.now() - placedT > 6) placed.length = 0; // yeni kare: önceki karenin etiketleri sayılmaz
+    const list = obstacles().concat(placed.map(p => ({ left: p[0], top: p[1], right: p[0] + p[2], bottom: p[1] + p[3] }))), pad = 6, maxY = (() => { const p = document.querySelector('.slide.active .gpanel'); return p ? p.getBoundingClientRect().top - h - 4 : innerHeight - h - 4; })();
     for (let pass = 0; pass < 5; pass++) {
       const r = list.find(r => x < r.right + pad && x + w > r.left - pad && y < r.bottom + pad && y + h > r.top - pad && r.top < maxY + h);
-      if (!r) return { x, y: Math.min(y, Math.max(0, maxY)) };
+      if (!r) { const out = { x, y: Math.min(y, Math.max(0, maxY)) }; place(out.x, out.y, w, h); return out; }
       if (r.bottom + pad <= maxY) y = r.bottom + pad;           // önce aşağı kay
       else if (r.right + pad + w < innerWidth - 8) x = r.right + pad; // sığmazsa sağa
       else if (r.left - pad - w > 8) x = r.left - pad - w;       // ya da sola
@@ -199,12 +204,19 @@ if (/[?&]e2e\b/.test(location.search)) {
   }
   function decadeReset() { decLast = 0; }
   // haber bandı: durdurmayan haberler kart yerine yıl çubuğunun altında tek satır manşet olur
-  let tickEl = null, tickT = 0;
+  let tickEl = null, tickT = 0, tickI = 0;
+  // yıl çubuğu ve içindeki her şeyin (hız, harita düğmesi) birleşik kutusunun altı; telefonda bant bu genişliğe sığar
+  function tickPos() {
+    const yb = document.querySelector('.slide.active .yearbar'); if (!yb || !tickEl) return;
+    let r = yb.getBoundingClientRect(), L = r.left, R = r.right, B = r.bottom;
+    yb.querySelectorAll('*').forEach(el => { const q = el.getBoundingClientRect(); if (q.width && q.height) { L = Math.min(L, q.left); R = Math.max(R, q.right); B = Math.max(B, q.bottom); } });
+    tickEl.style.top = (B + 4) + 'px'; tickEl.style.left = ((L + R) / 2) + 'px'; tickEl.style.maxWidth = innerWidth < 760 ? Math.max(140, R - L) + 'px' : '';
+  }
   function ticker(ic, from, html, tone, ms) {
     const yb = document.querySelector('.slide.active .yearbar'); if (!yb) return false;
     if (!tickEl) { tickEl = document.createElement('div'); tickEl.className = 'ticker'; tickEl.setAttribute('aria-live', 'polite'); document.body.appendChild(tickEl); }
     // yıl çubuğunun hemen altında, ortasına hizalı
-    const r = yb.getBoundingClientRect(); tickEl.style.top = (r.bottom + 4) + 'px'; tickEl.style.left = (r.left + r.width / 2) + 'px';
+    tickPos(); clearInterval(tickI); tickI = setInterval(() => { if (tickEl.classList.contains('on')) tickPos(); else clearInterval(tickI); }, 250);
     let plain = String(html).replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
     const first = plain.match(/^.*?[.!?](\s|$)/); if (first && first[0].length > 24) plain = first[0].trim();
     if (plain.length > 96) plain = plain.slice(0, 93).replace(/\s+\S*$/, '') + '…';
@@ -217,5 +229,5 @@ if (/[?&]e2e\b/.test(location.search)) {
   let fvOn = false;
   function fullView(on) { on = !!on; if (on === fvOn) return; fvOn = on; document.body.classList.toggle('fullview', on); }
   function viewTop(min = 96) { const yb = document.querySelector('.slide.active .yearbar'); const r = yb && yb.getBoundingClientRect(); return Math.max(min, r && r.height ? r.bottom + 10 : min); }
-  window.SceneUtils = { fullView, viewTop, avoidHud, lineChart, bestLine, yilEk, advise, preview, watchSliders, tour, atmo, decade, decadeReset, ticker };
+  window.SceneUtils = { placed, fullView, viewTop, avoidHud, lineChart, bestLine, yilEk, advise, preview, watchSliders, tour, atmo, decade, decadeReset, ticker };
 })();
