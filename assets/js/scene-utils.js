@@ -13,7 +13,7 @@ if (/[?&]e2e\b/.test(location.search)) {
   let hud = null, hudAt = 0;
   function hudRect() {
     const now = performance.now();
-    if (now - hudAt > 250) {
+    if (now - hudAt > 80) {
       hudAt = now;
       const el = document.querySelector('.slide.active[data-mode="game"] .gp-hud');
       hud = el ? el.getBoundingClientRect() : null;
@@ -24,10 +24,10 @@ if (/[?&]e2e\b/.test(location.search)) {
   // sahne etiketleri ekrandaki kutuların altına girmesin: sol HUD, yıl çubuğu, haber bandı, kartlar, alttaki panel
   let obsT = 0, obs = [];
   function obstacles() {
-    const now = performance.now(); if (now - obsT < 120) return obs; obsT = now;
-    const sel = ['.slide.active .yearbar', '.ticker', '.slide.active #toasts .toast:not(.out)'];
+    const now = performance.now(); if (now - obsT < 80) return obs; obsT = now;
+    const sel = ['.slide.active .yearbar', '.ticker', '.slide.active #toasts .toast:not(.out)', '.coach-tip'];
     const list = []; const hr = hudRect(); if (hr) list.push(hr);
-    sel.forEach(q => document.querySelectorAll(q).forEach(el => { if (q === '.ticker' && !el.textContent) return; const r = el.getBoundingClientRect(); if (r.width > 0 && r.height > 0) list.push(r); }));
+    sel.forEach(q => document.querySelectorAll(q).forEach(el => { if (q === '.ticker' && !el.textContent) return; if (q === '.coach-tip') { const cs = getComputedStyle(el); if (cs.display === 'none' || cs.visibility === 'hidden' || +cs.opacity < 0.2 || el.closest('[hidden]')) return; } const r = el.getBoundingClientRect(); if (r.width > 0 && r.height > 0) list.push(r); }));
     obs = list; return obs;
   }
   // test için: bu karede yerleştirilen kanvas etiketleri (e2e çakışma denetimi okur)
@@ -36,15 +36,20 @@ if (/[?&]e2e\b/.test(location.search)) {
   function avoidHud(x, y, w, h) {
     if (performance.now() - placedT > 6) placed.length = 0; // yeni kare: önceki karenin etiketleri sayılmaz
     const list = obstacles().concat(placed.map(p => ({ left: p[0], top: p[1], right: p[0] + p[2], bottom: p[1] + p[3] }))), pad = 6, maxY = (() => { const p = document.querySelector('.slide.active .gpanel'); return p ? p.getBoundingClientRect().top - h - 4 : innerHeight - h - 4; })();
-    for (let pass = 0; pass < 5; pass++) {
-      const r = list.find(r => x < r.right + pad && x + w > r.left - pad && y < r.bottom + pad && y + h > r.top - pad && r.top < maxY + h);
-      if (!r) { const out = { x, y: Math.min(y, Math.max(0, maxY)) }; place(out.x, out.y, w, h); return out; }
-      if (r.bottom + pad <= maxY) y = r.bottom + pad;           // önce aşağı kay
-      else if (r.right + pad + w < innerWidth - 8) x = r.right + pad; // sığmazsa sağa
-      else if (r.left - pad - w > 8) x = r.left - pad - w;       // ya da sola
-      else return { x, y };
+    // en yakın boş yeri ara: önce olduğu yer, sonra artan uzaklıkta aşağı / sağ / sol / yukarı ve çaprazlar.
+    // Hiç boş yer yoksa en az örtüşen yer seçilir. Sonuç her zaman ekranın içinde ve kaydırıcı panelinin üstünde.
+    const yMax = Math.max(0, maxY), xMax = Math.max(8, innerWidth - w - 8);
+    const fit = (cx, cy) => [Math.min(xMax, Math.max(8, cx)), Math.min(yMax, Math.max(0, cy))];
+    const cost = (cx, cy) => { let c = 0; for (const r of list) { const ox = Math.min(cx + w, r.right + pad) - Math.max(cx, r.left - pad), oy = Math.min(cy + h, r.bottom + pad) - Math.max(cy, r.top - pad); if (ox > 0 && oy > 0) c += ox * oy; } return c; };
+    let best = fit(x, y), bc = cost(best[0], best[1]);
+    if (bc > 0) {
+      const D = [[0, 1], [1, 0], [-1, 0], [0, -1], [1, 1], [-1, 1], [1, -1], [-1, -1]];
+      search: for (let d = 12; d <= 320; d += 12) for (const [dx, dy] of D) {
+        const c = fit(x + dx * d, y + dy * d), v = cost(c[0], c[1]);
+        if (v < bc) { best = c; bc = v; if (!v) break search; }
+      }
     }
-    return { x, y };
+    place(best[0], best[1], w, h); return { x: best[0], y: best[1] };
   }
 
   // series: [{ data: [0..1], color, label?, dash?, fmt? }] · opts: { y0, step, unit }
@@ -228,7 +233,14 @@ if (/[?&]e2e\b/.test(location.search)) {
   // tam ekran görünüm (harita, zincir, kutup, mikroskop) açıkken HUD söner; görünüm yıl çubuğunun altından başlar
   let fvOn = false;
   function fullView(on) { on = !!on; if (on === fvOn) return; fvOn = on; document.body.classList.toggle('fullview', on); }
-  function viewTop(min = 96) { const yb = document.querySelector('.slide.active .yearbar'); const r = yb && yb.getBoundingClientRect(); return Math.max(min, r && r.height ? r.bottom + 10 : min); }
+  // sahne/harita bu çizginin altından başlar: yıl kutusu, altındaki düğmeler (hız, görünüm) dahil
+  let vtAt = 0, vtB = 0;
+  function viewTop(min = 96) {
+    const now = performance.now();
+    if (now - vtAt > 250) { vtAt = now; vtB = 0; const yb = document.querySelector('.slide.active .yearbar');
+      if (yb) [yb, ...yb.querySelectorAll('*')].forEach(el => { const q = el.getBoundingClientRect(); if (q.width && q.height && getComputedStyle(el).visibility !== 'hidden') vtB = Math.max(vtB, q.bottom); }); }
+    return Math.max(min, vtB ? vtB + 10 : min);
+  }
   // okuma süresi: saniyede ~12 karakter + 1,5 sn nefes (çocuk okuru için)
   const readMs = (text, min = 4000) => Math.max(min, 1500 + String(text || '').replace(/<[^>]+>/g, '').length * 83);
   // 📼 önce tarih: tarihteki ayarlarla hızlı film; haber çıkınca okunacak kadar yavaşlar; sonra geri sarılır

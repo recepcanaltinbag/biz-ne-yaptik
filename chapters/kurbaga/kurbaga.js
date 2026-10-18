@@ -228,7 +228,7 @@
   // konuşma balonları
   const bubbles = [], floats = [];
   function drawBubble(bb) {
-    const pad = 10 * U, fs = 17 * U;
+    const pad = Math.max(8, 10 * U), fs = Math.max(15, 17 * U); // telefonda da okunur (en az 15 px)
     ctx.font = `${fs}px "Patrick Hand"`;
     const lines = bb.text.split('\n');
     const w = Math.max(...lines.map(l => ctx.measureText(l).width)) + pad * 2, h = lines.length * fs * 1.15 + pad * 1.4;
@@ -618,6 +618,14 @@
   // bölüm bir kez bitirildiyse (bu tarayıcıda) bütün slaytlar seçilebilir
   const DONE_KEY = 'bny-bitti-kurbaga';
   const wasDone = (() => { try { return !!localStorage.getItem(DONE_KEY); } catch (e) { return false; } })();
+  // tarih filminden sonra görev kartı: tarihte ne oldu + senin rolün, kontrolün, hedefin (oyuncu başlarken tek kart)
+  function missionCard(ic, fr, tx, tone, o) {
+    const m = document.getElementById('modal');
+    if (!window.Mission || !m || typeof MISSION === 'undefined') return showToast(ic, fr, tx, tone, o);
+    const hist = String(tx).split(/<b>Hedefin/)[0].trim().replace(/^Tarihte /, '').replace(/^./, c => c.toLocaleUpperCase('tr'));
+    game.reading = (game.reading || 0) + 1;
+    window.Mission.show(m, { ...MISSION, hist }, () => { game.reading = Math.max(0, game.reading - 1); if (o && o.then) o.then(); });
+  }
   if (wasDone) maxSeen = slides.length - 1;
   const slideOf = m => slides.findIndex(x => x.dataset.mode === m);
   const dotsEl = $('dots');
@@ -829,7 +837,7 @@
       { dur: 10000, text: 'Kurbağalar böceği yemedi; kıtaya yayıldı. Onları yiyen yerli yırtıcılar zehirlendi.', draw: mapShot },
       { dur: 4500, bg: '#e8d8a8', text: `${last.year}: kıtanın %${Math.round(last.areaPct)}'u kurbağaların. Yerli yırtıcıların yalnız %${Math.round(last.pred * 100)}'i kaldı.`, draw: (g, t, W, H) => mapShot(g, t, W, H, 1) },
     ] };
-    window.Cinema.play(FILM, () => showToast('⏪', '1935 · şimdi sen', `Tarihte yerli yırtıcıların <b>%${Math.round(last.pred * 100)}</b>'i kaldı. <b>Hedefin:</b> ${MISSION.goal} Kurtarıcıyı salacak mısın?`, '', { pause: true, then: go }));
+    window.Cinema.play(FILM, () => missionCard('⏪', '1935 · şimdi sen', `Tarihte yerli yırtıcıların <b>%${Math.round(last.pred * 100)}</b>'i kaldı. <b>Hedefin:</b> ${MISSION.goal} Kurtarıcıyı salacak mısın?`, '', { pause: true, then: go }));
   }
 
   function askRelease() {

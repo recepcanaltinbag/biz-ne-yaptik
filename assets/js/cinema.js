@@ -41,7 +41,7 @@
     resize(); addEventListener('resize', resize);
     const loaded = [];
     imgs.forEach((p, i) => p.then(im => { loaded[i] = im; }));
-    let i = 0, t0 = performance.now(), shown = -1, typed = 0, raf = 0, finished = false, start = 0;
+    let capTop = innerHeight * 0.75, i = 0, t0 = performance.now(), shown = -1, typed = 0, raf = 0, finished = false, start = 0;
     const capText = () => shots[i].text || '';
     function next() { if (i < shots.length - 1) { i++; t0 = performance.now(); shown = -1; } else finish(); }
     function finish() {
@@ -68,12 +68,18 @@
       let e = now - t0, s = shots[i];
       if (e >= s.dur) { next(); if (finished) return; e = now - t0; s = shots[i]; }
       const k = clamp(e / s.dur);
+      // alt yazı: daktilo gibi
+      if (shown !== i) { shown = i; typed = 0; cap.textContent = capText(); capTop = cap.getBoundingClientRect().top; cap.textContent = ''; cap.classList.remove('in'); void cap.offsetWidth; cap.classList.add('in'); }
       g.fillStyle = s.bg || '#14120f'; g.fillRect(0, 0, W, H);
       const im = loaded[i];
       if (im) drawImg(im, s, k, clamp(e / 600));
       // önceki kare yavaşça söner (geçiş)
       if (i > 0 && e < 600 && loaded[i - 1] && shots[i - 1].img) drawImg(loaded[i - 1], shots[i - 1], 1, 1 - e / 600);
-      if (s.draw) { g.save(); try { s.draw(g, e * FAST, W, H, k); } catch (err) { /* animasyon hatası sahneyi durdurmasın */ } g.restore(); }
+      // çizim, üst bant ile alt yazının üstü arasındaki alana sığdırılır (yazı hiçbir şeyin üstüne binmez)
+      const bh0 = Math.max(28, H * 0.09), top = bh0 + 8, bot = Math.max(top + H * 0.3, capTop - 10);
+      if (s.draw) { g.save(); g.beginPath(); g.rect(0, top, W, bot - top); g.clip(); g.translate(0, top); try { s.draw(g, e * FAST, W, bot - top, k); } catch (err) { /* animasyon hatası sahneyi durdurmasın */ } g.restore(); }
+      // alt yazı alanı: hafif koyu bant, yazı her zeminde okunur
+      const cg = g.createLinearGradient(0, bot - 20, 0, H); cg.addColorStop(0, 'rgba(0,0,0,0)'); cg.addColorStop(0.25, 'rgba(0,0,0,.45)'); cg.addColorStop(1, 'rgba(0,0,0,.6)'); g.fillStyle = cg; g.fillRect(0, bot - 20, W, H - bot + 20);
       // eski film: kenar karartma ve gren
       const vg = g.createRadialGradient(W / 2, H / 2, Math.min(W, H) * 0.3, W / 2, H / 2, Math.max(W, H) * 0.75);
       vg.addColorStop(0, 'rgba(0,0,0,0)'); vg.addColorStop(1, 'rgba(0,0,0,.55)'); g.fillStyle = vg; g.fillRect(0, 0, W, H);
@@ -81,8 +87,6 @@
       if (Math.random() < 0.04) { g.fillStyle = 'rgba(255,250,235,.06)'; g.fillRect(Math.random() * W, 0, 1, H); }
       // geniş ekran bantları
       const bh = Math.max(28, H * 0.09); g.fillStyle = '#000'; g.fillRect(0, 0, W, bh); g.fillRect(0, H - bh, W, bh);
-      // alt yazı: daktilo gibi
-      if (shown !== i) { shown = i; typed = 0; cap.textContent = ''; cap.classList.remove('in'); void cap.offsetWidth; cap.classList.add('in'); }
       const txt = capText(), want = Math.min(txt.length, Math.floor(e / (18 / FAST)));
       if (want !== typed) { typed = want; cap.textContent = txt.slice(0, typed); }
       el.querySelector('.cine-credit').style.opacity = im && s.img ? 0.8 : 0;

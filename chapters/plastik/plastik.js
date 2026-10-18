@@ -100,7 +100,7 @@
     return { x1, gt, gb, gh, shore: x1 * 0.58, water: gt + gh * 0.08 };
   }
   function drawBubble(bb) {
-    const pad = 10 * U, fs = 17 * U;
+    const pad = Math.max(8, 10 * U), fs = Math.max(15, 17 * U); // telefonda da okunur (en az 15 px)
     ctx.font = `${fs}px "Patrick Hand"`;
     const lines = bb.text.split('\n');
     const w = Math.max(...lines.map(l => ctx.measureText(l).width)) + pad * 2, h = lines.length * fs * 1.15 + pad * 1.4;
@@ -117,7 +117,7 @@
   }
   const sayAt = (obj, text) => { bubbles.length = 0; bubbles.push({ obj, text, life: 1 }); };
   function tag(x, y, text, o = {}) {
-    const fs = Math.max(11, (o.fs || 13) * U);
+    const fs = Math.max(mobile ? 12.5 : 11, (o.fs || 13) * U);
     ctx.font = `${fs}px "Patrick Hand"`;
     const w = ctx.measureText(text).width + 12 * U, h = fs + 8 * U;
     let bx = clamp(x - w / 2, 4, lay.x1 * W - w - 4), by = y - h;
@@ -227,7 +227,7 @@
     if (mode === 'facts' || mode === 'lessons' || mode === 'title' || view.k > 0.5) return;
     if (!(G.x1 > 50 && G.gh > 20)) return;
     const r0 = Math.min(G.gh * 0.36, G.x1 * 0.1), cx0 = G.x1 - r0 - 16 * U, cy0 = G.gb - r0 - 30 * U;
-    const big = smooth(0, 1, mview.k), top = 200 * U, rB = Math.min((G.gb - top) * 0.4, G.x1 * 0.28);
+    const big = smooth(0, 1, mview.k), top = (window.SceneUtils && window.SceneUtils.viewTop ? window.SceneUtils.viewTop(200 * U) : 200 * U), rB = Math.min((G.gb - top) * 0.4, G.x1 * 0.28);
     const r = Math.max(10, lerp(r0, rB, big)), cx = lerp(cx0, G.x1 / 2, big), cy = lerp(cy0, top + (G.gb - top) * 0.45, big);
     lensBox.x = cx; lensBox.y = cy; lensBox.r = r;
     if (big > 0.01) { ctx.fillStyle = `rgba(30,40,36,${0.55 * big})`; ctx.fillRect(0, 0, G.x1, H); }
@@ -245,7 +245,7 @@
   const view = { want: 'shore', k: 0, until: 0, user: false };
   function setView(v, ms) { view.want = v; view.user = !ms; view.until = ms ? performance.now() + ms : 0; const b = $('g-view'); if (b) b.textContent = v === 'map' ? '🏖️ Kıyı' : '🗺️ Okyanus'; }
   function mapGeom(G) {
-    const top = 104 * U, H2 = Math.max(80, G.gb - top), Wm = Math.min(G.x1 * 0.96, H2 * 1.6), Hm = Wm / 1.6;
+    const top = (window.SceneUtils && window.SceneUtils.viewTop ? window.SceneUtils.viewTop(104 * U) : 104 * U), H2 = Math.max(80, G.gb - top), Wm = Math.min(G.x1 * 0.96, H2 * 1.6), Hm = Wm / 1.6;
     return { ox: (G.x1 - Wm) / 2, oy: top + (H2 - Hm) / 2, Wm, Hm, cx: 0.5, cy: 0.48 };
   }
   function current(px, py) { // girdap: saat yönünde döner, yavaşça ortaya çeker
@@ -368,6 +368,14 @@
   let cur = 0, maxSeen = 0, mode = 'title';
   const DONE_KEY = 'bny-bitti-plastik';
   const wasDone = (() => { try { return !!localStorage.getItem(DONE_KEY); } catch (e) { return false; } })();
+  // tarih filminden sonra görev kartı: tarihte ne oldu + senin rolün, kontrolün, hedefin (oyuncu başlarken tek kart)
+  function missionCard(ic, fr, tx, tone, o) {
+    const m = document.getElementById('modal');
+    if (!window.Mission || !m || typeof MISSION === 'undefined') return showToast(ic, fr, tx, tone, o);
+    const hist = String(tx).split(/<b>Hedefin/)[0].trim().replace(/^Tarihte /, '').replace(/^./, c => c.toLocaleUpperCase('tr'));
+    game.reading = (game.reading || 0) + 1;
+    window.Mission.show(m, { ...MISSION, hist }, () => { game.reading = Math.max(0, game.reading - 1); if (o && o.then) o.then(); });
+  }
   if (wasDone) maxSeen = slides.length - 1;
   const dotsEl = $('dots');
   slides.forEach((_, i) => { const b = document.createElement('button'); b.setAttribute('aria-label', `Adım ${i + 1}`); b.onclick = () => { if (i <= maxSeen) goTo(i); }; dotsEl.appendChild(b); });
@@ -590,7 +598,7 @@
   function histFilm(then) {
     if (wasDone || !window.SceneUtils || !window.SceneUtils.replay) { game.story = false; return then(); }
     game.story = true;
-    window.SceneUtils.replay({ n: HISTORY.hist.length, ms: 14000, yearAt: i => HISTORY.hist[i].y, news: { 1965: ["🛍️", "Plastik poşet icat edildi"], 1973: ["🍾", "PET şişe geldi"], 1997: ["⛵", "Pasifik'in ortasında çöp alanı bulundu"], 2015: ["📊", "Okyanusa yılda milyonlarca ton plastik giriyor"], 2018: ["🚚", "Çin atık almayı bıraktı"] }, onIndex: i => { RPI = i; if (typeof replayPol === 'function') replayPol(i); }, card: () => ['⏪', '1950 · şimdi sen', `Tarihte 2030'da denize yılda <b>${f1(HISTORY.hist[HISTORY.hist.length - 1].I)} milyon ton</b> plastik giriyor. <b>Hedefin:</b> 12 milyon tonun altı. Daha iyisini yapabilir misin?`], showCard: (ic, fr, tx, th) => showToast(ic, fr, tx, '', { pause: true, then: () => {
+    window.SceneUtils.replay({ n: HISTORY.hist.length, ms: 14000, yearAt: i => HISTORY.hist[i].y, news: { 1965: ["🛍️", "Plastik poşet icat edildi"], 1973: ["🍾", "PET şişe geldi"], 1997: ["⛵", "Pasifik'in ortasında çöp alanı bulundu"], 2015: ["📊", "Okyanusa yılda milyonlarca ton plastik giriyor"], 2018: ["🚚", "Çin atık almayı bıraktı"] }, onIndex: i => { RPI = i; if (typeof replayPol === 'function') replayPol(i); }, card: () => ['⏪', '1950 · şimdi sen', `Tarihte 2030'da denize yılda <b>${f1(HISTORY.hist[HISTORY.hist.length - 1].I)} milyon ton</b> plastik giriyor. <b>Hedefin:</b> 12 milyon tonun altı. Daha iyisini yapabilir misin?`], showCard: (ic, fr, tx, th) => missionCard(ic, fr, tx, '', { pause: true, then: () => {
       // kontroller: ilk kaydırıcı spot ışığıyla tanıtılır (görev kartının yerine)
       const sl = document.querySelector('.slide.active .gpanel .sl:not(.locked)');
       const go = () => { game.story = false; th(); };

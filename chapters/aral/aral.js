@@ -124,7 +124,7 @@
   const riverY = (x, G) => G.ry + Math.sin(x * 0.012) * 4 * U + Math.sin(x * 0.031 + 1) * 2 * U;
 
   function drawBubble(bb) {
-    const pad = 10 * U, fs = 17 * U;
+    const pad = Math.max(8, 10 * U), fs = Math.max(15, 17 * U); // telefonda da okunur (en az 15 px)
     ctx.font = `${fs}px "Patrick Hand"`;
     const lines = bb.text.split('\n');
     const w = Math.max(...lines.map(l => ctx.measureText(l).width)) + pad * 2, h = lines.length * fs * 1.15 + pad * 1.4;
@@ -396,7 +396,7 @@
   const ME = [[0.42, 0.32], [0.58, 0.3], [0.74, 0.38], [0.8, 0.56], [0.74, 0.76], [0.58, 0.86], [0.42, 0.84], [0.44, 0.56]];
   const cen = pts => pts.reduce((a, p) => [a[0] + p[0] / pts.length, a[1] + p[1] / pts.length], [0, 0]);
   function mapRect(pts, pad = 0) {
-    const G = geo(), top = 104 * U, H2 = G.gb - top, Wm = Math.min(G.x1 * 0.96, H2 * 1.35), Hm = Wm / 1.35, ox = (G.x1 - Wm) / 2, oy = top + (H2 - Hm) / 2;
+    const G = geo(), top = (window.SceneUtils && window.SceneUtils.viewTop ? window.SceneUtils.viewTop(104 * U) : 104 * U), H2 = G.gb - top, Wm = Math.min(G.x1 * 0.96, H2 * 1.35), Hm = Wm / 1.35, ox = (G.x1 - Wm) / 2, oy = top + (H2 - Hm) / 2;
     const xs = pts.map(p => ox + p[0] * Wm), ys = pts.map(p => oy + p[1] * Hm);
     return [Math.min(...xs) - pad, Math.min(...ys) - pad, Math.max(...xs) - Math.min(...xs) + pad * 2, Math.max(...ys) - Math.min(...ys) + pad * 2];
   }
@@ -406,7 +406,7 @@
     window.SceneUtils.tour(steps, () => { game.reading = Math.max(0, game.reading - 1); if (then) then(); });
   }
   function drawMap(G, t, alpha) {
-    const top = 104 * U, H2 = G.gb - top, Wm = Math.min(G.x1 * 0.96, H2 * 1.35), Hm = Wm / 1.35;
+    const top = (window.SceneUtils && window.SceneUtils.viewTop ? window.SceneUtils.viewTop(104 * U) : 104 * U), H2 = G.gb - top, Wm = Math.min(G.x1 * 0.96, H2 * 1.35), Hm = Wm / 1.35;
     const ox = (G.x1 - Wm) / 2, oy = top + (H2 - Hm) / 2;
     const X = p => ox + p[0] * Wm, Y = p => oy + p[1] * Hm;
     const zoom = 1 + (1 - alpha) * 0.35;
@@ -466,7 +466,7 @@
   const pulses = [];
   const pulseAt = (getPos, col = '#e0b04a') => pulses.push({ getPos, t0: performance.now(), col });
   function tag(x, y, text, o = {}) {
-    const fs = Math.max(11, (o.fs || 13) * U);
+    const fs = Math.max(mobile ? 12.5 : 11, (o.fs || 13) * U);
     ctx.font = `${fs}px "Patrick Hand"`;
     const w = ctx.measureText(text).width + 12 * U, h = fs + 8 * U;
     let bx = clamp(x - w / 2, 4, lay.x1 * W - w - 4), by = y - h;
@@ -729,6 +729,14 @@
   let cur = 0, maxSeen = 0, mode = 'title';
   const DONE_KEY = 'bny-bitti-aral';
   const wasDone = (() => { try { return !!localStorage.getItem(DONE_KEY); } catch (e) { return false; } })();
+  // tarih filminden sonra görev kartı: tarihte ne oldu + senin rolün, kontrolün, hedefin (oyuncu başlarken tek kart)
+  function missionCard(ic, fr, tx, tone, o) {
+    const m = document.getElementById('modal');
+    if (!window.Mission || !m || typeof MISSION === 'undefined') return showToast(ic, fr, tx, tone, o);
+    const hist = String(tx).split(/<b>Hedefin/)[0].trim().replace(/^Tarihte /, '').replace(/^./, c => c.toLocaleUpperCase('tr'));
+    game.reading = (game.reading || 0) + 1;
+    window.Mission.show(m, { ...MISSION, hist }, () => { game.reading = Math.max(0, game.reading - 1); if (o && o.then) o.then(); });
+  }
   if (wasDone) maxSeen = slides.length - 1;
   const dotsEl = $('dots');
   slides.forEach((_, i) => { const b = document.createElement('button'); b.setAttribute('aria-label', `Adım ${i + 1}`); b.onclick = () => { if (i <= maxSeen) goTo(i); }; dotsEl.appendChild(b); });
@@ -893,7 +901,7 @@
       toast(ic, from, text, tone, { ...opt, then: opt.pause ? () => show(i + 1) : undefined });
       if (!opt.pause) setTimeout(() => show(i + 1), 6500 / Math.max(1, FAST / 2));
     };
-    const start = () => { if (wasDone) game.story = false; setTimeout(() => histFilm(() => { setView("map", 7000); show(0); }), 300); };
+    const start = () => { if (wasDone) game.story = false; setTimeout(() => cine(CINE.intro, () => histFilm(() => { setView("map", 7000); show(0); })), 300); };
     start(); // görev kartı yok: hedef, tarih filmi bitince 'şimdi sen' kartında
   }
 
@@ -904,10 +912,34 @@
     if (i === null) { gW.value = 20; gFix.value = 0; readGameSliders(); return; }
     const hp = M.histP(HISTORY.hist[i].y); gW.value = Math.round(hp.w * 100); readGameSliders();
   }
+  function cine(spec, then) {
+    if (!window.Cinema) { if (then) then(); return; }
+    if (game.speed > 1 && typeof setSpeed === 'function') setSpeed(1);
+    game.reading = (game.reading || 0) + 1;
+    window.Cinema.play({ skipIfSeen: wasDone, ...spec }, () => { game.reading = Math.max(0, game.reading - 1); if (then) then(); });
+  }
+  // açılış filmi: 1960'ta dolu bir göl ve pamuk planı (Muynak fotoğrafı arşivden, gerisi kodla çizilir)
+  const CINE = {
+    intro: { id: 'aral-1960', year: '1960', title: 'Aral Gölü, Orta Asya', credit: 'Arian Zwegers, CC BY 2.0', shots: [
+      { bg: '#d8c89a', text: 'Aral, dünyanın 4. büyük gölü. Muynak limanında balıkçı tekneleri, balık konservesi fabrikaları.', draw: (g, t, W, H, k) => {
+        const s = Math.min(W, H) / 600; g.fillStyle = '#4a8ab8'; g.beginPath(); g.ellipse(W * 0.5, H * 0.55, W * 0.38, H * 0.26, 0, 0, 6.28); g.fill();
+        g.fillStyle = 'rgba(255,255,255,.35)'; for (let i = 0; i < 14; i++) g.fillRect(W * 0.2 + ((i * 97 + t * 0.03) % (W * 0.6)), H * (0.42 + (i % 5) * 0.05), 18 * s, 2);
+        for (let i = 0; i < 5; i++) { const x = W * (0.3 + i * 0.1) + Math.sin(t * 0.001 + i) * 10, y = H * (0.5 + (i % 2) * 0.08) + Math.sin(t * 0.003 + i) * 3; g.fillStyle = '#6a4a2a'; g.beginPath(); g.moveTo(x - 18 * s, y); g.lineTo(x + 18 * s, y); g.lineTo(x + 12 * s, y + 8 * s); g.lineTo(x - 12 * s, y + 8 * s); g.fill(); g.strokeStyle = '#3a2a1a'; g.lineWidth = 2; g.beginPath(); g.moveTo(x, y); g.lineTo(x, y - 24 * s); g.stroke(); }
+        const j = (t * 0.002) % 1; g.fillStyle = '#c8d8e0'; g.beginPath(); g.ellipse(W * 0.62, H * 0.62 - Math.sin(j * 3.14) * 30 * s, 7 * s, 3 * s, j * 3, 0, 6.28); g.fill(); } },
+      { bg: '#e2d4a8', text: 'Plan basit: göle akan iki nehrin suyu çöldeki pamuk tarlalarına. Pamuğa "beyaz altın" deniyor.', draw: (g, t, W, H, k) => {
+        const s = Math.min(W, H) / 600, rx = W * 0.3 * (1 - k * 0.25), ry = H * 0.2 * (1 - k * 0.25); g.fillStyle = '#4a8ab8'; g.beginPath(); g.ellipse(W * 0.5, H * 0.32, rx, ry, 0, 0, 6.28); g.fill();
+        const river = (x0, w) => { g.strokeStyle = '#4a8ab8'; g.lineWidth = w * s; g.beginPath(); g.moveTo(x0, H * 0.95); g.quadraticCurveTo(x0 + (W * 0.5 - x0) * 0.3, H * 0.6, W * 0.5 + (x0 - W * 0.5) * 0.25, H * 0.45); g.stroke(); };
+        river(W * 0.18, 10 * (1 - k * 0.8)); river(W * 0.82, 10 * (1 - k * 0.8));
+        for (let i = 0; i < 6; i++) { const left = i < 3, x = left ? W * (0.24 + i * 0.03) : W * (0.7 + (i - 3) * 0.03), y = H * (0.82 - (i % 3) * 0.08), d = Math.min(1, k * 2 - (i % 3) * 0.2); if (d <= 0) continue;
+          const ex = x + (left ? -1 : 1) * W * 0.16 * d; g.strokeStyle = '#6a9ac0'; g.lineWidth = 3 * s; g.beginPath(); g.moveTo(x, y); g.lineTo(ex, y); g.stroke();
+          g.fillStyle = '#f4f0e8'; for (let n = 0; n < 6; n++) { g.beginPath(); g.arc(x + (ex - x) * (n + 0.5) / 6, y + 10 * s, 4 * s, 0, 6.28); g.fill(); } } } },
+      { img: MOYNAQ, kb: [0.5, 0.55, 1.05, 0.45, 0.5, 1.2], text: 'Bu fotoğraf o limandan. Göl buraya nasıl geldi? Önce tarihte olanı izle.' },
+    ] },
+  };
   function histFilm(then) {
     if (wasDone || !window.SceneUtils || !window.SceneUtils.replay) { game.story = false; return then(); }
     game.story = true;
-    window.SceneUtils.replay({ n: HISTORY.hist.length, ms: 14000, yearAt: i => HISTORY.hist[i].y, news: { 1965: ["🌱", "Pamuk için nehirlerin suyu tarlalara"], 1982: ["🐟", "Ticari balıkçılık bitti"], 1987: ["✂️", "Göl ikiye ayrıldı"], 2005: ["🧱", "Kokaral seti: Küçük Aral kurtuluyor"] }, onIndex: i => { RPI = i; if (typeof replayPol === 'function') replayPol(i); }, card: () => ['⏪', '1960 · şimdi sen', `Tarihte göl alanının yalnız <b>%${Math.round(HISTORY.hist[HISTORY.hist.length - 1].A / M.A0 * 100)}</b>'i kaldı. <b>Hedefin:</b> pamuk planını tuttur, ama gölü yaşat. Daha iyisini yapabilir misin?`], showCard: (ic, fr, tx, th) => showToast(ic, fr, tx, '', { pause: true, then: () => {
+    window.SceneUtils.replay({ n: HISTORY.hist.length, ms: 14000, yearAt: i => HISTORY.hist[i].y, news: { 1965: ["🌱", "Pamuk için nehirlerin suyu tarlalara"], 1982: ["🐟", "Ticari balıkçılık bitti"], 1987: ["✂️", "Göl ikiye ayrıldı"], 2005: ["🧱", "Kokaral seti: Küçük Aral kurtuluyor"] }, onIndex: i => { RPI = i; if (typeof replayPol === 'function') replayPol(i); }, card: () => ['⏪', '1960 · şimdi sen', `Tarihte göl alanının yalnız <b>%${Math.round(HISTORY.hist[HISTORY.hist.length - 1].A / M.A0 * 100)}</b>'i kaldı. <b>Hedefin:</b> pamuk planını tuttur, ama gölü yaşat. Daha iyisini yapabilir misin?`], showCard: (ic, fr, tx, th) => missionCard(ic, fr, tx, '', { pause: true, then: () => {
       // kontroller: ilk kaydırıcı spot ışığıyla tanıtılır (görev kartının yerine)
       const sl = document.querySelector('.slide.active .gpanel .sl:not(.locked)');
       const go = () => { game.story = false; th(); };

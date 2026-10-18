@@ -101,7 +101,7 @@
     return { x1, gt, gb, gh, Y: r => gt + gh * (0.12 + 0.82 * r) };
   }
   function drawBubble(bb) {
-    const pad = 10 * U, fs = 17 * U;
+    const pad = Math.max(8, 10 * U), fs = Math.max(15, 17 * U); // telefonda da okunur (en az 15 px)
     ctx.font = `${fs}px "Patrick Hand"`;
     const lines = bb.text.split('\n');
     const w = Math.max(...lines.map(l => ctx.measureText(l).width)) + pad * 2, h = lines.length * fs * 1.15 + pad * 1.4;
@@ -118,7 +118,7 @@
   }
   const sayAt = (obj, text) => { bubbles.length = 0; bubbles.push({ obj, text, life: 1 }); };
   function tag(x, y, text, o = {}) {
-    const fs = Math.max(11, (o.fs || 13) * U);
+    const fs = Math.max(mobile ? 12.5 : 11, (o.fs || 13) * U);
     ctx.font = `${fs}px "Patrick Hand"`;
     const w = ctx.measureText(text).width + 12 * U, h = fs + 8 * U;
     let bx = clamp(x - w / 2, 4, lay.x1 * W - w - 4), by = y - h;
@@ -230,7 +230,7 @@
   const OZ = [[0.08, 0.42], [0.14, 0.3], [0.3, 0.2], [0.42, 0.1], [0.5, 0.13], [0.55, 0.05], [0.62, 0.15], [0.7, 0.08], [0.78, 0.02], [0.82, 0.2], [0.9, 0.35], [0.97, 0.5], [0.95, 0.68], [0.85, 0.85], [0.76, 0.9], [0.66, 0.82], [0.56, 0.74], [0.44, 0.7], [0.3, 0.74], [0.16, 0.78], [0.08, 0.68], [0.05, 0.55]];
   const GEE = [0.78, 0.88], WAX = 0.38;
   function drawMap(G, t, alpha) {
-    const top = 150 * U, H2 = Math.max(80, G.gb - top - 10 * U), Wm = Math.min(G.x1 * 0.92, H2 * 1.25), Hm = Wm / 1.25, ox = (G.x1 - Wm) / 2, oy = top + (H2 - Hm) / 2;
+    const top = (window.SceneUtils && window.SceneUtils.viewTop ? window.SceneUtils.viewTop(150 * U) : 150 * U), H2 = Math.max(80, G.gb - top - 10 * U), Wm = Math.min(G.x1 * 0.92, H2 * 1.25), Hm = Wm / 1.25, ox = (G.x1 - Wm) / 2, oy = top + (H2 - Hm) / 2;
     const X = p => ox + p * Wm, Y = p => oy + p * Hm;
     ctx.save(); ctx.globalAlpha = alpha;
     ctx.fillStyle = '#9cc4dc'; ctx.fillRect(0, 0, G.x1, H);
@@ -334,6 +334,14 @@
   let cur = 0, maxSeen = 0, mode = 'title';
   const DONE_KEY = 'bny-bitti-tavsan';
   const wasDone = (() => { try { return !!localStorage.getItem(DONE_KEY); } catch (e) { return false; } })();
+  // tarih filminden sonra görev kartı: tarihte ne oldu + senin rolün, kontrolün, hedefin (oyuncu başlarken tek kart)
+  function missionCard(ic, fr, tx, tone, o) {
+    const m = document.getElementById('modal');
+    if (!window.Mission || !m || typeof MISSION === 'undefined') return showToast(ic, fr, tx, tone, o);
+    const hist = String(tx).split(/<b>Hedefin/)[0].trim().replace(/^Tarihte /, '').replace(/^./, c => c.toLocaleUpperCase('tr'));
+    game.reading = (game.reading || 0) + 1;
+    window.Mission.show(m, { ...MISSION, hist }, () => { game.reading = Math.max(0, game.reading - 1); if (o && o.then) o.then(); });
+  }
   if (wasDone) maxSeen = slides.length - 1;
   const dotsEl = $('dots');
   slides.forEach((_, i) => { const b = document.createElement('button'); b.setAttribute('aria-label', `Adım ${i + 1}`); b.onclick = () => { if (i <= maxSeen) goTo(i); }; dotsEl.appendChild(b); });
@@ -567,7 +575,7 @@
         r.phase = 'done'; if (r.el) r.el.remove(); Object.values(SL).forEach(el => el.closest('.sl').classList.remove('replaying'));
         const last = HISTORY.hist[N - 1];
         game.replay = null; game.story = true;
-        showToast('⏪', '1859 · şimdi sen', `Tarihte 2000'de <b>${rabText(last.R)}</b> tavşan kaldı. <b>Hedefin:</b> 200 milyonun altı, otlak ve yerli hayvanlar sağlam. Sen daha iyisini yapabilir misin?`, '', { pause: true, then: () => { game.story = false; if (r.then) r.then(); } });
+        missionCard('⏪', '1859 · şimdi sen', `Tarihte 2000'de <b>${rabText(last.R)}</b> tavşan kaldı. <b>Hedefin:</b> 200 milyonun altı, otlak ve yerli hayvanlar sağlam. Sen daha iyisini yapabilir misin?`, '', { pause: true, then: () => { game.story = false; if (r.then) r.then(); } });
       }
     }
   }

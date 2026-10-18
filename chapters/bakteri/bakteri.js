@@ -106,7 +106,7 @@
     return { x1, gt, gb, gh, door: x1 * 0.44, road: gt + gh * 0.62 };
   }
   function drawBubble(bb) {
-    const pad = 10 * U, fs = 17 * U;
+    const pad = Math.max(8, 10 * U), fs = Math.max(15, 17 * U); // telefonda da okunur (en az 15 px)
     ctx.font = `${fs}px "Patrick Hand"`;
     const lines = bb.text.split('\n');
     const w = Math.max(...lines.map(l => ctx.measureText(l).width)) + pad * 2, h = lines.length * fs * 1.15 + pad * 1.4;
@@ -156,7 +156,7 @@
     const r0 = Math.min(G.gh * (mobile ? 0.62 : 0.72), G.x1 * (mobile ? 0.2 : 0.17));
     const cx0 = G.x1 - r0 - (mobile ? 10 : 26) * U, cy0 = Math.max(r0 + 60 * U, G.gt - r0 * 0.15);
     // dokununca mercek ekranı kaplar
-    const big = smooth(0, 1, mview.k), top = 150 * U, rB = Math.min((G.gb - top) * 0.4, G.x1 * 0.3);
+    const big = smooth(0, 1, mview.k), top = (window.SceneUtils && window.SceneUtils.viewTop ? window.SceneUtils.viewTop(150 * U) : 150 * U), rB = Math.min((G.gb - top) * 0.4, G.x1 * 0.3);
     const r = Math.max(10, lerp(r0, rB, big)), cx = lerp(cx0, G.x1 / 2, big), cy = lerp(cy0, top + (G.gb - top) * 0.45, big);
     if (!(G.x1 > 50 && G.gh > 20)) return;
     if (big > 0.01) { ctx.fillStyle = `rgba(30,40,36,${0.55 * big})`; ctx.fillRect(0, 0, G.x1, H); }
@@ -410,6 +410,14 @@
   let cur = 0, maxSeen = 0, mode = 'title';
   const DONE_KEY = 'bny-bitti-bakteri';
   const wasDone = (() => { try { return !!localStorage.getItem(DONE_KEY); } catch (e) { return false; } })();
+  // tarih filminden sonra görev kartı: tarihte ne oldu + senin rolün, kontrolün, hedefin (oyuncu başlarken tek kart)
+  function missionCard(ic, fr, tx, tone, o) {
+    const m = document.getElementById('modal');
+    if (!window.Mission || !m || typeof MISSION === 'undefined') return showToast(ic, fr, tx, tone, o);
+    const hist = String(tx).split(/<b>Hedefin/)[0].trim().replace(/^Tarihte /, '').replace(/^./, c => c.toLocaleUpperCase('tr'));
+    game.reading = (game.reading || 0) + 1;
+    window.Mission.show(m, { ...MISSION, hist }, () => { game.reading = Math.max(0, game.reading - 1); if (o && o.then) o.then(); });
+  }
   if (wasDone) maxSeen = slides.length - 1;
   const dotsEl = $('dots');
   slides.forEach((_, i) => { const b = document.createElement('button'); b.setAttribute('aria-label', `Adım ${i + 1}`); b.onclick = () => { if (i <= maxSeen) goTo(i); }; dotsEl.appendChild(b); });
@@ -559,15 +567,38 @@
       toast(ic, from, text, tone, { ...opt, then: opt.pause ? () => show(i + 1) : undefined });
       if (!opt.pause) setTimeout(() => show(i + 1), 4500 / Math.max(1, FAST / 2));
     };
-    const start = () => { if (wasDone) game.story = false; setTimeout(() => histFilm(() => show(0)), 300); };
+    const start = () => { if (wasDone) game.story = false; setTimeout(() => cine(CINE.intro, () => histFilm(() => show(0))), 300); };
     start(); // görev kartı yok: hedef, tarih filmi bitince 'şimdi sen' kartında
   }
   // 📼 önce tarih: tarihteki ayarlarla hızlı film (ortak modül), sonra 'şimdi sen' kartı; tekrar oynayana gösterilmez
   let RPI = null;
+  function cine(spec, then) {
+    if (!window.Cinema) { if (then) then(); return; }
+    if (game.speed > 1 && typeof setSpeed === 'function') setSpeed(1);
+    game.reading = (game.reading || 0) + 1;
+    window.Cinema.play({ skipIfSeen: wasDone, ...spec }, () => { game.reading = Math.max(0, game.reading - 1); if (then) then(); });
+  }
+  // açılış filmi: penisilin (afiş arşivden, gerisi kodla çizilir)
+  const PENI_IMG = '../../assets/img/cards/penicillin-past-present-and-future-the-development-and-produ.jpg';
+  function petri(g, W, H, t, kill, surv) {
+    const s = Math.min(W, H) / 600, cx = W * 0.5, cy = H * 0.5, R = Math.min(W, H) * 0.3; g.fillStyle = '#efe6c8'; g.beginPath(); g.arc(cx, cy, R, 0, 6.28); g.fill(); g.strokeStyle = 'rgba(255,255,255,.8)'; g.lineWidth = 4 * s; g.stroke();
+    for (let i = 0; i < 90; i++) { const a = i * 2.39996, r = R * 0.92 * Math.sqrt((i + 0.5) / 90), x = cx + Math.cos(a) * r, y = cy + Math.sin(a) * r, d = Math.hypot(x - (cx - R * 0.45), y - (cy - R * 0.35));
+      const strong = surv && i % 9 === 0; if (!strong && d < kill) continue; g.fillStyle = strong ? '#b03a2a' : '#d8b860'; g.beginPath(); g.arc(x, y, (strong ? 7 : 5) * s * (1 + 0.08 * Math.sin(t * 0.004 + i)), 0, 6.28); g.fill(); }
+    return [cx - R * 0.45, cy - R * 0.35, s];
+  }
+  const CINE = {
+    intro: { id: 'bak-1928', year: '1928–1945', title: 'Mucize ilaç', credit: 'Imperial War Museum, kamu malı', shots: [
+      { bg: '#2a2e34', text: '1928: Alexander Fleming tatilden dönüyor. Bir kaba küf girmiş; küfün çevresinde bakteri yok.', draw: (g, t, W, H, k) => {
+        const [mx, my, s] = petri(g, W, H, t, Math.min(W, H) * 0.22 * Math.min(1, k * 1.4), false); g.fillStyle = '#7a9a6a'; g.beginPath(); g.arc(mx, my, 26 * s, 0, 6.28); g.fill(); g.fillStyle = '#9aba8a'; g.beginPath(); g.arc(mx - 6 * s, my - 6 * s, 12 * s, 0, 6.28); g.fill(); } },
+      { img: PENI_IMG, kb: [0.5, 0.4, 1.05, 0.5, 0.5, 1.2], text: 'Savaş yıllarında penisilin fabrikada üretiliyor. Ölümcül yaralar ve enfeksiyonlar artık iyileşiyor.' },
+      { bg: '#2a2e34', text: '1945: Fleming uyarıyor: ilacı az ve gelişigüzel kullanırsan, en dayanıklı bakteriler hayatta kalır.', draw: (g, t, W, H, k) => {
+        const [mx, my, s] = petri(g, W, H, t, Math.min(W, H) * 0.5 * Math.min(1, k * 2), true); g.fillStyle = '#7a9a6a'; g.beginPath(); g.arc(mx, my, 26 * s, 0, 6.28); g.fill(); } },
+    ] },
+  };
   function histFilm(then) {
     if (wasDone || !window.SceneUtils || !window.SceneUtils.replay) { game.story = false; return then(); }
     game.story = true;
-    window.SceneUtils.replay({ n: HISTORY.hist.length, ms: 14000, yearAt: i => HISTORY.hist[i].y, news: { 1945: ["🏅", "Fleming uyardı: yanlış kullanırsanız direnç gelişir"], 1955: ["🦠", "Hastanelerde dirençli stafilokok"], 1961: ["🧪", "MRSA ilk kez görüldü"], 1970: ["🐔", "Çiftlik hayvanlarına da antibiyotik"], 2015: ["🌍", "Dünya Sağlık Örgütü küresel eylem planı"] }, onIndex: i => { RPI = i; if (typeof replayPol === 'function') replayPol(i); }, card: () => ['⏪', '1945 · şimdi sen', `Tarihte 2015'te tedavi başarısı <b>%${Math.round(HISTORY.hist[HISTORY.hist.length - 1].succ * 100)}</b>'e düştü. <b>Hedefin:</b> ilaçlar 2015'te de işe yarasın.`], showCard: (ic, fr, tx, th) => showToast(ic, fr, tx, '', { pause: true, then: () => {
+    window.SceneUtils.replay({ n: HISTORY.hist.length, ms: 14000, yearAt: i => HISTORY.hist[i].y, news: { 1945: ["🏅", "Fleming uyardı: yanlış kullanırsanız direnç gelişir"], 1955: ["🦠", "Hastanelerde dirençli stafilokok"], 1961: ["🧪", "MRSA ilk kez görüldü"], 1970: ["🐔", "Çiftlik hayvanlarına da antibiyotik"], 2015: ["🌍", "Dünya Sağlık Örgütü küresel eylem planı"] }, onIndex: i => { RPI = i; if (typeof replayPol === 'function') replayPol(i); }, card: () => ['⏪', '1945 · şimdi sen', `Tarihte 2015'te tedavi başarısı <b>%${Math.round(HISTORY.hist[HISTORY.hist.length - 1].succ * 100)}</b>'e düştü. <b>Hedefin:</b> ilaçlar 2015'te de işe yarasın.`], showCard: (ic, fr, tx, th) => missionCard(ic, fr, tx, '', { pause: true, then: () => {
       // kontroller: ilk kaydırıcı spot ışığıyla tanıtılır (görev kartının yerine)
       const sl = document.querySelector('.slide.active .gpanel .sl:not(.locked)');
       const go = () => { game.story = false; th(); };

@@ -102,7 +102,7 @@
     return { x1, gt, gb, gh, ozY: Math.max(70, gt - 52 * U) };
   }
   function drawBubble(bb) {
-    const pad = 10 * U, fs = 17 * U;
+    const pad = Math.max(8, 10 * U), fs = Math.max(15, 17 * U); // telefonda da okunur (en az 15 px)
     ctx.font = `${fs}px "Patrick Hand"`;
     const lines = bb.text.split('\n');
     const w = Math.max(...lines.map(l => ctx.measureText(l).width)) + pad * 2, h = lines.length * fs * 1.15 + pad * 1.4;
@@ -119,7 +119,7 @@
   }
   const sayAt = (obj, text) => { bubbles.length = 0; bubbles.push({ obj, text, life: 1 }); };
   function tag(x, y, text, o = {}) {
-    const fs = Math.max(11, (o.fs || 13) * U);
+    const fs = Math.max(mobile ? 12.5 : 11, (o.fs || 13) * U);
     ctx.font = `${fs}px "Patrick Hand"`;
     const w = ctx.measureText(text).width + 12 * U, h = fs + 8 * U;
     let bx = clamp(x - w / 2, 4, lay.x1 * W - w - 4), by = y - h;
@@ -249,7 +249,7 @@
   function setView(v, ms) { view.want = v; view.user = !ms; view.until = ms ? performance.now() + ms : 0; const b = $('g-view'); if (b) b.textContent = v === 'pole' ? '🤝 Masa' : '🌍 Kutup'; }
   const peng = { sx: undefined };
   function drawPole(G, t, dt, alpha) {
-    const top = 180 * U, H2 = Math.max(80, G.gb - top), cx = G.x1 / 2, cy = top + H2 * 0.48, R0 = Math.min(G.x1 * 0.42, H2 * 0.46);
+    const top = (window.SceneUtils && window.SceneUtils.viewTop ? window.SceneUtils.viewTop(180 * U) : 180 * U), H2 = Math.max(80, G.gb - top), cx = G.x1 / 2, cy = top + H2 * 0.48, R0 = Math.min(G.x1 * 0.42, H2 * 0.46);
     ctx.save(); ctx.globalAlpha = alpha;
     ctx.fillStyle = '#d6e2ec'; ctx.fillRect(0, 0, G.x1, H);
     ctx.fillStyle = '#3a6aa0'; ctx.beginPath(); ctx.arc(cx, cy, R0, 0, 6.283); ctx.fill();
@@ -353,6 +353,14 @@
   let cur = 0, maxSeen = 0, mode = 'title';
   const DONE_KEY = 'bny-bitti-ozon';
   const wasDone = (() => { try { return !!localStorage.getItem(DONE_KEY); } catch (e) { return false; } })();
+  // tarih filminden sonra görev kartı: tarihte ne oldu + senin rolün, kontrolün, hedefin (oyuncu başlarken tek kart)
+  function missionCard(ic, fr, tx, tone, o) {
+    const m = document.getElementById('modal');
+    if (!window.Mission || !m || typeof MISSION === 'undefined') return showToast(ic, fr, tx, tone, o);
+    const hist = String(tx).split(/<b>Hedefin/)[0].trim().replace(/^Tarihte /, '').replace(/^./, c => c.toLocaleUpperCase('tr'));
+    game.reading = (game.reading || 0) + 1;
+    window.Mission.show(m, { ...MISSION, hist }, () => { game.reading = Math.max(0, game.reading - 1); if (o && o.then) o.then(); });
+  }
   if (wasDone) maxSeen = slides.length - 1;
   const dotsEl = $('dots');
   slides.forEach((_, i) => { const b = document.createElement('button'); b.setAttribute('aria-label', `Adım ${i + 1}`); b.onclick = () => { if (i <= maxSeen) goTo(i); }; dotsEl.appendChild(b); });
@@ -574,7 +582,7 @@
   function histFilm(then) {
     if (wasDone || !window.SceneUtils || !window.SceneUtils.replay) { game.story = false; return then(); }
     game.story = true;
-    window.SceneUtils.replay({ n: HISTORY.hist.length, ms: 14000, yearAt: i => HISTORY.hist[i].y, news: { 1985: ["🧊", "Antarktika'da ozon deliği bulundu"], 1987: ["✍️", "Montreal Protokolü imzalandı"], 1990: ["💰", "Yoksul ülkeler için fon kuruldu"], 2009: ["🌍", "Bütün ülkeler onayladı"], 2018: ["🔎", "Kaçak CFC yakalandı"] }, onIndex: i => { RPI = i; if (typeof replayPol === 'function') replayPol(i); }, card: () => ['⏪', '1974 · şimdi sen', `Tarihte delik <b>${HREC}</b> civarında kapanacak. <b>Hedefin:</b> 2060'tan önce. Dünyayı daha erken anlaştırabilir misin?`], showCard: (ic, fr, tx, th) => showToast(ic, fr, tx, '', { pause: true, then: () => {
+    window.SceneUtils.replay({ n: HISTORY.hist.length, ms: 14000, yearAt: i => HISTORY.hist[i].y, news: { 1985: ["🧊", "Antarktika'da ozon deliği bulundu"], 1987: ["✍️", "Montreal Protokolü imzalandı"], 1990: ["💰", "Yoksul ülkeler için fon kuruldu"], 2009: ["🌍", "Bütün ülkeler onayladı"], 2018: ["🔎", "Kaçak CFC yakalandı"] }, onIndex: i => { RPI = i; if (typeof replayPol === 'function') replayPol(i); }, card: () => ['⏪', '1974 · şimdi sen', `Tarihte delik <b>${HREC}</b> civarında kapanacak. <b>Hedefin:</b> 2060'tan önce. Dünyayı daha erken anlaştırabilir misin?`], showCard: (ic, fr, tx, th) => missionCard(ic, fr, tx, '', { pause: true, then: () => {
       // kontroller: ilk kaydırıcı spot ışığıyla tanıtılır (görev kartının yerine)
       const sl = document.querySelector('.slide.active .gpanel .sl:not(.locked)');
       const go = () => { game.story = false; th(); };

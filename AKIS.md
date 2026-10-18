@@ -10,7 +10,7 @@ Bu şablon, araştırma (Case, Victor, Mayer, Sweller, Nintendo'nun dört adım�
 | 0 | 0:00 | **Kanca** | Başlık + **tek soru** ("24 tavşan 50 yılda ne yapar?") + Başla | Uzun görev metni |
 | 1 | 0:10 | **Sinema** | 2–3 karelik sahne: olay başlıyor (arşiv fotoğrafı ya da kodla çizim). Atlanabilir | Aynı şeyi sonra kartla tekrar anlatmak |
 | 2 | 0:30 | **📼 Önce tarih** | Tarihteki ayarlarla hızlı film (~18 sn): sahne, sayaç, haber bandı. Sonunda **tarihin skoru** | Kaydırıcı oynatmak (kilitli) |
-| 3 | 0:50 | **⏪ Şimdi sen** | Geri sarılır. Tek kart: "Tarihte X oldu. Hedefin: Y. Daha iyisini yapabilir misin?" | Kontrolleri metinle anlatmak |
+| 3 | 0:50 | **🎯 Görev kartı** | Geri sarılır. Görev kartı açılır: 📼 Tarihte X oldu · Sen · Kontrolün · Hedefin · Dikkat (`missionCard`) | Ayrı ayrı kartlar |
 | 4 | 1:00 | **Tanıt** | Yalnız **ilk araç** açık. Spot ışığı kaydırıcıyı gösterir. Oynayınca **"Ne olur?"** önizlemesi ve sahnede anında tepki | Aynı anda 3 kaydırıcı, 4 gösterge |
 | 5 | 1:30–3:00 | **Geliştir** | Yeni araç **ihtiyaç anında** açılır (1 durduran kart + spot ışığı). Haberler bant olarak akar. 💡 satırı tek adımı söyler | Bilgi kartları yağmuru |
 | 6 | ~3:00 | **Ters köşe** | Sistemin sürprizi (direnç, geç kalan çit, eşik). Kısa sinema + **önce göster, sonra sor** kararı | Bağlamsız karar kartı |

@@ -769,6 +769,7 @@ p.goal { font-size: 1.15rem !important; color: var(--ink) !important; background
 .mlist b { display: block; font-family: var(--hand); font-weight: 400; font-size: 1.12rem; color: var(--ink); }
 .mlist b.inl { display: inline; font: inherit; font-weight: 600; }
 .card.mission .go-m { width: 100%; }
+.mlist li.mhist { background: #f6ecd2; border-color: #c9a85a; }
 /* sol üstte sürekli duran hedef satırı */
 p.goal { font-family: var(--hand); font-size: 1.05rem; color: var(--ink-soft); border-left: 4px solid var(--green); padding-left: 10px; margin: 2px 0 0; }
 @media (max-width: 760px) { .mlist li { font-size: .9rem; padding: 6px 8px; } .mlist b { font-size: 1.02rem; } p.goal { font-size: .9rem; } }
@@ -866,6 +867,29 @@ p.goal { font-family: var(--hand); font-size: 1.05rem; color: var(--ink-soft); b
 .story-dots i.on { background: var(--ink); }
 .story-all { display: block; margin: 6px auto 0; background: none; border: 0; font: .85rem var(--sans, sans-serif); color: var(--ink-soft); text-decoration: underline; cursor: pointer; }
 .story-wait { opacity: .55; }
+/* kodla çizilen hikâye kartı: büyük simge + ana sayı (fotoğraf tekrar etmesin) */
+.story-card .ph.ill { display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding-top: clamp(18px, 5vh, 44px); text-align: center; color: #f4ecd8; filter: none; background: radial-gradient(ellipse at 50% 30%, #4a5a44, #1e241c); }
+.story-card.v1 .ph.ill { background: radial-gradient(ellipse at 50% 30%, #5a4a38, #221a12); }
+.story-card.v2 .ph.ill { background: radial-gradient(ellipse at 50% 30%, #3e5462, #141e26); }
+.story-card.v3 .ph.ill { background: radial-gradient(ellipse at 50% 30%, #6a5a2e, #261e0c); }
+.story-card .ph.ill::after { content: ''; position: absolute; inset: 0; background: repeating-linear-gradient(45deg, rgba(255,255,255,.025) 0 2px, transparent 2px 9px); pointer-events: none; }
+.ill-ic { font-size: clamp(2.6rem, 11vh, 5.2rem); line-height: 1.05; letter-spacing: .06em; filter: drop-shadow(0 4px 0 rgba(0,0,0,.35)); }
+.ill-big { font-family: var(--hand); font-size: clamp(1.7rem, 6.5vh, 3.1rem); color: #e9c46a; line-height: 1.05; margin-top: 4px; padding: 0 12px; }
+.ill-sub { font-size: clamp(.85rem, 2.1vh, 1.02rem); opacity: .85; margin-top: 4px; padding: 0 16px; max-width: 34em; }
+.story-card.on .ph.ill { animation: illIn .7s ease-out both; }
+@media (max-width: 760px) {
+  /* telefonda görsel üstte, yazı altta: yazı görselin üstüne binmez */
+  .story-stage { height: clamp(330px, 56vh, 520px); }
+  .story-card.has-vis .ph { bottom: auto; height: 40%; }
+  .story-card.has-vis .tx, .story-card.but.has-vis .tx { top: 40%; bottom: 0; padding: 10px 14px 12px; background: #16120e; overflow-y: auto; }
+  .story-card .ph.ill { padding-top: 8px; justify-content: center; }
+  .ill-ic { font-size: 2.3rem; } .ill-big { font-size: 1.55rem; } .ill-sub { font-size: .78rem; margin-top: 2px; }
+  .story-card .yr { font-size: 1.7rem; }
+  .story-card p, .story-card.but.has-vis p { font-size: .92rem; line-height: 1.4; }
+}
+@keyframes illIn { from { transform: translateY(10px) scale(.98); opacity: .4; } to { transform: none; opacity: 1; } }
+.story-card.but.has-vis .tx { top: auto; display: block; background: linear-gradient(to top, rgba(10,8,6,.9) 60%, rgba(10,8,6,0)); }
+.story-card.but.has-vis p { font-size: clamp(.95rem, 2.3vh, 1.12rem); }
 @keyframes storyKb { from { transform: scale(1.05); } to { transform: scale(1.18); } }
 
 /* 📼 önce tarih: hızlı tarih filmi */
@@ -879,7 +903,7 @@ p.goal { font-family: var(--hand); font-size: 1.05rem; color: var(--ink-soft); b
 .gp-meters [hidden] { display: none !important; }
 
 /* tam ekran görünümde HUD ve şeritler söner, görünümün üstüne binmez */
-body.fullview .slide.active .gp-hud, body.fullview .slide.active .chain, body.fullview .adv { opacity: .12; pointer-events: none; transition: opacity .3s; }
+body.fullview .slide.active .gp-hud, body.fullview .slide.active .chain, body.fullview .adv { opacity: 0; pointer-events: none; transition: opacity .3s; }
 .slide .gp-hud { transition: opacity .3s; }
 
 /* kamera: dokunulan yere yakınlaşma */

@@ -8,9 +8,14 @@ description: "Biz Ne Yaptık?" ekoloji oyunu sitesine (~/Documents/ekoloji-oyunu
 Bu kurallar kullanıcının geri bildirimleriyle tek tek oturtuldu. Yeni bölümde baştan uygula; sapacaksan kullanıcıya sor.
 
 ## ÖNCE OKU: akış şablonu
-Her yeni bölüm ve her elden geçirme **`AKIS.md`** (repo kökünde) şablonuna göre yapılır: kanca sorusu → sinema → 📼 önce tarih → ⏪ şimdi sen → tek araçla tanıt → ihtiyaç anında geliştir → ters köşe → sen ve tarih → resimli hikâye. Kesinti bütçesi ≤ 4, önce göster sonra sor, bilgi nesnenin yanında, aynı bilgi iki yerde değil, hiçbir şey üst üste binmez (e2e çakışma denetimi masaüstü + telefon). Altın örnek: `chapters/tavsan/`.
+Her yeni bölüm ve her elden geçirme **`AKIS.md`** (repo kökünde) şablonuna göre yapılır: kanca sorusu → sinema → 📼 önce tarih → 🎯 görev kartı (tarihte + hedef) → tek araçla tanıt → ihtiyaç anında geliştir → ters köşe → sen ve tarih → resimli hikâye. Kesinti bütçesi ≤ 4, önce göster sonra sor, bilgi nesnenin yanında, aynı bilgi iki yerde değil, hiçbir şey üst üste binmez (e2e çakışma denetimi masaüstü + telefon). Altın örnek: `chapters/tavsan/`.
 - **Kullanıcının bilmediği şeyi açıkla:** Kokaral seti gibi bir yer, araç ya da kavram karar kartında ilk kez geçiyorsa önce haritada / sahnede göster (spot ışığı), sonra sor.
-- **"Gerçekte ne oldu?"** `assets/js/story.js` ile resimli kartlara dönüşür (`<article class="paper" data-img>`, maddeler `<li><b>yıl</b> metin</li>`).
+- **"Gerçekte ne oldu?"** `assets/js/story.js` ile resimli kartlara dönüşür (maddeler `<li><b>yıl</b> metin</li>`). **Her kartın kendi görseli olsun, aynı foto tekrar etmesin** (kullanıcı: "hep aynı foto, kötü olmuş"): ilgili arşiv fotoğrafı varsa `<li data-img>`, yoksa kodla çizilen kart `<li data-ic="🦅" data-big="417 → 71.000" data-sub="kel kartal çifti">` (büyük simge + ana sayı). "Ama" kutusu da `.callout data-ic…` alır. Telefonda görsel üstte, yazı altta (yazı görselin üstüne binmez).
+- **Her bölüm açılış sineması ile başlar** (kullanıcı serçe ve Aral'da eksikliğini yakaladı): `cine(CINE.intro, () => histFilm(...))`. 3 kare: tarihî an (çizim) → arşiv fotoğrafı → merak sorusu. Yeni bölümde de unutma.
+- **Sinema çizimleri alt yazının üstündeki güvenli alana sığdırılır** (`cinema.js` `draw` çağrısını kırpıp ölçekler; sayaç alt yazının altında kalmaz). `draw(g, t, W, H, k)` içindeki H bu güvenli alanın yüksekliğidir.
+- **Görev kartı filmden hemen sonra açılır** (kullanıcı: "görevle ilgili bilgiler ilk başlarken olmalı"): `missionCard` → `Mission.show(…, { …MISSION, hist })`; ilk satır "📼 Tarihte", sonra Sen / Kontrolün / Hedefin / Dikkat. Ayrı "şimdi sen" kartı yok.
+- **Harita ve büyük görünümler `SceneUtils.viewTop()` altından başlar** (yıl kutusu + altındaki hız ve görünüm düğmeleri dahil). Sabit `top = 150 * U` yazma; dar-uzun ekranda düğmeler haritanın üstüne biniyordu. Tam ekran görünümde HUD tamamen gizlenir (soluk hayalet bırakma).
+- **Telefonda yazı boyu:** konuşma balonu en az 15 px, etiket en az 12,5 px (`U` 0,62'ye inince 10 px'e düşüyordu, okunmuyordu).
 
 ## Proje
 - Kod: `~/Documents/ekoloji-oyunu` · Repo: `recepcanaltinbag/biz-ne-yaptik` · Yayın: https://recepcanaltinbag.github.io/biz-ne-yaptik/ (GitHub Pages, `main` / kök).

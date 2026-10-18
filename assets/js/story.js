@@ -1,6 +1,8 @@
 // "Gerçekte ne oldu?" sayfasını resimli, adım adım bir hikâyeye çevirir.
 // Her <li> bir kart olur (ilk <b> yıl, kalanı metin), "Ama…" kutusu son karttır.
-// Görsel: <li data-img> ya da <article data-img> (sitede barındırılan arşiv fotoğrafı, toon.js ile baskı görünümü).
+// Görsel: <li data-img> (sitede barındırılan arşiv fotoğrafı, toon.js ile baskı görünümü) ya da kodla çizilen kart:
+// <li data-ic="🦅" data-big="417 → 71.000" data-sub="kel kartal çifti">. Her kart kendi görselini taşır; aynı foto tekrar etmez.
+// İkisi de yoksa yalnız ilk kart <article data-img> fotoğrafını kullanır.
 (() => {
   'use strict';
   function build(paper) {
@@ -8,18 +10,19 @@
     const items = [...list.querySelectorAll('li')].map((li, i) => {
       const b = li.querySelector('b'), year = b ? b.textContent : '';
       const tmp = li.cloneNode(true); const bb = tmp.querySelector('b'); if (bb) bb.remove();
-      return { year, html: tmp.innerHTML.trim(), img: li.dataset.img || paper.dataset.img, pos: li.dataset.pos || ['30% 40%', '70% 55%', '50% 30%'][i % 3] };
+      return { year, html: tmp.innerHTML.trim(), ill: li.dataset.ic ? { ic: li.dataset.ic, big: li.dataset.big || '', sub: li.dataset.sub || '' } : null, img: li.dataset.img || (!li.dataset.ic && i === 0 ? paper.dataset.img : ''), pos: li.dataset.pos || ['30% 40%', '70% 55%', '50% 30%'][i % 3] };
     });
     const call = paper.querySelector('.callout');
-    if (call) items.push({ year: '', html: call.innerHTML, img: paper.dataset.img, pos: '50% 70%', but: true });
+    if (call) items.push({ year: '', html: call.innerHTML, ill: call.dataset.ic ? { ic: call.dataset.ic, big: call.dataset.big || '', sub: call.dataset.sub || '' } : null, img: call.dataset.img || '', pos: '50% 70%', but: true });
     const st = document.createElement('div'); st.className = 'story';
     st.innerHTML = `<div class="story-stage"></div><div class="story-nav"><button type="button" class="hbtn sm story-prev">← Geri</button><span class="story-dots"></span><button type="button" class="hbtn sm story-next">İleri →</button></div><button type="button" class="story-all">Hepsini liste olarak oku</button>`;
     list.before(st); list.style.display = 'none'; if (call) call.style.display = 'none';
     const next = paper.querySelector('[data-next], .end-nav');
     const stage = st.querySelector('.story-stage'), dots = st.querySelector('.story-dots');
     items.forEach((it, i) => {
-      const c = document.createElement('div'); c.className = 'story-card' + (it.but ? ' but' : '');
-      c.innerHTML = `<div class="ph" style="background-position:${it.pos}"></div><div class="tx">${it.year ? `<div class="yr">${it.year}</div>` : ''}<p>${it.html}</p></div>`;
+      const c = document.createElement('div'); c.className = 'story-card' + (it.but ? ' but' : '') + (it.ill || it.img ? ' has-vis' : '') + (it.ill ? ' ill v' + (i % 4) : '');
+      const vis = it.ill ? `<div class="ph ill"><div class="ill-ic">${it.ill.ic}</div><div class="ill-big">${it.ill.big}</div><div class="ill-sub">${it.ill.sub}</div></div>` : `<div class="ph" style="background-position:${it.pos}"></div>`;
+      c.innerHTML = `${vis}<div class="tx">${it.year ? `<div class="yr">${it.year}</div>` : ''}<p>${it.html}</p></div>`;
       stage.appendChild(c);
       const ph = c.querySelector('.ph');
       if (it.img) { ph.style.backgroundImage = `url("${it.img}")`; if (window.Toon) window.Toon.process(it.img, { maxW: 900 }).then(u => { ph.style.backgroundImage = `url("${u}")`; }).catch(() => {}); }

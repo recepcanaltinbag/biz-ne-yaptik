@@ -115,7 +115,7 @@
   }
 
   function drawBubble(bb) {
-    const pad = 10 * U, fs = 17 * U;
+    const pad = Math.max(8, 10 * U), fs = Math.max(15, 17 * U); // telefonda da okunur (en az 15 px)
     ctx.font = `${fs}px "Patrick Hand"`;
     const lines = bb.text.split('\n');
     const w = Math.max(...lines.map(l => ctx.measureText(l).width)) + pad * 2, h = lines.length * fs * 1.15 + pad * 1.4;
@@ -555,6 +555,14 @@
   let cur = 0, maxSeen = 0, mode = 'title';
   const DONE_KEY = 'bny-bitti-ddt';
   const wasDone = (() => { try { return !!localStorage.getItem(DONE_KEY); } catch (e) { return false; } })();
+  // tarih filminden sonra görev kartı: tarihte ne oldu + senin rolün, kontrolün, hedefin (oyuncu başlarken tek kart)
+  function missionCard(ic, fr, tx, tone, o) {
+    const m = document.getElementById('modal');
+    if (!window.Mission || !m || typeof MISSION === 'undefined') return showToast(ic, fr, tx, tone, o);
+    const hist = String(tx).split(/<b>Hedefin/)[0].trim().replace(/^Tarihte /, '').replace(/^./, c => c.toLocaleUpperCase('tr'));
+    game.reading = (game.reading || 0) + 1;
+    window.Mission.show(m, { ...MISSION, hist }, () => { game.reading = Math.max(0, game.reading - 1); if (o && o.then) o.then(); });
+  }
   if (wasDone) maxSeen = slides.length - 1;
   const dotsEl = $('dots');
   slides.forEach((_, i) => { const b = document.createElement('button'); b.setAttribute('aria-label', `Adım ${i + 1}`); b.onclick = () => { if (i <= maxSeen) goTo(i); }; dotsEl.appendChild(b); });
@@ -714,7 +722,7 @@
       toast(ic, from, text, tone, { ...opt, then: opt.pause ? () => show(i + 1) : undefined });
       if (!opt.pause) setTimeout(() => show(i + 1), 6500 / Math.max(1, FAST / 2));
     };
-    const start = () => { if (wasDone) game.story = false; setTimeout(() => histFilm(() => show(0)), 300); };
+    const start = () => { if (wasDone) game.story = false; setTimeout(() => cine(CINE.intro, () => histFilm(() => show(0))), 300); };
     start(); // görev kartı yok: hedef, tarih filmi bitince 'şimdi sen' kartında
   }
   // 📼 önce tarih: tarihteki ayarlarla hızlı film (ortak modül), sonra 'şimdi sen' kartı; tekrar oynayana gösterilmez
@@ -724,10 +732,31 @@
     if (i === null) { gS.value = 10; readGameSliders(); return; }
     const hp = M.histP(HISTORY.hist[i].y); gS.value = Math.round((hp.s || 0) * 100); readGameSliders();
   }
+  function cine(spec, then) {
+    if (!window.Cinema) { if (then) then(); return; }
+    if (game.speed > 1 && typeof setSpeed === 'function') setSpeed(1);
+    game.reading = (game.reading || 0) + 1;
+    window.Cinema.play({ skipIfSeen: wasDone, ...spec }, () => { game.reading = Math.max(0, game.reading - 1); if (then) then(); });
+  }
+  // açılış filmi: DDT savaştan tarlaya (fotoğraf arşivden, gerisi kodla çizilir)
+  const CINE = {
+    intro: { id: 'ddt-1946', year: '1946', title: 'Savaştan tarlaya', credit: 'State Library of Queensland, kamu malı', shots: [
+      { bg: '#e8e0cc', text: '1939: Paul Müller, DDT\'nin böcekleri öldürdüğünü buldu. Savaşta sıtmaya ve bite karşı kullanıldı.', draw: (g, t, W, H, k) => {
+        const s = Math.min(W, H) / 600; g.fillStyle = 'rgba(180,200,160,.5)'; g.beginPath(); g.arc(W * 0.5, H * 0.5, Math.min(W, H) * 0.3 * Math.min(1, k * 1.5), 0, 6.28); g.fill();
+        for (let i = 0; i < 24; i++) { const a = i * 2.4, r = Math.min(W, H) * (0.12 + (i % 5) * 0.05), dead = (i / 24) < k * 1.3, x = W * 0.5 + Math.cos(a + (dead ? 0 : t * 0.002)) * r, y = H * 0.5 + Math.sin(a + (dead ? 0 : t * 0.002)) * r * 0.7 + (dead ? H * 0.2 * Math.min(1, k * 2) : 0);
+          g.strokeStyle = '#3a3a3a'; g.lineWidth = 1.5 * s; g.beginPath(); g.moveTo(x - 6 * s, y); g.lineTo(x + 6 * s, y); g.stroke(); g.beginPath(); g.moveTo(x, y); g.lineTo(x - 5 * s, y - (dead ? -4 : 6) * s); g.moveTo(x, y); g.lineTo(x + 5 * s, y - (dead ? -4 : 6) * s); g.stroke(); } } },
+      { img: PLANE_IMG, kb: [0.5, 0.45, 1.05, 0.55, 0.4, 1.22], text: 'Savaş bitti, DDT tarlaya ve bahçeye indi. Uçaklar bölgeleri ilaçlıyor (Queensland, 1947).' },
+      { bg: '#d8e4d0', text: 'Ucuz, güçlü ve kolay bozulmuyor. Ama zehir yağda birikir. Besin zincirinin tepesinde ne olur?', draw: (g, t, W, H, k) => {
+        const s = Math.min(W, H) / 600, L = [['🦟', 0.18, 1], ['🐟', 0.42, 3], ['🦅', 0.7, 9]]; g.textAlign = 'center'; g.textBaseline = 'middle';
+        L.forEach(([e, x, n], i) => { const a = Math.min(1, Math.max(0, k * 3 - i * 0.7)); g.globalAlpha = a; g.font = `${70 * s}px serif`; g.fillText(e, W * x, H * 0.48);
+          g.fillStyle = '#b03a2a'; for (let d = 0; d < n; d++) { g.beginPath(); g.arc(W * x - 30 * s + (d % 5) * 15 * s, H * 0.62 + Math.floor(d / 5) * 15 * s, 5 * s, 0, 6.28); g.fill(); }
+          if (i < 2) { g.strokeStyle = '#5a5a4a'; g.lineWidth = 3 * s; g.beginPath(); g.moveTo(W * x + 45 * s, H * 0.48); g.lineTo(W * L[i + 1][1] - 45 * s, H * 0.48); g.stroke(); } g.globalAlpha = 1; }); } },
+    ] },
+  };
   function histFilm(then) {
     if (wasDone || !window.SceneUtils || !window.SceneUtils.replay) { game.story = false; return then(); }
     game.story = true;
-    window.SceneUtils.replay({ n: HISTORY.hist.length, ms: 14000, yearAt: i => HISTORY.hist[i].y, news: { 1946: ["🇺🇸", "DDT çiftçilere satılıyor"], 1955: ["🦅", "Kartal yumurtaları kırılıyor"], 1962: ["📗", "Sessiz Bahar yayımlandı"], 1972: ["🚫", "ABD DDT'yi yasakladı"], 1985: ["🦅", "Kartallar geri dönüyor"] }, onIndex: i => { RPI = i; if (typeof replayPol === 'function') replayPol(i); }, card: () => ['⏪', '1946 · şimdi sen', `Tarihte en kötü yılda kartalların yalnız <b>%${Math.round(Math.min(...HISTORY.hist.map(h => h.B)) * 100)}</b>'i kaldı. <b>Hedefin:</b> 1990'a kadar ürünü koru, kartalları ve ötücü kuşları kaybetme.`], showCard: (ic, fr, tx, th) => showToast(ic, fr, tx, '', { pause: true, then: () => {
+    window.SceneUtils.replay({ n: HISTORY.hist.length, ms: 14000, yearAt: i => HISTORY.hist[i].y, news: { 1946: ["🇺🇸", "DDT çiftçilere satılıyor"], 1955: ["🦅", "Kartal yumurtaları kırılıyor"], 1962: ["📗", "Sessiz Bahar yayımlandı"], 1972: ["🚫", "ABD DDT'yi yasakladı"], 1985: ["🦅", "Kartallar geri dönüyor"] }, onIndex: i => { RPI = i; if (typeof replayPol === 'function') replayPol(i); }, card: () => ['⏪', '1946 · şimdi sen', `Tarihte en kötü yılda kartalların yalnız <b>%${Math.round(Math.min(...HISTORY.hist.map(h => h.B)) * 100)}</b>'i kaldı. <b>Hedefin:</b> 1990'a kadar ürünü koru, kartalları ve ötücü kuşları kaybetme.`], showCard: (ic, fr, tx, th) => missionCard(ic, fr, tx, '', { pause: true, then: () => {
       // kontroller: ilk kaydırıcı spot ışığıyla tanıtılır (görev kartının yerine)
       const sl = document.querySelector('.slide.active .gpanel .sl:not(.locked)');
       const go = () => { game.story = false; th(); };

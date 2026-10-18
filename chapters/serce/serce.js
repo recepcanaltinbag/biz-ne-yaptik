@@ -269,7 +269,7 @@
   }
 
   function drawBubble(bb) {
-    const pad = 10 * U, fs = 17 * U;
+    const pad = Math.max(8, 10 * U), fs = Math.max(15, 17 * U); // telefonda da okunur (en az 15 px)
     ctx.font = `${fs}px "Patrick Hand"`;
     const lines = bb.text.split('\n');
     const w = Math.max(...lines.map(l => ctx.measureText(l).width)) + pad * 2, h = lines.length * fs * 1.15 + pad * 1.4;
@@ -994,6 +994,14 @@
   // bölüm bir kez bitirildiyse (bu tarayıcıda) bütün slaytlar seçilebilir
   const DONE_KEY = 'bny-bitti-serce';
   const wasDone = (() => { try { return !!localStorage.getItem(DONE_KEY); } catch (e) { return false; } })();
+  // tarih filminden sonra görev kartı: tarihte ne oldu + senin rolün, kontrolün, hedefin (oyuncu başlarken tek kart)
+  function missionCard(ic, fr, tx, tone, o) {
+    const m = document.getElementById('modal');
+    if (!window.Mission || !m || typeof MISSION === 'undefined') return showToast(ic, fr, tx, tone, o);
+    const hist = String(tx).split(/<b>Hedefin/)[0].trim().replace(/^Tarihte /, '').replace(/^./, c => c.toLocaleUpperCase('tr'));
+    game.reading = (game.reading || 0) + 1;
+    window.Mission.show(m, { ...MISSION, hist }, () => { game.reading = Math.max(0, game.reading - 1); if (o && o.then) o.then(); });
+  }
   if (wasDone) maxSeen = slides.length - 1;
   const dotsEl = $('dots');
   slides.forEach((_, i) => {
@@ -1175,7 +1183,7 @@
         if (!opt.pause) setTimeout(() => show(i + 1), 9000 / Math.max(1, FAST / 2));
       };
       game.reading++;
-      const start = () => { game.reading = Math.max(0, game.reading - 1); setTimeout(() => histFilm(() => show(0)), 300); };
+      const start = () => { game.reading = Math.max(0, game.reading - 1); setTimeout(() => cine(CINE.intro, () => histFilm(() => show(0))), 300); };
       start(); // görev kartı yok: hedef, tarih filmi bitince 'şimdi sen' kartında
     }
   }
@@ -1215,13 +1223,39 @@
     if (i === null) { gK.value = 10; readGameSliders(); game.campaign = true; game.totalKills = 0; game.yearKills = 0; game.maxK = 0; birds.forEach(b => { b.fallen = false; b.leave = false; }); return; } // film oyuncunun hesabına yazılmaz
     gK.value = i < 14 ? 100 : i < 26 ? 50 : 0; readGameSliders(); game.campaign = i < 26;
   }
+  function cine(spec, then) {
+    if (!window.Cinema) { if (then) then(); return; }
+    if (game.speed > 1 && typeof setSpeed === 'function') setSpeed(1);
+    game.reading = (game.reading || 0) + 1;
+    window.Cinema.play({ skipIfSeen: wasDone, ...spec }, () => { game.reading = Math.max(0, game.reading - 1); if (then) then(); });
+  }
+  // açılış filmi: 1958 kampanyası (afiş arşivden, gerisi kodla çizilir)
+  const CINE = {
+    intro: { id: 'ser-1958', year: '1958', title: 'Çin', credit: 'Kampanya afişi, kamu malı', shots: [
+      { img: POSTER, kb: [0.5, 0.35, 1.05, 0.5, 0.55, 1.25], text: 'Çin\'de yeni bir kampanya: Dört Zararlı. Fare, sinek, sivrisinek… ve serçe.' },
+      { bg: '#cfe0ea', text: 'Serçe tahılı yiyor, deniyor. Köylüler tencere çalıyor; serçe konamıyor, yorulup düşüyor.', draw: (g, t, W, H, k) => {
+        g.fillStyle = '#a8b878'; g.fillRect(0, H * 0.7, W, H);
+        g.fillStyle = '#8a5a3a'; for (let i = 0; i < 4; i++) { const x = W * (0.1 + i * 0.25); g.fillRect(x, H * 0.56, W * 0.12, H * 0.14); g.fillStyle = '#6a3a2a'; g.beginPath(); g.moveTo(x - 10, H * 0.56); g.lineTo(x + W * 0.06, H * 0.48); g.lineTo(x + W * 0.12 + 10, H * 0.56); g.fill(); g.fillStyle = '#8a5a3a'; }
+        const s = Math.min(W, H) / 600;
+        for (let i = 0; i < 9; i++) { const x = W * (0.06 + i * 0.11), b = Math.abs(Math.sin(t * 0.012 + i)) * 8 * s, y = H * 0.82 - b;
+          g.fillStyle = '#3a3a48'; g.fillRect(x - 6 * s, y - 34 * s, 12 * s, 30 * s); g.beginPath(); g.arc(x, y - 44 * s, 9 * s, 0, 6.28); g.fill();
+          g.fillStyle = '#9aa0a8'; g.beginPath(); g.ellipse(x + 14 * s, y - 52 * s - b, 11 * s, 5 * s, 0, 0, 6.28); g.fill(); }
+        window.Cinema.fx.birds(g, t, W, H, Math.round(26 * (1 - k * 0.8)), { y: H * 0.28, spread: H * 0.14, v: 0.12 });
+        g.fillStyle = '#5a4a3a'; for (let i = 0; i < 10; i++) { const d = ((t * 0.0004 + i * 0.37) % 1); if (d < k) { g.beginPath(); g.arc(W * (0.08 + i * 0.09), H * (0.25 + d * 0.5), 3 * s, 0, 6.28); g.fill(); } }
+        g.font = `${Math.min(W, H) * 0.05}px "Patrick Hand", sans-serif`; g.textAlign = 'center'; g.fillStyle = 'rgba(60,40,30,.8)'; if (Math.sin(t * 0.02) > 0) g.fillText('TANG! TANG!', W * 0.5, H * 0.42); } },
+      { bg: '#e4d8b8', text: 'Ama serçe yavrularını böcekle besler. Gökyüzü sessizleşince tarlada kim kalır?', draw: (g, t, W, H, k) => {
+        g.fillStyle = '#c8b070'; g.fillRect(0, H * 0.62, W, H); const s = Math.min(W, H) / 600;
+        g.strokeStyle = '#a08840'; g.lineWidth = 2 * s; for (let i = 0; i < 60; i++) { const x = (i / 60) * W, h = H * 0.12 * (1 - k * 0.6); g.beginPath(); g.moveTo(x, H * 0.66); g.lineTo(x + 4 * s, H * 0.66 - h); g.stroke(); }
+        g.fillStyle = '#4a5a2a'; const n = Math.round(10 + k * 160); for (let i = 0; i < n; i++) { const x = ((i * 73.1 + t * 0.03 * (1 + i % 3)) % W), y = H * (0.45 + ((i * 37) % 100) / 400) + Math.sin(t * 0.01 + i) * 6; g.beginPath(); g.ellipse(x, y, 5 * s, 2.4 * s, 0.3, 0, 6.28); g.fill(); } } },
+    ] },
+  };
   function histFilm(then) {
     if (wasDone || !window.SceneUtils || !window.SceneUtils.replay) return then();
     game.reading++;
     window.SceneUtils.replay({ n: TOTAL, ms: 14000, yearAt: i => calYear(i), news: { 1958: ['🥁', 'Dört Zararlı Kampanyası: serçeye savaş'], 1959: ['🦗', 'Serçe kalmadı, çekirgeler tarlaları yedi'], 1960: ['🍚', 'Kıtlık büyüdü; serçe listeden çıkarıldı'] },
       onIndex: i => { RPI = i; replayPol(i); },
       card: () => ['⏪', '1958 · şimdi sen', 'Tarihte serçeler bitince böcekler patladı, hasatlar çöktü. <b>Hedefin:</b> 3 hasatta tahılı koru, Pekin\'i kızdırma. Daha iyisini yapabilir misin?'],
-      showCard: (ic, fr, tx, th) => showToast(ic, fr, tx, '', { pause: true, then: () => {
+      showCard: (ic, fr, tx, th) => missionCard(ic, fr, tx, '', { pause: true, then: () => {
         const sl = document.querySelector('.slide.active .gpanel .sl:not(.locked)');
         const go = () => { game.reading = Math.max(0, game.reading - 1); th(); };
         if (sl && window.SceneUtils.tour && MISSION && MISSION.control) window.SceneUtils.tour([{ el: sl, text: MISSION.control }], go); else go();

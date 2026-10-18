@@ -102,7 +102,7 @@
     return { x1, gt, gb, gh, rail: gt + gh * 0.16 };
   }
   function drawBubble(bb) {
-    const pad = 10 * U, fs = 17 * U;
+    const pad = Math.max(8, 10 * U), fs = Math.max(15, 17 * U); // telefonda da okunur (en az 15 px)
     ctx.font = `${fs}px "Patrick Hand"`;
     const lines = bb.text.split('\n');
     const w = Math.max(...lines.map(l => ctx.measureText(l).width)) + pad * 2, h = lines.length * fs * 1.15 + pad * 1.4;
@@ -119,7 +119,7 @@
   }
   const sayAt = (obj, text) => { bubbles.length = 0; bubbles.push({ obj, text, life: 1 }); };
   function tag(x, y, text, o = {}) {
-    const fs = Math.max(11, (o.fs || 13) * U);
+    const fs = Math.max(mobile ? 12.5 : 11, (o.fs || 13) * U);
     ctx.font = `${fs}px "Patrick Hand"`;
     const w = ctx.measureText(text).width + 12 * U, h = fs + 8 * U;
     let bx = clamp(x - w / 2, 4, lay.x1 * W - w - 4), by = y - h;
@@ -255,7 +255,7 @@
   const RAILS = [['ny', 'det', 0.1], ['det', 'chi', 0.25], ['chi', 'cin', 0.4], ['det', 'pet', 0.65], ['chi', 'pet', 0.8]];
   const colonies = [];
   function mapGeom(G) {
-    const top = 150 * U, H2 = Math.max(80, G.gb - top - 10 * U), Wm = Math.min(G.x1 * 0.94, H2 * 1.5), Hm = Wm / 1.5;
+    const top = (window.SceneUtils && window.SceneUtils.viewTop ? window.SceneUtils.viewTop(150 * U) : 150 * U), H2 = Math.max(80, G.gb - top - 10 * U), Wm = Math.min(G.x1 * 0.94, H2 * 1.5), Hm = Wm / 1.5;
     return { ox: (G.x1 - Wm) / 2, oy: top + (H2 - Hm) / 2, Wm, Hm };
   }
   function drawMap(G, t, dt, alpha) {
@@ -378,6 +378,14 @@
   let cur = 0, maxSeen = 0, mode = 'title';
   const DONE_KEY = 'bny-bitti-guvercin';
   const wasDone = (() => { try { return !!localStorage.getItem(DONE_KEY); } catch (e) { return false; } })();
+  // tarih filminden sonra görev kartı: tarihte ne oldu + senin rolün, kontrolün, hedefin (oyuncu başlarken tek kart)
+  function missionCard(ic, fr, tx, tone, o) {
+    const m = document.getElementById('modal');
+    if (!window.Mission || !m || typeof MISSION === 'undefined') return showToast(ic, fr, tx, tone, o);
+    const hist = String(tx).split(/<b>Hedefin/)[0].trim().replace(/^Tarihte /, '').replace(/^./, c => c.toLocaleUpperCase('tr'));
+    game.reading = (game.reading || 0) + 1;
+    window.Mission.show(m, { ...MISSION, hist }, () => { game.reading = Math.max(0, game.reading - 1); if (o && o.then) o.then(); });
+  }
   if (wasDone) maxSeen = slides.length - 1;
   const dotsEl = $('dots');
   slides.forEach((_, i) => { const b = document.createElement('button'); b.setAttribute('aria-label', `Adım ${i + 1}`); b.onclick = () => { if (i <= maxSeen) goTo(i); }; dotsEl.appendChild(b); });
@@ -591,7 +599,7 @@
   function histFilm(then) {
     if (wasDone || !window.SceneUtils || !window.SceneUtils.replay) { game.story = false; return then(); }
     game.story = true;
-    window.SceneUtils.replay({ n: HISTORY.hist.length, ms: 14000, yearAt: i => HISTORY.hist[i].y, news: { 1866: ["🚂", "Demiryolu ve telgraf avcıları kolonilere taşıyor"], 1878: ["🌲", "Petoskey: günde 50.000 kuş"], 1888: ["🪺", "Koloniler dağılıyor"], 1900: ["🕊️", "Son yabani kuş vuruldu"] }, onIndex: i => { RPI = i; if (typeof replayPol === 'function') replayPol(i); }, card: () => ['⏪', '1860 · şimdi sen', `Tarihte 1914'te tek bir göçmen güvercin kalmadı. <b>Hedefin:</b> 1914'te en az yarım milyar güvercin uçsun. Kurtarabilir misin?`], showCard: (ic, fr, tx, th) => showToast(ic, fr, tx, '', { pause: true, then: () => {
+    window.SceneUtils.replay({ n: HISTORY.hist.length, ms: 14000, yearAt: i => HISTORY.hist[i].y, news: { 1866: ["🚂", "Demiryolu ve telgraf avcıları kolonilere taşıyor"], 1878: ["🌲", "Petoskey: günde 50.000 kuş"], 1888: ["🪺", "Koloniler dağılıyor"], 1900: ["🕊️", "Son yabani kuş vuruldu"] }, onIndex: i => { RPI = i; if (typeof replayPol === 'function') replayPol(i); }, card: () => ['⏪', '1860 · şimdi sen', `Tarihte 1914'te tek bir göçmen güvercin kalmadı. <b>Hedefin:</b> 1914'te en az yarım milyar güvercin uçsun. Kurtarabilir misin?`], showCard: (ic, fr, tx, th) => missionCard(ic, fr, tx, '', { pause: true, then: () => {
       // kontroller: ilk kaydırıcı spot ışığıyla tanıtılır (görev kartının yerine)
       const sl = document.querySelector('.slide.active .gpanel .sl:not(.locked)');
       const go = () => { game.story = false; th(); };
