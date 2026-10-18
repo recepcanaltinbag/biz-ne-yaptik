@@ -31,8 +31,9 @@
     el.querySelector('.cine-year').textContent = spec.year || '';
     el.querySelector('.cine-title').textContent = spec.title || '';
     el.querySelector('.cine-credit').textContent = spec.credit || '';
-    // kare süresi: yazının yazılması + okunması (saniyede ~12 karakter) kadar en az; dokununca yine geçilir
-    const readMs = t => 1500 + String(t || '').length * (18 + 83);
+    // kare süresi: yazının yazılması (12 ms/harf) + okunması (~15 harf/sn) kadar en az; dokununca yine geçilir.
+    // Alt yazıları kısa tut (≤ 70 harf): açılış sineması toplam ~20 sn'yi geçmesin.
+    const readMs = t => 1200 + String(t || '').length * (12 + 68);
     const shots = spec.shots.map(s => ({ ...s, dur: Math.max(s.dur || 4200, readMs(s.text)) / FAST }));
     const total = shots.reduce((a, s) => a + s.dur, 0);
     const imgs = shots.map(s => s.img ? loadImg(s.img) : Promise.resolve(null));
@@ -87,7 +88,7 @@
       if (Math.random() < 0.04) { g.fillStyle = 'rgba(255,250,235,.06)'; g.fillRect(Math.random() * W, 0, 1, H); }
       // geniş ekran bantları
       const bh = Math.max(28, H * 0.09); g.fillStyle = '#000'; g.fillRect(0, 0, W, bh); g.fillRect(0, H - bh, W, bh);
-      const txt = capText(), want = Math.min(txt.length, Math.floor(e / (18 / FAST)));
+      const txt = capText(), want = Math.min(txt.length, Math.floor(e / (12 / FAST)));
       if (want !== typed) { typed = want; cap.textContent = txt.slice(0, typed); }
       el.querySelector('.cine-credit').style.opacity = im && s.img ? 0.8 : 0;
       bar.style.width = clamp((shots.slice(0, i).reduce((a, x) => a + x.dur, 0) + e) / total) * 100 + '%';

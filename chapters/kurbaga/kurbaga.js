@@ -624,7 +624,7 @@
     if (!window.Mission || !m || typeof MISSION === 'undefined') return showToast(ic, fr, tx, tone, o);
     const hist = String(tx).split(/<b>Hedefin/)[0].trim().replace(/^Tarihte /, '').replace(/^./, c => c.toLocaleUpperCase('tr'));
     game.reading = (game.reading || 0) + 1;
-    window.Mission.show(m, { ...MISSION, hist }, () => { game.reading = Math.max(0, game.reading - 1); if (o && o.then) o.then(); });
+    window.Mission.show(m, { ...MISSION, hist }, () => { game.reading = Math.max(0, game.reading - 1); window.__quietUntil = performance.now() + 10000 / (typeof FAST === 'number' ? FAST : 1); /* ilk 10 sn sahne konuşsun, yazı yok */ if (o && o.then) o.then(); if (MISSION.watch && window.SceneUtils && window.SceneUtils.ticker) setTimeout(() => window.SceneUtils.ticker('👀', 'Dikkat', MISSION.watch, '', 7000), 6000 / (typeof FAST === 'number' ? FAST : 1)); });
   }
   if (wasDone) maxSeen = slides.length - 1;
   const slideOf = m => slides.findIndex(x => x.dataset.mode === m);
@@ -674,8 +674,8 @@
     for (let i = toastQueue.length - 1; i >= 0; i--) { const a = toastQueue[i]; if (!(a[4] || {}).pause && a.born !== undefined && game.st && game.st.year - a.born > 3) toastQueue.splice(i, 1); }
     if (!toastQueue.length) return;
     const box = $('toasts'), visible = box.querySelectorAll('.toast:not(.out)').length;
-    const gap = 9000 / (typeof FAST === 'number' ? FAST : 1) / Math.sqrt(game.speed || 1);
-    if (visible >= (mobile ? 1 : 2) || performance.now() - lastToastAt < gap) return;
+    const gap = 13000 / (typeof FAST === 'number' ? FAST : 1) / Math.sqrt(game.speed || 1);
+    if (visible >= (mobile ? 1 : 2) || performance.now() - lastToastAt < gap || ((window.__quietUntil && performance.now() < window.__quietUntil) && !toastQueue.some(a => (a[4] || {}).pause))) return;
     const k = toastQueue.findIndex(a => (a[4] || {}).pause);
     const next = toastQueue.splice(k >= 0 ? k : 0, 1)[0];
     lastToastAt = performance.now();
@@ -1013,6 +1013,7 @@
       <div class="rbtns"><button class="hbtn" id="r-again">↺ Tekrar oyna</button><button class="hbtn" id="r-next">Kendin dene →</button><a class="hbtn" href="../../#bolumler">☰ Tüm bölümler</a></div>`;
     $('r-again').onclick = () => { resetGame(); goTo(slideOf('game')); };
     $('r-next').onclick = () => goTo(slideOf('sandbox'));
+    { const nx = $('r-next'), fb = document.createElement('button'); fb.className = 'hbtn'; fb.id = 'r-facts'; fb.textContent = '📜 Gerçekte ne oldu?'; fb.onclick = () => goTo(slideOf('facts')); nx.parentNode.insertBefore(fb, nx.nextSibling); }
     requestAnimationFrame(drawResultChart);
   }
   function lineChart(c, series, n, opts) {

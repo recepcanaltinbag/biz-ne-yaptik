@@ -735,7 +735,7 @@
     if (!window.Mission || !m || typeof MISSION === 'undefined') return showToast(ic, fr, tx, tone, o);
     const hist = String(tx).split(/<b>Hedefin/)[0].trim().replace(/^Tarihte /, '').replace(/^./, c => c.toLocaleUpperCase('tr'));
     game.reading = (game.reading || 0) + 1;
-    window.Mission.show(m, { ...MISSION, hist }, () => { game.reading = Math.max(0, game.reading - 1); if (o && o.then) o.then(); });
+    window.Mission.show(m, { ...MISSION, hist }, () => { game.reading = Math.max(0, game.reading - 1); window.__quietUntil = performance.now() + 10000 / (typeof FAST === 'number' ? FAST : 1); /* ilk 10 sn sahne konuşsun, yazı yok */ if (o && o.then) o.then(); if (MISSION.watch && window.SceneUtils && window.SceneUtils.ticker) setTimeout(() => window.SceneUtils.ticker('👀', 'Dikkat', MISSION.watch, '', 7000), 6000 / (typeof FAST === 'number' ? FAST : 1)); });
   }
   if (wasDone) maxSeen = slides.length - 1;
   const dotsEl = $('dots');
@@ -791,7 +791,7 @@
     const box = $('toasts'), visible = box.querySelectorAll('.toast:not(.out)').length;
     const k = toastQueue.findIndex(a => (a[4] || {}).pause);
     // yıla bağlı durduran kartlar beklemeden öne geçer (yıl birimi hızlı akar)
-    if (visible >= (mobile ? 1 : 2) || (k < 0 && performance.now() - lastToastAt < 9000 / FAST / Math.sqrt(game.speed || 1))) return;
+    if (visible >= (mobile ? 1 : 2) || (k < 0 && (performance.now() - lastToastAt < 13000 / FAST / Math.sqrt(game.speed || 1) || (window.__quietUntil && performance.now() < window.__quietUntil)))) return;
     const next = toastQueue.splice(k >= 0 ? k : 0, 1)[0];
     lastToastAt = performance.now();
     showToast(...next);
@@ -885,7 +885,6 @@
 
   const MOYNAQ = '../../assets/img/cards/moynaq-aral-sea-6226807306.jpg';
   const STORY = [
-    ['🌊', 'Aral Gölü · 1960', 'Dünyanın <b>4. büyük gölü</b>. Kıyıda balıkçı kasabası Moynak.', '', { pause: false }],
     ['🏛️', 'Moskova', 'Pamuk istiyoruz! Pamuk için su lazım: suyu gölü besleyen nehirden alacaksın.', '', { pause: false }],
     ['📋', 'Plan', '1965 hedefi: pamuk <b>1,3×</b>. Hedef sol üstte.', 'warn', { ms: 7000 }],
   ];
@@ -897,7 +896,7 @@
       if (mode !== 'game') return;
       if (i >= STORY.length) { game.story = false; return game.w <= 0.3 ? coach(gW, '👉 Kaydır: tarlaya daha çok su', 0) : null; }
       const [ic, from, text, tone, opt0] = STORY[i];
-      const opt = wasDone ? { ...opt0, pause: false, ms: 6000 } : opt0; // tekrar oynayışta hikâye durdurmaz
+      const opt = wasDone ? { ...opt0, pause: false, ms: 6000 } : i < 2 ? { ...opt0, pause: true } : opt0; // ilk iki kart 'Devam →' ile okunur (görevi anlamak için) // tekrar oynayışta hikâye durdurmaz
       toast(ic, from, text, tone, { ...opt, then: opt.pause ? () => show(i + 1) : undefined });
       if (!opt.pause) setTimeout(() => show(i + 1), 6500 / Math.max(1, FAST / 2));
     };
@@ -921,19 +920,19 @@
   // açılış filmi: 1960'ta dolu bir göl ve pamuk planı (Muynak fotoğrafı arşivden, gerisi kodla çizilir)
   const CINE = {
     intro: { id: 'aral-1960', year: '1960', title: 'Aral Gölü, Orta Asya', credit: 'Arian Zwegers, CC BY 2.0', shots: [
-      { bg: '#d8c89a', text: 'Aral, dünyanın 4. büyük gölü. Muynak limanında balıkçı tekneleri, balık konservesi fabrikaları.', draw: (g, t, W, H, k) => {
+      { bg: '#d8c89a', text: 'Dünyanın 4. büyük gölü. Muynak limanı balıkçılarla dolu.', draw: (g, t, W, H, k) => {
         const s = Math.min(W, H) / 600; g.fillStyle = '#4a8ab8'; g.beginPath(); g.ellipse(W * 0.5, H * 0.55, W * 0.38, H * 0.26, 0, 0, 6.28); g.fill();
         g.fillStyle = 'rgba(255,255,255,.35)'; for (let i = 0; i < 14; i++) g.fillRect(W * 0.2 + ((i * 97 + t * 0.03) % (W * 0.6)), H * (0.42 + (i % 5) * 0.05), 18 * s, 2);
         for (let i = 0; i < 5; i++) { const x = W * (0.3 + i * 0.1) + Math.sin(t * 0.001 + i) * 10, y = H * (0.5 + (i % 2) * 0.08) + Math.sin(t * 0.003 + i) * 3; g.fillStyle = '#6a4a2a'; g.beginPath(); g.moveTo(x - 18 * s, y); g.lineTo(x + 18 * s, y); g.lineTo(x + 12 * s, y + 8 * s); g.lineTo(x - 12 * s, y + 8 * s); g.fill(); g.strokeStyle = '#3a2a1a'; g.lineWidth = 2; g.beginPath(); g.moveTo(x, y); g.lineTo(x, y - 24 * s); g.stroke(); }
         const j = (t * 0.002) % 1; g.fillStyle = '#c8d8e0'; g.beginPath(); g.ellipse(W * 0.62, H * 0.62 - Math.sin(j * 3.14) * 30 * s, 7 * s, 3 * s, j * 3, 0, 6.28); g.fill(); } },
-      { bg: '#e2d4a8', text: 'Plan basit: göle akan iki nehrin suyu çöldeki pamuk tarlalarına. Pamuğa "beyaz altın" deniyor.', draw: (g, t, W, H, k) => {
+      { bg: '#e2d4a8', text: 'Plan: göle akan iki nehrin suyu çöldeki pamuğa. Pamuk "beyaz altın".', draw: (g, t, W, H, k) => {
         const s = Math.min(W, H) / 600, rx = W * 0.3 * (1 - k * 0.25), ry = H * 0.2 * (1 - k * 0.25); g.fillStyle = '#4a8ab8'; g.beginPath(); g.ellipse(W * 0.5, H * 0.32, rx, ry, 0, 0, 6.28); g.fill();
         const river = (x0, w) => { g.strokeStyle = '#4a8ab8'; g.lineWidth = w * s; g.beginPath(); g.moveTo(x0, H * 0.95); g.quadraticCurveTo(x0 + (W * 0.5 - x0) * 0.3, H * 0.6, W * 0.5 + (x0 - W * 0.5) * 0.25, H * 0.45); g.stroke(); };
         river(W * 0.18, 10 * (1 - k * 0.8)); river(W * 0.82, 10 * (1 - k * 0.8));
         for (let i = 0; i < 6; i++) { const left = i < 3, x = left ? W * (0.24 + i * 0.03) : W * (0.7 + (i - 3) * 0.03), y = H * (0.82 - (i % 3) * 0.08), d = Math.min(1, k * 2 - (i % 3) * 0.2); if (d <= 0) continue;
           const ex = x + (left ? -1 : 1) * W * 0.16 * d; g.strokeStyle = '#6a9ac0'; g.lineWidth = 3 * s; g.beginPath(); g.moveTo(x, y); g.lineTo(ex, y); g.stroke();
           g.fillStyle = '#f4f0e8'; for (let n = 0; n < 6; n++) { g.beginPath(); g.arc(x + (ex - x) * (n + 0.5) / 6, y + 10 * s, 4 * s, 0, 6.28); g.fill(); } } } },
-      { img: MOYNAQ, kb: [0.5, 0.55, 1.05, 0.45, 0.5, 1.2], text: 'Bu fotoğraf o limandan. Göl buraya nasıl geldi? Önce tarihte olanı izle.' },
+      { img: MOYNAQ, kb: [0.5, 0.55, 1.05, 0.45, 0.5, 1.2], text: 'Bu fotoğraf o limandan. Göl buraya nasıl geldi?' },
     ] },
   };
   function histFilm(then) {
@@ -943,7 +942,7 @@
       // kontroller: ilk kaydırıcı spot ışığıyla tanıtılır (görev kartının yerine)
       const sl = document.querySelector('.slide.active .gpanel .sl:not(.locked)');
       const go = () => { game.story = false; th(); };
-      if (sl && window.SceneUtils.tour && MISSION && MISSION.control) window.SceneUtils.tour([{ el: sl, text: MISSION.control + '<br><small style="display:inline;text-align:left">Oynatınca ne olacağını hemen görürsün.</small>' }], go); else go();
+      go(); { const inp = sl && sl.querySelector('input'); if (inp) coach(inp, '👉 Dene: kaydır, sonucu hemen gör', 9000); } // görev kartı kontrolü zaten anlattı: spot ışığıyla durdurma yok, yalnız nabız
     } }), then });
   }
   function updateGame(dt) {
@@ -1122,6 +1121,7 @@
       <div class="rbtns"><button class="hbtn" id="r-again">↺ Tekrar oyna</button><button class="hbtn" id="r-next">Kendin dene →</button><a class="hbtn" href="../../#bolumler">☰ Tüm bölümler</a></div>`;
     $('r-again').onclick = () => { resetGame(); goTo(slideOf('game')); };
     $('r-next').onclick = () => goTo(slideOf('sandbox'));
+    { const nx = $('r-next'), fb = document.createElement('button'); fb.className = 'hbtn'; fb.id = 'r-facts'; fb.textContent = '📜 Gerçekte ne oldu?'; fb.onclick = () => goTo(slideOf('facts')); nx.parentNode.insertBefore(fb, nx.nextSibling); }
     requestAnimationFrame(drawResultChart);
   }
   function lineChart(c, series, n, opts) {

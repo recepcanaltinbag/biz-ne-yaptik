@@ -561,7 +561,7 @@
     if (!window.Mission || !m || typeof MISSION === 'undefined') return showToast(ic, fr, tx, tone, o);
     const hist = String(tx).split(/<b>Hedefin/)[0].trim().replace(/^Tarihte /, '').replace(/^./, c => c.toLocaleUpperCase('tr'));
     game.reading = (game.reading || 0) + 1;
-    window.Mission.show(m, { ...MISSION, hist }, () => { game.reading = Math.max(0, game.reading - 1); if (o && o.then) o.then(); });
+    window.Mission.show(m, { ...MISSION, hist }, () => { game.reading = Math.max(0, game.reading - 1); window.__quietUntil = performance.now() + 10000 / (typeof FAST === 'number' ? FAST : 1); /* ilk 10 sn sahne konuşsun, yazı yok */ if (o && o.then) o.then(); if (MISSION.watch && window.SceneUtils && window.SceneUtils.ticker) setTimeout(() => window.SceneUtils.ticker('👀', 'Dikkat', MISSION.watch, '', 7000), 6000 / (typeof FAST === 'number' ? FAST : 1)); });
   }
   if (wasDone) maxSeen = slides.length - 1;
   const dotsEl = $('dots');
@@ -611,7 +611,7 @@
     if (!toastQueue.length) return;
     const box = $('toasts'), visible = box.querySelectorAll('.toast:not(.out)').length;
     const k = toastQueue.findIndex(a => (a[4] || {}).pause);
-    if (visible >= (mobile ? 1 : 2) || (k < 0 && performance.now() - lastToastAt < 9000 / FAST / Math.sqrt(game.speed || 1))) return;
+    if (visible >= (mobile ? 1 : 2) || (k < 0 && (performance.now() - lastToastAt < 13000 / FAST / Math.sqrt(game.speed || 1) || (window.__quietUntil && performance.now() < window.__quietUntil)))) return;
     const next = toastQueue.splice(k >= 0 ? k : 0, 1)[0];
     lastToastAt = performance.now();
     showToast(...next);
@@ -705,9 +705,7 @@
 
   const PLANE_IMG = '../../assets/img/cards/statelibqld-2-162299-cloud-spraying-for-mosquitos-at-norman-.jpg';
   const STORY = [
-    ['🇺🇸', 'ABD · 1946', 'Savaş bitti. Askerleri tifüs ve sıtmadan koruyan "mucize toz" <b>DDT</b> artık çiftçilere satılıyor. Ucuz, etkili ve herkes zararsız sanıyor.', '', { pause: true, img: PLANE_IMG }],
     ['🧪', 'Kimya şirketi', '"Bir uçak dolusu DDT, bir tarla dolusu böceği bir günde bitirir!" İlçede ne kadar ilaçlanacağına tarım müdürü olarak sen karar vereceksin.', '', { pause: false }],
-    ['✈️', 'Senin işin', 'Kaydırıcı ilaçlamayı belirler. Uçak tarlaya, bahçelere ve bataklığa sıkar. Böcekleri, ürünü ve gökyüzünü izle.', '', { ms: 9000 }],
     ['👨‍🌾', 'Çiftçi birliği', 'Mısırda kurt, bahçede sinek var. Çiftçiler ilaç bekliyor.', 'warn', { ms: 8000 }],
   ];
   function enterGame() {
@@ -718,7 +716,7 @@
       if (mode !== 'game') return;
       if (i >= STORY.length) { game.story = false; return game.s <= 0.15 ? coach(gS, '👉 Kaydırıcıyı dene: ilaç ne değiştiriyor?', 12000) : null; }
       const [ic, from, text, tone, opt0] = STORY[i];
-      const opt = wasDone ? { ...opt0, pause: false, ms: 6000 } : opt0; // tekrar oynayışta hikâye durdurmaz
+      const opt = wasDone ? { ...opt0, pause: false, ms: 6000 } : i < 2 ? { ...opt0, pause: true } : opt0; // ilk iki kart 'Devam →' ile okunur (görevi anlamak için) // tekrar oynayışta hikâye durdurmaz
       toast(ic, from, text, tone, { ...opt, then: opt.pause ? () => show(i + 1) : undefined });
       if (!opt.pause) setTimeout(() => show(i + 1), 6500 / Math.max(1, FAST / 2));
     };
@@ -741,12 +739,12 @@
   // açılış filmi: DDT savaştan tarlaya (fotoğraf arşivden, gerisi kodla çizilir)
   const CINE = {
     intro: { id: 'ddt-1946', year: '1946', title: 'Savaştan tarlaya', credit: 'State Library of Queensland, kamu malı', shots: [
-      { bg: '#e8e0cc', text: '1939: Paul Müller, DDT\'nin böcekleri öldürdüğünü buldu. Savaşta sıtmaya ve bite karşı kullanıldı.', draw: (g, t, W, H, k) => {
+      { bg: '#e8e0cc', text: '1939\'da bulundu: DDT böcekleri öldürüyor. Savaşta sıtmayı durdurdu.', draw: (g, t, W, H, k) => {
         const s = Math.min(W, H) / 600; g.fillStyle = 'rgba(180,200,160,.5)'; g.beginPath(); g.arc(W * 0.5, H * 0.5, Math.min(W, H) * 0.3 * Math.min(1, k * 1.5), 0, 6.28); g.fill();
         for (let i = 0; i < 24; i++) { const a = i * 2.4, r = Math.min(W, H) * (0.12 + (i % 5) * 0.05), dead = (i / 24) < k * 1.3, x = W * 0.5 + Math.cos(a + (dead ? 0 : t * 0.002)) * r, y = H * 0.5 + Math.sin(a + (dead ? 0 : t * 0.002)) * r * 0.7 + (dead ? H * 0.2 * Math.min(1, k * 2) : 0);
           g.strokeStyle = '#3a3a3a'; g.lineWidth = 1.5 * s; g.beginPath(); g.moveTo(x - 6 * s, y); g.lineTo(x + 6 * s, y); g.stroke(); g.beginPath(); g.moveTo(x, y); g.lineTo(x - 5 * s, y - (dead ? -4 : 6) * s); g.moveTo(x, y); g.lineTo(x + 5 * s, y - (dead ? -4 : 6) * s); g.stroke(); } } },
-      { img: PLANE_IMG, kb: [0.5, 0.45, 1.05, 0.55, 0.4, 1.22], text: 'Savaş bitti, DDT tarlaya ve bahçeye indi. Uçaklar bölgeleri ilaçlıyor (Queensland, 1947).' },
-      { bg: '#d8e4d0', text: 'Ucuz, güçlü ve kolay bozulmuyor. Ama zehir yağda birikir. Besin zincirinin tepesinde ne olur?', draw: (g, t, W, H, k) => {
+      { img: PLANE_IMG, kb: [0.5, 0.45, 1.05, 0.55, 0.4, 1.22], text: 'Savaş bitti, DDT tarlaya indi. Uçaklar her yeri ilaçlıyor (1947).' },
+      { bg: '#d8e4d0', text: 'Ama zehir yağda birikir. Besin zincirinin tepesinde ne olur?', draw: (g, t, W, H, k) => {
         const s = Math.min(W, H) / 600, L = [['🦟', 0.18, 1], ['🐟', 0.42, 3], ['🦅', 0.7, 9]]; g.textAlign = 'center'; g.textBaseline = 'middle';
         L.forEach(([e, x, n], i) => { const a = Math.min(1, Math.max(0, k * 3 - i * 0.7)); g.globalAlpha = a; g.font = `${70 * s}px serif`; g.fillText(e, W * x, H * 0.48);
           g.fillStyle = '#b03a2a'; for (let d = 0; d < n; d++) { g.beginPath(); g.arc(W * x - 30 * s + (d % 5) * 15 * s, H * 0.62 + Math.floor(d / 5) * 15 * s, 5 * s, 0, 6.28); g.fill(); }
@@ -760,7 +758,7 @@
       // kontroller: ilk kaydırıcı spot ışığıyla tanıtılır (görev kartının yerine)
       const sl = document.querySelector('.slide.active .gpanel .sl:not(.locked)');
       const go = () => { game.story = false; th(); };
-      if (sl && window.SceneUtils.tour && MISSION && MISSION.control) window.SceneUtils.tour([{ el: sl, text: MISSION.control + '<br><small style="display:inline;text-align:left">Oynatınca ne olacağını hemen görürsün.</small>' }], go); else go();
+      go(); { const inp = sl && sl.querySelector('input'); if (inp) coach(inp, '👉 Dene: kaydır, sonucu hemen gör', 9000); } // görev kartı kontrolü zaten anlattı: spot ışığıyla durdurma yok, yalnız nabız
     } }), then });
   }
   function updateGame(dt) {
@@ -911,6 +909,7 @@
       <div class="rbtns"><button class="hbtn" id="r-again">↺ Tekrar oyna</button><button class="hbtn" id="r-next">Kendin dene →</button><a class="hbtn" href="../../#bolumler">☰ Tüm bölümler</a></div>`;
     $('r-again').onclick = () => { resetGame(); goTo(slideOf('game')); };
     $('r-next').onclick = () => goTo(slideOf('sandbox'));
+    { const nx = $('r-next'), fb = document.createElement('button'); fb.className = 'hbtn'; fb.id = 'r-facts'; fb.textContent = '📜 Gerçekte ne oldu?'; fb.onclick = () => goTo(slideOf('facts')); nx.parentNode.insertBefore(fb, nx.nextSibling); }
     requestAnimationFrame(drawResultChart);
   }
   function lineChart(c, series, n, opts) {

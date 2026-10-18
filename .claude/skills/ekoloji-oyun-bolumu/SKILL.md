@@ -17,6 +17,16 @@ Her yeni bölüm ve her elden geçirme **`AKIS.md`** (repo kökünde) şablonuna
 - **Harita ve büyük görünümler `SceneUtils.viewTop()` altından başlar** (yıl kutusu + altındaki hız ve görünüm düğmeleri dahil). Sabit `top = 150 * U` yazma; dar-uzun ekranda düğmeler haritanın üstüne biniyordu. Tam ekran görünümde HUD tamamen gizlenir (soluk hayalet bırakma).
 - **Telefonda yazı boyu:** konuşma balonu en az 15 px, etiket en az 12,5 px (`U` 0,62'ye inince 10 px'e düşüyordu, okunmuyordu).
 
+## Akıcılık ölçüleri (gerçek hızda ölçüldü, kullanıcı: "akıcılık ve atmosfere girmek zor")
+- `~/Documents/ekoloji-oyunu-test/flow.js <w> <h> <sn> [bölüm]` gerçek hızda oynayıp zaman çizelgesi çıkarır. **Tek bölüm tek başına** çalıştır (9 sayfa aynı anda birbirini yavaşlatır).
+- Hedef: Başla → ilk kaydırma **≤ 50 sn** (eskiden 100+ sn idi). Açılış sineması ~20 sn (alt yazı ≤ 70 harf), tarih filmi ~18 sn (en çok 3 haber, haberde ≤ 2,2 sn duraklama), sonra görev kartı.
+- **İlk iki hikâye kartı "Devam →" ile geçilir** (kullanıcı: görevi anlamak için iyiydi). Görev kartı kısa: Tarihte · Kontrolün · Hedefin; rol başlığın altında; "Dikkat" sonradan haber bandında.
+- Görev kartından sonra 10 sn sessiz (yalnız sahne), yazılar arası en az 13 sn. Sinema/görev kartının anlattığını tekrar eden kart koyma ("Senin işin" kartı yok).
+- Görev kartından sonra spot ışığı yok; yalnız kaydırıcı nabzı (coach).
+- Haber bandı hiçbir şeyin üstüne binmez: HUD'a değerse altına iner, kart / pencere / spot açıkken susar.
+- Sonuç ekranında **"📜 Gerçekte ne oldu?"** düğmesi olur (kullanıcı isteği). Rozet bildirimi sonuç ekranında açılmaz; rozet sonuç kartındaki rozet satırına eklenir.
+- Oyuncunun açtığı bir şeyi kapatabilmesi de gerekir (kullanıcı: "antibiyotiği açıyoruz, kapatabilelim de"): geri alınabilir kararlar tercih et.
+
 ## Proje
 - Kod: `~/Documents/ekoloji-oyunu` · Repo: `recepcanaltinbag/biz-ne-yaptik` · Yayın: https://recepcanaltinbag.github.io/biz-ne-yaptik/ (GitHub Pages, `main` / kök).
 - Push keychain'deki HTTPS kimliğiyle çalışır (`GIT_TERMINAL_PROMPT=0 git push`). `gh` oturumu yok.

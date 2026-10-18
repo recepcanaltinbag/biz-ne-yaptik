@@ -211,17 +211,32 @@ if (/[?&]e2e\b/.test(location.search)) {
   // haber bandı: durdurmayan haberler kart yerine yıl çubuğunun altında tek satır manşet olur
   let tickEl = null, tickT = 0, tickI = 0;
   // yıl çubuğu ve içindeki her şeyin (hız, harita düğmesi) birleşik kutusunun altı; telefonda bant bu genişliğe sığar
+  // haber bandı yıl kutusunun altında durur ve hiçbir şeyin üstüne binmez:
+  // HUD'a / düğmelere değerse onların altına iner, kart / pencere / spot ışığı açıkken susar (gizlenir)
+  const hitR = (a, b) => Math.min(a.right, b.right) - Math.max(a.left, b.left) > 2 && Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top) > 2;
+  const visR = q => [...document.querySelectorAll(q)].filter(el => { const cs = getComputedStyle(el); return cs.display !== 'none' && cs.visibility !== 'hidden' && +cs.opacity > 0.2 && !el.closest('[hidden]'); }).map(el => el.getBoundingClientRect()).filter(r => r.width > 2 && r.height > 2);
   function tickPos() {
     const yb = document.querySelector('.slide.active .yearbar'); if (!yb || !tickEl) return;
     let r = yb.getBoundingClientRect(), L = r.left, R = r.right, B = r.bottom;
-    yb.querySelectorAll('*').forEach(el => { const q = el.getBoundingClientRect(); if (q.width && q.height) { L = Math.min(L, q.left); R = Math.max(R, q.right); B = Math.max(B, q.bottom); } });
-    tickEl.style.top = (B + 4) + 'px'; tickEl.style.left = ((L + R) / 2) + 'px'; tickEl.style.maxWidth = innerWidth < 760 ? Math.max(140, R - L) + 'px' : '';
+    [...yb.querySelectorAll('*'), ...document.querySelectorAll('.slide.active .yb-view, .slide.active .yb-speed, .slide.active .yb-harvest')].forEach(el => { const q = el.getBoundingClientRect(); if (q.width && q.height) { L = Math.min(L, q.left); R = Math.max(R, q.right); B = Math.max(B, q.bottom); } });
+    const c = (L + R) / 2, hud = visR('.slide.active .gp-hud')[0];
+    let half = Math.min(c - 8, innerWidth - c - 8), top = B + 4;
+    if (hud && hud.bottom > top) half = Math.min(half, c - hud.right - 10);
+    let left = c, mw = 2 * half;
+    if (mw < 170) { top = Math.max(top, hud ? hud.bottom + 6 : top); left = innerWidth / 2; mw = innerWidth - 16; } // dar ekran: HUD'un altına
+    tickEl.style.top = top + 'px'; tickEl.style.left = left + 'px'; tickEl.style.maxWidth = Math.max(140, mw) + 'px';
+    const me = tickEl.getBoundingClientRect();
+    const solid = visR('.slide.active .adv:not([hidden]), .slide.active .coach-tip'), cover = visR('.slide.active #toasts .toast:not(.out), #modal:not([hidden]) .card, .spot, .cine, .milestone:not([hidden]), #harvest:not([hidden])');
+    const bump = solid.filter(q => hitR(me, q));
+    if (bump.length) { tickEl.style.top = (Math.max(...bump.map(q => q.bottom)) + 4) + 'px'; }
+    const me2 = tickEl.getBoundingClientRect();
+    tickEl.classList.toggle('mute', cover.some(q => hitR(me2, q)) || solid.some(q => hitR(me2, q)));
   }
   function ticker(ic, from, html, tone, ms) {
     const yb = document.querySelector('.slide.active .yearbar'); if (!yb) return false;
     if (!tickEl) { tickEl = document.createElement('div'); tickEl.className = 'ticker'; tickEl.setAttribute('aria-live', 'polite'); document.body.appendChild(tickEl); }
     // yıl çubuğunun hemen altında, ortasına hizalı
-    tickPos(); clearInterval(tickI); tickI = setInterval(() => { if (tickEl.classList.contains('on')) tickPos(); else clearInterval(tickI); }, 250);
+    tickPos(); clearInterval(tickI); tickI = setInterval(() => { if (tickEl.classList.contains('on')) tickPos(); else clearInterval(tickI); }, 150);
     let plain = String(html).replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
     const first = plain.match(/^.*?[.!?](\s|$)/); if (first && first[0].length > 24) plain = first[0].trim();
     if (plain.length > 96) plain = plain.slice(0, 93).replace(/\s+\S*$/, '') + '…';
@@ -252,7 +267,9 @@ if (/[?&]e2e\b/.test(location.search)) {
     const pnl = document.querySelector('.slide.active .gpanel'); if (pnl) b.style.bottom = (innerHeight - pnl.getBoundingClientRect().top + 10) + 'px';
     const FASTK = /[?&](hizli|e2e)\b/.test(location.search) ? 8 : 1;
     let i = 0, phase = 'play', hold = 0, endHold = 0, rw = 0, from = 0, last = performance.now(), done = false, lastY = o.yearAt(0) - 1;
-    const step = o.ms / o.n;
+    // film kısa kalsın (oyuncu ~15 sn içinde kontrolü alsın): en çok 11 sn akış + en çok 3 haber, haberde kısa duraklama
+    const step = Math.min(o.ms, 11000) / o.n;
+    if (o.news) { const ks = Object.keys(o.news).map(Number).sort((a, b) => a - b); if (ks.length > 3) { const keep = [ks[0], ks[Math.floor(ks.length / 2)], ks[ks.length - 1]]; o.news = Object.fromEntries(keep.map(k => [k, o.news[k]])); } }
     b.querySelector('button').onclick = () => { if (phase === 'play') { phase = 'rewind'; from = i; rw = 0; b.querySelector('span').innerHTML = '⏪ <b>Geri sarılıyor…</b>'; } };
     function tick(now) {
       if (done) return;
@@ -261,7 +278,7 @@ if (/[?&]e2e\b/.test(location.search)) {
         if (hold > 0) hold -= dt * FASTK;
         else {
           i = Math.max(0, Math.min(o.n - 1, i + dt / step)); const y = o.yearAt(Math.floor(i));
-          for (let yy = lastY + 1; yy <= y; yy++) if (o.news && o.news[yy]) { const [ic, tx] = o.news[yy], text = `${yy}: ${tx}`, ms = readMs(text, 3500); ticker(ic, 'Tarih', text, 'warn', ms / FASTK); hold = ms * 0.8; }
+          for (let yy = lastY + 1; yy <= y; yy++) if (o.news && o.news[yy]) { const [ic, tx] = o.news[yy], text = `${yy}: ${tx}`, ms = readMs(text, 3500); ticker(ic, 'Tarih', text, 'warn', ms / FASTK); hold = Math.min(2200, ms * 0.4); }
           lastY = y;
           if (i >= o.n - 1) { endHold += dt * FASTK; if (endHold > 1500) { phase = 'rewind'; from = i; rw = 0; b.querySelector('span').innerHTML = '⏪ <b>Geri sarılıyor…</b>'; } }
         }

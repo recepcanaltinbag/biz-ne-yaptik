@@ -189,12 +189,24 @@
   const inGame = () => !!document.querySelector('.slide.active[data-mode="game"]');
   function flush() {
     if (inGame()) { waitT = setTimeout(flush, 500); return; }
-    waitT = 0; const d = pending.shift(); if (!d) return; show(d);
+    waitT = 0; const d = pending.shift(); if (!d) return;
+    // sonuç ekranı kazanılan rozetleri zaten listeler: orada bildirim açılıp sonucu örtmesin
+    if (onResult()) { setTimeout(() => { show(d); if (pending.length) flush(); }, 900); return; }
+    show(d);
     if (pending.length) waitT = setTimeout(flush, 1200);
   }
   // oyundan hemen önce açılan rozet de oyun başlayınca sahneden çekilsin
   setInterval(() => { const b = document.getElementById('badge-toast-box'); if (b && b.children.length && inGame()) b.querySelectorAll('.badge-toast:not(.out)').forEach(t => { t.classList.add('out'); setTimeout(() => t.remove(), 500); }); }, 300);
+  const onResult = () => !!document.querySelector('.slide.active[data-mode="result"]');
+  const listed = d => { const rb = document.querySelector('.slide.active .run-badges'); return !!(rb && rb.textContent.includes(d.name)); };
   function show(def) {
+    // sonuç ekranında bildirim yok: rozet sonuç kartındaki rozet satırına eklenir (yoksa satır açılır)
+    if (onResult()) {
+      if (listed(def)) return;
+      const card = document.querySelector('.slide.active[data-mode="result"] .rchart'); if (!card) return;
+      let rb = document.querySelector('.slide.active .run-badges'); if (!rb) { rb = document.createElement('div'); rb.className = 'run-badges'; card.before(rb); }
+      const sp = document.createElement('span'); if (def.hidden) sp.className = 'secret'; sp.textContent = `${def.icon} ${def.name}`; rb.appendChild(sp); return;
+    }
     if (inGame()) { pending.push(def); if (!waitT) waitT = setTimeout(flush, 500); return; }
     const box = toastEl(); box.style.top = ''; box.style.bottom = '';
     const t = document.createElement('div');

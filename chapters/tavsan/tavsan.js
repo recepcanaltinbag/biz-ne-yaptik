@@ -340,7 +340,7 @@
     if (!window.Mission || !m || typeof MISSION === 'undefined') return showToast(ic, fr, tx, tone, o);
     const hist = String(tx).split(/<b>Hedefin/)[0].trim().replace(/^Tarihte /, '').replace(/^./, c => c.toLocaleUpperCase('tr'));
     game.reading = (game.reading || 0) + 1;
-    window.Mission.show(m, { ...MISSION, hist }, () => { game.reading = Math.max(0, game.reading - 1); if (o && o.then) o.then(); });
+    window.Mission.show(m, { ...MISSION, hist }, () => { game.reading = Math.max(0, game.reading - 1); window.__quietUntil = performance.now() + 10000 / (typeof FAST === 'number' ? FAST : 1); /* ilk 10 sn sahne konuşsun, yazı yok */ if (o && o.then) o.then(); if (MISSION.watch && window.SceneUtils && window.SceneUtils.ticker) setTimeout(() => window.SceneUtils.ticker('👀', 'Dikkat', MISSION.watch, '', 7000), 6000 / (typeof FAST === 'number' ? FAST : 1)); });
   }
   if (wasDone) maxSeen = slides.length - 1;
   const dotsEl = $('dots');
@@ -389,7 +389,7 @@
     if (!toastQueue.length) return;
     const box = $('toasts'), visible = box.querySelectorAll('.toast:not(.out)').length;
     const k = toastQueue.findIndex(a => (a[4] || {}).pause);
-    if (visible >= (mobile ? 1 : 2) || (k < 0 && performance.now() - lastToastAt < 9000 / FAST / Math.sqrt(game.speed || 1))) return;
+    if (visible >= (mobile ? 1 : 2) || (k < 0 && (performance.now() - lastToastAt < 13000 / FAST / Math.sqrt(game.speed || 1) || (window.__quietUntil && performance.now() < window.__quietUntil)))) return;
     const next = toastQueue.splice(k >= 0 ? k : 0, 1)[0];
     lastToastAt = performance.now();
     showToast(...next);
@@ -542,7 +542,7 @@
       if (mode !== 'game') return;
       if (i >= STORY.length) { game.story = false; return; }
       const [ic, from, text, tone, opt0] = STORY[i];
-      const opt = wasDone ? { ...opt0, pause: false, ms: 6000 } : opt0;
+      const opt = wasDone ? { ...opt0, pause: false, ms: 6000 } : i < 2 ? { ...opt0, pause: true } : opt0; // ilk iki kart 'Devam →' ile okunur (görevi anlamak için)
       toast(ic, from, text, tone, { ...opt, then: opt.pause ? () => show(i + 1) : undefined });
       if (!opt.pause) setTimeout(() => show(i + 1), 4500 / Math.max(1, FAST / 2));
     };
@@ -556,7 +556,8 @@
     Object.values(SL).forEach(el => el.closest('.sl').classList.add('replaying'));
     const b = document.createElement('div'); b.className = 'rbanner'; b.innerHTML = '<span>📼 <b>Önce tarih:</b> gerçekte ne oldu? (hızlı)</span><button type="button">Geç ⏭</button>';
     document.body.appendChild(b); game.replay.el = b;
-    const pnl = document.querySelector('.slide.active .gpanel'); if (pnl) b.style.bottom = (innerHeight - pnl.getBoundingClientRect().top + 10) + 'px'; // panelin hemen üstünde b.querySelector('button').onclick = () => endReplay(true);
+    const pnl = document.querySelector('.slide.active .gpanel'); if (pnl) b.style.bottom = (innerHeight - pnl.getBoundingClientRect().top + 10) + 'px'; // panelin hemen üstünde
+    b.querySelector('button').onclick = () => endReplay(true);
     setView('scene');
   }
   function endReplay(skip) {
@@ -566,7 +567,7 @@
   function replayTick(dt) {
     const r = game.replay, N = HISTORY.hist.length;
     if (r.phase === 'play') {
-      const prev = Math.floor(r.i); r.i = Math.min(N - 1, r.i + dt / 125);
+      const prev = Math.floor(r.i); r.i = Math.min(N - 1, r.i + dt / 80); // ~11 sn
       const y = HISTORY.hist[Math.floor(r.i)].y; for (let yy = HISTORY.hist[prev].y + 1; yy <= y; yy++) if (REPLAY_NEWS[yy] && window.SceneUtils && window.SceneUtils.ticker) window.SceneUtils.ticker(REPLAY_NEWS[yy][0], 'Tarih', `${yy}: ${REPLAY_NEWS[yy][1]}`, 'warn', 2600);
       if (r.i >= N - 1) { r.hold = (r.hold || 0) + dt; if (r.hold > 1400) endReplay(); }
     } else if (r.phase === 'rewind') {
@@ -720,6 +721,7 @@
       <div class="rbtns"><button class="hbtn" id="r-again">↺ Tekrar oyna</button><button class="hbtn" id="r-next">Kendin dene →</button><a class="hbtn" href="../../#bolumler">☰ Tüm bölümler</a></div>`;
     $('r-again').onclick = () => { resetGame(); goTo(slideOf('game')); };
     $('r-next').onclick = () => goTo(slideOf('sandbox')); $('r-next').textContent = '🧪 Zehirsiz başarabilir misin? →';
+    { const nx = $('r-next'), fb = document.createElement('button'); fb.className = 'hbtn'; fb.id = 'r-facts'; fb.textContent = '📜 Gerçekte ne oldu?'; fb.onclick = () => goTo(slideOf('facts')); nx.parentNode.insertBefore(fb, nx.nextSibling); }
     requestAnimationFrame(drawResultChart);
   }
   const rBar = R => clamp(Math.log10(1 + R * 1e6) / 9.5);

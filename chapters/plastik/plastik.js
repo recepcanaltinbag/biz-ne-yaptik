@@ -374,7 +374,7 @@
     if (!window.Mission || !m || typeof MISSION === 'undefined') return showToast(ic, fr, tx, tone, o);
     const hist = String(tx).split(/<b>Hedefin/)[0].trim().replace(/^Tarihte /, '').replace(/^./, c => c.toLocaleUpperCase('tr'));
     game.reading = (game.reading || 0) + 1;
-    window.Mission.show(m, { ...MISSION, hist }, () => { game.reading = Math.max(0, game.reading - 1); if (o && o.then) o.then(); });
+    window.Mission.show(m, { ...MISSION, hist }, () => { game.reading = Math.max(0, game.reading - 1); window.__quietUntil = performance.now() + 10000 / (typeof FAST === 'number' ? FAST : 1); /* ilk 10 sn sahne konuşsun, yazı yok */ if (o && o.then) o.then(); if (MISSION.watch && window.SceneUtils && window.SceneUtils.ticker) setTimeout(() => window.SceneUtils.ticker('👀', 'Dikkat', MISSION.watch, '', 7000), 6000 / (typeof FAST === 'number' ? FAST : 1)); });
   }
   if (wasDone) maxSeen = slides.length - 1;
   const dotsEl = $('dots');
@@ -423,7 +423,7 @@
     if (!toastQueue.length) return;
     const box = $('toasts'), visible = box.querySelectorAll('.toast:not(.out)').length;
     const k = toastQueue.findIndex(a => (a[4] || {}).pause);
-    if (visible >= (mobile ? 1 : 2) || (k < 0 && performance.now() - lastToastAt < 9000 / FAST / Math.sqrt(game.speed || 1))) return;
+    if (visible >= (mobile ? 1 : 2) || (k < 0 && (performance.now() - lastToastAt < 13000 / FAST / Math.sqrt(game.speed || 1) || (window.__quietUntil && performance.now() < window.__quietUntil)))) return;
     const next = toastQueue.splice(k >= 0 ? k : 0, 1)[0];
     lastToastAt = performance.now();
     showToast(...next);
@@ -558,15 +558,15 @@
   const CINE = {
     // açılış: mucize malzeme (kodla çizilir: fabrika, sayaç, kumsal)
     intro: { id: 'pla-1950', year: '1950', title: 'Mucize malzeme', shots: [
-      { bg: '#e8e0cc', text: 'Hafif, ucuz, kırılmaz. Fabrikalar yeni bir mucize malzeme üretiyor: plastik.', draw: (g, t, W, H, k) => {
+      { bg: '#e8e0cc', text: 'Hafif, ucuz, kırılmaz: mucize malzeme plastik.', draw: (g, t, W, H, k) => {
         const s = Math.min(W, H) / 600; g.fillStyle = '#8a7a6a'; g.fillRect(W * 0.08, H * 0.35, W * 0.22, H * 0.45); g.fillRect(W * 0.12, H * 0.15, W * 0.04, H * 0.2);
         for (let i = 0; i < 4; i++) { const ph = (t * 0.0006 + i * 0.25) % 1; g.fillStyle = `rgba(200,200,200,${0.6 * (1 - ph)})`; g.beginPath(); g.arc(W * 0.14, H * 0.15 - ph * H * 0.12, (10 + ph * 20) * s, 0, 6.28); g.fill(); }
         g.fillStyle = '#5a5048'; g.fillRect(W * 0.3, H * 0.74, W * 0.66, 10 * s); const cols = ['#e05a4a', '#4a9ad8', '#f0c040', '#5ab06a', '#c070c0'];
         for (let i = 0; i < 12; i++) { const x = W * 0.3 + ((t * 0.08 * s + i * 60 * s) % (W * 0.66)), c = cols[i % 5]; g.fillStyle = c; if (i % 3 === 0) { g.fillRect(x, H * 0.74 - 34 * s, 16 * s, 34 * s); g.fillRect(x + 4 * s, H * 0.74 - 42 * s, 8 * s, 8 * s); } else if (i % 3 === 1) { g.beginPath(); g.arc(x + 12 * s, H * 0.74 - 12 * s, 12 * s, 0, 6.28); g.fill(); } else { g.fillRect(x, H * 0.74 - 20 * s, 26 * s, 20 * s); } } } },
-      { bg: '#2a2620', text: 'Yılda 2 milyon ton ile başladı. 2015\'te 400 milyon tona yaklaştı; çoğu tek kullanımlık.', draw: (g, t, W, H, k) => {
+      { bg: '#2a2620', text: 'Yılda 2 milyon tonla başladı, 2015\'te 400 milyon tona yaklaştı.', draw: (g, t, W, H, k) => {
         window.Cinema.fx.counter(g, W, H, 2, 400, Math.min(1, k * 1.4), { y: H * 0.45, suffix: ' milyon ton' });
         g.font = `${Math.min(W, H) * 0.045}px "Patrick Hand", sans-serif`; g.textAlign = 'center'; g.fillStyle = 'rgba(244,236,216,.75)'; g.fillText(Math.round(1950 + 65 * Math.min(1, k * 1.4)) + ' · yıllık üretim', W / 2, H * 0.62); } },
-      { bg: '#bcd8e4', text: 'Bugüne kadarki plastik atığın yalnız %9\'u geri dönüştü. Gerisi nereye gitti?', draw: (g, t, W, H, k) => {
+      { bg: '#bcd8e4', text: 'Plastik atığın yalnız %9\'u geri dönüştü. Gerisi nereye gitti?', draw: (g, t, W, H, k) => {
         const s = Math.min(W, H) / 600, sea = H * 0.5; g.fillStyle = '#4a8ab0'; g.fillRect(0, sea, W, H * 0.22); g.fillStyle = '#e4d4a8'; g.fillRect(0, sea + H * 0.22, W, H);
         g.fillStyle = 'rgba(255,255,255,.5)'; for (let i = 0; i < 10; i++) g.fillRect(((i * 131 + t * 0.03) % (W + 40)) - 20, sea + H * 0.03 + (i % 4) * H * 0.045, 26 * s, 2);
         const cols = ['#e05a4a', '#4a9ad8', '#f0c040', '#5ab06a', '#c070c0', '#f4f4f4'];
@@ -592,7 +592,6 @@
   }
 
   const STORY = [
-    ['🧪', '1950', 'Plastik bir mucize: hafif, ucuz, kırılmaz. Dünya yılda <b>2 milyon ton</b> üretiyor.', '', { pause: false }],
     ['🏞️', 'Senin ülken', 'Toplanmayan çöp dereyle denize iner. Sahnede dereye bak.', '', { pause: false }],
   ];
   function enterGame() {
@@ -603,7 +602,7 @@
       if (mode !== 'game') return;
       if (i >= STORY.length) { game.story = false; return; }
       const [ic, from, text, tone, opt0] = STORY[i];
-      const opt = wasDone ? { ...opt0, pause: false, ms: 6000 } : opt0;
+      const opt = wasDone ? { ...opt0, pause: false, ms: 6000 } : i < 2 ? { ...opt0, pause: true } : opt0; // ilk iki kart 'Devam →' ile okunur (görevi anlamak için)
       toast(ic, from, text, tone, { ...opt, then: opt.pause ? () => show(i + 1) : undefined });
       if (!opt.pause) setTimeout(() => show(i + 1), 4500 / Math.max(1, FAST / 2));
     };
@@ -619,7 +618,7 @@
       // kontroller: ilk kaydırıcı spot ışığıyla tanıtılır (görev kartının yerine)
       const sl = document.querySelector('.slide.active .gpanel .sl:not(.locked)');
       const go = () => { game.story = false; th(); };
-      if (sl && window.SceneUtils.tour && MISSION && MISSION.control) window.SceneUtils.tour([{ el: sl, text: MISSION.control + '<br><small style="display:inline;text-align:left">Oynatınca ne olacağını hemen görürsün.</small>' }], go); else go();
+      go(); { const inp = sl && sl.querySelector('input'); if (inp) coach(inp, '👉 Dene: kaydır, sonucu hemen gör', 9000); } // görev kartı kontrolü zaten anlattı: spot ışığıyla durdurma yok, yalnız nabız
     } }), then });
   }
   function updateGame(dt) {
@@ -769,6 +768,7 @@
       <div class="rbtns"><button class="hbtn" id="r-again">↺ Tekrar oyna</button><button class="hbtn" id="r-next">Kendin dene →</button><a class="hbtn" href="../../#bolumler">☰ Tüm bölümler</a></div>`;
     $('r-again').onclick = () => { resetGame(); goTo(slideOf('game')); };
     $('r-next').onclick = () => goTo(slideOf('sandbox'));
+    { const nx = $('r-next'), fb = document.createElement('button'); fb.className = 'hbtn'; fb.id = 'r-facts'; fb.textContent = '📜 Gerçekte ne oldu?'; fb.onclick = () => goTo(slideOf('facts')); nx.parentNode.insertBefore(fb, nx.nextSibling); }
     requestAnimationFrame(drawResultChart);
   }
   const series = hist => [

@@ -226,7 +226,7 @@
   function drawShelf(G) {
     // ilaç dolabı: her şişede kırmızı = direnç; kilit = yedekte
     const avail = curState().avail || [];
-    const bw = (mobile ? 18 : 24) * U, gap = 7 * U, x0 = G.x1 * 0.03, y0 = G.gb - 34 * U;
+    const bw = (mobile ? 28 : 24) * U, gap = 7 * U, room0 = 2 * (bw + gap) - 4, x0 = Math.max(G.x1 * 0.03, room0 / 2 - bw / 2 + 6), y0 = G.gb - 46 * U;
     const w = Math.max(avail.length, 1) * (bw + gap) + gap;
     ctx.fillStyle = '#c9b48a'; ctx.fillRect(x0 - gap, y0 + 4 * U, w, 6 * U);
     ctx.fillStyle = '#8a7350'; ctx.fillRect(x0 - gap, y0 + 10 * U, 4 * U, 30 * U); ctx.fillRect(x0 - gap + w - 4 * U, y0 + 10 * U, 4 * U, 30 * U);
@@ -240,9 +240,13 @@
       ctx.fillStyle = rgb(PAL.res, 0.85); ctx.fillRect(x + 2, y + 2 + (bw * 1.5 - 4) * (1 - r), bw - 4, (bw * 1.5 - 4) * r);
       ctx.fillStyle = '#5a6470'; ctx.fillRect(x + bw * 0.25, y - 5 * U, bw * 0.5, 5 * U);
       if (curReserve()[id]) { ctx.font = `${12 * U}px sans-serif`; ctx.fillText('🔒', x + bw * 0.15, y + bw * 0.9); }
-      ctx.fillStyle = rgb(PAL.ink); ctx.font = `${(mobile ? 8 : 10) * U}px "Patrick Hand"`; ctx.textAlign = 'center'; ctx.fillText(nameOf(id).slice(0, mobile ? 5 : 9), x + bw / 2, y0 + 22 * U); ctx.textAlign = 'left';
+      // adlar iki sıra (tek/çift) ve iki şişe aralığına sığacak boyda: hiçbiri komşusunun üstüne binmez
+      const room = 2 * (bw + gap) - 4; let fs = Math.max(10, (mobile ? 9 : 11) * U), nm = nameOf(id);
+      ctx.font = `${fs}px "Patrick Hand"`; while (ctx.measureText(nm).width > room && fs > 9) { fs -= 0.5; ctx.font = `${fs}px "Patrick Hand"`; }
+      while (ctx.measureText(nm + '.').width > room && nm.length > 4) nm = nm.slice(0, -1); if (nm !== nameOf(id)) nm += '.';
+      ctx.fillStyle = rgb(PAL.ink); ctx.textAlign = 'center'; ctx.fillText(nm, x + bw / 2, y0 + (i % 2 ? 34 : 21) * U); ctx.textAlign = 'left';
     });
-    if (avail.length) tag(x0 + w / 2 - gap, y0 - bw * 1.5 - 8 * U, Object.keys(curReserve()).length ? '🧴 İlaç dolabı · kırmızı = direnç · 🔒 dokun: aç' : '🧴 İlaç dolabı · kırmızı = direnç', { fs: mobile ? 10 : 12 });
+    if (avail.length) tag(x0 + w / 2 - gap, y0 - bw * 1.5 - 8 * U, mode === 'game' ? '🧴 İlaç dolabı · kırmızı = direnç · şişeye dokun: rafa kaldır / aç' : '🧴 İlaç dolabı · kırmızı = direnç', { fs: mobile ? 10 : 12 });
   }
 
   function render(t, dt) {
@@ -267,7 +271,7 @@
     // doktor kapıda
     doctor.x = G.door + 18 * U; doctor.y = G.road + 4 * U; doctor.sx = doctor.x; doctor.sy = doctor.y - 46 * U;
     person(doctor.x, doctor.y, U * (mobile ? 0.85 : 1), { dir: -1, coat: true, hair: '#5a4030' });
-    drawShelf(G);
+    if (mode === "game" || mode === "title") drawShelf(G);
     drawPatients(G, t, dt);
     // tavuk (arka bahçede)
     chicken.ph += dt * 0.01; chicken.x = x1 * 0.26 + Math.sin(chicken.ph * 0.05) * 20 * U; chicken.y = G.road + 30 * U;
@@ -346,7 +350,13 @@
     add(chicken.sx, chicken.sy, 'chicken', () => { cluck(); award('bak-tavuk'); });
     add(bread.x, bread.y - 6 * U, 'bread', () => award('bak-kuf'));
     // kilitli şişeye dokunmak yedeği açar
-    for (const sh of shelf) if (mode === 'game' && game.reserve[sh.id] && Math.abs(x - sh.x) < 16 * U && y > sh.y - 10 * U && y < sh.y + 50 * U) { delete game.reserve[sh.id]; sayAt({ x: sh.x, y: sh.y }, nameOf(sh.id) + ' artık\nherkese veriliyor.'); blip(); return true; }
+    // şişeye dokun: herkese açık ilacı rafa kaldır (yalnız ağır hastalara) ya da raftakini herkese aç
+    for (const sh of shelf) if (mode === 'game' && RPI === null && Math.abs(x - sh.x) < 18 * U && y > sh.y - 10 * U && y < sh.y + 60 * U) {
+      if (game.reserve[sh.id]) { delete game.reserve[sh.id]; sayAt({ x: sh.x, y: sh.y }, nameOf(sh.id) + ' artık\nherkese veriliyor.'); }
+      else if (gs.avail.filter(id => !game.reserve[id]).length <= 1) sayAt({ x: sh.x, y: sh.y }, 'En az bir ilaç\nherkese açık kalmalı.');
+      else { game.reserve[sh.id] = 1; sayAt({ x: sh.x, y: sh.y }, nameOf(sh.id) + ' rafa kalktı:\nyalnız ağır hastaya. Direnci dinlenir.'); once('shelf-off', () => toast('🔒', 'İlaç dolabı', 'Kullanılmayan ilaçta dirençli bakteri yavaş yavaş azalır. Ama rafta duran ilaç sıradan hastaya gitmez.', '')); }
+      blip(); return true;
+    }
     shelf.forEach(s => add(s.x, s.y, 'shelf'));
     if (official && official.x) add(official.x, official.y, 'official');
     if (!c.length) return false;
@@ -416,7 +426,7 @@
     if (!window.Mission || !m || typeof MISSION === 'undefined') return showToast(ic, fr, tx, tone, o);
     const hist = String(tx).split(/<b>Hedefin/)[0].trim().replace(/^Tarihte /, '').replace(/^./, c => c.toLocaleUpperCase('tr'));
     game.reading = (game.reading || 0) + 1;
-    window.Mission.show(m, { ...MISSION, hist }, () => { game.reading = Math.max(0, game.reading - 1); if (o && o.then) o.then(); });
+    window.Mission.show(m, { ...MISSION, hist }, () => { game.reading = Math.max(0, game.reading - 1); window.__quietUntil = performance.now() + 10000 / (typeof FAST === 'number' ? FAST : 1); /* ilk 10 sn sahne konuşsun, yazı yok */ if (o && o.then) o.then(); if (MISSION.watch && window.SceneUtils && window.SceneUtils.ticker) setTimeout(() => window.SceneUtils.ticker('👀', 'Dikkat', MISSION.watch, '', 7000), 6000 / (typeof FAST === 'number' ? FAST : 1)); });
   }
   if (wasDone) maxSeen = slides.length - 1;
   const dotsEl = $('dots');
@@ -466,7 +476,7 @@
     if (!toastQueue.length) return;
     const box = $('toasts'), visible = box.querySelectorAll('.toast:not(.out)').length;
     const k = toastQueue.findIndex(a => (a[4] || {}).pause);
-    if (visible >= (mobile ? 1 : 2) || (k < 0 && performance.now() - lastToastAt < 9000 / FAST / Math.sqrt(game.speed || 1))) return;
+    if (visible >= (mobile ? 1 : 2) || (k < 0 && (performance.now() - lastToastAt < 13000 / FAST / Math.sqrt(game.speed || 1) || (window.__quietUntil && performance.now() < window.__quietUntil)))) return;
     const next = toastQueue.splice(k >= 0 ? k : 0, 1)[0];
     lastToastAt = performance.now();
     showToast(...next);
@@ -550,9 +560,7 @@
   const comeOfficial = (who, say) => { official = { t0: performance.now(), leave: 0, who, say }; };
 
   const STORY = [
-    ['🧪', 'Londra · 1945', 'Penisilin savaşta mucize oldu. Şimdi her eve giriyor. Bulan <b>Alexander Fleming</b> Nobel ödülünü alırken bir uyarı yaptı.', '', { pause: false }],
-    ['🔬', 'Fleming\'in uyarısı', '"İlacı az ya da gereksiz kullanırsanız, ölmeyen mikroplar dirençli olur ve çoğalır." Sağdaki mikroskopta bunu izleyeceksin: <b>yeşiller ilaca duyarlı, kırmızılar dirençli</b>.', '', { pause: false }],
-    ['💊', 'Senin işin', 'Kaydırıcı doktorların ne kadar kolay reçete yazacağını belirler. Az olursa gerçek hastalar ilaçsız kalır, çok olursa nezleye de ilaç gider.', '', { ms: 9000 }],
+    ['🔬', 'Mikroskop', 'Sağdaki mikroskopta <b>yeşiller ilaca duyarlı, kırmızılar dirençli</b>. Kırmızı çoğalırsa ilaç işe yaramaz olur.', '', { pause: false }],
     ['🚪', 'Kapıda kuyruk', 'Gelenler: 🤒 bakteri enfeksiyonu (ilaç işe yarar) ve 🤧 nezle (virüs, ilaç yaramaz). İkisi de ilaç istiyor.', '', { ms: 9000 }],
   ];
   function enterGame() {
@@ -563,7 +571,7 @@
       if (mode !== 'game') return;
       if (i >= STORY.length) { game.story = false; return; }
       const [ic, from, text, tone, opt0] = STORY[i];
-      const opt = wasDone ? { ...opt0, pause: false, ms: 6000 } : opt0; // tekrar oynayışta hikâye durdurmaz
+      const opt = wasDone ? { ...opt0, pause: false, ms: 6000 } : i < 2 ? { ...opt0, pause: true } : opt0; // ilk iki kart 'Devam →' ile okunur (görevi anlamak için) // tekrar oynayışta hikâye durdurmaz
       toast(ic, from, text, tone, { ...opt, then: opt.pause ? () => show(i + 1) : undefined });
       if (!opt.pause) setTimeout(() => show(i + 1), 4500 / Math.max(1, FAST / 2));
     };
@@ -588,10 +596,10 @@
   }
   const CINE = {
     intro: { id: 'bak-1928', year: '1928–1945', title: 'Mucize ilaç', credit: 'Imperial War Museum, kamu malı', shots: [
-      { bg: '#2a2e34', text: '1928: Alexander Fleming tatilden dönüyor. Bir kaba küf girmiş; küfün çevresinde bakteri yok.', draw: (g, t, W, H, k) => {
+      { bg: '#2a2e34', text: '1928: Fleming\'in kabına küf girmiş. Küfün çevresinde bakteri yok.', draw: (g, t, W, H, k) => {
         const [mx, my, s] = petri(g, W, H, t, Math.min(W, H) * 0.22 * Math.min(1, k * 1.4), false); g.fillStyle = '#7a9a6a'; g.beginPath(); g.arc(mx, my, 26 * s, 0, 6.28); g.fill(); g.fillStyle = '#9aba8a'; g.beginPath(); g.arc(mx - 6 * s, my - 6 * s, 12 * s, 0, 6.28); g.fill(); } },
-      { img: PENI_IMG, kb: [0.5, 0.4, 1.05, 0.5, 0.5, 1.2], text: 'Savaş yıllarında penisilin fabrikada üretiliyor. Ölümcül yaralar ve enfeksiyonlar artık iyileşiyor.' },
-      { bg: '#2a2e34', text: '1945: Fleming uyarıyor: ilacı az ve gelişigüzel kullanırsan, en dayanıklı bakteriler hayatta kalır.', draw: (g, t, W, H, k) => {
+      { img: PENI_IMG, kb: [0.5, 0.4, 1.05, 0.5, 0.5, 1.2], text: 'Savaşta penisilin fabrikada üretiliyor. Ölümcül yaralar iyileşiyor.' },
+      { bg: '#2a2e34', text: 'Fleming uyarıyor: ilacı yanlış kullanırsan dayanıklı bakteri kalır.', draw: (g, t, W, H, k) => {
         const [mx, my, s] = petri(g, W, H, t, Math.min(W, H) * 0.5 * Math.min(1, k * 2), true); g.fillStyle = '#7a9a6a'; g.beginPath(); g.arc(mx, my, 26 * s, 0, 6.28); g.fill(); } },
     ] },
   };
@@ -602,7 +610,7 @@
       // kontroller: ilk kaydırıcı spot ışığıyla tanıtılır (görev kartının yerine)
       const sl = document.querySelector('.slide.active .gpanel .sl:not(.locked)');
       const go = () => { game.story = false; th(); };
-      if (sl && window.SceneUtils.tour && MISSION && MISSION.control) window.SceneUtils.tour([{ el: sl, text: MISSION.control + '<br><small style="display:inline;text-align:left">Oynatınca ne olacağını hemen görürsün.</small>' }], go); else go();
+      go(); { const inp = sl && sl.querySelector('input'); if (inp) coach(inp, '👉 Dene: kaydır, sonucu hemen gör', 9000); } // görev kartı kontrolü zaten anlattı: spot ışığıyla durdurma yok, yalnız nabız
     } }), then });
   }
   function updateGame(dt) {
@@ -749,6 +757,7 @@
       <div class="rbtns"><button class="hbtn" id="r-again">↺ Tekrar oyna</button><button class="hbtn" id="r-next">Kendin dene →</button><a class="hbtn" href="../../#bolumler">☰ Tüm bölümler</a></div>`;
     $('r-again').onclick = () => { resetGame(); goTo(slideOf('game')); };
     $('r-next').onclick = () => goTo(slideOf('sandbox'));
+    { const nx = $('r-next'), fb = document.createElement('button'); fb.className = 'hbtn'; fb.id = 'r-facts'; fb.textContent = '📜 Gerçekte ne oldu?'; fb.onclick = () => goTo(slideOf('facts')); nx.parentNode.insertBefore(fb, nx.nextSibling); }
     requestAnimationFrame(drawResultChart);
   }
   function lineChart(c, series, n, opts) {
@@ -864,7 +873,7 @@
     return { html: `▶ <span class="k">5 yıl sonra</span> 💊 tedavi ${arrowTxt(A.succ, B.succ, v => '%' + Math.round(v * 100), true)} · 🦠 direnç ${arrowTxt(Math.max(...[].concat(A.r)), Math.max(...[].concat(B.r)), v => '%' + Math.round(v * 100), false)}` }; });
   resetGame();
   if (wasDone) { paintDots(); replayNav(); }
-  if (/[?&]debug\b/.test(location.search)) window.__dbg = { game, sb, vis, bugs, patients, lensBox, bread, chicken, M, get gs() { return gs; }, get mode() { return mode; }, go: m => { maxSeen = slides.length; goTo(slideOf(m)); } };
+  if (/[?&]debug\b/.test(location.search)) window.__dbg = { game, sb, shelf, talkAt, vis, bugs, patients, lensBox, bread, chicken, M, get gs() { return gs; }, get mode() { return mode; }, go: m => { maxSeen = slides.length; goTo(slideOf(m)); } };
   window.addEventListener('resize', resize);
   resize();
   goTo(0);
