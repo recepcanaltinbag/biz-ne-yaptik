@@ -5,7 +5,7 @@
     title: 'Dünyanın Anlaştığı Gün · 1974',
     role: 'BM çevre programında baş müzakerecisin. Masada yedi taraf var.',
     control: 'Her yıl <b class="inl">100 puanlık bütçe</b>: 🔬 bilim, 🤝 diplomasi, 1990\'dan sonra 💰 ozon fonu. Konferanslarda anlaşmanın ne kadar sıkı olacağına sen karar verirsin.',
-    goal: 'Ozon deliği <b>2060\'a kadar</b> kapanacak yola girsin.',
+    goal: 'Ozon deliği <b>2060\'a kadar</b> kapanma yoluna girsin.',
     watch: 'CFC havada onlarca yıl kalır: bugün kesilen gaz, deliği ancak yıllar sonra kapatır.',
   };
   const M = window.OzonModel;
@@ -22,6 +22,7 @@
   const HISTORY = M.run(TOTAL, M.histP);
   const HREC = M.recoveryYear(HISTORY, M.histP(M.Y1));
   const COST = { sci: 1, dip: 1, fund: 1 };
+  const bname = (i, y) => BLOCS[i].id === 'ssc' && (y || (gs ? gs.y : 0)) > 1991 ? 'Rusya' : BLOCS[i].name;
   const yk = y => window.SceneUtils ? window.SceneUtils.yilEk(y, 'de') : y + "'de";
   const recText = r => r === null ? 'delik hiç açılmadı' : r >= 9999 ? 'kapanmıyor' : r > 2150 ? '2150 sonrası' : String(r);
   const eraName = y => y < 1985 ? 'Bir uyarı' : y < 1987 ? 'Delik bulundu' : y < 1992 ? 'Masada' : y < 2009 ? 'Söz tutulacak mı?' : 'Uzun bekleyiş';
@@ -201,18 +202,18 @@
       seats[i].sx = x; seats[i].sy = y - 50 * U;
       person(x, y, U * (mobile ? 0.8 : 1), { shirt: b.col, mood: p, arms: !signedY && p < 0.3 ? 'cross' : null, skin: i === 4 || i === 5 ? '#d8a878' : '#e9c49d' });
       // ikna çubuğu ve imza
-      const bw = 26 * U, by = y - 66 * U;
-      ctx.fillStyle = 'rgba(255,255,255,.85)'; ctx.fillRect(x - bw / 2, by, bw, 5 * U); ctx.fillStyle = p >= 0.45 ? '#4f9a7a' : p >= 0.3 ? '#e0b04a' : '#c0503a'; ctx.fillRect(x - bw / 2, by, bw * clamp(p), 5 * U);
-      ctx.fillStyle = '#c0302a'; ctx.fillRect(x - bw / 2 + bw * 0.45 - 1, by - 2 * U, 2, 9 * U);
+      const bw = (mobile ? 32 : 26) * U, bh = (mobile ? 8 : 5) * U, by = y - 66 * U;
+      ctx.fillStyle = 'rgba(255,255,255,.85)'; ctx.fillRect(x - bw / 2, by, bw, bh); ctx.fillStyle = p >= 0.45 ? '#4f9a7a' : p >= 0.3 ? '#e0b04a' : '#c0503a'; ctx.fillRect(x - bw / 2, by, bw * clamp(p), bh);
+      ctx.fillStyle = '#c0302a'; ctx.fillRect(x - bw / 2 + bw * 0.45 - 1, by - 2 * U, 2.5, bh + 4 * U);
       if (signedY) { ctx.font = `${14 * U}px sans-serif`; ctx.textAlign = 'center'; ctx.fillText('✍️', x + 14 * U, y - 20 * U); ctx.textAlign = 'left'; }
     });
     ctx.fillStyle = rgb(PAL.table); ctx.beginPath(); ctx.roundRect ? ctx.roundRect(tx0 - 10 * U, ty - 6 * U, tx1 - tx0 + 20 * U, 16 * U, 6 * U) : ctx.rect(tx0 - 10 * U, ty - 6 * U, tx1 - tx0 + 20 * U, 16 * U); ctx.fill();
     ctx.fillStyle = '#7a5a3a'; ctx.fillRect(tx0, ty + 10 * U, 6 * U, 24 * U); ctx.fillRect(tx1 - 6 * U, ty + 10 * U, 6 * U, 24 * U);
-    BLOCS.forEach((b, i) => { const x = lerp(tx0, tx1, (i + 0.5) / n); ctx.fillStyle = '#fff'; ctx.fillRect(x - 14 * U, ty - 4 * U, 28 * U, 10 * U); ctx.fillStyle = rgb(PAL.ink); ctx.font = `${8 * U}px "Patrick Hand"`; ctx.textAlign = 'center'; ctx.fillText(b.name.split(' ')[0], x, ty + 4 * U); ctx.textAlign = 'left'; ctx.fillStyle = '#fff'; ctx.fillRect(x - 6 * U, ty - 12 * U, 12 * U, 8 * U); });
+    BLOCS.forEach((b, i) => { const x = lerp(tx0, tx1, (i + 0.5) / n); ctx.fillStyle = '#fff'; ctx.fillRect(x - 14 * U, ty - 4 * U, 28 * U, 10 * U); ctx.fillStyle = rgb(PAL.ink); ctx.font = `${8 * U}px "Patrick Hand"`; ctx.textAlign = 'center'; ctx.fillText(bname(i).split(' ')[0], x, ty + 4 * U); ctx.textAlign = 'left'; ctx.fillStyle = '#fff'; ctx.fillRect(x - 6 * U, ty - 12 * U, 12 * U, 8 * U); });
     G.table = { tx0, tx1, ty };
   }
   function drawBeach(G, t) {
-    const uvBad = smooth(1.2, 3, vis.uv);
+    const uvBad = smooth(1.15, 2.2, vis.uv);
     bathers.forEach((b, i) => {
       const x = G.x1 * b.f, y = G.gt + G.gh * (0.55 + (i % 2) * 0.2); b.sx = x; b.sy = y - 44 * U;
       person(x, y, U * (mobile ? 0.75 : 0.9), { shirt: ['#e0b04a', '#7aa7d6', '#c0503a', '#8ac08a'][i], skin: mixC([233, 196, 157], [226, 120, 100], uvBad).reduce((s, v, k) => s + (k ? ',' : 'rgb(') + v, '') + ')', hat: uvBad > 0.3 ? '#e8dcc0' : null, glasses: uvBad > 0.5 });
@@ -239,7 +240,7 @@
     if (mode !== 'game' && mode !== 'sandbox') return;
     const h = curHist(); if (!h) return;
     const fs = mobile ? 11 : 13;
-    if (G.band) tag(G.band.hx, G.band.y - G.band.th - 4 * U, h.hole > 0.5 ? `🛡️ Ozon tabakası · Antarktika'da delik: ${f1(h.hole)} milyon km²` : '🛡️ Ozon tabakası: UV ışınlarını süzer', { fs, color: h.hole > 15 ? '#7a3a9a' : undefined });
+    if (G.band) tag(G.band.hx, G.band.y + G.band.th + 22 * U, h.hole > 0.5 ? `🛡️ Ozon tabakası · Antarktika'da delik: ${f1(h.hole)} milyon km²` : '🛡️ Ozon tabakası: UV ışınlarını süzer', { fs, color: h.hole > 15 ? '#7a3a9a' : undefined });
     if (G.table && mode === 'game') tag((G.table.tx0 + G.table.tx1) / 2, G.table.ty + 44 * U, `✍️ İmzalayan: ${h.signed}/7 · kırmızı çizgi: imza eşiği`, { fs: fs - 1 });
   }
   // kutup görünümü: Antarktika yukarıdan; delik her baharda açılır
@@ -247,7 +248,7 @@
   function setView(v, ms) { view.want = v; view.user = !ms; view.until = ms ? performance.now() + ms : 0; const b = $('g-view'); if (b) b.textContent = v === 'pole' ? '🤝 Masa' : '🌍 Kutup'; }
   const peng = { sx: undefined };
   function drawPole(G, t, dt, alpha) {
-    const top = 150 * U, H2 = Math.max(80, G.gb - top), cx = G.x1 / 2, cy = top + H2 * 0.48, R0 = Math.min(G.x1 * 0.42, H2 * 0.46);
+    const top = 180 * U, H2 = Math.max(80, G.gb - top), cx = G.x1 / 2, cy = top + H2 * 0.48, R0 = Math.min(G.x1 * 0.42, H2 * 0.46);
     ctx.save(); ctx.globalAlpha = alpha;
     ctx.fillStyle = '#d6e2ec'; ctx.fillRect(0, 0, G.x1, H);
     ctx.fillStyle = '#3a6aa0'; ctx.beginPath(); ctx.arc(cx, cy, R0, 0, 6.283); ctx.fill();
@@ -394,11 +395,11 @@
   }
   function pumpToasts() {
     if (!toastQueue.length || mode !== 'game') return;
-    for (let i = toastQueue.length - 1; i >= 0; i--) { const a = toastQueue[i]; if (!(a[4] || {}).pause && !(a[4] || {}).keep && a.born !== undefined && gs.y - a.born > 2) toastQueue.splice(i, 1); }
+    for (let i = toastQueue.length - 1; i >= 0; i--) { const a = toastQueue[i]; if (!(a[4] || {}).pause && a.born !== undefined && gs.y - a.born > ((a[4] || {}).keep ? 4 : 2)) toastQueue.splice(i, 1); }
     if (!toastQueue.length) return;
     const box = $('toasts'), visible = box.querySelectorAll('.toast:not(.out)').length;
     const k = toastQueue.findIndex(a => (a[4] || {}).pause);
-    if (visible >= (mobile ? 1 : 2) || (k < 0 && performance.now() - lastToastAt < 9000 / FAST)) return;
+    if (visible >= (mobile ? 1 : 2) || (k < 0 && performance.now() - lastToastAt < 9000 / FAST / Math.sqrt(game.speed || 1))) return;
     const next = toastQueue.splice(k >= 0 ? k : 0, 1)[0];
     lastToastAt = performance.now();
     showToast(...next);
@@ -423,7 +424,7 @@
     box.appendChild(el);
     while (box.children.length > 3) box.firstChild.remove();
     const plain = text.replace(/<[^>]+>/g, '');
-    if (!opt.pause) setTimeout(close, Math.min(16000, Math.max(opt.ms || 0, 4500 + plain.length * 65)));
+    if (!opt.pause) setTimeout(close, Math.min(16000, Math.max(opt.ms || 0, 4500 + plain.length * 65)) / Math.sqrt(game.speed || 1)); // hız arttıkça kart da kısa kalır
   }
 
   // =====================================================================
@@ -447,7 +448,7 @@
     Object.assign(game, {
       started: false, paused: false, state: 'play', frac: 0, fired: new Set(), hist: [], speed: 1, touched: false, reading: 0, story: false, endAfter: false,
       p: { sci: 0.3, dip: 0.3, fund: 0 }, S: 0.5, used: 60, unlocked: { sci: true, dip: true, fund: false }, moved: {},
-      world: makeWorld(), cheatOn: 0, cheatSince: 0, caughtFast: 0, caughtTotal: 0, rec: null, choices: {},
+      world: makeWorld(), hcfc: 0, cheatOn: 0, cheatSince: 0, caughtFast: 0, caughtTotal: 0, rec: null, choices: {},
     });
     SL.sci.value = 30; SL.dip.value = 30; SL.fund.value = 0; SL.fund.disabled = true;
     $('w-fund').classList.add('locked'); $('o-fund').textContent = "🔒 1990'da açılır";
@@ -455,7 +456,7 @@
     readPolicy();
     $('g-pause').textContent = '❚❚ Durdur'; setSpeed(1);
     $('modal').hidden = true; $('yb-harvest').textContent = ''; $('toasts').innerHTML = ''; toastQueue.length = 0; lastToastAt = -1e9;
-    $('g-intro').classList.remove('gone'); $('g-rec').textContent = '';
+    $('g-intro').classList.remove('gone'); $('g-rec').textContent = ''; if (window.SceneUtils) window.SceneUtils.advise('Önce kanıt lazım: bilime puan ayır');
     if (window.Badges) window.Badges.resetSession(); tapCount.m = {};
     choiceQ.length = 0; official = null; mols.length = 0; puffs.length = 0; setView('scene');
   }
@@ -490,7 +491,7 @@
 
   const STORY = [
     ['🔬', '1974', 'İki kimyager, Molina ve Rowland, uyarıyor: buzdolabı ve spreylerdeki <b>CFC</b> gazları yükselip <b>ozon tabakasını</b> yıkabilir. Ozon, Güneş\'in zararlı UV ışınını süzer.', '', { pause: true }],
-    ['🤝', 'Masada yedi taraf', 'Her delegenin başında bir ikna çubuğu var. <b>Kırmızı çizgiyi</b> geçen anlaşma açılınca imzalar.', '', { pause: true }],
+    ['🤝', 'Masada yedi taraf', 'Delegelerin başındaki çubuk <b>ikna</b>. Kırmızı çizgiyi geçen, anlaşma açılınca imzalar.', '', { pause: false, ms: 7000 }],
   ];
   function enterGame() {
     game.paused = false; $('g-pause').textContent = '❚❚ Durdur';
@@ -501,6 +502,7 @@
       if (i >= STORY.length) { game.story = false; return; }
       const [ic, from, text, tone, opt0] = STORY[i];
       const opt = wasDone ? { ...opt0, pause: false, ms: 6000 } : opt0;
+      if (i === 1) BLOCS.forEach((b, k) => setTimeout(() => pulseAt(() => [seats[k].sx, seats[k].sy - 20 * U], '#4f9a7a'), k * 250));
       toast(ic, from, text, tone, { ...opt, then: opt.pause ? () => show(i + 1) : undefined });
       if (!opt.pause) setTimeout(() => show(i + 1), 4500 / Math.max(1, FAST / 2));
     };
@@ -511,7 +513,7 @@
     if (mode !== 'game' || game.paused || game.reading || game.story || game.state !== 'play' || gs.y > M.Y1) return;
     const visible = $('toasts').querySelector('.toast:not(.out)');
     const pace = visible ? 1.5 : toastQueue.length ? 0.95 : 0.47;
-    const dur = YEAR * (gs.y < M.Y0 + 2 ? 1.5 : gs.y > 2015 ? 0.7 : 1) / game.speed;
+    const dur = YEAR * (gs.y < M.Y0 + 2 ? 1.5 : gs.y > 2025 ? 0.4 : gs.y > 2010 ? 0.7 : 1) / game.speed;
     game.frac += dt / (dur * pace);
     if (game.frac >= 1) { game.frac -= 1; yearTick(); }
   }
@@ -538,17 +540,17 @@
   }
   function conference(y) {
     comeOfficial('tolba', 'Delegeler salonda.');
-    if (y === 1987) choice('UNEP Başkanı Mostafa Tolba', 'Montreal Konferansı', '"Bütün dünya masada. Anlaşma ne kadar sıkı olsun? Sıkı anlaşma ozonu çabuk korur, ama bazı ülkeler imzadan kaçabilir."', [
+    if (y === 1987) choice('UNEP Başkanı Mostafa Tolba', 'Montreal Konferansı', '"Dünyanın önde gelen ülkeleri masada. Anlaşma ne kadar sıkı olsun? Sıkı anlaşma ozonu çabuk korur, ama bazı ülkeler imzadan kaçabilir."', [
       { label: '½ Yalnız %50 kesinti', sub: 'Kolay imza; ozon yavaş korunur', fn: () => { game.S = 0.2; game.choices.m = 'weak'; } },
       { label: '📉 Kademeli tam yasak', sub: 'Dengeli', fn: () => { game.S = 0.6; game.choices.m = 'mid'; } },
       { label: '⛔ Hemen tam yasak', sub: 'Sanayi kızar; bazıları geç imzalar', fn: () => { game.S = 0.9; game.choices.m = 'strict'; } },
     ], 'tolba');
     if (y === 1990) choice('Londra toplantısı', 'Takvim sıkılaşsın mı?', '"Yeni ölçümler delik büyüyor diyor. CFC\'yi <b>2000\'e kadar</b> tamamen bırakalım mı?"', [
-      { label: '⏩ Evet, sıkılaştır', sub: 'Ozon çabuk iyileşir', fn: () => { game.S = Math.min(1, game.S + 0.25); } },
+      { label: '⏩ Evet, sıkılaştır', sub: 'Ozon çabuk iyileşir; Avrupa ve Japonya sanayisi kızar', fn: () => { game.S = Math.min(1, game.S + 0.25); [1, 2].forEach(i => gs.p[i] = Math.max(0, gs.p[i] - 0.15)); } },
       { label: '⏸ Şimdilik böyle kalsın', sub: 'Sanayi rahat eder', fn: () => {} },
     ], 'tolba');
     if (y === 1992) choice('Kopenhag toplantısı', 'Bir adım daha?', '"Alternatif soğutucular hazır. Takvimi <b>1996\'ya</b> çekebiliriz."', [
-      { label: '⏩ Çekelim', sub: 'Sıkı takvim', fn: () => { game.S = Math.min(1, game.S + 0.15); } },
+      { label: '⏩ Çekelim', sub: 'Sıkı takvim; zengin ülkeler biraz soğur', fn: () => { game.S = Math.min(1, game.S + 0.15); BLOCS.forEach((b, i) => { if (!b.dev) gs.p[i] = Math.max(0, gs.p[i] - 0.08); }); } },
       { label: '⏸ Gerek yok', sub: 'Takvim aynı', fn: () => {} },
     ], 'tolba');
   }
@@ -557,36 +559,61 @@
     const y = gs.y, Wd = game.world;
     if (Wd.cheats.includes(y)) { game.cheatOn = 1; game.cheatSince = y; }
     const sl = Wd.slides.find(s => s.y === y);
-    M.step(gs, { ...game.p, S: game.S, cheat: game.cheatOn, slide: sl ? sl.i : -1 });
+    M.step(gs, { ...game.p, S: game.S, cheat: game.cheatOn, slide: sl ? sl.i : -1, hcfc: game.hcfc && y >= 2008 ? 1 : 0 });
+    { const hh = gs.hist[gs.hist.length - 1]; hh.hole = Math.min(29, hh.hole * (0.88 + 0.24 * Math.random())); } // hava koşulları deliği yıldan yıla oynatır
     const h = gs.hist[gs.hist.length - 1];
     game.hist.push({ ...h, rec: null });
     // kaçak üretim: ölçüm ağı güçlüyse çabuk yakalanır
     if (game.cheatOn) {
-      if (y === game.cheatSince) { pulseAt(() => [sci.sx, sci.sy], '#c0503a'); toast('📈', 'Ölçüm istasyonu', 'Havada <b>beklenmedik CFC</b> var! Biri gizlice üretiyor. Bilime puan ayırırsan kaynağı bulur.', 'bad', { keep: true }); if (!game.moved.sci || game.p.sci < 0.3) coach(SL.sci, '👉 Kaydır: bilim ve ölçüm'); }
-      else if (Math.random() < 0.15 + 0.7 * game.p.sci) { game.cheatOn = 0; game.caughtTotal++; if (y - game.cheatSince <= 2) game.caughtFast++; toast('🔎', 'Bilim insanları', `Kaçak fabrikalar ${y - game.cheatSince} yılda bulundu ve kapatıldı.`, 'good'); }
+      if (y === game.cheatSince) { pulseAt(() => [sci.sx, sci.sy], '#c0503a'); milestone('📈', 'Ölçüm istasyonu', 'Havada <b>beklenmedik CFC</b> var! Biri gizlice üretiyor. Bilime puan ayırırsan kaynağı çabuk bulur.', 'bad'); if (!game.moved.sci || game.p.sci < 0.3) coach(SL.sci, '👉 Kaydır: bilim ve ölçüm'); }
+      else if (Math.random() < 0.15 + 0.7 * game.p.sci) { game.cheatOn = 0; game.caughtTotal++; if (y - game.cheatSince <= 2) game.caughtFast++; toast('🔎', 'Bilim insanları', `Kaçak fabrikalar ${y - game.cheatSince} yılda bulundu ve kapatıldı.`, 'good', { keep: true }); }
     }
-    if (sl) { const b = BLOCS[sl.i]; pulseAt(() => [seats[sl.i].sx, seats[sl.i].sy], '#c0503a'); toast('📉', b.name, `Ekonomik kriz ve yeni hükümet: ${b.name} anlaşmadan <b>geri adım</b> atıyor. Diplomasi${b.dev ? ' ve fon' : ''} gerek.`, 'bad', { keep: true }); coach(b.dev && game.unlocked.fund ? SL.fund : SL.dip, b.dev && game.unlocked.fund ? '👉 Kaydır: ozon fonu' : '👉 Kaydır: diplomasi'); }
+    if (sl) { const b = { ...BLOCS[sl.i], name: bname(sl.i) }; pulseAt(() => [seats[sl.i].sx, seats[sl.i].sy], '#c0503a'); toast('📉', b.name, `Ekonomik kriz ve yeni hükümet: ${b.name} anlaşmadan <b>geri adım</b> atıyor: imzalı ama uymuyor. Diplomasi${b.dev ? ' ve fon' : ''} gerek.`, 'bad', { keep: true }); coach(b.dev && game.unlocked.fund ? SL.fund : SL.dip, b.dev && game.unlocked.fund ? '👉 Kaydır: ozon fonu' : '👉 Kaydır: diplomasi'); }
     // yeni imzalar
-    h.sign.forEach((s, i) => { if (s === y) { sign(); pulseAt(() => [seats[i].sx, seats[i].sy], '#4f9a7a'); floats.push({ x: seats[i].sx || W / 2, y: (seats[i].sy || H / 2) - 10, text: `${BLOCS[i].name} imzaladı!`, life: 1.5, col: '#2f7a4a' }); } });
+    h.sign.forEach((s, i) => { if (s === y) { if (view.want === 'pole' && !view.user) setView('scene'); sign(); pulseAt(() => [seats[i].sx, seats[i].sy], '#4f9a7a'); floats.push({ x: seats[i].sx || W / 2, y: (seats[i].sy || H / 2) - 10, text: `${bname(i)} imzaladı!`, life: 1.5, col: '#2f7a4a' }); } });
     // projeksiyon
-    game.rec = M.recoveryYear(gs, { ...game.p, S: game.S, cheat: 0 });
+    game.rec = M.recoveryYear(gs, { ...game.p, S: game.S, cheat: 0, hcfc: game.hcfc ? 1 : 0 });
     game.hist[game.hist.length - 1].rec = game.rec;
     if (y >= 1980) { const r = game.rec; $('g-rec').textContent = r === null ? '' : `Tahmin: ${recText(r)}`; $('g-rec').style.color = r !== null && r <= GOAL ? 'var(--green)' : 'var(--danger)'; }
     $('yb-harvest').textContent = h.hole > 0.5 ? `🌀 ${f1(h.hole)} Mkm²` : '🛡️ sağlam'; $('yb-harvest').style.color = h.hole < 5 ? 'var(--green)' : h.hole < 18 ? 'var(--grain)' : 'var(--danger)';
     // olaylar
     if (y === 1978) toast('🧴', 'ABD', 'ABD sprey kutularında CFC\'yi yasakladı. Ama buzdolapları ve klimalar sürüyor.', '', { keep: true });
-    if (y === 1985) { setView('pole', 9000); milestone('🧊', 'İngiliz Antarktika araştırmacıları', 'Antarktika\'nın üstünde her baharda ozon <b>delik</b> gibi incelip açılıyor! 1970\'lerden beri ölçüyoruz.', 'bad'); toast('📜', 'Viyana', 'Ülkeler ozonu korumak için bir çerçeve sözleşmesi imzaladı. Ama henüz yasak yok.', '', { keep: true }); }
+    if (y === 1985) { setView('pole', 9000); milestone('🧊', 'İngiliz Antarktika araştırmacıları', 'Antarktika\'nın üstünde her baharda ozon incelip bir <b>delik</b> açılıyor! 1957\'den beri ölçüyoruz, şimdi emin olduk.', 'bad'); toast('📜', 'Viyana', 'Ülkeler ozonu korumak için bir çerçeve sözleşmesi imzaladı. Ama henüz yasak yok.', '', { keep: true }); }
     if (y === 1986) conferenceSoon();
     if (y === 1987) toast('🕶️', 'Bir bakan', '"Herkes şapka ve güneş gözlüğü taksın, yeter!" Gazeteler bununla aylarca dalga geçti.', '', { keep: true });
-    if (y === 1989) { game.unlocked.fund = true; SL.fund.disabled = false; $('w-fund').classList.remove('locked'); readPolicy(); milestone('💰', 'Gelişmekte olan ülkeler', '"Sizin kirliliğinizi biz mi ödeyeceğiz?" <b>Ozon fonu</b>: zengin ülkeler, yoksul ülkelerin CFC\'yi bırakmasına para verir. Fonsuz Çin ve Hindistan imzalamaz.', '', () => !game.moved.fund && coach(SL.fund, '👉 Kaydır: ozon fonu')); }
+    if (y === 1990) { game.unlocked.fund = true; SL.fund.disabled = false; $('w-fund').classList.remove('locked'); readPolicy(); milestone('💰', 'Gelişmekte olan ülkeler', '"Sizin kirliliğinizi biz mi ödeyeceğiz?" <b>Ozon fonu</b>: zengin ülkeler, yoksul ülkelerin CFC\'yi bırakmasına para verir. Fonsuz Çin ve Hindistan imzalamaz.', '', () => !game.moved.fund && coach(SL.fund, '👉 Kaydır: ozon fonu')); }
     if (y === 1991) toast('🇹🇷', 'Türkiye', 'Türkiye de Montreal Protokolü\'ne katıldı.', 'good', { keep: true });
     if (y === 1995) toast('🏅', 'Nobel', 'Molina, Rowland ve Crutzen ozonu yıkan kimyayı çözdükleri için Nobel Kimya Ödülü\'nü aldı.', 'good', { keep: true });
     if (y === 2009 && h.signed === BLOCS.length) toast('🌍', 'BM', 'Tarihte ilk kez <b>dünyadaki bütün ülkeler</b> bir çevre anlaşmasını onayladı!', 'good', { keep: true });
+    if (y === 2007) { comeOfficial('tolba', 'Bir karar daha.'); choice('BM toplantısı', 'Geçiş gazları', '"CFC\'nin yerine geçen <b>HCFC</b> gazları da ozonu biraz yıkıyor. Bırakma takvimini 10 yıl öne çekelim mi? Gelişmekte olan ülkeler daha çok fon ister."', [
+      { label: '⏩ Öne çekelim', sub: 'Delik daha erken kapanır; fon azsa Çin ve Hindistan soğur', fn: () => { game.hcfc = 1; if (game.p.fund < 0.3) BLOCS.forEach((b, i) => { if (b.dev) gs.p[i] = Math.max(0, gs.p[i] - 0.2); }); } },
+      { label: '⏸ Takvim aynı kalsın', sub: 'Kimse kızmaz', fn: () => {} },
+    ], 'tolba'); }
     if (y === 2016) toast('❄️', 'Kigali', 'Ülkeler CFC\'nin yerine geçen HFC gazlarını da azaltmaya karar verdi: bu gazlar iklimi ısıtıyor.', 'good', { keep: true });
     if (h.hole > 20) once('big', () => { setView('pole', 7000); toast('🌀', 'Uydu', `Delik ${f1(h.hole)} milyon km²: Antarktika'dan büyük!`, 'bad'); });
     if (y > 1990 && h.signed === BLOCS.length && y <= 1995) once('all95', () => award('ozon-herkes'));
     if (y === M.Y1) { if (game.rec !== null && game.rec <= GOAL) award('ozon-kapandi'); if (game.caughtTotal >= 2 && game.caughtFast >= 2) award('ozon-kacak'); }
+    advise(h);
     if (gs.y > M.Y1 && game.state === 'play') endGame(); else if (gs.y > M.Y1) game.endAfter = true;
+  }
+  // yol gösterici: o an en önemli tek adım + kapanış tahmini
+  function advise(h) {
+    if (!window.SceneUtils) return;
+    const y = h.y, r = game.rec, recS = r === null ? '' : ` · tahmin: ${recText(r)}`;
+    const unsigned = BLOCS.map((b, i) => i).filter(i => !h.sign[i]);
+    const devWait = unsigned.filter(i => BLOCS[i].dev);
+    const slid = BLOCS.map((b, i) => i).find(i => h.sign[i] && h.p[i] < 0.45);
+    let t, tone;
+    if (y < 1985) { t = game.p.sci < 0.4 ? 'Önce kanıt lazım: bilime puan ayır' : 'Bilim çalışıyor; kaygı büyüyor'; }
+    else if (game.cheatOn) { t = 'Kaçak var: bilimi artır, kaynağı bulsun'; tone = 'bad'; }
+    else if (slid !== undefined) { t = `${bname(slid)} uymuyor: ${BLOCS[slid].dev ? 'fonu' : 'diplomasiyi'} artır`; tone = 'bad'; }
+    else if (y < 1987) t = 'Montreal yaklaşıyor: diplomasiyle çubukları kırmızı çizgiye taşı';
+    else if (devWait.length && !game.unlocked.fund) t = 'Gelişmekte olan ülkeler bekliyor: fon 1990\'da açılacak';
+    else if (devWait.length && game.p.fund < 0.25) { t = `${devWait.map(i => bname(i)).join(', ')} fon bekliyor`; tone = 'bad'; }
+    else if (unsigned.length) t = `${unsigned.map(i => bname(i)).join(', ')} henüz imzalamadı: diplomasi`;
+    else if (r !== null && r > GOAL) { t = y < 2007 ? 'Herkes imzalı ama tahmin geç: 2007\'de takvim kararı gelecek' : 'Tahmin geç: kaçakları yakala, uymayanı ikna et'; tone = 'bad'; }
+    else { t = 'Herkes imzalı, yol doğru: bilimi kesme, kaçakları yakala'; tone = 'good'; }
+    window.SceneUtils.advise(t + (y >= 1985 ? recS : ''), tone);
   }
   function conferenceSoon() { once('conf87', () => toast('📅', 'UNEP', 'Gelecek yıl Montreal\'de büyük konferans: anlaşmanın sıkılığını sen seçeceksin. İmzalayanlar kırmızı çizgiyi geçmiş olmalı.', 'warn')); }
   // konferans kartları: yılın başında
@@ -605,11 +632,11 @@
     const hs = game.hist, last = hs[hs.length - 1], r = game.rec, peak = Math.max(...hs.map(h => h.hole)), hpeak = Math.max(...HISTORY.hist.map(h => h.hole));
     const score = r === null ? 100 : Math.round(clamp((2100 - Math.min(r, 2100)) / 60) * 100);
     let title, text;
-    if (r !== null && r <= GOAL) { title = 'Dünya anlaştı'; text = `Ozon deliği ${yk(r)} kapanacak, tarihten (${HREC}) erken. Bilim kanıtladı, diplomasi ikna etti, fon herkesi masaya getirdi.`; }
+    if (r !== null && r <= GOAL) { title = 'Dünya anlaştı'; text = `Ozon deliği ${yk(r)} kapanacak, tarihten (${HREC}) erken. Bilim kanıtladı, diplomasi ikna etti${game.p.fund > 0.1 ? ', fon herkesi masaya getirdi' : ''}.`; }
     else if (r !== null && r < 2075) { title = 'Tarihe yakın'; text = `Delik ${yk(r)} kapanacak, tarihte ${HREC}. Anlaşma işe yaradı, ama daha erken ve daha sıkı olabilirdi.`; }
     else if (r !== null && r < 9999) { title = 'Geç kalan anlaşma'; text = `Delik ancak ${recText(r)} kapanacak. CFC havada uzun kalır: her geciken yıl, onlarca yıl bekleme demek.`; }
-    else { title = 'Delik kapanmıyor'; text = 'Anlaşma yarım kaldı: bazı ülkeler CFC\'yi bırakmadı. Klor birikmeye devam ediyor.'; }
-    if (game.choices.m === 'weak') text += ' %50 kesinti kolay imzalandı ama yetmedi.';
+    else { title = 'Delik kapanmıyor'; text = last.signed < 7 ? 'Anlaşma yarım kaldı: bazı ülkeler hiç imzalamadı. Klor birikmeye devam ediyor.' : 'Anlaşma imzalandı ama yetmedi: CFC salınmaya devam etti, klor birikiyor.'; }
+    if (game.choices.m === 'weak' && !(r !== null && r <= GOAL)) text = 'Herkes imzaladı, ama yalnız %50 kesinti vardı: CFC\'nin yarısı salınmaya devam etti, klor birikti.';
     const col = r !== null && r <= GOAL ? 'var(--green)' : r !== null && r < 2075 ? 'var(--grain)' : 'var(--danger)';
     $('result').innerHTML = `
       <div class="kicker">2060 · görev süren doldu</div>
@@ -658,7 +685,7 @@
   function enterSandbox() { sb.running = true; $('sb-play').textContent = '❚❚ Durdur'; updateSbStats(); setTimeout(drawSbChart, 50); }
   function labP(y) {
     if (sb.preset === 'history') return M.histP(y);
-    if (sb.preset === 'none') return { sci: 0.1, dip: 0, fund: 0, S: 1 }; // kimse ikna edilmez
+    if (sb.preset === 'none') return { sci: 0.1, dip: 0, fund: 0, S: 0, noTreaty: 1 }; // anlaşma hiç yok
     return { ...sb.p, fund: y >= 1990 ? (sb.preset === 'none' ? 0 : 0.5) : 0 };
   }
   function updateSandbox(dt) {
@@ -684,7 +711,7 @@
   function frame(now) {
     const dt = Math.min(50, now - last); last = now;
     // konferans yılları: yılın başında karar
-    if (mode === 'game' && game.state === 'play' && !game.reading && [1987, 1990, 1992].includes(gs.y) && !game.fired.has('conf' + gs.y)) { game.fired.add('conf' + gs.y); conference(gs.y); }
+    if (mode === 'game' && game.state === 'play' && !game.reading && [1987, 1990, 1992].includes(gs.y - 1) && !game.fired.has('conf' + (gs.y - 1))) { game.fired.add('conf' + (gs.y - 1)); conference(gs.y - 1); }
     updateGame(dt); updateSandbox(dt); ambientChat(now);
     if (game.endAfter && game.state === 'play') { game.endAfter = false; endGame(); }
     const h = (mode === 'game' || mode === 'result' || mode === 'sandbox') ? curHist() : null;

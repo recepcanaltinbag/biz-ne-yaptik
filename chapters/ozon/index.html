@@ -8,8 +8,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Inter:wght@400;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../../assets/css/badges.css?v=261018114421">
-<link rel="stylesheet" href="../../assets/css/chapter.css?v=261018114421">
+<link rel="stylesheet" href="../../assets/css/badges.css?v=261018121323">
+<link rel="stylesheet" href="../../assets/css/chapter.css?v=261018121323">
 <style>
   .sl.locked span { color: var(--ink-soft); }
   #m-ozone { background: #5a8ad0; } #m-cfc { background: #b5543c; } #m-sign { background: #4f9a7a; }
@@ -55,7 +55,8 @@
         <div class="chip date" id="g-date">1974</div>
         <div class="chip budget"><span>💰</span><span class="bbar"><i id="b-sci"></i><i id="b-dip"></i><i id="b-fund"></i></span><b id="g-budget">40 puan boşta</b></div>
       </div>
-      <p class="goal gp-extra">🎯 <b>Hedef:</b> ozon deliği <b>2060'a kadar</b> kapanacak yola girsin. <span id="g-rec"></span></p>
+      <p class="goal gp-extra">🎯 <b>Hedef:</b> delik <b>2060'a kadar</b> kapanma yoluna girsin. <span id="g-rec"></span></p>
+      <div class="adv" id="g-adv" hidden></div>
       <div class="gp-meters">
         <div class="mrow"><span>🛡️<em> Ozon tabakası</em></span><span class="track"><i id="m-ozone"></i></span></div>
         <div class="mrow"><span>🏭<em> CFC salımı</em></span><span class="track"><i id="m-cfc"></i></span></div>
@@ -139,13 +140,13 @@
 
 <nav class="dots" id="dots" aria-label="Bölüm adımları"></nav>
 
-<script src="../../assets/js/stats.js?v=261018114421"></script>
-<script src="../../assets/js/mission.js?v=261018114421"></script>
-<script src="../../assets/js/scene-utils.js?v=261018114421"></script>
-<script src="../../assets/js/badges.js?v=261018114421"></script>
-<script src="../../assets/js/toon.js?v=261018114421"></script>
-<script src="model.js?v=261018114421"></script>
-<script src="ozon.js?v=261018114421"></script>
+<script src="../../assets/js/stats.js?v=261018121323"></script>
+<script src="../../assets/js/mission.js?v=261018121323"></script>
+<script src="../../assets/js/scene-utils.js?v=261018121323"></script>
+<script src="../../assets/js/badges.js?v=261018121323"></script>
+<script src="../../assets/js/toon.js?v=261018121323"></script>
+<script src="model.js?v=261018121323"></script>
+<script src="ozon.js?v=261018121323"></script>
 <script>/* gpToggle */document.querySelectorAll(".gp-toggle").forEach(b=>b.onclick=()=>{const p=b.closest(".gpanel");const o=p.classList.toggle("open");b.setAttribute("aria-expanded",o);b.textContent=o?"✕ Kapat":"⋯ Daha fazla";window.dispatchEvent(new Event("panel"));});</script>
 </body>
 </html>

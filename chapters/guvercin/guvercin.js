@@ -420,11 +420,11 @@
   }
   function pumpToasts() {
     if (!toastQueue.length || mode !== 'game') return;
-    for (let i = toastQueue.length - 1; i >= 0; i--) { const a = toastQueue[i]; if (!(a[4] || {}).pause && !(a[4] || {}).keep && a.born !== undefined && gs.y - a.born > 2) toastQueue.splice(i, 1); }
+    for (let i = toastQueue.length - 1; i >= 0; i--) { const a = toastQueue[i]; if (!(a[4] || {}).pause && a.born !== undefined && gs.y - a.born > ((a[4] || {}).keep ? 4 : 2)) toastQueue.splice(i, 1); }
     if (!toastQueue.length) return;
     const box = $('toasts'), visible = box.querySelectorAll('.toast:not(.out)').length;
     const k = toastQueue.findIndex(a => (a[4] || {}).pause);
-    if (visible >= (mobile ? 1 : 2) || (k < 0 && performance.now() - lastToastAt < 9000 / FAST)) return;
+    if (visible >= (mobile ? 1 : 2) || (k < 0 && performance.now() - lastToastAt < 9000 / FAST / Math.sqrt(game.speed || 1))) return;
     const next = toastQueue.splice(k >= 0 ? k : 0, 1)[0];
     lastToastAt = performance.now();
     showToast(...next);
@@ -449,7 +449,7 @@
     box.appendChild(el);
     while (box.children.length > 3) box.firstChild.remove();
     const plain = text.replace(/<[^>]+>/g, '');
-    if (!opt.pause) setTimeout(close, Math.min(16000, Math.max(opt.ms || 0, 4500 + plain.length * 65)));
+    if (!opt.pause) setTimeout(close, Math.min(16000, Math.max(opt.ms || 0, 4500 + plain.length * 65)) / Math.sqrt(game.speed || 1)); // hız arttıkça kart da kısa kalır
   }
 
   // =====================================================================
@@ -617,6 +617,18 @@
     if (game.sat < 25 && !game.replaced) once('warn-sat' + Math.floor(y / 10), () => toast('🏛️', 'Meclis', 'Kasabalar ve tüccarlar şikâyetçi. Meclisin desteği düşüyor.', 'warn'));
     if (game.sat <= 0 && !game.replaced && gs.y >= game.lockUntil && (game.p.nest + game.p.quota + game.p.forest) > 0.4) lobby();
     if (y === M.Y1) { if (h.P >= GOAL) award('guv-gokyuzu'); if (h.F >= 0.6) award('guv-orman'); }
+    if (window.SceneUtils) {
+      const A = window.SceneUtils.advise;
+      if (h.P <= 0) A('Yabani sürü bitti', 'bad');
+      else if (h.P < THR) A('Sürü eşiğin altında: her şeyi koru, ama geç olabilir', 'bad');
+      else if (game.lockUntil && y < game.lockUntil) A(`Meclis yasakları kısıtladı (${game.lockUntil} yılına kadar): bekçi gönder`, 'bad');
+      else if (game.sat < 25) A('Meclis kızgın: yasakları birden değil yavaş artır', 'bad');
+      else if (h.reach > 0.1 && game.p.nest < 0.5) A('Demiryolu yayılıyor: yuva yasağını artır');
+      else if (game.unlocked.quota && h.killRate > 0.12 && game.p.quota < 0.4) A('Pazar yasağı avı keser: biraz artır');
+      else if (game.unlocked.forest && h.F < 0.7 && game.p.forest < 0.3) A('Orman kesiliyor: yemiş azalırsa yuva da azalır');
+      else if (h.P < 1) A(`Sürü inceliyor (${popText(h.P)}): kolonilere bekçi gönder`);
+      else A(`Gökyüzü kara: ${popText(h.P)} güvercin`, 'good');
+    }
     if (gs.y > M.Y1 && game.state === 'play') endGame(); else if (gs.y > M.Y1) game.endAfter = true;
   }
   function lobby() {

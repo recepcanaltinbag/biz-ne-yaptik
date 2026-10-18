@@ -107,5 +107,14 @@ if (/[?&]e2e\b/.test(location.search)) {
     const base = { de: back ? 'da' : 'de', den: back ? 'dan' : 'den' }[ek] || ek;
     return `${n}'${hard ? base.replace('d', 't') : base}`;
   }
-  window.SceneUtils = { avoidHud, lineChart, bestLine, yilEk };
+  // yol gösterici: HUD'da tek satır "şimdi ne yapmalı?"; metin değişince kısa bir parlama
+  let advLast = '';
+  function advise(text, tone) {
+    const el = document.getElementById('g-adv'); if (!el) return;
+    if (text === advLast) return; advLast = text;
+    el.innerHTML = text ? '💡 ' + text : ''; el.hidden = !text;
+    el.className = 'adv' + (tone ? ' ' + tone : '');
+    el.classList.remove('flash'); void el.offsetWidth; if (text) el.classList.add('flash');
+  }
+  window.SceneUtils = { avoidHud, lineChart, bestLine, yilEk, advise };
 })();

@@ -8,8 +8,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Inter:wght@400;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../../assets/css/badges.css?v=261018114421">
-<link rel="stylesheet" href="../../assets/css/chapter.css?v=261018114421">
+<link rel="stylesheet" href="../../assets/css/badges.css?v=261018121323">
+<link rel="stylesheet" href="../../assets/css/chapter.css?v=261018121323">
 <style>
   .sl.locked span { color: var(--ink-soft); }
   #m-in { background: #b5543c; } #m-micro { background: #8a6fd8; } #m-turtle { background: #4f9a7a; }
@@ -56,6 +56,7 @@
         <div class="chip budget"><span>💰</span><span class="bbar"><i id="b-waste"></i><i id="b-tax"></i><i id="b-clean"></i></span><b id="g-budget">80 puan boşta</b></div>
       </div>
       <p class="goal gp-extra">🎯 <b>Hedef:</b> 2030'da denize giren plastiği yılda 12 milyon tonun altına indir.</p>
+      <div class="adv" id="g-adv" hidden></div>
       <div class="gp-meters">
         <div class="mrow"><span>🌊<em> Denize giren plastik</em></span><span class="track"><i id="m-in"></i></span></div>
         <div class="mrow"><span>🔬<em> Mikroplastik</em></span><span class="track"><i id="m-micro"></i></span></div>
@@ -139,13 +140,13 @@
 
 <nav class="dots" id="dots" aria-label="Bölüm adımları"></nav>
 
-<script src="../../assets/js/stats.js?v=261018114421"></script>
-<script src="../../assets/js/mission.js?v=261018114421"></script>
-<script src="../../assets/js/scene-utils.js?v=261018114421"></script>
-<script src="../../assets/js/badges.js?v=261018114421"></script>
-<script src="../../assets/js/toon.js?v=261018114421"></script>
-<script src="model.js?v=261018114421"></script>
-<script src="plastik.js?v=261018114421"></script>
+<script src="../../assets/js/stats.js?v=261018121323"></script>
+<script src="../../assets/js/mission.js?v=261018121323"></script>
+<script src="../../assets/js/scene-utils.js?v=261018121323"></script>
+<script src="../../assets/js/badges.js?v=261018121323"></script>
+<script src="../../assets/js/toon.js?v=261018121323"></script>
+<script src="model.js?v=261018121323"></script>
+<script src="plastik.js?v=261018121323"></script>
 <script>/* gpToggle */document.querySelectorAll(".gp-toggle").forEach(b=>b.onclick=()=>{const p=b.closest(".gpanel");const o=p.classList.toggle("open");b.setAttribute("aria-expanded",o);b.textContent=o?"✕ Kapat":"⋯ Daha fazla";window.dispatchEvent(new Event("panel"));});</script>
 </body>
 </html>

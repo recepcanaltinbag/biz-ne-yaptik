@@ -117,6 +117,14 @@ Bu kurallar kullanıcının geri bildirimleriyle tek tek oturtuldu. Yeni bölüm
   - **Olay sırası:** bir kart (koloni haberi, tren) sahnede henüz olmayan bir şeyden söz etmesin; önce onu tanıtan kart gelsin.
   - **Baskı kartının üçüncüsü** artık uyarı değil, sonuç olsun (görevden alma).
   - **Rozet eşiği** modelde gerçekten ulaşılabilir mi? En iyi stratejiyle node'da kontrol et.
+- **Kolay ve akıcı deneyim (kullanıcının isteği: "hem kolay hem akışkan"):**
+  - **💡 Yol gösterici satırı:** HUD'da tek satır "şimdi en önemli adım" (`SceneUtils.advise(text, tone)`, `#g-adv`). Öncelik sırasıyla durumdan üretilir (tehlike > fırsat > hedef durumu). Varsa tahmin de eklenir. Telefonda da görünür. Karar olmayan bir şeyi önerme (ör. sıkılaştırma kararı yokken "sıkılaştır" deme).
+  - **Kartlar hıza uyar:** kart süresi ve kartlar arası bekleme `÷ √hız`; `keep` kartları da 4 yıldan eskiyince atılır. 4×'te kart 10 yıl gecikmemeli.
+  - **Karar kartı ekranda yazan yılda gelsin:** yıl çubuğu `gs.y-1` gösterir; kontrolü buna göre yap.
+  - **Tanıtım kartı anlattığı şeyi örtmesin:** gerekiyorsa durdurmayan kart kullan ve anlatılan öğeyi sahnede nabızla göster.
+  - **Ölü dönemleri hızlandır:** karar olmayan uzun dönemlerde yıl süresi kısalsın; son yıllara da bir karar ya da olay koy.
+  - **Kartın sözü modelle tutsun:** "fonsuz imzalamaz" diyorsan modelde de imzalamasın; sonuç metni de seçimlere göre değişsin.
+  - **Laboratuvar ön ayarları adını doğrulasın** ("anlaşma olmasaydı" ayarında gerçekten anlaşma olmasın).
 - **Çizim hatası döngüyü durdurmasın:** `try { render(now, dt); } catch (e) { … }`. Kanvas, negatif yarıçap gibi tek bir hatada bütün oyunu dondurur. Boyutları `Math.max(…)` ile sınırla.
 - **Arka plan sekmesinde zamanlayıcılar kısılır:** uzun e2e testini öndeki sekmede çalıştır.
 - **Uçtan uca duman testi:** `tools/e2e.js` her bölümü `?debug&hizli&sessiz&e2e` ile baştan sona otomatik oynatır, hataları ve takılmaları raporlar. `?e2e`, gizli pencerede de kareleri sürer. Yayından önce çalıştır.

@@ -8,8 +8,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Inter:wght@400;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../../assets/css/badges.css?v=261018114421">
-<link rel="stylesheet" href="../../assets/css/chapter.css?v=261018114421">
+<link rel="stylesheet" href="../../assets/css/badges.css?v=261018121323">
+<link rel="stylesheet" href="../../assets/css/chapter.css?v=261018121323">
 <style>
   .sl.locked span { color: var(--ink-soft); }
   #m-pop { background: #6a7fb0; } #m-nest { background: #e0b04a; } #m-forest { background: #4f9a7a; }
@@ -54,6 +54,7 @@
         <div class="chip" id="g-pop">🕊️ 4,2 milyar</div>
       </div>
       <p class="goal gp-extra">🎯 <b>Hedef:</b> 1914'te gökyüzünde en az yarım milyar güvercin uçsun.</p>
+      <div class="adv" id="g-adv" hidden></div>
       <div class="gp-meters">
         <div class="mrow"><span>🕊️<em> Sürü</em></span><span class="track"><i id="m-pop"></i><b class="thr" id="m-thr" title="Bu çizginin altında koloniler ürememeye başlar"></b></span></div>
         <div class="mrow"><span>🪺<em> Yuva başarısı</em></span><span class="track"><i id="m-nest"></i></span></div>
@@ -137,13 +138,13 @@
 
 <nav class="dots" id="dots" aria-label="Bölüm adımları"></nav>
 
-<script src="../../assets/js/stats.js?v=261018114421"></script>
-<script src="../../assets/js/mission.js?v=261018114421"></script>
-<script src="../../assets/js/scene-utils.js?v=261018114421"></script>
-<script src="../../assets/js/badges.js?v=261018114421"></script>
-<script src="../../assets/js/toon.js?v=261018114421"></script>
-<script src="model.js?v=261018114421"></script>
-<script src="guvercin.js?v=261018114421"></script>
+<script src="../../assets/js/stats.js?v=261018121323"></script>
+<script src="../../assets/js/mission.js?v=261018121323"></script>
+<script src="../../assets/js/scene-utils.js?v=261018121323"></script>
+<script src="../../assets/js/badges.js?v=261018121323"></script>
+<script src="../../assets/js/toon.js?v=261018121323"></script>
+<script src="model.js?v=261018121323"></script>
+<script src="guvercin.js?v=261018121323"></script>
 <script>/* gpToggle */document.querySelectorAll(".gp-toggle").forEach(b=>b.onclick=()=>{const p=b.closest(".gpanel");const o=p.classList.toggle("open");b.setAttribute("aria-expanded",o);b.textContent=o?"✕ Kapat":"⋯ Daha fazla";window.dispatchEvent(new Event("panel"));});</script>
 </body>
 </html>

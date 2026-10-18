@@ -410,11 +410,11 @@
   }
   function pumpToasts() {
     if (!toastQueue.length || mode !== 'game') return;
-    for (let i = toastQueue.length - 1; i >= 0; i--) { const a = toastQueue[i]; if (!(a[4] || {}).pause && !(a[4] || {}).keep && a.born !== undefined && gs.y - a.born > 2) toastQueue.splice(i, 1); }
+    for (let i = toastQueue.length - 1; i >= 0; i--) { const a = toastQueue[i]; if (!(a[4] || {}).pause && a.born !== undefined && gs.y - a.born > ((a[4] || {}).keep ? 4 : 2)) toastQueue.splice(i, 1); }
     if (!toastQueue.length) return;
     const box = $('toasts'), visible = box.querySelectorAll('.toast:not(.out)').length;
     const k = toastQueue.findIndex(a => (a[4] || {}).pause);
-    if (visible >= (mobile ? 1 : 2) || (k < 0 && performance.now() - lastToastAt < 9000 / FAST)) return;
+    if (visible >= (mobile ? 1 : 2) || (k < 0 && performance.now() - lastToastAt < 9000 / FAST / Math.sqrt(game.speed || 1))) return;
     const next = toastQueue.splice(k >= 0 ? k : 0, 1)[0];
     lastToastAt = performance.now();
     showToast(...next);
@@ -440,7 +440,7 @@
     box.appendChild(el);
     while (box.children.length > 3) box.firstChild.remove();
     const plain = text.replace(/<[^>]+>/g, '');
-    if (!opt.pause) setTimeout(close, Math.min(16000, Math.max(opt.ms || 0, 4500 + plain.length * 65)));
+    if (!opt.pause) setTimeout(close, Math.min(16000, Math.max(opt.ms || 0, 4500 + plain.length * 65)) / Math.sqrt(game.speed || 1)); // hız arttıkça kart da kısa kalır
   }
 
   // =====================================================================
@@ -618,6 +618,16 @@
     if (y >= 2000 && Math.random() < 0.06) { ghost.on = 1; ghost.x = rnd(0.7, 0.92); once('ghost' + Math.floor(y / 6), () => toast('🕸️', 'Balıkçı', 'Fırtınada bir ağ koptu: artık <b>hayalet ağ</b>, kimse çekmeden avlıyor.', 'warn')); }
     if (game.sat < 25 && !game.replaced) once('warn-sat', () => toast('📢', 'Market zinciri', '"Vergi müşteriyi kaçırıyor!" Halkın desteği düşüyor.', 'warn'));
     if (game.sat <= 0 && !game.replaced && game.p.tax > 0.1 && gs.y >= game.lobbyUntil) lobby();
+    if (window.SceneUtils) {
+      const A = window.SceneUtils.advise, crisis = game.crises.some(c => y >= c && y < c + 3);
+      if (crisis && game.used > game.budget + 0.5) A('Kriz: bütçe aşıldı, neyi keseceğini sen seç', 'bad');
+      else if (game.storms.includes(y + 1)) A('Sel geliyor: atık toplamayı artır');
+      else if (game.sat < 25) A('Halk kızgın: vergiyi yavaş artır; temizlik gemisi sevilir', 'bad');
+      else if (game.unlocked.tax && game.cap < 0.85 && game.p.tax < 0.3) A('Çöp dağı büyüyor: vergiyle üretimi yavaşlat');
+      else if (y < 1990) A('Toplanmayan çöp dereyle denize iner: atık yönetimine puan ayır');
+      else if (h.I > TARGET) A(`Hedef 12 Mt: şimdi ${f1(h.I)} Mt`);
+      else A(`Hedefte: ${f1(h.I)} Mt; mikroplastik hâlâ birikiyor`, 'good');
+    }
     if (gs.y > M.Y1 && game.state === 'play') endGame(); else if (gs.y > M.Y1) game.endAfter = true;
   }
   function lobby() {

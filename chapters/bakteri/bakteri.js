@@ -458,7 +458,7 @@
     if (!toastQueue.length) return;
     const box = $('toasts'), visible = box.querySelectorAll('.toast:not(.out)').length;
     const k = toastQueue.findIndex(a => (a[4] || {}).pause);
-    if (visible >= (mobile ? 1 : 2) || (k < 0 && performance.now() - lastToastAt < 9000 / FAST)) return;
+    if (visible >= (mobile ? 1 : 2) || (k < 0 && performance.now() - lastToastAt < 9000 / FAST / Math.sqrt(game.speed || 1))) return;
     const next = toastQueue.splice(k >= 0 ? k : 0, 1)[0];
     lastToastAt = performance.now();
     showToast(...next);
@@ -483,7 +483,7 @@
     box.appendChild(el);
     while (box.children.length > 3) box.firstChild.remove();
     const plain = text.replace(/<[^>]+>/g, '');
-    if (!opt.pause) setTimeout(close, Math.min(16000, Math.max(opt.ms || 0, 4500 + plain.length * 65)));
+    if (!opt.pause) setTimeout(close, Math.min(16000, Math.max(opt.ms || 0, 4500 + plain.length * 65)) / Math.sqrt(game.speed || 1)); // hız arttıkça kart da kısa kalır
   }
 
   // =====================================================================

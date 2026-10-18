@@ -376,11 +376,11 @@
   }
   function pumpToasts() {
     if (!toastQueue.length || mode !== 'game') return;
-    for (let i = toastQueue.length - 1; i >= 0; i--) { const a = toastQueue[i]; if (!(a[4] || {}).pause && !(a[4] || {}).keep && a.born !== undefined && gs.y - a.born > 3) toastQueue.splice(i, 1); }
+    for (let i = toastQueue.length - 1; i >= 0; i--) { const a = toastQueue[i]; if (!(a[4] || {}).pause && a.born !== undefined && gs.y - a.born > ((a[4] || {}).keep ? 4 : 3)) toastQueue.splice(i, 1); }
     if (!toastQueue.length) return;
     const box = $('toasts'), visible = box.querySelectorAll('.toast:not(.out)').length;
     const k = toastQueue.findIndex(a => (a[4] || {}).pause);
-    if (visible >= (mobile ? 1 : 2) || (k < 0 && performance.now() - lastToastAt < 9000 / FAST)) return;
+    if (visible >= (mobile ? 1 : 2) || (k < 0 && performance.now() - lastToastAt < 9000 / FAST / Math.sqrt(game.speed || 1))) return;
     const next = toastQueue.splice(k >= 0 ? k : 0, 1)[0];
     lastToastAt = performance.now();
     showToast(...next);
@@ -405,7 +405,7 @@
     box.appendChild(el);
     while (box.children.length > 3) box.firstChild.remove();
     const plain = text.replace(/<[^>]+>/g, '');
-    if (!opt.pause) setTimeout(close, Math.min(16000, Math.max(opt.ms || 0, 4500 + plain.length * 65)));
+    if (!opt.pause) setTimeout(close, Math.min(16000, Math.max(opt.ms || 0, 4500 + plain.length * 65)) / Math.sqrt(game.speed || 1)); // hız arttıkça kart da kısa kalır
   }
 
   // =====================================================================
@@ -564,6 +564,17 @@
     if (game.sat < 20 && !game.replaced) once('sat' + Math.floor(y / 15), () => toast('🧑‍🌾', 'Çiftçiler', 'Otlak kalmadı, koyunlar açlıktan ölüyor! Kurulun desteği düşüyor.', 'warn'));
     if (game.sat <= 0 && !game.replaced) { game.replaced = true; toast('📜', 'Hükümet', 'Çiftçiler kurulu dağıttı: görevden alındın.', 'bad'); endGame(); return; }
     if (y === M.Y1) { if (h.G >= 0.9) award('tav-otlak'); if (h.N >= 0.7) award('tav-bilbi'); if (h.R < GOAL.R && h.G >= GOAL.G && h.N >= GOAL.N) award('tav-hedef'); }
+    if (window.SceneUtils) {
+      const A = window.SceneUtils.advise, dNext = game.droughts.includes(y + 1);
+      if (y < 1883) A(`Henüz araç yok: 24 tavşanın nasıl çoğaldığını izle (${rabText(h.R)})`);
+      else if (!game.fenceY && gs.A < 0.6 && y >= 1886) A('Çit için hâlâ vakit var: cephe Batı\'ya varmadan kur');
+      else if (h.N < 0.55 && game.p.trap > 0.4) A('Zehir yerli hayvanları da vuruyor: tuzağı biraz azalt', 'bad');
+      else if (h.G < 0.75) A('Otlak çıplak, çiftçiler kızgın: tavşanı azalt', 'bad');
+      else if (dNext) A('Kuraklık geliyor: tavşanlar su başında toplanacak, tuzak için fırsat');
+      else if (h.v > 0 && h.q > 0.4 && game.p.vir < 0.3) A('Tavşanlar direnç kazandı: virüs programını artır', 'bad');
+      else if (h.R >= GOAL.R) A(`Hedef 200 milyonun altı: şimdi ${rabText(h.R)}`);
+      else A(`Hedefte: ${rabText(h.R)} tavşan; otlağı ve yerlileri koru`, 'good');
+    }
     if (gs.y > M.Y1 && game.state === 'play') endGame(); else if (gs.y > M.Y1) game.endAfter = true;
   }
   function askVirus(y) {
