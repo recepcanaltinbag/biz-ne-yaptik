@@ -183,11 +183,20 @@
     if (!el) { el = document.createElement('div'); el.id = 'badge-toast-box'; document.body.appendChild(el); }
     return el;
   }
+  // oyun sırasında rozet sahneyi örtmesin: biriktir, oyun ekranından çıkınca (sonuç) sırayla göster
+  const pending = [];
+  let waitT = 0;
+  const inGame = () => !!document.querySelector('.slide.active[data-mode="game"]');
+  function flush() {
+    if (inGame()) { waitT = setTimeout(flush, 500); return; }
+    waitT = 0; const d = pending.shift(); if (!d) return; show(d);
+    if (pending.length) waitT = setTimeout(flush, 1200);
+  }
+  // oyundan hemen önce açılan rozet de oyun başlayınca sahneden çekilsin
+  setInterval(() => { const b = document.getElementById('badge-toast-box'); if (b && b.children.length && inGame()) b.querySelectorAll('.badge-toast:not(.out)').forEach(t => { t.classList.add('out'); setTimeout(() => t.remove(), 500); }); }, 300);
   function show(def) {
-    const box = toastEl();
-    // oyundaysa kaydırıcı panelinin ve ipucu balonunun üstünde dursun (hiçbir şeyi örtmesin)
-    const pnl = document.querySelector('.slide.active[data-mode="game"] .gpanel');
-    if (pnl) { box.style.top = 'auto'; box.style.bottom = (innerHeight - pnl.getBoundingClientRect().top + 48) + 'px'; } else { box.style.top = ''; box.style.bottom = ''; }
+    if (inGame()) { pending.push(def); if (!waitT) waitT = setTimeout(flush, 500); return; }
+    const box = toastEl(); box.style.top = ''; box.style.bottom = '';
     const t = document.createElement('div');
     t.className = 'badge-toast' + (def.hidden ? ' secret' : '');
     t.innerHTML = `<div class="bt-ic">${medal(def, true)}</div><div><div class="bt-k">${def.hidden ? 'Gizli rozet bulundu!' : 'Rozet kazanıldı'}</div><div class="bt-n">${def.name}</div><div class="bt-f">🔍 ${def.fact}</div></div>`;

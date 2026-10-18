@@ -408,7 +408,7 @@
     box.appendChild(el);
     while (box.children.length > 3) box.firstChild.remove();
     const plain = text.replace(/<[^>]+>/g, '');
-    if (!opt.pause) setTimeout(close, Math.min(16000, Math.max(opt.ms || 0, 4500 + plain.length * 65)) / Math.sqrt(game.speed || 1)); // hız arttıkça kart da kısa kalır
+    if (!opt.pause) setTimeout(close, Math.min(16000, Math.max(opt.ms || 0, 1500 + plain.length * 83)) / (typeof FAST === 'number' ? FAST : 1)); // okuma süresi: saniyede ~12 karakter (oyun hızından bağımsız)
   }
 
   // =====================================================================
@@ -769,7 +769,7 @@
   cv.addEventListener('pointerdown', e => { initAudio(); if (mode === 'game' || mode === 'sandbox' || mode === 'title') talkAt(e.clientX, e.clientY); });
   let last = performance.now(), bgTick = 0, lastBg = '';
   function frame(now) {
-    const dt = Math.min(50, now - last); last = now;
+    const dt = Math.max(0, Math.min(50, now - last)); last = now;
     updateGame(dt); updateSandbox(dt); ambientChat(now);
     if (game.endAfter && game.state === 'play') { game.endAfter = false; endGame(); }
     const h = (mode === 'game' || mode === 'result' || mode === 'sandbox') ? curHist() : null;

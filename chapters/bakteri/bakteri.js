@@ -483,7 +483,7 @@
     box.appendChild(el);
     while (box.children.length > 3) box.firstChild.remove();
     const plain = text.replace(/<[^>]+>/g, '');
-    if (!opt.pause) setTimeout(close, Math.min(16000, Math.max(opt.ms || 0, 4500 + plain.length * 65)) / Math.sqrt(game.speed || 1)); // hız arttıkça kart da kısa kalır
+    if (!opt.pause) setTimeout(close, Math.min(16000, Math.max(opt.ms || 0, 1500 + plain.length * 83)) / (typeof FAST === 'number' ? FAST : 1)); // okuma süresi: saniyede ~12 karakter (oyun hızından bağımsız)
   }
 
   // =====================================================================
@@ -497,7 +497,7 @@
   const choiceQ = [];
   const curState = () => mode === 'sandbox' ? sb.st : gs;
   const curReserve = () => mode === 'sandbox' ? sb.p.reserve : game.reserve || {};
-  const curHist = () => { const s = curState(); return s.hist.length ? s.hist[s.hist.length - 1] : null; };
+  const curHist = () => { if (RPI !== null && mode === 'game') return HISTORY.hist[RPI]; const s = curState(); return s.hist.length ? s.hist[s.hist.length - 1] : null; };
   let lensDrug = 'pen';
   function pickLensDrug(s, res) { const f = (s.avail || []).filter(id => !res[id]).sort((a, b) => s.r[a] - s.r[b]); if (!f.length) return lensDrug; if (!s.r[lensDrug] || res[lensDrug] || !f.includes(lensDrug) || s.r[lensDrug] > s.r[f[0]] + 0.12) lensDrug = f[0]; return lensDrug; }
   const frontName = () => nameOf(lensDrug);
@@ -542,8 +542,8 @@
   const comeOfficial = (who, say) => { official = { t0: performance.now(), leave: 0, who, say }; };
 
   const STORY = [
-    ['🧪', 'Londra · 1945', 'Penisilin savaşta mucize oldu. Şimdi her eve giriyor. Bulan <b>Alexander Fleming</b> Nobel ödülünü alırken bir uyarı yaptı.', '', { pause: true }],
-    ['🔬', 'Fleming\'in uyarısı', '"İlacı az ya da gereksiz kullanırsanız, ölmeyen mikroplar dirençli olur ve çoğalır." Sağdaki mikroskopta bunu izleyeceksin: <b>yeşiller ilaca duyarlı, kırmızılar dirençli</b>.', '', { pause: true }],
+    ['🧪', 'Londra · 1945', 'Penisilin savaşta mucize oldu. Şimdi her eve giriyor. Bulan <b>Alexander Fleming</b> Nobel ödülünü alırken bir uyarı yaptı.', '', { pause: false }],
+    ['🔬', 'Fleming\'in uyarısı', '"İlacı az ya da gereksiz kullanırsanız, ölmeyen mikroplar dirençli olur ve çoğalır." Sağdaki mikroskopta bunu izleyeceksin: <b>yeşiller ilaca duyarlı, kırmızılar dirençli</b>.', '', { pause: false }],
     ['💊', 'Senin işin', 'Kaydırıcı doktorların ne kadar kolay reçete yazacağını belirler. Az olursa gerçek hastalar ilaçsız kalır, çok olursa nezleye de ilaç gider.', '', { ms: 9000 }],
     ['🚪', 'Kapıda kuyruk', 'Gelenler: 🤒 bakteri enfeksiyonu (ilaç işe yarar) ve 🤧 nezle (virüs, ilaç yaramaz). İkisi de ilaç istiyor.', '', { ms: 9000 }],
   ];
@@ -559,10 +559,23 @@
       toast(ic, from, text, tone, { ...opt, then: opt.pause ? () => show(i + 1) : undefined });
       if (!opt.pause) setTimeout(() => show(i + 1), 4500 / Math.max(1, FAST / 2));
     };
-    const start = () => { if (wasDone) game.story = false; setTimeout(() => show(0), 300); };
-    if (window.Mission && !window.__mSeen && (window.__mSeen = 1)) window.Mission.show($('modal'), MISSION, start); else start();
+    const start = () => { if (wasDone) game.story = false; setTimeout(() => histFilm(() => show(0)), 300); };
+    start(); // görev kartı yok: hedef, tarih filmi bitince 'şimdi sen' kartında
+  }
+  // 📼 önce tarih: tarihteki ayarlarla hızlı film (ortak modül), sonra 'şimdi sen' kartı; tekrar oynayana gösterilmez
+  let RPI = null;
+  function histFilm(then) {
+    if (wasDone || !window.SceneUtils || !window.SceneUtils.replay) { game.story = false; return then(); }
+    game.story = true;
+    window.SceneUtils.replay({ n: HISTORY.hist.length, ms: 14000, yearAt: i => HISTORY.hist[i].y, news: { 1945: ["🏅", "Fleming uyardı: yanlış kullanırsanız direnç gelişir"], 1955: ["🦠", "Hastanelerde dirençli stafilokok"], 1961: ["🧪", "MRSA ilk kez görüldü"], 1970: ["🐔", "Çiftlik hayvanlarına da antibiyotik"], 2015: ["🌍", "Dünya Sağlık Örgütü küresel eylem planı"] }, onIndex: i => { RPI = i; if (typeof replayPol === 'function') replayPol(i); }, card: () => ['⏪', '1945 · şimdi sen', `Tarihte 2015'te tedavi başarısı <b>%${Math.round(HISTORY.hist[HISTORY.hist.length - 1].succ * 100)}</b>'e düştü. <b>Hedefin:</b> ilaçlar 2015'te de işe yarasın.`], showCard: (ic, fr, tx, th) => showToast(ic, fr, tx, '', { pause: true, then: () => {
+      // kontroller: ilk kaydırıcı spot ışığıyla tanıtılır (görev kartının yerine)
+      const sl = document.querySelector('.slide.active .gpanel .sl:not(.locked)');
+      const go = () => { game.story = false; th(); };
+      if (sl && window.SceneUtils.tour && MISSION && MISSION.control) window.SceneUtils.tour([{ el: sl, text: MISSION.control + '<br><small style="display:inline;text-align:left">Oynatınca ne olacağını hemen görürsün.</small>' }], go); else go();
+    } }), then });
   }
   function updateGame(dt) {
+    if (RPI !== null) return; // tarih filmi oynuyor
     if (mode !== 'game' || game.paused || game.reading || game.story || game.state !== 'play' || gs.y > M.Y1) return;
     const visible = $('toasts').querySelector('.toast:not(.out)');
     const pace = visible ? 1.5 : toastQueue.length ? 0.95 : 0.47;
@@ -779,7 +792,7 @@
 
   let last = performance.now(), bgTick = 0, lastBg = '';
   function frame(now) {
-    const dt = Math.min(50, now - last); last = now;
+    const dt = Math.max(0, Math.min(50, now - last)); last = now;
     updateGame(dt); updateSandbox(dt); ambientChat(now);
     if (game.endAfter && game.state === 'play') { game.endAfter = false; endGame(); }
     const h = (mode === 'game' || mode === 'result' || mode === 'sandbox') ? curHist() : null;
@@ -797,10 +810,10 @@
     try { render(now, dt); } catch (e) { if (!frame.err) { frame.err = 1; console.error(e); } } // çizim hatası döngüyü durdurmasın
     if (mode === 'game') {
       // yıl çubuğu son işlenen yılı gösterir; kartlar da o yıla aittir
-      const yy = String(Math.max(M.Y0, Math.min(gs.y - 1, M.Y1)));
+      const yy = String(RPI !== null ? HISTORY.hist[RPI].y : Math.max(M.Y0, Math.min(gs.y - 1, M.Y1)));
       if ($('yb-year').textContent !== yy) { const el = $('yb-year'); el.textContent = yy; el.classList.remove('pulse'); void el.offsetWidth; el.classList.add('pulse'); }
       $('yb-sub').textContent = eraName(Math.min(gs.y, M.Y1)); $('g-date').textContent = yy;
-      $('yb-fill').style.width = clamp((gs.hist.length + game.frac) / TOTAL) * 100 + '%';
+      $('yb-fill').style.width = clamp(RPI !== null ? RPI / TOTAL : (gs.hist.length + game.frac) / TOTAL) * 100 + '%';
       const resv = Object.keys(game.reserve).map(nameOf);
       $('d-name').textContent = frontName() + (resv.length ? ` · 🔒 ${resv.join(', ')}` : '');
       $('m-succ').style.width = clamp(vis.succ) * 100 + '%';
@@ -814,6 +827,10 @@
     requestAnimationFrame(frame);
   }
 
+  const arrowTxt = (a, b, f, upGood) => { const better = upGood ? b > a : b < a, same = Math.abs(b - a) < 1e-9 || f(a) === f(b); return `${f(a)} → <b class="${same ? '' : better ? 'up' : 'down'}">${f(b)}</b>`; };
+  function simBak(pol, n = 5) { const st = JSON.parse(JSON.stringify(gs)); st.hist = []; for (let i = 0; i < n && st.y <= M.Y1; i++) M.step(st, { p: pol.p, h: clamp(pol.h + (game.hBonus || 0)), reserve: game.reserve, test: game.test }); return st.hist[st.hist.length - 1]; }
+  if (window.SceneUtils && window.SceneUtils.watchSliders) window.SceneUtils.watchSliders([gP, gH], () => ({ p: game.p, h: game.h }), (a, b) => { if (mode !== 'game' || !gs.hist.length) return null; const A = simBak(a), B = simBak(b); if (!A || !B) return null;
+    return { html: `▶ <span class="k">5 yıl sonra</span> 💊 tedavi ${arrowTxt(A.succ, B.succ, v => '%' + Math.round(v * 100), true)} · 🦠 direnç ${arrowTxt(Math.max(...[].concat(A.r)), Math.max(...[].concat(B.r)), v => '%' + Math.round(v * 100), false)}` }; });
   resetGame();
   if (wasDone) { paintDots(); replayNav(); }
   if (/[?&]debug\b/.test(location.search)) window.__dbg = { game, sb, vis, bugs, patients, lensBox, bread, chicken, M, get gs() { return gs; }, get mode() { return mode; }, go: m => { maxSeen = slides.length; goTo(slideOf(m)); } };

@@ -450,7 +450,7 @@
     box.appendChild(el);
     while (box.children.length > 3) box.firstChild.remove();
     const plain = text.replace(/<[^>]+>/g, '');
-    if (!opt.pause) setTimeout(close, Math.min(16000, Math.max(opt.ms || 0, 4500 + plain.length * 65)) / Math.sqrt(game.speed || 1)); // hız arttıkça kart da kısa kalır
+    if (!opt.pause) setTimeout(close, Math.min(16000, Math.max(opt.ms || 0, 1500 + plain.length * 83)) / (typeof FAST === 'number' ? FAST : 1)); // okuma süresi: saniyede ~12 karakter (oyun hızından bağımsız)
   }
 
   // =====================================================================
@@ -462,7 +462,7 @@
   const SL = { nest: $('g-nest'), quota: $('g-quota'), forest: $('g-forest') };
   const award = id => (window.Badges ? window.Badges.award(id) : false);
   const choiceQ = [];
-  const curHist = () => { const s = mode === 'sandbox' ? sb.st : gs; return s.hist.length ? s.hist[s.hist.length - 1] : null; };
+  const curHist = () => { if (RPI !== null && mode === 'game') return HISTORY.hist[RPI]; const s = mode === 'sandbox' ? sb.st : gs; return s.hist.length ? s.hist[s.hist.length - 1] : null; };
   const PLACES = { Wisconsin: [0.22, 0.3], 'Michigan ormanı': [0.47, 0.42], Pennsylvania: [0.8, 0.72], 'New York eyaleti': [0.86, 0.5], Ohio: [0.6, 0.78] };
 
   function makeWorld() {
@@ -567,8 +567,8 @@
   }
 
   const STORY = [
-    ['🕊️', '1860', 'Gökyüzü kararıyor: Kuzey Amerika\'da <b>4 milyar</b> göçmen güvercin var. Bir sürünün geçişi günler sürüyor.', '', { pause: true }],
-    ['🪺', 'Doğa bilimci', 'Bu kuş yılda <b>tek yumurta</b> yapar ve yalnız dev kolonilerde ürer. Kalabalık, onun hayatta kalma yolu.', '', { pause: true }],
+    ['🕊️', '1860', 'Gökyüzü kararıyor: Kuzey Amerika\'da <b>4 milyar</b> göçmen güvercin var. Bir sürünün geçişi günler sürüyor.', '', { pause: false }],
+    ['🪺', 'Doğa bilimci', 'Bu kuş yılda <b>tek yumurta</b> yapar ve yalnız dev kolonilerde ürer. Kalabalık, onun hayatta kalma yolu.', '', { pause: false }],
     ['📜', 'Senato raporu (1857)', 'Ohio: "Göçmen güvercinin korunmaya ihtiyacı yok. Bu kadar bereketli bir kuşu sıradan bir av azaltamaz."', '', { pause: false, ms: 8000 }],
   ];
   function enterGame() {
@@ -583,10 +583,23 @@
       toast(ic, from, text, tone, { ...opt, then: opt.pause ? () => show(i + 1) : undefined });
       if (!opt.pause) setTimeout(() => show(i + 1), 4500 / Math.max(1, FAST / 2));
     };
-    const start = () => { if (wasDone) game.story = false; setTimeout(() => cine(CINE.sky, () => show(0)), 300); };
-    if (window.Mission && !window.__mSeen && (window.__mSeen = 1)) window.Mission.show($('modal'), MISSION, start); else start();
+    const start = () => { if (wasDone) game.story = false; setTimeout(() => cine(CINE.sky, () => histFilm(() => show(0))), 300); };
+    start(); // görev kartı yok: hedef, tarih filmi bitince 'şimdi sen' kartında
+  }
+  // 📼 önce tarih: tarihteki ayarlarla hızlı film (ortak modül), sonra 'şimdi sen' kartı; tekrar oynayana gösterilmez
+  let RPI = null;
+  function histFilm(then) {
+    if (wasDone || !window.SceneUtils || !window.SceneUtils.replay) { game.story = false; return then(); }
+    game.story = true;
+    window.SceneUtils.replay({ n: HISTORY.hist.length, ms: 14000, yearAt: i => HISTORY.hist[i].y, news: { 1866: ["🚂", "Demiryolu ve telgraf avcıları kolonilere taşıyor"], 1878: ["🌲", "Petoskey: günde 50.000 kuş"], 1888: ["🪺", "Koloniler dağılıyor"], 1900: ["🕊️", "Son yabani kuş vuruldu"] }, onIndex: i => { RPI = i; if (typeof replayPol === 'function') replayPol(i); }, card: () => ['⏪', '1860 · şimdi sen', `Tarihte 1914'te tek bir göçmen güvercin kalmadı. <b>Hedefin:</b> 1914'te en az yarım milyar güvercin uçsun. Kurtarabilir misin?`], showCard: (ic, fr, tx, th) => showToast(ic, fr, tx, '', { pause: true, then: () => {
+      // kontroller: ilk kaydırıcı spot ışığıyla tanıtılır (görev kartının yerine)
+      const sl = document.querySelector('.slide.active .gpanel .sl:not(.locked)');
+      const go = () => { game.story = false; th(); };
+      if (sl && window.SceneUtils.tour && MISSION && MISSION.control) window.SceneUtils.tour([{ el: sl, text: MISSION.control + '<br><small style="display:inline;text-align:left">Oynatınca ne olacağını hemen görürsün.</small>' }], go); else go();
+    } }), then });
   }
   function updateGame(dt) {
+    if (RPI !== null) return; // tarih filmi oynuyor
     if (mode !== 'game' || game.paused || game.reading || game.story || game.state !== 'play' || gs.y > M.Y1) return;
     const visible = $('toasts').querySelector('.toast:not(.out)');
     const pace = visible ? 1.5 : toastQueue.length ? 0.95 : 0.47;
@@ -785,7 +798,7 @@
   cv.addEventListener('pointerdown', e => { initAudio(); if (mode === 'game' || mode === 'sandbox' || mode === 'title') talkAt(e.clientX, e.clientY); });
   let last = performance.now(), bgTick = 0, lastBg = '';
   function frame(now) {
-    const dt = Math.min(50, now - last); last = now;
+    const dt = Math.max(0, Math.min(50, now - last)); last = now;
     updateGame(dt); updateSandbox(dt); ambientChat(now);
     if (game.endAfter && game.state === 'play') { game.endAfter = false; endGame(); }
     const h = (mode === 'game' || mode === 'result' || mode === 'sandbox') ? curHist() : null;
@@ -805,10 +818,10 @@
     lay.gt = lerp(lay.gt, L.gt, k * 0.6); lay.gb = lerp(lay.gb, L.gb, k * 0.6); lay.x1 = lerp(lay.x1, L.x1, k * 0.6);
     try { render(now, dt); } catch (e) { if (!frame.err) { frame.err = 1; console.error(e); } } // çizim hatası döngüyü durdurmasın
     if (mode === 'game') {
-      const yy = String(Math.max(M.Y0, Math.min(gs.y - 1, M.Y1))), hh0 = curHist();
+      const yy = String(RPI !== null ? HISTORY.hist[RPI].y : Math.max(M.Y0, Math.min(gs.y - 1, M.Y1))), hh0 = curHist();
       if ($('yb-year').textContent !== yy) { const el = $('yb-year'); el.textContent = yy; el.classList.remove('pulse'); void el.offsetWidth; el.classList.add('pulse'); }
       $('yb-sub').textContent = eraName(Number(yy), hh0 ? hh0.P : 4.2); $('g-date').textContent = yy;
-      $('yb-fill').style.width = clamp((gs.hist.length + game.frac) / TOTAL) * 100 + '%';
+      $('yb-fill').style.width = clamp(RPI !== null ? RPI / TOTAL : (gs.hist.length + game.frac) / TOTAL) * 100 + '%';
       const hh = curHist();
       $('g-pop').textContent = '🕊️ ' + popText(hh ? hh.P : 4.2);
       $('m-pop').style.width = popBar(vis.P) * 100 + '%';

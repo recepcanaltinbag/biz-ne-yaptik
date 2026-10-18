@@ -1085,7 +1085,7 @@
     if (toastQueue.length > 4) toastQueue.splice(0, toastQueue.length - 4);
     // okuma süresi metnin uzunluğuna göre; durduran kartlar oyuncu kapatana kadar kalır
     const plain = text.replace(/<[^>]+>/g, '');
-    if (!opt.pause) setTimeout(close, Math.min(16000, Math.max(opt.ms || 0, 4500 + plain.length * 65)) / Math.sqrt(game.speed || 1)); // hız arttıkça kart da kısa kalır
+    if (!opt.pause) setTimeout(close, Math.min(16000, Math.max(opt.ms || 0, 1500 + plain.length * 83)) / (typeof FAST === 'number' ? FAST : 1)); // okuma süresi: saniyede ~12 karakter (oyun hızından bağımsız)
   }
 
   // =====================================================================
@@ -1139,8 +1139,8 @@
   // oyun akarken olayları adım adım anlatan kartlar
   const POSTER = '../../assets/img/cards/kill-bird-and-insect.jpg';
   const STORY = [
-    [0, '🇨🇳', 'Çin', 'Mao Zedong <b>Büyük İleri Atılım</b>\'ı başlattı. Hedef birkaç yılda sanayileşmek, tarımda rekor kırmak.', '', { pause: true }],
-    [0, '', 'Dört Zararlı Kampanyası', 'Dört düşman ilan edildi: <b>fare, sinek, sivrisinek ve serçe</b>. Serçenin suçu tahıl yemek.', '', { img: POSTER, pause: true }],
+    [0, '🇨🇳', 'Çin', 'Mao Zedong <b>Büyük İleri Atılım</b>\'ı başlattı. Hedef birkaç yılda sanayileşmek, tarımda rekor kırmak.', '', { pause: false }],
+    [0, '', 'Dört Zararlı Kampanyası', 'Dört düşman ilan edildi: <b>fare, sinek, sivrisinek ve serçe</b>. Serçenin suçu tahıl yemek.', '', { img: POSTER, pause: false }],
     [13500, '🥁', 'Yöntem', 'Köylüler tencere çalınca serçeler konamıyor. <b>%20\'ye kadar</b> ses onları yalnız korkutur; daha fazlası yorup düşürür. Ne kadar çok tencere, o kadar az serçe.', '', { ms: 9000 }],
     [21000, '🌾', 'Tarladan not', 'Bu tarlada tahıl büyüyor, böcekler tahılı yiyor, serçeler de böcekleri. Bunu aklının bir köşesinde tut.', '', { ms: 9000 }],
     [28000, '📻', 'Pekin', 'Kampanya başladı. 1958 kotası: köy başına <b>25 serçe</b>. Seferberliği sen ayarla.', 'warn', { ms: 9000 }],
@@ -1175,8 +1175,8 @@
         if (!opt.pause) setTimeout(() => show(i + 1), 9000 / Math.max(1, FAST / 2));
       };
       game.reading++;
-      const start = () => { game.reading = Math.max(0, game.reading - 1); setTimeout(() => show(0), 300); };
-      if (window.Mission && !window.__mSeen && (window.__mSeen = 1)) window.Mission.show($('modal'), MISSION, start); else start();
+      const start = () => { game.reading = Math.max(0, game.reading - 1); setTimeout(() => histFilm(() => show(0)), 300); };
+      start(); // görev kartı yok: hedef, tarih filmi bitince 'şimdi sen' kartında
     }
   }
 
@@ -1196,7 +1196,7 @@
 
   // köylülerin tenceresiyle düşen her serçe kotaya yazılır
   function onKill(b) {
-    if (mode !== 'game' || !game.campaign) return;
+    if (mode !== 'game' || !game.campaign || RPI !== null) return; // tarih filmindeki serçeler kotaya yazılmaz
     game.totalKills++; game.yearKills++;
     floats.push({ x: b.x, y: b.y - 14 * U, text: '+1', life: 1 });
     renderQuota();
@@ -1209,7 +1209,26 @@
 
   function monthDur() { return (isWarm(calMonth(gs.m)) ? MONTH_WARM : MONTH_COLD) * (gs.m < 2 ? 1.7 : 1) / game.speed; }
 
+  // 📼 önce tarih: tarihteki seferberlikle (1958–59 tam, sonra yarım) hızlı film; köylüler tarihteki gibi tencere çalar
+  let RPI = null;
+  function replayPol(i) {
+    if (i === null) { gK.value = 10; readGameSliders(); game.campaign = true; game.totalKills = 0; game.yearKills = 0; game.maxK = 0; birds.forEach(b => { b.fallen = false; b.leave = false; }); return; } // film oyuncunun hesabına yazılmaz
+    gK.value = i < 14 ? 100 : i < 26 ? 50 : 0; readGameSliders(); game.campaign = i < 26;
+  }
+  function histFilm(then) {
+    if (wasDone || !window.SceneUtils || !window.SceneUtils.replay) return then();
+    game.reading++;
+    window.SceneUtils.replay({ n: TOTAL, ms: 14000, yearAt: i => calYear(i), news: { 1958: ['🥁', 'Dört Zararlı Kampanyası: serçeye savaş'], 1959: ['🦗', 'Serçe kalmadı, çekirgeler tarlaları yedi'], 1960: ['🍚', 'Kıtlık büyüdü; serçe listeden çıkarıldı'] },
+      onIndex: i => { RPI = i; replayPol(i); },
+      card: () => ['⏪', '1958 · şimdi sen', 'Tarihte serçeler bitince böcekler patladı, hasatlar çöktü. <b>Hedefin:</b> 3 hasatta tahılı koru, Pekin\'i kızdırma. Daha iyisini yapabilir misin?'],
+      showCard: (ic, fr, tx, th) => showToast(ic, fr, tx, '', { pause: true, then: () => {
+        const sl = document.querySelector('.slide.active .gpanel .sl:not(.locked)');
+        const go = () => { game.reading = Math.max(0, game.reading - 1); th(); };
+        if (sl && window.SceneUtils.tour && MISSION && MISSION.control) window.SceneUtils.tour([{ el: sl, text: MISSION.control }], go); else go();
+      } }), then });
+  }
   function updateGame(dt) {
+    if (RPI !== null) return; // tarih filmi oynuyor
     if (mode !== 'game' || game.paused || game.reading || game.state !== 'play' || gs.m >= TOTAL) return;
     // kart okunurken zaman yavaşlar; yapılacak bir şey yokken hızlanır
     const visible = $('toasts').querySelector('.toast:not(.out)');
@@ -1559,11 +1578,15 @@
   const target = { S: 1, P: 0.6, Fr: 1, warm: 1 };
   let last = performance.now(), bgTick = 0, lastBg = '';
   function frame(now) {
-    const dt = Math.min(50, now - last); last = now;
+    const dt = Math.max(0, Math.min(50, now - last)); last = now;
     updateGame(dt); updateSandbox(dt);
 
     // hangi dünya gösteriliyor?
-    if (mode === 'game' || mode === 'result') {
+    if (RPI !== null && mode === 'game') {
+      const hh = HISTORY.hist[RPI], base = RPI > 0 ? BASE.hist[RPI - 1].F : 1;
+      Object.assign(target, { S: hh.S, P: hh.P, Fr: clamp(hh.F / base), warm: isWarm(calMonth(RPI)) ? 1 : 0 });
+      vis.c = 2 + RPI;
+    } else if (mode === 'game' || mode === 'result') {
       const base = gs.m > 0 ? BASE.hist[gs.m - 1].F : 1;
       Object.assign(target, { S: gs.S, P: gs.P, Fr: clamp(gs.F / base), warm: isWarm(calMonth(Math.min(gs.m, TOTAL - 1))) ? 1 : 0 });
       vis.c = 2 + Math.min(gs.m, TOTAL) + (game.state === 'play' ? game.frac : 0);
@@ -1586,7 +1609,7 @@
 
     // HUD ve arka plan rengi
     if (mode === 'game') {
-      const mm = Math.min(gs.m, TOTAL - 1);
+      const mm = RPI !== null ? RPI : Math.min(gs.m, TOTAL - 1);
       $('g-date').textContent = `${MONTHS[calMonth(mm)]} ${calYear(mm)}`;
       const yy = String(calYear(mm));
       if ($('yb-year').textContent !== yy) { const el = $('yb-year'); el.textContent = yy; el.classList.remove('pulse'); void el.offsetWidth; el.classList.add('pulse'); }

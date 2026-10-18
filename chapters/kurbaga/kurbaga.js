@@ -695,7 +695,7 @@
     box.appendChild(el);
     while (box.children.length > 3) box.firstChild.remove();
     const plain = text.replace(/<[^>]+>/g, '');
-    if (!opt.pause) setTimeout(close, Math.min(16000, Math.max(opt.ms || 0, 4500 + plain.length * 65)) / FAST / Math.sqrt(game.speed || 1)); // hız arttıkça kart da kısa kalır
+    if (!opt.pause) setTimeout(close, Math.min(16000, Math.max(opt.ms || 0, 1500 + plain.length * 83)) / FAST); // okuma süresi: saniyede ~12 karakter (oyun hızından bağımsız)
   }
 
   // =====================================================================
@@ -805,7 +805,31 @@
       setTimeout(ask, 1600);
     };
     };
-    if (window.Mission && !window.__mSeen && (window.__mSeen = 1)) window.Mission.show($('modal'), MISSION, go); else go();
+    // 📼 önce tarih: kurbağalar 1935–2025 kıtaya yayılır (kayıttaki en batı / en güney noktadan); sonra 'şimdi sen' kartı
+    if (wasDone || !window.Cinema) return go();
+    const Hh = HISTORY.hist, last = Hh[Hh.length - 1];
+    const OZ = [[0.08, 0.42], [0.14, 0.3], [0.3, 0.2], [0.42, 0.1], [0.5, 0.13], [0.55, 0.05], [0.62, 0.15], [0.7, 0.08], [0.78, 0.02], [0.82, 0.2], [0.9, 0.35], [0.97, 0.5], [0.95, 0.68], [0.85, 0.85], [0.76, 0.9], [0.66, 0.82], [0.56, 0.74], [0.44, 0.7], [0.3, 0.74], [0.16, 0.78], [0.08, 0.68], [0.05, 0.55]];
+    const lonX = lon => (lon - 113) / 41, latY = lat => (-10 - lat) / 34;
+    const mapShot = (g, t, W, H, k) => {
+      const Wm = Math.min(W * 0.8, H * 0.95), Hm = Wm * 0.85, ox = (W - Wm) / 2, oy = H * 0.12, X = v => ox + v * Wm, Y = v => oy + v * Hm;
+      g.fillStyle = '#9cc4dc'; g.fillRect(0, 0, W, H);
+      g.beginPath(); OZ.forEach(([x, y], i) => i ? g.lineTo(X(x), Y(y)) : g.moveTo(X(x), Y(y))); g.closePath(); g.fillStyle = '#e8d8a8'; g.fill();
+      const i = Math.min(Hh.length - 1, Math.floor(k * Hh.length)), h = Hh[i];
+      g.save(); g.clip(); g.fillStyle = 'rgba(122,82,40,.72)'; const x0 = X(lonX(h.west)), y1 = Y(latY(h.south));
+      // kuzey bandı batıya (en batı nokta), doğu kıyısı güneye (en güney nokta) uzanır
+      const north = Y(latY(-20.5)), eastX = X(lonX(Math.max(141, Math.min(150, h.west + 4))));
+      g.beginPath(); g.rect(x0, Y(0), X(1.05) - x0, Math.max(0, Math.min(north, y1) - Y(0))); g.rect(eastX, Y(0), X(1.05) - eastX, Math.max(0, y1 - Y(0))); g.fill(); g.restore();
+      g.fillStyle = '#c0503a'; g.beginPath(); g.arc(X(0.82), Y(0.2), 5, 0, 6.283); g.fill();
+      window.Cinema.fx.stamp(g, W, H, String(h.year), 1, { x: W * 0.84, y: H * 0.22, fs: Math.min(W, H) * 0.08, rot: 0, fade: false, col: '#2b3a2e' });
+      g.font = `${Math.min(W, H) * 0.035}px "Patrick Hand"`; g.textAlign = 'center'; g.fillStyle = '#2b3a2e';
+      g.fillText(`🐸 ${Math.round(h.toads / 1e6) >= 1 ? Math.round(h.toads / 1e6) + ' milyon' : Math.round(h.toads / 1000) + ' bin'} kurbağa · yerli yırtıcı %${Math.round(h.pred * 100)}`, W / 2, Y(1.02));
+    };
+    const FILM = { id: 'kur-tarih', year: '1935', title: 'Önce tarih: gerçekte ne oldu?', shots: [
+      { dur: 4200, bg: '#5a8ab0', text: 'Hawaii\'den bir gemi: 102 kamış kurbağası, kamış böceğini yesin diye.', draw: (g, t, W, H, k) => { g.fillStyle = '#4a7aa0'; g.fillRect(0, H * 0.6, W, H); const x = W * (0.1 + 0.6 * k), y = H * 0.6 + Math.sin(t * 0.002) * 4; g.fillStyle = '#5a3a2a'; g.beginPath(); g.moveTo(x - 90, y - 10); g.lineTo(x + 90, y - 10); g.lineTo(x + 70, y + 22); g.lineTo(x - 70, y + 22); g.fill(); g.fillStyle = '#3a3a3a'; g.fillRect(x - 10, y - 60, 20, 50); g.fillStyle = 'rgba(200,200,200,.6)'; g.beginPath(); g.arc(x, y - 70 - (t % 1500) / 50, 10, 0, 6.28); g.fill(); } },
+      { dur: 10000, text: 'Kurbağalar böceği yemedi; kıtaya yayıldı. Onları yiyen yerli yırtıcılar zehirlendi.', draw: mapShot },
+      { dur: 4500, bg: '#e8d8a8', text: `${last.year}: kıtanın %${Math.round(last.areaPct)}'u kurbağaların. Yerli yırtıcıların yalnız %${Math.round(last.pred * 100)}'i kaldı.`, draw: (g, t, W, H) => mapShot(g, t, W, H, 1) },
+    ] };
+    window.Cinema.play(FILM, () => showToast('⏪', '1935 · şimdi sen', `Tarihte yerli yırtıcıların <b>%${Math.round(last.pred * 100)}</b>'i kaldı. <b>Hedefin:</b> ${MISSION.goal} Kurtarıcıyı salacak mısın?`, '', { pause: true, then: go }));
   }
 
   function askRelease() {
@@ -1124,7 +1148,7 @@
   // çizim hatası döngüyü durdurmasın
   function frame(now) { try { frame0(now); } catch (e) { if (!frame.err) { frame.err = 1; console.error(e); } requestAnimationFrame(frame); } }
   function frame0(now) {
-    const dt = Math.min(FAST > 1 ? 1000 : 50, now - last); last = now;
+    const dt = Math.max(0, Math.min(FAST > 1 ? 1000 : 50, now - last)); last = now;
     updateGame(dt); updateSandbox(dt);
     ctx.clearRect(0, 0, W, H);
     let st = null;

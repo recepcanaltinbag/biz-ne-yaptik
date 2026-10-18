@@ -809,7 +809,7 @@
     box.appendChild(el);
     while (box.children.length > 3) box.firstChild.remove();
     const plain = text.replace(/<[^>]+>/g, '');
-    if (!opt.pause) setTimeout(close, Math.min(16000, Math.max(opt.ms || 0, 4500 + plain.length * 65)) / Math.sqrt(game.speed || 1)); // hız arttıkça kart da kısa kalır
+    if (!opt.pause) setTimeout(close, Math.min(16000, Math.max(opt.ms || 0, 1500 + plain.length * 83)) / (typeof FAST === 'number' ? FAST : 1)); // okuma süresi: saniyede ~12 karakter (oyun hızından bağımsız)
   }
 
   // =====================================================================
@@ -877,8 +877,8 @@
 
   const MOYNAQ = '../../assets/img/cards/moynaq-aral-sea-6226807306.jpg';
   const STORY = [
-    ['🌊', 'Aral Gölü · 1960', 'Dünyanın <b>4. büyük gölü</b>. Kıyıda balıkçı kasabası Moynak.', '', { pause: true }],
-    ['🏛️', 'Moskova', 'Pamuk istiyoruz! Pamuk için su lazım: suyu gölü besleyen nehirden alacaksın.', '', { pause: true }],
+    ['🌊', 'Aral Gölü · 1960', 'Dünyanın <b>4. büyük gölü</b>. Kıyıda balıkçı kasabası Moynak.', '', { pause: false }],
+    ['🏛️', 'Moskova', 'Pamuk istiyoruz! Pamuk için su lazım: suyu gölü besleyen nehirden alacaksın.', '', { pause: false }],
     ['📋', 'Plan', '1965 hedefi: pamuk <b>1,3×</b>. Hedef sol üstte.', 'warn', { ms: 7000 }],
   ];
   function enterGame() {
@@ -893,11 +893,29 @@
       toast(ic, from, text, tone, { ...opt, then: opt.pause ? () => show(i + 1) : undefined });
       if (!opt.pause) setTimeout(() => show(i + 1), 6500 / Math.max(1, FAST / 2));
     };
-    const start = () => { if (wasDone) game.story = false; setView("map", 7000); setTimeout(() => show(0), 300); };
-    if (window.Mission && !window.__mSeen && (window.__mSeen = 1)) window.Mission.show($('modal'), MISSION, start); else start();
+    const start = () => { if (wasDone) game.story = false; setTimeout(() => histFilm(() => { setView("map", 7000); show(0); }), 300); };
+    start(); // görev kartı yok: hedef, tarih filmi bitince 'şimdi sen' kartında
   }
 
+  // 📼 önce tarih: tarihteki ayarlarla hızlı film (ortak modül), sonra 'şimdi sen' kartı; tekrar oynayana gösterilmez
+  let RPI = null;
+  // film sırasında kaydırıcılar tarihteki ayarı gösterir; film bitince oyuncunun başlangıç ayarına döner
+  function replayPol(i) {
+    if (i === null) { gW.value = 20; gFix.value = 0; readGameSliders(); return; }
+    const hp = M.histP(HISTORY.hist[i].y); gW.value = Math.round(hp.w * 100); readGameSliders();
+  }
+  function histFilm(then) {
+    if (wasDone || !window.SceneUtils || !window.SceneUtils.replay) { game.story = false; return then(); }
+    game.story = true;
+    window.SceneUtils.replay({ n: HISTORY.hist.length, ms: 14000, yearAt: i => HISTORY.hist[i].y, news: { 1965: ["🌱", "Pamuk için nehirlerin suyu tarlalara"], 1982: ["🐟", "Ticari balıkçılık bitti"], 1987: ["✂️", "Göl ikiye ayrıldı"], 2005: ["🧱", "Kokaral seti: Küçük Aral kurtuluyor"] }, onIndex: i => { RPI = i; if (typeof replayPol === 'function') replayPol(i); }, card: () => ['⏪', '1960 · şimdi sen', `Tarihte göl alanının yalnız <b>%${Math.round(HISTORY.hist[HISTORY.hist.length - 1].A / M.A0 * 100)}</b>'i kaldı. <b>Hedefin:</b> pamuk planını tuttur, ama gölü yaşat. Daha iyisini yapabilir misin?`], showCard: (ic, fr, tx, th) => showToast(ic, fr, tx, '', { pause: true, then: () => {
+      // kontroller: ilk kaydırıcı spot ışığıyla tanıtılır (görev kartının yerine)
+      const sl = document.querySelector('.slide.active .gpanel .sl:not(.locked)');
+      const go = () => { game.story = false; th(); };
+      if (sl && window.SceneUtils.tour && MISSION && MISSION.control) window.SceneUtils.tour([{ el: sl, text: MISSION.control + '<br><small style="display:inline;text-align:left">Oynatınca ne olacağını hemen görürsün.</small>' }], go); else go();
+    } }), then });
+  }
   function updateGame(dt) {
+    if (RPI !== null) return; // tarih filmi oynuyor
     if (mode !== 'game' || game.paused || game.reading || game.story || game.state !== 'play' || gs.y > M.Y1) return;
     const visible = $('toasts').querySelector('.toast:not(.out)');
     const pace = visible ? 1.5 : toastQueue.length ? 0.95 : 0.47;
@@ -1159,11 +1177,11 @@
   // =====================================================================
   let last = performance.now(), bgTick = 0, lastBg = '';
   function frame(now) {
-    const dt = Math.min(50, now - last); last = now;
+    const dt = Math.max(0, Math.min(50, now - last)); last = now;
     updateGame(dt); updateSandbox(dt); ambientChat(now);
     if (game.endAfter && game.state === 'play') { game.endAfter = false; endGame(); }
     const src = mode === 'sandbox' ? sb.st : (mode === 'game' || mode === 'result') ? gs : null;
-    const h = src && src.hist.length ? src.hist[src.hist.length - 1] : null;
+    const h = RPI !== null && mode === 'game' ? HISTORY.hist[RPI] : src && src.hist.length ? src.hist[src.hist.length - 1] : null;
     if (h) Object.assign(target, { A: h.A / M.A0, sal: h.sal, F: h.F, C: h.C, dust: h.dust, soil: h.soil, Vn: h.Vn || 0, w: mode === 'sandbox' ? sb.p.w : game.w });
     else Object.assign(target, { A: 1, sal: 10, F: 1, C: 1, dust: 0, soil: 1, Vn: 0, w: mode === 'game' ? game.w : 0.2 });
     if (mode === 'game' && !h) target.w = game.w;
@@ -1182,11 +1200,11 @@
 
     if (mode === 'game') {
       // yıl çubuğu son işlenen yılı gösterir; kartlar da o yıla aittir
-      const yy = String(Math.max(M.Y0, Math.min(gs.y - 1, M.Y1)));
+      const yy = String(RPI !== null ? HISTORY.hist[RPI].y : Math.max(M.Y0, Math.min(gs.y - 1, M.Y1)));
       if ($('yb-year').textContent !== yy) { const el = $('yb-year'); el.textContent = yy; el.classList.remove('pulse'); void el.offsetWidth; el.classList.add('pulse'); }
       $('yb-sub').textContent = planName(Math.min(gs.y, M.Y1));
       $('g-date').textContent = yy;
-      $('yb-fill').style.width = clamp((gs.hist.length + game.frac) / TOTAL) * 100 + '%';
+      $('yb-fill').style.width = clamp(RPI !== null ? RPI / TOTAL : (gs.hist.length + game.frac) / TOTAL) * 100 + '%';
       const tgt = targetFor(Math.min(gs.y, M.Y1));
       $('pl-n').textContent = fmtX(vis.C); $('pl-t').textContent = fmtX(tgt);
       $('pl-bar').style.width = clamp(vis.C / tgt) * 100 + '%';
@@ -1207,6 +1225,10 @@
     requestAnimationFrame(frame);
   }
 
+  const arrowTxt = (a, b, f, upGood) => { const better = upGood ? b > a : b < a, same = Math.abs(b - a) < 1e-9 || f(a) === f(b); return `${f(a)} → <b class="${same ? '' : better ? 'up' : 'down'}">${f(b)}</b>`; };
+  function simAral(pol, n = 5) { const st = JSON.parse(JSON.stringify(gs)); st.hist = []; for (let i = 0; i < n && st.y <= M.Y1; i++) M.step(st, { w: pol.w, fix: pol.fix, warm: 1, dam: game.dam ? 1 : 0, q: 1 }); return st.hist[st.hist.length - 1]; }
+  if (window.SceneUtils && window.SceneUtils.watchSliders) window.SceneUtils.watchSliders([gW, gFix], () => ({ w: game.w, fix: game.fix }), (a, b) => { if (mode !== 'game' || !gs.hist.length) return null; const A = simAral(a), B = simAral(b); if (!A || !B) return null;
+    return { html: `▶ <span class="k">5 yıl sonra</span> 🌊 göl ${arrowTxt(A.A / M.A0, B.A / M.A0, v => '%' + Math.round(v * 100), true)} · 🌱 pamuk ${arrowTxt(A.C, B.C, v => v.toFixed(1).replace('.', ',') + '×', true)}` }; });
   resetGame();
   if (wasDone) { paintDots(); replayNav(); }
   if (/[?&]debug\b/.test(location.search)) window.__dbg = { game, sb, vis, SHIPS, camel, puddle, pickers, gags, M, get gs() { return gs; }, get mode() { return mode; }, gag: () => { nextGag = 1; }, go: m => { maxSeen = slides.length; goTo(slideOf(m)); } };

@@ -31,7 +31,9 @@
     el.querySelector('.cine-year').textContent = spec.year || '';
     el.querySelector('.cine-title').textContent = spec.title || '';
     el.querySelector('.cine-credit').textContent = spec.credit || '';
-    const shots = spec.shots.map(s => ({ dur: 4200, ...s, dur: (s.dur || 4200) / FAST }));
+    // kare süresi: yazının yazılması + okunması (saniyede ~12 karakter) kadar en az; dokununca yine geçilir
+    const readMs = t => 1500 + String(t || '').length * (18 + 83);
+    const shots = spec.shots.map(s => ({ ...s, dur: Math.max(s.dur || 4200, readMs(s.text)) / FAST }));
     const total = shots.reduce((a, s) => a + s.dur, 0);
     const imgs = shots.map(s => s.img ? loadImg(s.img) : Promise.resolve(null));
     let W = 0, H = 0, dpr = 1;
@@ -81,7 +83,7 @@
       const bh = Math.max(28, H * 0.09); g.fillStyle = '#000'; g.fillRect(0, 0, W, bh); g.fillRect(0, H - bh, W, bh);
       // alt yazı: daktilo gibi
       if (shown !== i) { shown = i; typed = 0; cap.textContent = ''; cap.classList.remove('in'); void cap.offsetWidth; cap.classList.add('in'); }
-      const txt = capText(), want = Math.min(txt.length, Math.floor(e / (28 / FAST)));
+      const txt = capText(), want = Math.min(txt.length, Math.floor(e / (18 / FAST)));
       if (want !== typed) { typed = want; cap.textContent = txt.slice(0, typed); }
       el.querySelector('.cine-credit').style.opacity = im && s.img ? 0.8 : 0;
       bar.style.width = clamp((shots.slice(0, i).reduce((a, x) => a + x.dur, 0) + e) / total) * 100 + '%';

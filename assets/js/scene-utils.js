@@ -222,12 +222,48 @@ if (/[?&]e2e\b/.test(location.search)) {
     if (plain.length > 96) plain = plain.slice(0, 93).replace(/\s+\S*$/, '') + '…';
     tickEl.innerHTML = `<span class="ic">${ic}</span><span class="tx">${plain}</span>`;
     tickEl.className = 'ticker on ' + (tone || ''); tickEl.title = from || '';
-    clearTimeout(tickT); tickT = setTimeout(() => tickEl && tickEl.classList.remove('on'), ms || 7000);
+    clearTimeout(tickT); tickT = setTimeout(() => tickEl && tickEl.classList.remove('on'), Math.max(ms || 0, readMs(plain, 6000) / (/[?&](hizli|e2e)\b/.test(location.search) ? 8 : 1)));
     return true;
   }
   // tam ekran görünüm (harita, zincir, kutup, mikroskop) açıkken HUD söner; görünüm yıl çubuğunun altından başlar
   let fvOn = false;
   function fullView(on) { on = !!on; if (on === fvOn) return; fvOn = on; document.body.classList.toggle('fullview', on); }
   function viewTop(min = 96) { const yb = document.querySelector('.slide.active .yearbar'); const r = yb && yb.getBoundingClientRect(); return Math.max(min, r && r.height ? r.bottom + 10 : min); }
-  window.SceneUtils = { placed, fullView, viewTop, avoidHud, lineChart, bestLine, yilEk, advise, preview, watchSliders, tour, atmo, decade, decadeReset, ticker };
+  // okuma süresi: saniyede ~12 karakter + 1,5 sn nefes (çocuk okuru için)
+  const readMs = (text, min = 4000) => Math.max(min, 1500 + String(text || '').replace(/<[^>]+>/g, '').length * 83);
+  // 📼 önce tarih: tarihteki ayarlarla hızlı film; haber çıkınca okunacak kadar yavaşlar; sonra geri sarılır
+  // o: { n, ms, yearAt(i), news: { yıl: [ikon, metin] }, onIndex(i | null), card: () => [ikon, kimden, metin], showCard(ikon, kimden, metin, then), then }
+  function replay(o) {
+    const sls = [...document.querySelectorAll('.slide.active .gpanel .sl')]; sls.forEach(el => el.classList.add('replaying'));
+    const b = document.createElement('div'); b.className = 'rbanner'; b.innerHTML = '<span>📼 <b>Önce tarih:</b> gerçekte ne oldu? (hızlı)</span><button type="button">Geç ⏭</button>';
+    document.body.appendChild(b);
+    const pnl = document.querySelector('.slide.active .gpanel'); if (pnl) b.style.bottom = (innerHeight - pnl.getBoundingClientRect().top + 10) + 'px';
+    const FASTK = /[?&](hizli|e2e)\b/.test(location.search) ? 8 : 1;
+    let i = 0, phase = 'play', hold = 0, endHold = 0, rw = 0, from = 0, last = performance.now(), done = false, lastY = o.yearAt(0) - 1;
+    const step = o.ms / o.n;
+    b.querySelector('button').onclick = () => { if (phase === 'play') { phase = 'rewind'; from = i; rw = 0; b.querySelector('span').innerHTML = '⏪ <b>Geri sarılıyor…</b>'; } };
+    function tick(now) {
+      if (done) return;
+      const dt = Math.max(0, Math.min(50, now - last)); last = now;
+      if (phase === 'play') {
+        if (hold > 0) hold -= dt * FASTK;
+        else {
+          i = Math.max(0, Math.min(o.n - 1, i + dt / step)); const y = o.yearAt(Math.floor(i));
+          for (let yy = lastY + 1; yy <= y; yy++) if (o.news && o.news[yy]) { const [ic, tx] = o.news[yy], text = `${yy}: ${tx}`, ms = readMs(text, 3500); ticker(ic, 'Tarih', text, 'warn', ms / FASTK); hold = ms * 0.8; }
+          lastY = y;
+          if (i >= o.n - 1) { endHold += dt * FASTK; if (endHold > 1500) { phase = 'rewind'; from = i; rw = 0; b.querySelector('span').innerHTML = '⏪ <b>Geri sarılıyor…</b>'; } }
+        }
+        o.onIndex(Math.floor(i));
+      } else {
+        rw += dt * FASTK; const k = Math.min(1, rw / 1500); i = from * (1 - k); o.onIndex(Math.floor(i));
+        if (k >= 1) {
+          done = true; b.remove(); sls.forEach(el => el.classList.remove('replaying')); o.onIndex(null);
+          const [ic, fr, tx] = o.card(); o.showCard(ic, fr, tx, o.then); return;
+        }
+      }
+      requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  }
+  window.SceneUtils = { readMs, replay, placed, fullView, viewTop, avoidHud, lineChart, bestLine, yilEk, advise, preview, watchSliders, tour, atmo, decade, decadeReset, ticker };
 })();
