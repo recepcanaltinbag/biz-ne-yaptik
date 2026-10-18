@@ -167,6 +167,7 @@
     drawBeach(G, t);
     drawScientist(G, t);
     drawMols(G, t, dt);
+    if (window.SceneUtils && window.SceneUtils.atmo && (mode === 'game' || mode === 'title')) window.SceneUtils.atmo(ctx, G.x1, H, { year: (mode === 'game' ? Math.max(M.Y0, gs.y - 1) : M.Y0 + 40), bad: vis.bad }); // dönem rengi ve kriz
     drawLabels(G);
     drawOfficial(G, t);
     if (view.k > 0.01) drawPole(G, t, dt, view.k);
@@ -299,7 +300,7 @@
     if (official && official.x) add(official.x, official.y, 'official');
     if (!c.length) return false;
     c.sort((a, b) => a.d - b.d);
-    sayAt(c[0].obj, pick(SAY[c[0].kind] || ['...'])); blip(); if (c[0].fn) c[0].fn();
+    sayAt(c[0].obj, pick(SAY[c[0].kind] || ['...'])); blip(); if (c[0].fn) c[0].fn(); if (window.Camera) window.Camera.focus(c[0].obj.x, c[0].obj.y + 30 * U); // dokunulan yere yakınlaş
     return true;
   }
   let nextChat = 0;
@@ -456,8 +457,8 @@
     readPolicy();
     $('g-pause').textContent = '❚❚ Durdur'; setSpeed(1);
     $('modal').hidden = true; $('yb-harvest').textContent = ''; $('toasts').innerHTML = ''; toastQueue.length = 0; lastToastAt = -1e9;
-    $('g-intro').classList.remove('gone'); $('g-rec').textContent = ''; if (window.SceneUtils) window.SceneUtils.advise('Önce kanıt lazım: bilime puan ayır');
-    if (window.Badges) window.Badges.resetSession(); tapCount.m = {};
+    $('g-intro').classList.remove('gone'); $('g-rec').textContent = ''; if (window.SceneUtils && window.SceneUtils.advise) window.SceneUtils.advise('Önce kanıt lazım: bilime puan ayır');
+    if (window.Badges) window.Badges.resetSession(); tapCount.m = {}; if (window.SceneUtils && window.SceneUtils.decadeReset) window.SceneUtils.decadeReset();
     choiceQ.length = 0; official = null; mols.length = 0; puffs.length = 0; setView('scene');
   }
   // ortak bütçe: 100 puan; aşan kaydırıcı sığdığı kadar kalır
@@ -470,6 +471,20 @@
     $('g-budget').textContent = Math.max(0, Math.round(100 - used)) + ' puan boşta';
     game.used = used;
   }
+  const arrowTxt = (a, b, f, upGood) => { const better = upGood ? b > a : b < a, same = Math.abs(b - a) < 1e-9 || f(a) === f(b); return `${f(a)} → <b class="${same ? '' : better ? 'up' : 'down'}">${f(b)}</b>`; };
+  function simOz(pol) {
+    const st = JSON.parse(JSON.stringify(gs));
+    const P = { ...pol, S: game.S, cheat: 0, hcfc: game.hcfc ? 1 : 0 };
+    const rec = M.recoveryYear(st, P);
+    const s5 = JSON.parse(JSON.stringify(gs)); for (let i = 0; i < 5 && s5.y <= M.Y1; i++) M.step(s5, P);
+    return { rec: rec === null ? 0 : rec, signed: s5.sign.filter(Boolean).length };
+  }
+  if (window.SceneUtils && window.SceneUtils.watchSliders) window.SceneUtils.watchSliders(Object.values(SL), () => game.p, (a, b) => {
+    if (mode !== 'game' || !gs.hist.length) return null;
+    const A = simOz(a), B = simOz(b);
+    const yr = v => v >= 9999 ? 'kapanmıyor' : v > 2150 ? '2150+' : v ? String(v) : '—';
+    return { html: `▶ <span class="k">kapanış tahmini</span> ${arrowTxt(A.rec || 9999, B.rec || 9999, yr, false)} · <span class="k">5 yıl sonra imza</span> ${arrowTxt(A.signed, B.signed, v => v + '/7', true)}` };
+  });
   Object.entries(SL).forEach(([k, el]) => el.addEventListener('input', () => { initAudio(); game.moved[k] = 1; readPolicy(k); if (!game.touched) { game.touched = true; setTimeout(() => $('g-intro').classList.add('gone'), 2500); } }));
   $('g-pause').onclick = () => { game.paused = !game.paused; $('g-pause').textContent = game.paused ? '▶ Devam' : '❚❚ Durdur'; };
   $('g-view').onclick = e => { e.stopPropagation(); initAudio(); setView(view.want === 'pole' ? 'scene' : 'pole'); };
@@ -488,6 +503,47 @@
   function once(key, fn) { if (game.fired && !game.fired.has(key)) { game.fired.add(key); fn(); } }
   const milestone = (ic, from, text, tone, then) => { if (game.speed > 1) setSpeed(1); showToast(ic, from, text, tone, { pause: true, then }); };
   const comeOfficial = (who, say) => { official = { t0: performance.now(), leave: 0, who, say }; };
+  function guide(steps, then) {
+    if (!window.SceneUtils || !window.SceneUtils.tour || wasDone) { if (then) then(); return; }
+    game.reading = (game.reading || 0) + 1;
+    window.SceneUtils.tour(steps, () => { game.reading = Math.max(0, game.reading - 1); if (then) then(); });
+  }
+  // sinematik sahne: oyun durur, atlanabilir; bölümü bitiren tekrar oynarken atlanır
+  function cine(spec, then) {
+    if (!window.Cinema) { if (then) then(); return; }
+    if (game.speed > 1) setSpeed(1);
+    game.reading = (game.reading || 0) + 1;
+    window.Cinema.play({ skipIfSeen: wasDone, ...spec }, () => { game.reading = Math.max(0, game.reading - 1); if (then) then(); });
+  }
+  const CINE = {
+    hole: { id: 'ozon-1985', year: '1985', title: 'Halley İstasyonu, Antarktika', credit: 'NASA, kamu malı', shots: [
+      { dur: 4600, bg: '#0e1a2e', text: 'Antarktika. İngiliz araştırmacılar 1957\'den beri her gün gökyüzündeki ozonu ölçüyor.', draw: (g, t, W, H, k) => {
+        g.fillStyle = '#e8eef4'; g.fillRect(0, H * 0.68, W, H); g.fillStyle = '#c9d6e2'; g.beginPath(); g.moveTo(0, H * 0.7); for (let x = 0; x <= W; x += 40) g.lineTo(x, H * 0.68 + Math.sin(x * 0.02) * 8); g.lineTo(W, H); g.lineTo(0, H); g.fill();
+        g.fillStyle = '#c0503a'; g.fillRect(W * 0.62, H * 0.56, W * 0.12, H * 0.12); g.fillStyle = '#8a3a2a'; g.fillRect(W * 0.6, H * 0.54, W * 0.16, H * 0.03);
+        const x = W * 0.45, y = H * 0.68; g.fillStyle = '#e07a3a'; g.fillRect(x - 10, y - 46, 20, 30); g.fillStyle = '#f2d2b0'; g.beginPath(); g.arc(x, y - 54, 9, 0, 6.28); g.fill();
+        g.fillStyle = '#556'; g.fillRect(x + 16, y - 40, 26, 22); g.strokeStyle = '#334'; g.lineWidth = 3; g.beginPath(); g.moveTo(x + 29, y - 40); g.lineTo(x + 36 + Math.sin(t * 0.002) * 4, y - 70); g.stroke();
+        for (let i = 0; i < 40; i++) { g.fillStyle = 'rgba(255,255,255,.8)'; g.fillRect((i * 137 + t * 0.03) % W, (i * 71 + t * 0.06) % (H * 0.68), 2, 2); } } },
+      { dur: 4800, bg: '#f4ecd8', text: 'Her ilkbahar ozon biraz daha az. 1984\'te ekim ayındaki ozonun üçte biri gitmiş.', draw: (g, t, W, H, k) => {
+        const x0 = W * 0.14, x1 = W * 0.86, y0 = H * 0.25, y1 = H * 0.72; g.strokeStyle = '#3a3a3a'; g.lineWidth = 2; g.beginPath(); g.moveTo(x0, y0); g.lineTo(x0, y1); g.lineTo(x1, y1); g.stroke();
+        g.font = `${Math.max(12, H * 0.025)}px "Patrick Hand"`; g.fillStyle = '#3a3a3a'; g.fillText('1957', x0, y1 + H * 0.04); g.fillText('1984', x1 - 30, y1 + H * 0.04); g.fillText('ozon', x0 - 10, y0 - 10);
+        const n = 28, m = Math.floor(n * Math.min(1, k * 1.3)); g.strokeStyle = '#3a6ab0'; g.lineWidth = 4; g.beginPath();
+        for (let i = 0; i <= m; i++) { const f = i / n, v = 1 - (f < 0.6 ? 0.05 * f : 0.03 + 0.55 * Math.pow((f - 0.6) / 0.4, 1.6)) + Math.sin(i * 2.1) * 0.02; const X = x0 + (x1 - x0) * f, Y = y0 + (y1 - y0) * (1 - v) * 0.9 + 10; i ? g.lineTo(X, Y) : g.moveTo(X, Y); } g.stroke(); } },
+      { img: '../../assets/img/cards/hole-in-the-ozone-layer-over-antarctica-gpn-2002-000117.jpg', kb: [0.5, 0.5, 1.0, 0.5, 0.48, 1.35], dur: 5000, text: 'Uydudan bakınca: Antarktika\'nın üstünde her baharda açılan bir delik.' },
+    ] },
+    sign: { id: 'ozon-1987', year: '1987', title: 'Montreal', shots: [
+      { dur: 4200, bg: '#2a2622', text: 'Montreal, eylül 1987. Ülkeler ilk kez gökyüzü için aynı masada.', draw: (g, t, W, H, k) => {
+        const pan = -k * W * 0.15; g.translate(pan, 0);
+        const cols = BLOCS.map(b => b.col); for (let i = 0; i < 7; i++) { const x = W * (0.18 + i * 0.12); g.strokeStyle = '#8a7a6a'; g.lineWidth = 3; g.beginPath(); g.moveTo(x, H * 0.2); g.lineTo(x, H * 0.52); g.stroke(); g.fillStyle = cols[i]; g.fillRect(x, H * 0.2 + Math.sin(t * 0.002 + i) * 3, W * 0.07, H * 0.08); }
+        g.fillStyle = '#6a4a30'; g.fillRect(W * 0.08, H * 0.62, W * 1.0, H * 0.06);
+        for (let i = 0; i < 7; i++) { const x = W * (0.16 + i * 0.12); g.fillStyle = cols[i]; g.fillRect(x - 12, H * 0.52, 24, H * 0.1); g.fillStyle = '#e9c49d'; g.beginPath(); g.arc(x, H * 0.5, 11, 0, 6.28); g.fill(); } } },
+      { dur: 4400, bg: '#f4ecd8', text: 'Bir imza. Etkisini görmek onlarca yıl sürecek.', draw: (g, t, W, H, k) => {
+        g.fillStyle = '#fffaf0'; g.fillRect(W * 0.2, H * 0.18, W * 0.6, H * 0.64); g.strokeStyle = '#ccc4b0'; g.lineWidth = 1; for (let y = H * 0.26; y < H * 0.6; y += H * 0.04) { g.beginPath(); g.moveTo(W * 0.26, y); g.lineTo(W * 0.74, y); g.stroke(); }
+        g.font = `${Math.max(14, H * 0.035)}px "Patrick Hand"`; g.fillStyle = '#3a3a3a'; g.fillText('MONTREAL PROTOKOLÜ', W * 0.34, H * 0.24);
+        const m = Math.floor(60 * Math.min(1, k * 1.4)); g.strokeStyle = '#1a2a6a'; g.lineWidth = 3; g.beginPath(); let px = 0, py = 0;
+        for (let i = 0; i <= m; i++) { const f = i / 60; px = W * (0.4 + 0.25 * f); py = H * 0.7 + Math.sin(f * 18) * H * 0.025 * (1 - f * 0.5); i ? g.lineTo(px, py) : g.moveTo(px, py); } g.stroke();
+        g.fillStyle = '#2a2a2a'; g.save(); g.translate(px, py); g.rotate(-0.7); g.fillRect(-3, -60, 6, 60); g.restore(); } },
+    ] },
+  };
 
   const STORY = [
     ['🔬', '1974', 'İki kimyager, Molina ve Rowland, uyarıyor: buzdolabı ve spreylerdeki <b>CFC</b> gazları yükselip <b>ozon tabakasını</b> yıkabilir. Ozon, Güneş\'in zararlı UV ışınını süzer.', '', { pause: true }],
@@ -502,7 +558,11 @@
       if (i >= STORY.length) { game.story = false; return; }
       const [ic, from, text, tone, opt0] = STORY[i];
       const opt = wasDone ? { ...opt0, pause: false, ms: 6000 } : opt0;
-      if (i === 1) BLOCS.forEach((b, k) => setTimeout(() => pulseAt(() => [seats[k].sx, seats[k].sy - 20 * U], '#4f9a7a'), k * 250));
+      if (i === 1) { guide([
+        { key: 'table', rect: () => { const G = geo(); return G.table ? [G.table.tx0 - 20 * U, G.table.ty - 80 * U, G.table.tx1 - G.table.tx0 + 40 * U, 100 * U] : [0, 0, 0, 0]; }, text: '🤝 Her delegenin başındaki çubuk <b>ikna</b>. Kırmızı çizgiyi geçen, anlaşma açılınca imzalar.' },
+        { el: '#g-adv', text: '💡 Burada her yıl <b>şimdi ne yapman gerektiği</b> yazar.' },
+        { el: '#w-sci', text: '🔬 Önce <b>bilim</b>: kanıt olmadan kimse ikna olmaz. Kaydırıcıyı oynatınca ne olacağını hemen görürsün.' },
+      ], () => show(i + 1)); return; }
       toast(ic, from, text, tone, { ...opt, then: opt.pause ? () => show(i + 1) : undefined });
       if (!opt.pause) setTimeout(() => show(i + 1), 4500 / Math.max(1, FAST / 2));
     };
@@ -540,11 +600,17 @@
   }
   function conference(y) {
     comeOfficial('tolba', 'Delegeler salonda.');
-    if (y === 1987) choice('UNEP Başkanı Mostafa Tolba', 'Montreal Konferansı', '"Dünyanın önde gelen ülkeleri masada. Anlaşma ne kadar sıkı olsun? Sıkı anlaşma ozonu çabuk korur, ama bazı ülkeler imzadan kaçabilir."', [
+    if (y === 1987) { cine(CINE.sign, () => conference87()); return; }
+    conferenceRest(y);
+  }
+  function conference87() {
+    choice('UNEP Başkanı Mostafa Tolba', 'Montreal Konferansı', '"Dünyanın önde gelen ülkeleri masada. Anlaşma ne kadar sıkı olsun? Sıkı anlaşma ozonu çabuk korur, ama bazı ülkeler imzadan kaçabilir."', [
       { label: '½ Yalnız %50 kesinti', sub: 'Kolay imza; ozon yavaş korunur', fn: () => { game.S = 0.2; game.choices.m = 'weak'; } },
       { label: '📉 Kademeli tam yasak', sub: 'Dengeli', fn: () => { game.S = 0.6; game.choices.m = 'mid'; } },
       { label: '⛔ Hemen tam yasak', sub: 'Sanayi kızar; bazıları geç imzalar', fn: () => { game.S = 0.9; game.choices.m = 'strict'; } },
     ], 'tolba');
+  }
+  function conferenceRest(y) {
     if (y === 1990) choice('Londra toplantısı', 'Takvim sıkılaşsın mı?', '"Yeni ölçümler delik büyüyor diyor. CFC\'yi <b>2000\'e kadar</b> tamamen bırakalım mı?"', [
       { label: '⏩ Evet, sıkılaştır', sub: 'Ozon çabuk iyileşir; Avrupa ve Japonya sanayisi kızar', fn: () => { game.S = Math.min(1, game.S + 0.25); [1, 2].forEach(i => gs.p[i] = Math.max(0, gs.p[i] - 0.15)); } },
       { label: '⏸ Şimdilik böyle kalsın', sub: 'Sanayi rahat eder', fn: () => {} },
@@ -578,7 +644,7 @@
     $('yb-harvest').textContent = h.hole > 0.5 ? `🌀 ${f1(h.hole)} Mkm²` : '🛡️ sağlam'; $('yb-harvest').style.color = h.hole < 5 ? 'var(--green)' : h.hole < 18 ? 'var(--grain)' : 'var(--danger)';
     // olaylar
     if (y === 1978) toast('🧴', 'ABD', 'ABD sprey kutularında CFC\'yi yasakladı. Ama buzdolapları ve klimalar sürüyor.', '', { keep: true });
-    if (y === 1985) { setView('pole', 9000); milestone('🧊', 'İngiliz Antarktika araştırmacıları', 'Antarktika\'nın üstünde her baharda ozon incelip bir <b>delik</b> açılıyor! 1957\'den beri ölçüyoruz, şimdi emin olduk.', 'bad'); toast('📜', 'Viyana', 'Ülkeler ozonu korumak için bir çerçeve sözleşmesi imzaladı. Ama henüz yasak yok.', '', { keep: true }); }
+    if (y === 1985) { cine(CINE.hole, () => { setView('pole'); setTimeout(() => guide([{ key: 'pole', el: '#g-view', text: '🌍 Deliğe <b>istediğin zaman</b> buradan bakabilirsin. Her ilkbahar açılır, nefes alır gibi.' }], () => setView('scene', 1)), 900); }); milestone('🧊', 'İngiliz Antarktika araştırmacıları', 'Antarktika\'nın üstünde her baharda ozon incelip bir <b>delik</b> açılıyor! 1957\'den beri ölçüyoruz, şimdi emin olduk.', 'bad'); toast('📜', 'Viyana', 'Ülkeler ozonu korumak için bir çerçeve sözleşmesi imzaladı. Ama henüz yasak yok.', '', { keep: true }); }
     if (y === 1986) conferenceSoon();
     if (y === 1987) toast('🕶️', 'Bir bakan', '"Herkes şapka ve güneş gözlüğü taksın, yeter!" Gazeteler bununla aylarca dalga geçti.', '', { keep: true });
     if (y === 1990) { game.unlocked.fund = true; SL.fund.disabled = false; $('w-fund').classList.remove('locked'); readPolicy(); milestone('💰', 'Gelişmekte olan ülkeler', '"Sizin kirliliğinizi biz mi ödeyeceğiz?" <b>Ozon fonu</b>: zengin ülkeler, yoksul ülkelerin CFC\'yi bırakmasına para verir. Fonsuz Çin ve Hindistan imzalamaz.', '', () => !game.moved.fund && coach(SL.fund, '👉 Kaydır: ozon fonu')); }
@@ -594,11 +660,12 @@
     if (y > 1990 && h.signed === BLOCS.length && y <= 1995) once('all95', () => award('ozon-herkes'));
     if (y === M.Y1) { if (game.rec !== null && game.rec <= GOAL) award('ozon-kapandi'); if (game.caughtTotal >= 2 && game.caughtFast >= 2) award('ozon-kacak'); }
     advise(h);
+    if (y % 10 === 0 && window.SceneUtils && window.SceneUtils.decade) window.SceneUtils.decade(y, ({ 1980: "Spreyler, buzdolapları, klimalar her evde", 1990: "Soğuk Savaş bitiyor", 2000: "Yeni bir yüzyıl", 2010: "CFC neredeyse tamamen bırakıldı", 2020: "Delik yavaşça küçülüyor", 2030: null, 2040: null, 2050: null })[y]);
     if (gs.y > M.Y1 && game.state === 'play') endGame(); else if (gs.y > M.Y1) game.endAfter = true;
   }
   // yol gösterici: o an en önemli tek adım + kapanış tahmini
   function advise(h) {
-    if (!window.SceneUtils) return;
+    if (!window.SceneUtils || !window.SceneUtils.advise) return;
     const y = h.y, r = game.rec, recS = r === null ? '' : ` · tahmin: ${recText(r)}`;
     const unsigned = BLOCS.map((b, i) => i).filter(i => !h.sign[i]);
     const devWait = unsigned.filter(i => BLOCS[i].dev);
@@ -725,6 +792,7 @@
     if (view.until && performance.now() > view.until && !view.user) setView('scene');
     if (mode !== 'game' && mode !== 'result' && view.want === 'pole') setView('scene');
     view.k = lerp(view.k, view.want === 'pole' ? 1 : 0, 1 - Math.pow(0.9, dt / 16));
+    if (window.SceneUtils && window.SceneUtils.fullView) window.SceneUtils.fullView(view.k > 0.5 && mode === 'game');
     const L = layoutFor(mode);
     lay.gt = lerp(lay.gt, L.gt, k * 0.6); lay.gb = lerp(lay.gb, L.gb, k * 0.6); lay.x1 = lerp(lay.x1, L.x1, k * 0.6);
     try { render(now, dt); } catch (e) { if (!frame.err) { frame.err = 1; console.error(e); } } // çizim hatası döngüyü durdurmasın

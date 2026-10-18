@@ -1097,6 +1097,7 @@
     const cs = candidates(); let best = null, bd = Infinity; // en yakın karakter, mesafe sınırı yok
     const onMap = mode === 'sandbox' || mode === 'result' || (mode === 'game' && game.phase === 'map');
     const [px, py] = onMap ? toBase(e.clientX, e.clientY) : [e.clientX, e.clientY];
+    if (!onMap && mode === 'game' && window.Camera) window.Camera.focus(px, py); // tarlada dokunulan yere yakınlaş
     if (onMap && mode === 'game') {
       const [lon, lat] = unP(px, py);
       if (lon > 143.3 && lon < 149.2 && lat < -39.7 && lat > -44.2) {

@@ -352,7 +352,7 @@
     if (!c.length) return false;
     c.sort((a, b) => a.d - b.d);
     const best = c[0];
-    sayAt(best.obj, lines(best.kind)); blip(); if (best.fn) best.fn();
+    sayAt(best.obj, lines(best.kind)); blip(); if (best.fn) best.fn(); if (window.Camera) window.Camera.focus(best.obj.x, best.obj.y + 30 * U); // dokunulan yere yakınlaş
     if (best.kind === 'vir') setTimeout(() => sayAt({ x: doctor.sx, y: doctor.sy }, 'Nezle bir virüs.\nAntibiyotik virüsü öldürmez.'), 2200);
     return true;
   }
@@ -791,6 +791,7 @@
     if (mview.until && performance.now() > mview.until && !mview.user) setMicro(false);
     if (mode !== 'game' && mode !== 'sandbox') mview.want = 0;
     mview.k = lerp(mview.k, mview.want, 1 - Math.pow(0.9, dt / 16));
+    if (window.SceneUtils && window.SceneUtils.fullView) window.SceneUtils.fullView(mview.k > 0.5 && mode === 'game');
     const L = layoutFor(mode);
     lay.gt = lerp(lay.gt, L.gt, k * 0.6); lay.gb = lerp(lay.gb, L.gb, k * 0.6); lay.x1 = lerp(lay.x1, L.x1, k * 0.6);
     try { render(now, dt); } catch (e) { if (!frame.err) { frame.err = 1; console.error(e); } } // çizim hatası döngüyü durdurmasın

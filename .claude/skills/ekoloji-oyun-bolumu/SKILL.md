@@ -7,6 +7,11 @@ description: "Biz Ne Yaptık?" ekoloji oyunu sitesine (~/Documents/ekoloji-oyunu
 
 Bu kurallar kullanıcının geri bildirimleriyle tek tek oturtuldu. Yeni bölümde baştan uygula; sapacaksan kullanıcıya sor.
 
+## ÖNCE OKU: akış şablonu
+Her yeni bölüm ve her elden geçirme **`AKIS.md`** (repo kökünde) şablonuna göre yapılır: kanca sorusu → sinema → 📼 önce tarih → ⏪ şimdi sen → tek araçla tanıt → ihtiyaç anında geliştir → ters köşe → sen ve tarih → resimli hikâye. Kesinti bütçesi ≤ 4, önce göster sonra sor, bilgi nesnenin yanında, aynı bilgi iki yerde değil, hiçbir şey üst üste binmez (e2e çakışma denetimi masaüstü + telefon). Altın örnek: `chapters/tavsan/`.
+- **Kullanıcının bilmediği şeyi açıkla:** Kokaral seti gibi bir yer, araç ya da kavram karar kartında ilk kez geçiyorsa önce haritada / sahnede göster (spot ışığı), sonra sor.
+- **"Gerçekte ne oldu?"** `assets/js/story.js` ile resimli kartlara dönüşür (`<article class="paper" data-img>`, maddeler `<li><b>yıl</b> metin</li>`).
+
 ## Proje
 - Kod: `~/Documents/ekoloji-oyunu` · Repo: `recepcanaltinbag/biz-ne-yaptik` · Yayın: https://recepcanaltinbag.github.io/biz-ne-yaptik/ (GitHub Pages, `main` / kök).
 - Push keychain'deki HTTPS kimliğiyle çalışır (`GIT_TERMINAL_PROMPT=0 git push`). `gh` oturumu yok.
@@ -125,6 +130,23 @@ Bu kurallar kullanıcının geri bildirimleriyle tek tek oturtuldu. Yeni bölüm
   - **Ölü dönemleri hızlandır:** karar olmayan uzun dönemlerde yıl süresi kısalsın; son yıllara da bir karar ya da olay koy.
   - **Kartın sözü modelle tutsun:** "fonsuz imzalamaz" diyorsan modelde de imzalamasın; sonuç metni de seçimlere göre değişsin.
   - **Laboratuvar ön ayarları adını doğrulasın** ("anlaşma olmasaydı" ayarında gerçekten anlaşma olmasın).
+- **Sinematik sahneler (kullanıcının isteği):** önemli tarihî anlarda kısa, atlanabilir bir "film kesiti" (`assets/js/cinema.js`, `Cinema.play(spec, done)`).
+  - **Yapay zekâ üretimi görsel yok.** Yalnız sitede barındırılan arşiv fotoğrafları (kamu malı / CC, atıf `credit` ile gösterilir; `toon.js` ile baskı görünümü, Ken Burns `kb` ile yavaş yakınlaşma) ve kodla çizilen animasyonlar (`draw(g, t, W, H, k)`; `Cinema.fx.birds`, `fx.counter`, `fx.stamp`).
+  - Bölüm başına 2–3 sahne: açılış (ör. 24 tavşan sandıktan çıkar), dönüm noktası (keşif, anlaşma, virüs), gerekiyorsa son (ör. Martha). Her kare ~4–5 sn, 2–3 kare; alt yazı tek cümle.
+  - Sahne oyunu durdurur (`game.reading`), "Atla ⏭" / Esc hepsini geçer, dokunma sonraki kareye geçirir. Bölümü bitiren tekrar oynarken sahne atlanır (`skipIfSeen: wasDone`).
+  - Bölümde `cine(spec, then)` yardımcısını kullan; karar kartından önce sahne gerekiyorsa kartı `then` içinde aç.
+- **Anlaşılırlık (kullanıcı: "bilgi çok ama oyuncu tam anlayamıyor"):**
+  - **Hareket → sonuç hemen görünsün:** kaydırıcı oynayınca "Ne olur?" önizlemesi modeli birkaç yıl ileri koşup önce/sonra sayısını gösterir (`SceneUtils.preview`).
+  - Aynı anda tek fikir: yeni gösterge ancak ilgili araç açılınca öne çıksın; kart en fazla 2 kısa cümle.
+  - Neden-sonuç sahnede görünsün (ok, nabız, sayaç); metin yalnız adını koysun.
+  - 💡 yol gösterici satırı o anki tek adımı söylesin.
+- **Kart diyeti (kullanıcı: "çok bilgi var, oyunun içine girmek zor, akışta kopukluk var"):**
+  - Durdurmayan haberler kart değil, **haber bandı** olur: yıl çubuğunun altında tek satır manşet (`SceneUtils.ticker`; `showToast` başında yönlendir). İlk cümle ya da ~90 karakter.
+  - Oyunu durduran kart yalnız üç durumda: **yeni araç**, **karar**, **ders veren dönüm noktası** (ör. direnç). Bölüm başına en fazla ~4 durduran kart + kararlar.
+  - Sinematik sahne bir şeyi anlattıysa aynı şeyi ayrıca kartla tekrar anlatma.
+  - Ekrandaki giriş yazısı (`#g-intro`) görev kartıyla aynı şeyi söylüyorsa gizle. Görev kartı 4 kısa satır.
+- **Haritayı ve özel görünümleri öğret:** ilk kez önemli olduğunda kısa sahne → görünüm kendiliğinden açılır → spot ışığı önce sahnedeki şeyi, sonra ona istediğin zaman nereden bakılacağını (düğmeyi) gösterir (`SceneUtils.tour`).
+- **Atmosfer:** `SceneUtils.atmo` (eski yıllar sepya ve grenli, kriz büyüdükçe kenarlar kararır) ve `SceneUtils.decade` (on yıl geçişinde büyük "1950'ler" + tek satır doğru manşet; emin değilsen boş bırak).
 - **Çizim hatası döngüyü durdurmasın:** `try { render(now, dt); } catch (e) { … }`. Kanvas, negatif yarıçap gibi tek bir hatada bütün oyunu dondurur. Boyutları `Math.max(…)` ile sınırla.
 - **Arka plan sekmesinde zamanlayıcılar kısılır:** uzun e2e testini öndeki sekmede çalıştır.
 - **Uçtan uca duman testi:** `tools/e2e.js` her bölümü `?debug&hizli&sessiz&e2e` ile baştan sona otomatik oynatır, hataları ve takılmaları raporlar. `?e2e`, gizli pencerede de kareleri sürer. Yayından önce çalıştır.

@@ -219,6 +219,7 @@
       for (let k = 0; k < nz; k++) bird(zx - 14 * U + k * 6 * U, zy - 12 * U - (k % 2) * 6 * U, U * 1.2, 0.3, '#7a6a9a');
       tag(zx, zy - 42 * U, '🏛️ Cincinnati Hayvanat Bahçesi', { fs: 11 });
     } else zoo.sx = undefined;
+    if (window.SceneUtils && window.SceneUtils.atmo && (mode === 'game' || mode === 'title')) window.SceneUtils.atmo(ctx, G.x1, H, { year: (mode === 'game' ? Math.max(M.Y0, gs.y - 1) : M.Y0 + 40), bad: vis.bad }); // dönem rengi ve kriz
     drawLabels(G, t);
     drawOfficial(G, t);
     if (view.k > 0.01) drawMap(G, t, dt, view.k);
@@ -319,7 +320,7 @@
     if (official && official.x) add(official.x, official.y, 'official');
     if (!c.length) return false;
     c.sort((a, b) => a.d - b.d);
-    sayAt(c[0].obj, lines(c[0].kind)); blip(); if (c[0].fn) c[0].fn();
+    sayAt(c[0].obj, lines(c[0].kind)); blip(); if (c[0].fn) c[0].fn(); if (window.Camera) window.Camera.focus(c[0].obj.x, c[0].obj.y + 30 * U); // dokunulan yere yakınlaş
     return true;
   }
   let nextChat = 0;
@@ -483,7 +484,7 @@
     $('g-pause').textContent = '❚❚ Durdur'; setSpeed(1);
     $('modal').hidden = true; $('yb-harvest').textContent = ''; $('toasts').innerHTML = ''; toastQueue.length = 0; lastToastAt = -1e9;
     $('g-intro').classList.remove('gone');
-    if (window.Badges) window.Badges.resetSession(); tapCount.m = {};
+    if (window.Badges) window.Badges.resetSession(); tapCount.m = {}; if (window.SceneUtils && window.SceneUtils.decadeReset) window.SceneUtils.decadeReset();
     choiceQ.length = 0; official = null; colonies.length = 0; mapBirds.length = 0; setView('scene');
   }
   function readPolicy() {
@@ -494,6 +495,19 @@
       if (game.unlocked[k]) $('o-' + k).textContent = '%' + SL[k].value + (game.lockUntil && gs.y < game.lockUntil ? ' · 🔒 meclis' : '');
     });
   }
+  const arrowTxt = (a, b, f, upGood) => { const better = upGood ? b > a : b < a, same = Math.abs(b - a) < 1e-9 || f(a) === f(b); return `${f(a)} → <b class="${same ? '' : better ? 'up' : 'down'}">${f(b)}</b>`; };
+  function simGuv(pol, n = 5) {
+    const st = JSON.parse(JSON.stringify(gs)); st.hist = [];
+    for (let i = 0; i < n && st.y <= M.Y1; i++) { M.step(st, { ...pol, guard: 0, colony: 1, mast: 1 }); if (st.P * 1e9 < 40) st.P = 0; }
+    return st.hist[st.hist.length - 1];
+  }
+  if (window.SceneUtils && window.SceneUtils.watchSliders) window.SceneUtils.watchSliders(Object.values(SL), () => game.p, (a, b) => {
+    if (mode !== 'game' || !gs.hist.length) return null;
+    const A = simGuv(a), B = simGuv(b); if (!A || !B) return null;
+    const lv = q => (q.nest * 1.6 + q.quota * 2.2 + q.forest * 1.6) / 5.4, press = 0.4 + 0.8 * (gs.hist[gs.hist.length - 1].reach) / 0.31;
+    const dSat = -(lv(b) - lv(a)) * press * 2 - Math.max(0, lv(b) - lv(a)) ** 2 * 40;
+    return { html: `▶ <span class="k">5 yıl sonra</span> 🕊️ ${arrowTxt(A.P, B.P, popText, true)} · 🪺 ${arrowTxt(A.nest, B.nest, v => '%' + Math.round(v * 100), true)}${Math.abs(dSat) >= 1 ? ` · 🏛️ destek <b class="${dSat > 0 ? 'up' : 'down'}">${dSat > 0 ? '+' : ''}${Math.round(dSat)}</b>` : ''}` };
+  });
   Object.entries(SL).forEach(([k, el]) => el.addEventListener('input', () => { initAudio(); game.moved[k] = 1; readPolicy(); if (!game.touched) { game.touched = true; setTimeout(() => $('g-intro').classList.add('gone'), 2500); } }));
   $('g-pause').onclick = () => { game.paused = !game.paused; $('g-pause').textContent = game.paused ? '▶ Devam' : '❚❚ Durdur'; };
   $('g-view').onclick = e => { e.stopPropagation(); initAudio(); setView(view.want === 'map' ? 'scene' : 'map'); };
@@ -512,6 +526,41 @@
   function once(key, fn) { if (game.fired && !game.fired.has(key)) { game.fired.add(key); fn(); } }
   const milestone = (ic, from, text, tone, then) => { if (game.speed > 1) setSpeed(1); showToast(ic, from, text, tone, { pause: true, then }); };
   const comeOfficial = (who, say) => { official = { t0: performance.now(), leave: 0, who, say }; };
+  // sinematik sahne: oyun durur, atlanabilir; bölümü bitiren tekrar oynarken atlanır
+  function cine(spec, then) {
+    if (!window.Cinema) { if (then) then(); return; }
+    if (game.speed > 1) setSpeed(1);
+    game.reading = (game.reading || 0) + 1;
+    window.Cinema.play({ skipIfSeen: wasDone, ...spec }, () => { game.reading = Math.max(0, game.reading - 1); if (then) then(); });
+  }
+  function guide(steps, then) {
+    if (!window.SceneUtils || !window.SceneUtils.tour || wasDone) { if (then) then(); return; }
+    game.reading = (game.reading || 0) + 1;
+    window.SceneUtils.tour(steps, () => { game.reading = Math.max(0, game.reading - 1); if (then) then(); });
+  }
+  const CINE = {
+    sky: { id: 'guv-1860', year: '1860', title: 'Kuzey Amerika', shots: [
+      { dur: 5200, bg: '#c8d4dc', text: 'Doğa bilimci Audubon yazmıştı: sürü geçerken öğle güneşi tutulmadaki gibi karardı.', draw: (g, t, W, H, k) => {
+        const dark = Math.min(1, k * 1.4); g.fillStyle = `rgba(40,40,60,${0.55 * dark})`; g.fillRect(0, 0, W, H);
+        g.fillStyle = '#4a6a3a'; g.beginPath(); g.moveTo(0, H * 0.8); for (let x = 0; x <= W; x += 30) g.lineTo(x, H * 0.76 - Math.abs(Math.sin(x * 0.03)) * 30); g.lineTo(W, H); g.lineTo(0, H); g.fill();
+        window.Cinema.fx.birds(g, t, W, H, Math.round(40 + 260 * k), { y: H * 0.38, spread: H * 0.22, v: 0.09, col: 'rgba(25,25,35,.8)' }); } },
+      { dur: 4600, bg: '#c8d4dc', text: 'Kuzey Amerika\'da 3–5 milyar göçmen güvercin. Kimse bitebileceklerini düşünmüyor.', draw: (g, t, W, H, k) => {
+        g.fillStyle = 'rgba(40,40,60,.5)'; g.fillRect(0, 0, W, H); window.Cinema.fx.birds(g, t, W, H, 300, { y: H * 0.4, spread: H * 0.3, v: 0.08 }); window.Cinema.fx.counter(g, W, H, 1000, 4000000000, k, { y: H * 0.86, fs: Math.min(W, H) * 0.08 }); } },
+    ] },
+    petoskey: { id: 'guv-1878', year: '1878', title: 'Petoskey, Michigan', credit: 'J. P. Cockburn (1829), kamu malı', shots: [
+      { img: '../../assets/img/cards/passenger-pigeon-net-cockburn-1829.jpg', kb: [0.3, 0.5, 1.05, 0.65, 0.45, 1.35], dur: 5200, text: 'Telgraf haber verdi, trenler avcıları getirdi. Ağlar kurulup yüzlerce kuş birden yakalanıyor.' },
+      { dur: 4400, bg: '#2a2420', text: 'Aylarca, her gün yaklaşık 50.000 güvercin varillere konup şehirlere yollandı.', draw: (g, t, W, H, k) => {
+        const n = Math.floor(24 * Math.min(1, k * 1.3)); for (let i = 0; i < n; i++) { const x = W * 0.12 + (i % 8) * W * 0.1, y = H * 0.7 - Math.floor(i / 8) * H * 0.14; g.fillStyle = '#8a5a30'; g.beginPath(); g.ellipse(x, y, W * 0.035, H * 0.06, 0, 0, 6.28); g.fill(); g.strokeStyle = '#4a2a10'; g.lineWidth = 2; g.beginPath(); g.moveTo(x - W * 0.035, y - H * 0.02); g.lineTo(x + W * 0.035, y - H * 0.02); g.moveTo(x - W * 0.035, y + H * 0.02); g.lineTo(x + W * 0.035, y + H * 0.02); g.stroke(); } } },
+    ] },
+    martha: { id: 'guv-1914', year: '1914', title: 'Cincinnati Hayvanat Bahçesi', shots: [
+      { dur: 5000, bg: '#d8d0c0', text: '1 Eylül 1914. Martha, türünün son bireyi, kafesinde yalnız.', draw: (g, t, W, H, k) => {
+        g.strokeStyle = '#4a4a4a'; g.lineWidth = 3; const x0 = W * 0.3, x1 = W * 0.7, y0 = H * 0.22, y1 = H * 0.78; g.strokeRect(x0, y0, x1 - x0, y1 - y0); for (let x = x0; x < x1; x += 22) { g.beginPath(); g.moveTo(x, y0); g.lineTo(x, y1); g.stroke(); }
+        g.strokeStyle = '#6a4a30'; g.lineWidth = 6; g.beginPath(); g.moveTo(x0 + 20, H * 0.55); g.lineTo(x1 - 20, H * 0.55); g.stroke();
+        const a = 1 - Math.max(0, (k - 0.75) * 4); g.globalAlpha = Math.max(0, a); g.fillStyle = '#7a6a9a'; g.beginPath(); g.ellipse(W * 0.5, H * 0.52, 16, 9, -0.2, 0, 6.28); g.fill(); g.beginPath(); g.arc(W * 0.5 + 14, H * 0.49, 6, 0, 6.28); g.fill(); g.globalAlpha = 1; } },
+      { dur: 4400, bg: '#14120f', text: 'Milyarlardan sıfıra: elli yıl yetti.', draw: (g, t, W, H, k) => { window.Cinema.fx.counter(g, W, H, 4000000000, 1, Math.min(1, k * 1.6), { y: H * 0.52 }); } },
+    ] },
+  };
+
   function unlock(k, text) {
     game.unlocked[k] = true; SL[k].disabled = false; $('w-' + k).classList.remove('locked'); readPolicy();
     milestone(k === 'quota' ? '🛒' : '🌳', 'Yeni araç', text, '', () => !game.moved[k] && Number(SL[k].value) === 0 && coach(SL[k], k === 'quota' ? '👉 Kaydır: pazar yasağı' : '👉 Kaydır: orman koruma'));
@@ -534,7 +583,7 @@
       toast(ic, from, text, tone, { ...opt, then: opt.pause ? () => show(i + 1) : undefined });
       if (!opt.pause) setTimeout(() => show(i + 1), 4500 / Math.max(1, FAST / 2));
     };
-    const start = () => { if (wasDone) game.story = false; setTimeout(() => show(0), 300); };
+    const start = () => { if (wasDone) game.story = false; setTimeout(() => cine(CINE.sky, () => show(0)), 300); };
     if (window.Mission && !window.__mSeen && (window.__mSeen = 1)) window.Mission.show($('modal'), MISSION, start); else start();
   }
   function updateGame(dt) {
@@ -569,10 +618,12 @@
   // telgraf: dev koloni haberi; bekçi göndermek meclisi zorlar, göndermemek avcıları koloniye yığar
   function colonyAlert(y, name) {
     const big = name === 'Petoskey';
+    if (big && !game.fired.has('cineP')) { game.fired.add('cineP'); cine(CINE.petoskey, () => colonyAlert(y, name)); return; }
     tele.pulse = 0; tick();
     const at = big ? CITY.pet : PLACES[name]; colonies.length = 0; colonies.push({ x: at[0], y: at[1], name, year: y, guard: false });
     const col = colonies[colonies.length - 1];
     setView('map', 7000);
+    if (!game.fired.has('gmap')) { game.fired.add('gmap'); guide([{ key: 'map', el: '#g-view', text: '🗺️ <b>Haritaya</b> istediğin zaman buradan bakabilirsin: demiryolu, orman ve koloniler.' }]); }
     comeOfficial('tel', 'Tık tık! Telgraf var.');
     choice('Telgrafçı', big ? 'Petoskey: dev koloni!' : `${name}: yeni koloni`, big ? '"Michigan\'ın kuzeyinde görülmüş en büyük koloni! Bütün avcılar trene biniyor. Günde <b>50.000 kuş</b> avlayacaklar."' : pick(['"Telgraf haber verdi: dev bir koloni yuva yapıyor. Avcılar yarın trenle oraya varır."', '"Tık tık tık! Ağaçlar yuvadan görünmüyor diyorlar. İstasyonda ağlar yükleniyor."', '"Kasabadan haber: kuşlar ormana indi. Tüccarlar boş varil ısmarladı bile."']), [
       { label: '🛡️ Bekçi gönder', sub: 'Bu yıl koloni korunur; meclis masrafa kızar', fn: () => { game.guard = 1; game.guards++; col.guard = true; if (big) { game.petoskey = true; award('guv-petoskey'); } if (game.guards >= 4) award('guv-bekci'); toast('🛡️', 'Bekçiler', 'Bekçiler koloniye vardı. Ağlar toplandı.', 'good'); } },
@@ -607,7 +658,7 @@
     const nextCol = W0.col.includes(y + 1) || y + 1 === 1878;
     if (nextCol && gs.P > 0.05) { game.colonyNow = 1; colonyAlert(y + 1, y + 1 === 1878 ? 'Petoskey' : pick(Object.keys(PLACES))); }
     else if (nextCol && gs.P > 0) once('nocol', () => toast('🪺', 'Telgrafçı', 'Artık dev koloni haberi gelmiyor. Kuşlar küçük gruplara dağılmış.', 'bad'));
-    if (h.P > 0 && h.P < 0.6) once('allee1', () => { pulseAt(() => [geo().x1 * 0.78, geo().gt + 40 * U]); milestone('🪺', 'Doğa bilimci', 'Koloniler küçülüyor. Kuşlar kalabalık olmadan yuva yapmıyor (<i>Allee etkisi</i>). Çizgiye yaklaşıyorsun.', 'warn'); });
+    if (h.P > 0 && h.P < 0.6) once('allee1', () => { pulseAt(() => [geo().x1 * 0.78, geo().gt + 40 * U]); guide([{ key: 'thr', rect: () => { const r = $('m-pop').parentElement.getBoundingClientRect(); return [r.left, r.top, r.width, r.height]; }, pad: 10, text: '🕊️ Sürü göstergesindeki <b>kırmızı çizgi</b> eşik: altına inerse koloniler ürüyemez, koruma da yetmeyebilir.' }]); milestone('🪺', 'Doğa bilimci', 'Koloniler küçülüyor. Kuşlar kalabalık olmadan yuva yapmıyor (<i>Allee etkisi</i>). Çizgiye yaklaşıyorsun.', 'warn'); });
     if (h.P > 0 && h.P < THR) once('allee2', () => milestone('⚠️', 'Eşik geçildi', 'Sürü <b>çizginin altına</b> indi. Artık her yıl daha az yavru çıkıyor; tam koruma bile yetmeyebilir.', 'bad'));
     if (game.wildGone === y) toast('🕊️', 'Son yabani kuş', y >= 1898 && y <= 1902 ? 'Ohio\'da bir çocuk son yabani güvercini vurdu. Gökyüzü boş.' : 'Yabani sürü bitti. Geriye yalnız hayvanat bahçesindeki birkaç kuş kaldı.', 'bad', { keep: true });
     if (y === 1900) toast('⚖️', 'ABD Kongresi', '<b>Lacey Yasası</b>: yasa dışı avlanan hayvanı eyaletten eyalete satmak artık federal suç.', '', { keep: true });
@@ -617,7 +668,7 @@
     if (game.sat < 25 && !game.replaced) once('warn-sat' + Math.floor(y / 10), () => toast('🏛️', 'Meclis', 'Kasabalar ve tüccarlar şikâyetçi. Meclisin desteği düşüyor.', 'warn'));
     if (game.sat <= 0 && !game.replaced && gs.y >= game.lockUntil && (game.p.nest + game.p.quota + game.p.forest) > 0.4) lobby();
     if (y === M.Y1) { if (h.P >= GOAL) award('guv-gokyuzu'); if (h.F >= 0.6) award('guv-orman'); }
-    if (window.SceneUtils) {
+    if (window.SceneUtils && window.SceneUtils.advise) {
       const A = window.SceneUtils.advise;
       if (h.P <= 0) A('Yabani sürü bitti', 'bad');
       else if (h.P < THR) A('Sürü eşiğin altında: her şeyi koru, ama geç olabilir', 'bad');
@@ -629,6 +680,7 @@
       else if (h.P < 1) A(`Sürü inceliyor (${popText(h.P)}): kolonilere bekçi gönder`);
       else A(`Gökyüzü kara: ${popText(h.P)} güvercin`, 'good');
     }
+    if (y % 10 === 0 && window.SceneUtils && window.SceneUtils.decade) window.SceneUtils.decade(y, ({ 1860: "ABD'de iç savaş başlıyor (1861)", 1870: "Demiryolu kıtayı boydan boya birleştirdi (1869)", 1880: "Ormanlar hızla kesiliyor", 1890: "İlk kuş koruma dernekleri kuruluyor", 1900: "Lacey Yasası: yasa dışı av satışı suç", 1910: "Son kuşlar" })[y]);
     if (gs.y > M.Y1 && game.state === 'play') endGame(); else if (gs.y > M.Y1) game.endAfter = true;
   }
   function lobby() {
@@ -648,8 +700,9 @@
     if (window.Stat) window.Stat.event('bitti-guvercin', 'Bitirdi: Milyarlardan Sıfıra');
     maxSeen = slides.length - 1; paintDots(); replayNav();
     const h = gs.hist[gs.hist.length - 1];
-    if (!game.replaced && h && h.P === 0) toast('🏛️', '1 Eylül 1914', '<b>Martha</b>, türünün son bireyi, Cincinnati Hayvanat Bahçesi\'nde öldü.', 'bad', { keep: true });
-    setTimeout(() => { if (mode === 'game') goTo(slideOf('result')); }, 3200);
+    if (!game.replaced && h && h.P === 0) { game.reading = 0; window.Cinema && window.Cinema.play({ id: 'guv-1914', skipIfSeen: wasDone, ...CINE.martha }, () => { if (mode === 'game') goTo(slideOf('result')); }); }
+    if (false) toast('🏛️', '1 Eylül 1914', '<b>Martha</b>, türünün son bireyi, Cincinnati Hayvanat Bahçesi\'nde öldü.', 'bad', { keep: true });
+    if (!(window.Cinema && !game.replaced && h && h.P === 0 && !(wasDone && window.Cinema.seen('guv-1914')))) setTimeout(() => { if (mode === 'game') goTo(slideOf('result')); }, 3200);
   }
   function renderResult() {
     if (!game.hist.length || (gs.y <= M.Y1 && !game.replaced)) { $('result').innerHTML = '<h2>Önce oyunu bitir</h2><button class="hbtn">← Oyuna dön</button>'; $('result').querySelector('button').onclick = () => goTo(slideOf('game')); return; }
@@ -747,6 +800,7 @@
     if (view.until && performance.now() > view.until && !view.user) setView('scene');
     if (mode !== 'game' && view.want === 'map') setView('scene');
     view.k = lerp(view.k, view.want === 'map' ? 1 : 0, 1 - Math.pow(0.9, dt / 16));
+    if (window.SceneUtils && window.SceneUtils.fullView) window.SceneUtils.fullView(view.k > 0.5 && mode === 'game');
     const L = layoutFor(mode);
     lay.gt = lerp(lay.gt, L.gt, k * 0.6); lay.gb = lerp(lay.gb, L.gb, k * 0.6); lay.x1 = lerp(lay.x1, L.x1, k * 0.6);
     try { render(now, dt); } catch (e) { if (!frame.err) { frame.err = 1; console.error(e); } } // çizim hatası döngüyü durdurmasın

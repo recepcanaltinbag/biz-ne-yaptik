@@ -20,13 +20,26 @@ if (/[?&]e2e\b/.test(location.search)) {
     }
     return hud;
   }
+  // sahne etiketleri ekrandaki kutuların altına girmesin: sol HUD, yıl çubuğu, haber bandı, kartlar, alttaki panel
+  let obsT = 0, obs = [];
+  function obstacles() {
+    const now = performance.now(); if (now - obsT < 120) return obs; obsT = now;
+    const sel = ['.slide.active .yearbar', '.ticker.on', '.slide.active #toasts .toast:not(.out)'];
+    const list = []; const hr = hudRect(); if (hr) list.push(hr);
+    sel.forEach(q => document.querySelectorAll(q).forEach(el => { const r = el.getBoundingClientRect(); if (r.width > 0 && r.height > 0) list.push(r); }));
+    obs = list; return obs;
+  }
   function avoidHud(x, y, w, h) {
-    const r = hudRect();
-    if (!r) return { x, y };
-    const hit = x < r.right + 6 && x + w > r.left - 6 && y < r.bottom + 6 && y + h > r.top - 6;
-    if (!hit) return { x, y };
-    if (r.right + 10 + w < window.innerWidth - 8) return { x: r.right + 10, y };
-    return { x, y: r.bottom + 10 };
+    const list = obstacles(), pad = 6, maxY = (() => { const p = document.querySelector('.slide.active .gpanel'); return p ? p.getBoundingClientRect().top - h - 4 : innerHeight - h - 4; })();
+    for (let pass = 0; pass < 5; pass++) {
+      const r = list.find(r => x < r.right + pad && x + w > r.left - pad && y < r.bottom + pad && y + h > r.top - pad && r.top < maxY + h);
+      if (!r) return { x, y: Math.min(y, Math.max(0, maxY)) };
+      if (r.bottom + pad <= maxY) y = r.bottom + pad;           // önce aşağı kay
+      else if (r.right + pad + w < innerWidth - 8) x = r.right + pad; // sığmazsa sağa
+      else if (r.left - pad - w > 8) x = r.left - pad - w;       // ya da sola
+      else return { x, y };
+    }
+    return { x, y };
   }
 
   // series: [{ data: [0..1], color, label?, dash?, fmt? }] · opts: { y0, step, unit }
@@ -116,5 +129,93 @@ if (/[?&]e2e\b/.test(location.search)) {
     el.className = 'adv' + (tone ? ' ' + tone : '');
     el.classList.remove('flash'); void el.offsetWidth; if (text) el.classList.add('flash');
   }
-  window.SceneUtils = { avoidHud, lineChart, bestLine, yilEk, advise };
+  // "Ne olur?" önizlemesi: kaydırıcı oynayınca birkaç yıl sonrası önce → sonra; panelin hemen üstünde
+  let prevEl = null, prevT = 0;
+  function preview(html, tone) {
+    if (!prevEl) { prevEl = document.createElement('div'); prevEl.className = 'prev'; document.body.appendChild(prevEl); }
+    const pnl = document.querySelector('.slide.active .gpanel');
+    if (!pnl || !html) { prevEl.classList.remove('on'); return; }
+    const r = pnl.getBoundingClientRect();
+    prevEl.innerHTML = html; prevEl.className = 'prev on' + (tone ? ' ' + tone : '');
+    prevEl.style.bottom = (innerHeight - r.top + 8) + 'px';
+    clearTimeout(prevT); prevT = setTimeout(() => prevEl.classList.remove('on'), 6500);
+  }
+  // kaydırıcıya bağla: oynamaya başlamadan önceki ayarı saklar, bırakınca sim(eski, yeni) çağrılır
+  function watchSliders(inputs, getPolicy, sim) {
+    let before = null, t = 0;
+    inputs.forEach(el => {
+      const grab = () => { if (!before) before = JSON.parse(JSON.stringify(getPolicy())); };
+      el.addEventListener('pointerdown', grab); el.addEventListener('keydown', grab); el.addEventListener('focus', grab);
+      el.addEventListener('input', () => { grab(); clearTimeout(t); t = setTimeout(() => { const now = JSON.parse(JSON.stringify(getPolicy())); try { const out = sim(before, now); if (out) preview(out.html, out.tone); } catch (e) {} before = null; }, 450); });
+    });
+  }
+  // spot ışığı turu: ekran kararır, yalnız gösterilen yer açık kalır; dokun → sonraki adım
+  // steps: [{ el: '#g-view' | Element, rect: () => [x, y, w, h], text, pad }]
+  function tour(steps, done) {
+    const ov = document.createElement('div'); ov.className = 'spot';
+    ov.innerHTML = '<div class="spot-hole"></div><div class="spot-tip"><span></span><small>dokun: devam</small></div><button type="button" class="spot-skip">Geç ⏭</button>';
+    document.body.appendChild(ov);
+    const hole = ov.querySelector('.spot-hole'), tip = ov.querySelector('.spot-tip'), txt = tip.querySelector('span');
+    let i = -1, raf = 0, over = false;
+    const rectOf = st => { if (st.rect) return st.rect(); const el = typeof st.el === 'string' ? document.querySelector(st.el) : st.el; if (!el) return null; const r = el.getBoundingClientRect(); return [r.left, r.top, r.width, r.height]; };
+    function place() {
+      if (over) return;
+      const st = steps[i]; const r = rectOf(st);
+      if (r && r[2] > 0) {
+        const pad = st.pad === undefined ? 8 : st.pad, x = r[0] - pad, y = r[1] - pad, w = r[2] + pad * 2, h = r[3] + pad * 2;
+        Object.assign(hole.style, { left: x + 'px', top: y + 'px', width: w + 'px', height: h + 'px', borderRadius: (st.round || 14) + 'px' });
+        const below = y + h + 120 < innerHeight, tw = Math.min(340, innerWidth - 24);
+        tip.style.width = tw + 'px'; tip.style.left = Math.max(12, Math.min(innerWidth - tw - 12, x + w / 2 - tw / 2)) + 'px';
+        tip.style.top = below ? (y + h + 14) + 'px' : Math.max(12, y - tip.offsetHeight - 14) + 'px';
+      }
+      raf = requestAnimationFrame(place);
+    }
+    function next() { i++; if (i >= steps.length) return end(); txt.innerHTML = steps[i].text; tip.classList.remove('in'); void tip.offsetWidth; tip.classList.add('in'); if (steps[i].onShow) steps[i].onShow(); }
+    function end() { if (over) return; over = true; cancelAnimationFrame(raf); ov.classList.add('out'); setTimeout(() => ov.remove(), 300); if (done) done(); }
+    ov.addEventListener('pointerdown', e => { e.stopPropagation(); if (e.target.closest('.spot-skip')) end(); else next(); });
+    next(); raf = requestAnimationFrame(place);
+    if (/[?&](hizli|e2e)\b/.test(location.search)) setTimeout(end, 600);
+  }
+  // atmosfer: eski yıllar sepya ve grenli (eski fotoğraf gibi), sonra renk gelir; kriz büyüdükçe kenarlar kararır, hafif kızarır
+  function atmo(g, W, H, o = {}) {
+    const y = o.year || 2000, old = Math.max(0, Math.min(1, (1960 - y) / 90)), bad = Math.max(0, Math.min(1, o.bad || 0));
+    if (old > 0.01) {
+      g.save(); g.globalCompositeOperation = 'color'; g.fillStyle = `rgba(160,130,90,${0.55 * old})`; g.fillRect(0, 0, W, H); g.restore();
+      g.fillStyle = `rgba(255,248,230,${0.05 * old})`; for (let n = 0; n < 50 * old; n++) g.fillRect(Math.random() * W, Math.random() * H, 1.5, 1.5);
+      if (Math.random() < 0.05 * old) { g.fillStyle = `rgba(60,50,40,${0.12 * old})`; g.fillRect(Math.random() * W, 0, 1, H); }
+    }
+    const vg = g.createRadialGradient(W / 2, H * 0.55, Math.min(W, H) * 0.35, W / 2, H * 0.55, Math.max(W, H) * 0.8);
+    vg.addColorStop(0, 'rgba(0,0,0,0)'); vg.addColorStop(1, `rgba(${Math.round(40 + 60 * bad)},20,15,${0.12 + 0.3 * bad + 0.12 * old})`);
+    g.fillStyle = vg; g.fillRect(0, 0, W, H);
+  }
+  // on yıl geçişi: büyük yarı saydam "1950'ler" ve tek satır manşet; oyunu durdurmaz
+  let decEl = null, decLast = 0;
+  function decade(y, line) {
+    const d = Math.floor(y / 10) * 10; if (d === decLast) return; decLast = d;
+    if (!decEl) { decEl = document.createElement('div'); decEl.className = 'decade'; document.body.appendChild(decEl); }
+    const suf = yilEk(d, 'de').slice(String(d).length + 1).replace(/^d/, 'l').replace(/^t/, 'l').replace(/a$/, 'ar').replace(/e$/, 'er');
+    decEl.innerHTML = `<b>${d}'${suf}</b>${line ? `<span>${line}</span>` : ''}`;
+    decEl.classList.remove('on'); void decEl.offsetWidth; decEl.classList.add('on');
+  }
+  function decadeReset() { decLast = 0; }
+  // haber bandı: durdurmayan haberler kart yerine yıl çubuğunun altında tek satır manşet olur
+  let tickEl = null, tickT = 0;
+  function ticker(ic, from, html, tone, ms) {
+    const yb = document.querySelector('.slide.active .yearbar'); if (!yb) return false;
+    if (!tickEl) { tickEl = document.createElement('div'); tickEl.className = 'ticker'; tickEl.setAttribute('aria-live', 'polite'); document.body.appendChild(tickEl); }
+    // yıl çubuğunun hemen altında, ortasına hizalı
+    const r = yb.getBoundingClientRect(); tickEl.style.top = (r.bottom + 4) + 'px'; tickEl.style.left = (r.left + r.width / 2) + 'px';
+    let plain = String(html).replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
+    const first = plain.match(/^.*?[.!?](\s|$)/); if (first && first[0].length > 24) plain = first[0].trim();
+    if (plain.length > 96) plain = plain.slice(0, 93).replace(/\s+\S*$/, '') + '…';
+    tickEl.innerHTML = `<span class="ic">${ic}</span><span class="tx">${plain}</span>`;
+    tickEl.className = 'ticker on ' + (tone || ''); tickEl.title = from || '';
+    clearTimeout(tickT); tickT = setTimeout(() => tickEl && tickEl.classList.remove('on'), ms || 7000);
+    return true;
+  }
+  // tam ekran görünüm (harita, zincir, kutup, mikroskop) açıkken HUD söner; görünüm yıl çubuğunun altından başlar
+  let fvOn = false;
+  function fullView(on) { on = !!on; if (on === fvOn) return; fvOn = on; document.body.classList.toggle('fullview', on); }
+  function viewTop(min = 96) { const yb = document.querySelector('.slide.active .yearbar'); const r = yb && yb.getBoundingClientRect(); return Math.max(min, r && r.height ? r.bottom + 10 : min); }
+  window.SceneUtils = { fullView, viewTop, avoidHud, lineChart, bestLine, yilEk, advise, preview, watchSliders, tour, atmo, decade, decadeReset, ticker };
 })();

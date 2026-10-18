@@ -395,6 +395,16 @@
   const MW = [[0.3, 0.34], [0.4, 0.32], [0.44, 0.5], [0.43, 0.72], [0.38, 0.86], [0.31, 0.8], [0.28, 0.56]];
   const ME = [[0.42, 0.32], [0.58, 0.3], [0.74, 0.38], [0.8, 0.56], [0.74, 0.76], [0.58, 0.86], [0.42, 0.84], [0.44, 0.56]];
   const cen = pts => pts.reduce((a, p) => [a[0] + p[0] / pts.length, a[1] + p[1] / pts.length], [0, 0]);
+  function mapRect(pts, pad = 0) {
+    const G = geo(), top = 104 * U, H2 = G.gb - top, Wm = Math.min(G.x1 * 0.96, H2 * 1.35), Hm = Wm / 1.35, ox = (G.x1 - Wm) / 2, oy = top + (H2 - Hm) / 2;
+    const xs = pts.map(p => ox + p[0] * Wm), ys = pts.map(p => oy + p[1] * Hm);
+    return [Math.min(...xs) - pad, Math.min(...ys) - pad, Math.max(...xs) - Math.min(...xs) + pad * 2, Math.max(...ys) - Math.min(...ys) + pad * 2];
+  }
+  function guide(steps, then) {
+    if (!window.SceneUtils || !window.SceneUtils.tour || wasDone) { if (then) then(); return; }
+    game.reading = (game.reading || 0) + 1;
+    window.SceneUtils.tour(steps, () => { game.reading = Math.max(0, game.reading - 1); if (then) then(); });
+  }
   function drawMap(G, t, alpha) {
     const top = 104 * U, H2 = G.gb - top, Wm = Math.min(G.x1 * 0.96, H2 * 1.35), Hm = Wm / 1.35;
     const ox = (G.x1 - Wm) / 2, oy = top + (H2 - Hm) / 2;
@@ -586,7 +596,7 @@
     if (!c.length) return false;
     c.sort((a, b) => a.d - b.d);
     const best = c[0];
-    sayAt(best.o, lines(best.kind)); blip();
+    sayAt(best.o, lines(best.kind)); blip(); if (window.Camera) window.Camera.focus(best.o.x, best.o.y + 30 * U); // dokunulan yere yakınlaş
     if (best.fn) best.fn();
     return true;
   }
@@ -970,7 +980,13 @@
     if (y === 1991) { $('trust-lbl').textContent = ' Hükümetin güveni'; milestone('🗺️', 'Haber', 'Sovyetler Birliği dağıldı. Göl artık birkaç ülkenin ortak sorunu.', ''); }
     // Kokaral seti: kuzeydeki küçük gölü kurtarmak
     if (y === 2003 && h.Vn !== null) {
-      setView('map', 9000);
+      setView('map');
+      setTimeout(() => guide([
+        { key: 'north', rect: () => mapRect(MN, 10), text: '🌊 Kuzeyde ayrılan <b>Küçük Aral</b>. Siri Derya nehri buraya akıyor.' },
+        { key: 'dam', rect: () => mapRect([[0.5, 0.25], [0.6, 0.33]], 6), text: '🧱 <b>Kokaral seti</b> tam buraya, iki gölün arasına yapılır: nehrin suyu kuzeyde kalır, güneye akmaz.' },
+      ], () => { setView('map', 6000); askKokaral(); }), 900);
+    }
+    function askKokaral() {
       comeOfficial('eng', 'Bir set fikrimiz var.');
       choice('Kazak su mühendisi', 'Kokaral seti', '"Kuzeydeki küçük gölü 13 km\'lik bir setle ayıralım. Siri Derya\'nın suyu orada kalır, göl yükselir, tuz azalır. Büyük Aral\'a giden su ise daha da azalır."', [
         { label: 'Seti yap', sub: 'Kuzey Aral kurtulabilir', fn: () => { game.dam = true; game.saved = true; award('aral-kokaral'); toast('🧱', 'Kokaral', 'Set inşa ediliyor. 2005\'te bitecek.', 'good'); } },
@@ -1131,10 +1147,10 @@
   // =====================================================================
   cv.addEventListener('pointerdown', e => {
     initAudio();
-    if (view.k > 0.5 && mode === 'game') { setView('shore'); return; }
+    if (view.k > 0.5 && (mode === 'game' || mode === 'sandbox')) { setView('shore'); return; }
     // uydu görüntüsüne dokununca harita ekranı kaplar
     const sbx = drawSat.box;
-    if (mode === 'game' && sbx && e.clientX > sbx.x && e.clientX < sbx.x + sbx.w && e.clientY > sbx.y && e.clientY < sbx.y + sbx.h + 20 * U) { setView('map'); blip(); return; }
+    if ((mode === 'game' || mode === 'sandbox') && sbx && e.clientX > sbx.x && e.clientX < sbx.x + sbx.w && e.clientY > sbx.y && e.clientY < sbx.y + sbx.h + 20 * U) { setView('map'); blip(); return; }
     if (mode === 'game' || mode === 'sandbox' || mode === 'title') talkAt(e.clientX, e.clientY);
   });
 
@@ -1157,8 +1173,9 @@
     vis.bad = lerp(vis.bad, smooth(0.15, 0.7, 1 - health), k * 0.5);
     if (view.until && (game.reading || game.state === 'choice')) view.until += dt; // kart okunurken harita kapanmasın
     if (view.until && performance.now() > view.until && !view.user) setView('shore');
-    if (mode !== 'game' && view.want === 'map' && mode !== 'result') setView('shore');
-    view.k = lerp(view.k, view.want === 'map' && (mode === 'game' || mode === 'result') ? 1 : 0, 1 - Math.pow(0.9, dt / 16));
+    if (mode !== 'game' && view.want === 'map' && mode !== 'result' && mode !== 'sandbox') setView('shore');
+    view.k = lerp(view.k, view.want === 'map' && (mode === 'game' || mode === 'result' || mode === 'sandbox') ? 1 : 0, 1 - Math.pow(0.9, dt / 16));
+    if (window.SceneUtils && window.SceneUtils.fullView) window.SceneUtils.fullView(view.k > 0.5 && mode === 'game');
     const L = layoutFor(mode);
     lay.gt = lerp(lay.gt, L.gt, k * 0.6); lay.gb = lerp(lay.gb, L.gb, k * 0.6); lay.x1 = lerp(lay.x1, L.x1, k * 0.6);
     try { render(now, dt); } catch (e) { if (!frame.err) { frame.err = 1; console.error(e); } } // çizim hatası döngüyü durdurmasın

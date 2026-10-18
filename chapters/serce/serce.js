@@ -509,6 +509,7 @@
     if (!cands.length) return false;
     cands.sort((a, b) => a[0] - b[0]);
     cands[0][1]();
+    if (window.Camera && mode === 'game') window.Camera.focus(x, y); // dokunulan yere yakınlaş
     return true;
   }
   let nextChat = 0;

@@ -349,7 +349,7 @@
   const parts = [];
   function setChain(on, ms) { cview.want = on ? 1 : 0; cview.user = on && !ms; cview.until = ms ? performance.now() + ms : 0; }
   function drawChainView(G, t, dt, alpha) {
-    const top = 96 * U, Hh = G.gb - top, x0 = G.x1 * 0.04, Wd = G.x1 * (mobile ? 0.92 : 0.66);
+    const top = (window.SceneUtils && window.SceneUtils.viewTop ? window.SceneUtils.viewTop(96 * U) : 96 * U) + 24 * U, Hh = G.gb - top, x0 = G.x1 * 0.04, Wd = G.x1 * (mobile ? 0.92 : 0.66);
     ctx.save(); ctx.globalAlpha = alpha;
     ctx.fillStyle = 'rgba(250,248,240,.97)'; ctx.fillRect(0, top - 10 * U, G.x1, Hh + 10 * U + (H - G.gb));
     const c = M.chain(vis.D);
@@ -385,7 +385,7 @@
       const a = L[p.i], b = L[p.i + 1], px = lerp(a.x, b.x, p.k), py = lerp(a.y - 30 * U, b.y - 34 * U, p.k) - Math.sin(p.k * Math.PI) * 30 * U;
       ctx.fillStyle = 'rgba(192,64,48,.9)'; ctx.beginPath(); ctx.arc(px, py, 3.2 * U, 0, 6.283); ctx.fill();
     }
-    ctx.font = `${(mobile ? 15 : 20) * U}px "Patrick Hand"`; ctx.fillStyle = rgb(PAL.ink); ctx.fillText('Zehir her basamakta katlanıyor (biyolojik birikim)', x0, top + 12 * U);
+    ctx.font = `${(mobile ? 15 : 20) * U}px "Patrick Hand"`; ctx.fillStyle = rgb(PAL.ink); ctx.textAlign = 'center'; ctx.fillText('Zehir her basamakta katlanıyor (biyolojik birikim)', G.x1 / 2, top - 6 * U); ctx.textAlign = 'left';
     // yumurta kabuğu kesiti: 1946 ile bugünkü kalınlık
     if (!mobile) {
       const ex = G.x1 * 0.86, ey = top + Hh * 0.5, er = Math.min(G.x1 * 0.09, Hh * 0.28), th = 1 - vis.thin / 100;
@@ -438,7 +438,7 @@
     if (!c.length) return false;
     c.sort((a, b) => a.d - b.d);
     const best = c[0];
-    sayAt(best.o, best.kind === 'truck' ? 'Şoför: Çocuklar, sisin\narkasından koşmayın!' : lines(best.kind)); blip();
+    sayAt(best.o, best.kind === 'truck' ? 'Şoför: Çocuklar, sisin\narkasından koşmayın!' : lines(best.kind)); blip(); if (window.Camera) window.Camera.focus(best.o.x, best.o.y + 30 * U); // dokunulan yere yakınlaş
     if (best.fn) best.fn();
     return true;
   }
@@ -955,6 +955,7 @@
     if (cview.until && performance.now() > cview.until && !cview.user) setChain(false);
     if (mode !== 'game' && mode !== 'sandbox') cview.want = 0;
     cview.k = lerp(cview.k, cview.want, 1 - Math.pow(0.9, dt / 16));
+    if (window.SceneUtils && window.SceneUtils.fullView) window.SceneUtils.fullView(cview.k > 0.5);
     const L = layoutFor(mode);
     lay.gt = lerp(lay.gt, L.gt, k * 0.6); lay.gb = lerp(lay.gb, L.gb, k * 0.6); lay.x1 = lerp(lay.x1, L.x1, k * 0.6);
     try { render(now, dt); } catch (e) { if (!frame.err) { frame.err = 1; console.error(e); } } // çizim hatası döngüyü durdurmasın

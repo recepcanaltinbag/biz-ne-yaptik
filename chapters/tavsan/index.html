@@ -8,8 +8,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Inter:wght@400;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../../assets/css/badges.css?v=261018121935">
-<link rel="stylesheet" href="../../assets/css/chapter.css?v=261018121935">
+<link rel="stylesheet" href="../../assets/css/badges.css?v=261018134756">
+<link rel="stylesheet" href="../../assets/css/chapter.css?v=261018134756">
 <style>
   .sl.locked span { color: var(--ink-soft); }
   #m-rab { background: #9a7a5a; } #m-grass { background: #7ab060; } #m-native { background: #c08a4a; }
@@ -34,7 +34,8 @@
     <div class="center-col"><div class="glass">
       <div class="kicker">Biz Ne Yaptık? · Sezon 1 · Bölüm 3</div>
       <h1 class="title">24 Tavşanlık Felaket</h1>
-      <p class="sub">1859–2000 · oynama süresi ~5 dakika</p>
+      <p class="hook">1859'da 24 tavşan salındı. 50 yılda ne olur?</p>
+      <p class="sub">1859–2000 · ~5 dakika</p>
       <button class="hbtn big" data-next>Başla →</button>
     </div></div>
   </section>
@@ -60,8 +61,8 @@
       <div class="gp-meters">
         <div class="mrow"><span>🐇<em> Tavşan</em></span><span class="track"><i id="m-rab"></i></span></div>
         <div class="mrow"><span>🌾<em> Otlak</em></span><span class="track"><i id="m-grass"></i></span></div>
-        <div class="mrow"><span>🦘<em> Yerli hayvanlar</em></span><span class="track"><i id="m-native"></i></span></div>
-        <div class="mrow trust"><span>🧑‍🌾<em> Çiftçilerin desteği</em></span><span class="track"><i id="m-trust"></i></span></div>
+        <div class="mrow" id="row-native" hidden><span>🦘<em> Yerli hayvanlar</em></span><span class="track"><i id="m-native"></i></span></div>
+        <div class="mrow trust" id="row-trust" hidden><span>🧑‍🌾<em> Çiftçilerin desteği</em></span><span class="track"><i id="m-trust"></i></span></div>
       </div>
       </div>
       <label class="sl big locked" id="w-trap"><span>🪤 Tuzak ve zehir <b id="o-trap">🔒 1883'te açılır</b></span><input type="range" id="g-trap" min="0" max="100" step="5" value="0" disabled></label>
@@ -105,7 +106,7 @@
   </section>
 
   <section class="slide scroll" data-mode="facts">
-    <article class="paper">
+    <article class="paper" data-img="../../assets/img/cards/csiro-scienceimage-2232-releasing-the-myxoma-virus-for-rabbi.jpg">
       <h2>Gerçekte ne oldu?</h2>
       <ul class="facts">
         <li><b>1859</b> Thomas Austin, Victoria'daki çiftliğinde avlanmak için İngiltere'den getirttiği <b>iki düzine tavşanı</b> saldı. Tavşanlar yılda yaklaşık 100 km ilerleyerek kıtaya yayıldı: bilinen en hızlı memeli istilalarından biri.</li>
@@ -140,13 +141,16 @@
 
 <nav class="dots" id="dots" aria-label="Bölüm adımları"></nav>
 
-<script src="../../assets/js/stats.js?v=261018121935"></script>
-<script src="../../assets/js/mission.js?v=261018121935"></script>
-<script src="../../assets/js/scene-utils.js?v=261018121935"></script>
-<script src="../../assets/js/badges.js?v=261018121935"></script>
-<script src="../../assets/js/toon.js?v=261018121935"></script>
-<script src="model.js?v=261018121935"></script>
-<script src="tavsan.js?v=261018121935"></script>
+<script src="../../assets/js/stats.js?v=261018134756"></script>
+<script src="../../assets/js/mission.js?v=261018134756"></script>
+<script src="../../assets/js/scene-utils.js?v=261018134756"></script>
+<script src="../../assets/js/badges.js?v=261018134756"></script>
+<script src="../../assets/js/toon.js?v=261018134756"></script>
+<script src="../../assets/js/cinema.js?v=261018134756"></script>
+<script src="../../assets/js/story.js?v=261018134756"></script>
+<script src="../../assets/js/camera.js?v=261018134756"></script>
+<script src="model.js?v=261018134756"></script>
+<script src="tavsan.js?v=261018134756"></script>
 <script>/* gpToggle */document.querySelectorAll(".gp-toggle").forEach(b=>b.onclick=()=>{const p=b.closest(".gpanel");const o=p.classList.toggle("open");b.setAttribute("aria-expanded",o);b.textContent=o?"✕ Kapat":"⋯ Daha fazla";window.dispatchEvent(new Event("panel"));});</script>
 </body>
 </html>

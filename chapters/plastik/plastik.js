@@ -202,6 +202,7 @@
     } else boat.sx = undefined;
     // hayalet ağ olayı
     if (ghost.on > 0.05) { const gx = ghost.x * x1, gy = G.water + (gb - G.water) * 0.3; ghost.sx = gx; ghost.sy = gy - 20 * U; ctx.globalAlpha = ghost.on; drawDebrisItem(gx, gy, 2, U * 4, 0.2); ctx.globalAlpha = 1; ghost.on = Math.max(0, ghost.on - dt / 30000); } else ghost.sx = undefined;
+    if (window.SceneUtils && window.SceneUtils.atmo && (mode === 'game' || mode === 'title')) window.SceneUtils.atmo(ctx, G.x1, H, { year: (mode === 'game' ? Math.max(M.Y0, gs.y - 1) : M.Y0 + 40), bad: vis.bad }); // dönem rengi ve kriz
     drawLabels(G, t);
     drawLens(G, t, dt);
     drawOfficial(G, t);
@@ -313,7 +314,7 @@
     if (official && official.x) add(official.x, official.y, 'official');
     if (!c.length) return false;
     c.sort((a, b) => a.d - b.d);
-    sayAt(c[0].obj, lines(c[0].kind)); blip(); if (c[0].fn) c[0].fn();
+    sayAt(c[0].obj, lines(c[0].kind)); blip(); if (c[0].fn) c[0].fn(); if (window.Camera) window.Camera.focus(c[0].obj.x, c[0].obj.y + 30 * U); // dokunulan yere yakınlaş
     return true;
   }
   let nextChat = 0;
@@ -472,7 +473,7 @@
     $('g-pause').textContent = '❚❚ Durdur'; setSpeed(1);
     $('modal').hidden = true; $('yb-harvest').textContent = ''; $('toasts').innerHTML = ''; toastQueue.length = 0; lastToastAt = -1e9;
     $('g-intro').classList.remove('gone');
-    if (window.Badges) window.Badges.resetSession(); tapCount.m = {};
+    if (window.Badges) window.Badges.resetSession(); tapCount.m = {}; if (window.SceneUtils && window.SceneUtils.decadeReset) window.SceneUtils.decadeReset();
     choiceQ.length = 0; official = null; bottles.length = 0; mapParts.length = 0; debris.length = 0; setView('shore'); setMicro(false);
   }
   // ortak bütçe: üç araç 100 puanı paylaşır; aşan kaydırıcı sığdığı kadar kalır
@@ -499,6 +500,18 @@
     $('g-budget').textContent = over ? `bütçe aşıldı: araçlar %${Math.round(game.budget / used * 100)} güçte` : Math.max(0, Math.round(game.budget - used)) + ' puan boşta';
     $('g-budget').style.color = over ? 'var(--danger)' : '';
   }
+  const arrowTxt = (a, b, f, upGood) => { const better = upGood ? b > a : b < a, same = Math.abs(b - a) < 1e-9 || f(a) === f(b); return `${f(a)} → <b class="${same ? '' : better ? 'up' : 'down'}">${f(b)}</b>`; };
+  function simPla(pol, n = 5) {
+    const st = JSON.parse(JSON.stringify(gs)); st.hist = [];
+    for (let i = 0; i < n && st.y <= M.Y1; i++) M.step(st, { waste: pol.waste, tax: pol.tax, clean: pol.clean, export: game.export, storm: 1 });
+    return st.hist[st.hist.length - 1];
+  }
+  if (window.SceneUtils && window.SceneUtils.watchSliders) window.SceneUtils.watchSliders(Object.values(SL), () => game.p, (a, b) => {
+    if (mode !== 'game' || !gs.hist.length) return null;
+    const A = simPla(a), B = simPla(b); if (!A || !B) return null;
+    const dSat = (b.clean - a.clean) * 6 - 1.5 * (b.tax - a.tax) - 100 * Math.max(0, b.tax - game.habit) ** 2 + 100 * Math.max(0, a.tax - game.habit) ** 2;
+    return { html: `▶ <span class="k">5 yıl sonra</span> 🌊 ${arrowTxt(A.I, B.I, v => f1(v) + ' Mt', false)} · 🐢 ${arrowTxt(A.turtle, B.turtle, v => '%' + Math.round(v * 100), true)}${Math.abs(dSat) >= 1 ? ` · 🙂 destek <b class="${dSat > 0 ? 'up' : 'down'}">${dSat > 0 ? '+' : ''}${Math.round(dSat)}/yıl</b>` : ''}` };
+  });
   Object.entries(SL).forEach(([k, el]) => el.addEventListener('input', () => { initAudio(); game.moved[k] = 1; readPolicy(k); if (!game.touched) { game.touched = true; setTimeout(() => $('g-intro').classList.add('gone'), 2500); } }));
   $('g-pause').onclick = () => { game.paused = !game.paused; $('g-pause').textContent = game.paused ? '▶ Devam' : '❚❚ Durdur'; };
   $('g-view').onclick = e => { e.stopPropagation(); initAudio(); setView(view.want === 'map' ? 'shore' : 'map'); };
@@ -517,6 +530,37 @@
   function once(key, fn) { if (game.fired && !game.fired.has(key)) { game.fired.add(key); fn(); } }
   const milestone = (ic, from, text, tone, then) => { if (game.speed > 1) setSpeed(1); showToast(ic, from, text, tone, { pause: true, then }); };
   const comeOfficial = (who, say) => { official = { t0: performance.now(), leave: 0, who, say }; };
+  // sinematik sahne ve spot ışığı turu: oyun durur, atlanabilir
+  function cine(spec, then) {
+    if (!window.Cinema) { if (then) then(); return; }
+    if (game.speed > 1) setSpeed(1);
+    game.reading = (game.reading || 0) + 1;
+    window.Cinema.play({ skipIfSeen: wasDone, ...spec }, () => { game.reading = Math.max(0, game.reading - 1); if (then) then(); });
+  }
+  function guide(steps, then) {
+    if (!window.SceneUtils || !window.SceneUtils.tour || wasDone) { if (then) then(); return; }
+    game.reading = (game.reading || 0) + 1;
+    window.SceneUtils.tour(steps, () => { game.reading = Math.max(0, game.reading - 1); if (then) then(); });
+  }
+  // haritadaki çöp alanının ekrandaki yeri (spot ışığı için)
+  function patchRect() {
+    const G = geo(), g = mapGeom(G), h = curHist(), Gk = h ? h.G : 0, area = 1.6 * Math.pow(Math.max(0.01, Gk) / 79, 0.8), pr = Math.max(40, Math.sqrt(area) * 0.09 * g.Wm);
+    const cx = g.ox + 0.5 * g.Wm, cy = g.oy + 0.48 * g.Hm; return [cx - pr, cy - pr * 0.7, pr * 2, pr * 1.4];
+  }
+  const CINE = {
+    moore: { id: 'pla-1997', year: '1997', title: 'Kuzey Pasifik', credit: 'CaptainDarwin, CC BY-SA 4.0', shots: [
+      { dur: 4800, bg: '#5a90b8', text: 'Kaptan Charles Moore, Hawaii\'den dönerken kestirmeden geçiyor. Karadan bin kilometre uzakta.', draw: (g, t, W, H, k) => {
+        g.fillStyle = '#4a80a8'; g.fillRect(0, H * 0.55, W, H); g.strokeStyle = 'rgba(255,255,255,.35)'; g.lineWidth = 2; for (let i = 0; i < 16; i++) { const y = H * 0.6 + i * H * 0.025, x = (i * 113 + t * 0.03) % W; g.beginPath(); g.moveTo(x, y); g.lineTo(x + 30, y); g.stroke(); }
+        const bx = W * 0.5, by = H * 0.6 + Math.sin(t * 0.002) * 5; g.fillStyle = '#f4f0e8'; g.beginPath(); g.moveTo(bx - 70, by); g.lineTo(bx + 70, by); g.lineTo(bx + 50, by + 22); g.lineTo(bx - 50, by + 22); g.fill(); g.strokeStyle = '#4a3a2a'; g.lineWidth = 3; g.beginPath(); g.moveTo(bx, by); g.lineTo(bx, by - 120); g.stroke(); g.fillStyle = '#fffdf6'; g.beginPath(); g.moveTo(bx + 4, by - 115); g.lineTo(bx + 60, by - 10); g.lineTo(bx + 4, by - 10); g.fill();
+        const n = Math.round(60 * k); for (let i = 0; i < n; i++) { const x = (i * 83.7) % W, y = H * 0.6 + ((i * 47) % (H * 0.36)); g.fillStyle = i % 3 ? 'rgba(255,255,255,.85)' : 'rgba(140,200,230,.9)'; g.fillRect(x, y + Math.sin(t * 0.003 + i) * 2, 8, 4); } } },
+      { img: '../../assets/img/cards/plastic-pollution-in-santa-luzia-cape-verde.jpg', kb: [0.5, 0.6, 1.05, 0.45, 0.55, 1.3], dur: 4800, text: '"Günlerce, nereye baksam plastik vardı." Şişe kapakları, poşetler, ağlar.' },
+      { dur: 5000, bg: '#1e3a52', text: 'Akıntılar okyanusun ortasında yavaşça döner ve yüzen çöpü merkeze toplar: bir girdap.', draw: (g, t, W, H, k) => {
+        const cx = W / 2, cy = H / 2, R0 = Math.min(W, H) * 0.36; g.strokeStyle = 'rgba(255,255,255,.4)'; g.lineWidth = 2;
+        for (let a = 0; a < 6.28 * 3; a += 0.08) { const r = R0 * (1 - a / (6.28 * 3)), x = cx + Math.cos(a + t * 0.0006) * r, y = cy + Math.sin(a + t * 0.0006) * r * 0.6; g.fillStyle = 'rgba(255,255,255,.5)'; g.fillRect(x, y, 2, 2); }
+        for (let i = 0; i < 80; i++) { const a = i * 0.7 + t * 0.0008, r = R0 * Math.max(0.05, 1 - ((i * 0.013 + k * 0.6) % 1)), x = cx + Math.cos(a) * r, y = cy + Math.sin(a) * r * 0.6; g.fillStyle = '#f4ecd8'; g.fillRect(x, y, 5, 3); }
+        const pr = R0 * 0.18 * k; const gr = g.createRadialGradient(cx, cy, 0, cx, cy, Math.max(1, pr)); gr.addColorStop(0, 'rgba(230,200,150,.85)'); gr.addColorStop(1, 'rgba(230,200,150,0)'); g.fillStyle = gr; g.beginPath(); g.ellipse(cx, cy, Math.max(1, pr), Math.max(1, pr * 0.6), 0, 0, 6.28); g.fill(); } },
+    ] },
+  };
   function unlock(k, text) {
     game.unlocked[k] = true; SL[k].disabled = false; $('w-' + k).classList.remove('locked'); readPolicy();
     milestone(k === 'tax' ? '🛍️' : '🚢', 'Yeni araç', text, '', () => !game.moved[k] && Number(SL[k].value) === 0 && coach(SL[k], k === 'tax' ? '👉 Kaydır: plastik vergisi' : '👉 Kaydır: temizlik gemileri'));
@@ -602,7 +646,10 @@
     if (y === 1965) toast('🛍️', 'İsveç', 'Plastik poşet icat edildi. Bedava, hafif, her yerde.', '', { keep: true });
     if (y === 1973) toast('🍾', 'ABD', 'PET şişe icat edildi. Cam şişeler yavaş yavaş kayboluyor.', '', { keep: true });
     if (y === 1990) unlock('tax', 'Bazı ülkeler tek kullanımlık plastiğe vergi koymayı düşünüyor. <b>Plastik vergisi</b>: üretimin büyümesini yavaşlatır, ama halk ve marketler kızar.');
-    if (y === 1997) { setView('map', 9000); milestone('⛵', 'Kaptan Charles Moore', 'Hawaii\'den dönerken Pasifik\'in ortasında, karadan çok uzakta <b>plastikle dolu</b> bir deniz buldum. Akıntılar çöpü buraya topluyor!', 'bad'); }
+    if (y === 1997) { cine(CINE.moore, () => { setView('map'); setTimeout(() => guide([
+      { key: 'patch', rect: patchRect, text: '🗑️ <b>Çöp alanı</b> burada: akıntılar yüzen plastiği ortaya topluyor. Sen kirlettikçe büyür.' },
+      { el: '#g-view', text: 'Okyanusa <b>istediğin zaman</b> buradan bakabilirsin. Bir daha basınca kıyıya dönersin.' },
+    ], () => setView('shore', 1)), 900); }); if (false) milestone('⛵', 'Kaptan Charles Moore', 'Hawaii\'den dönerken Pasifik\'in ortasında, karadan çok uzakta <b>plastikle dolu</b> bir deniz buldum. Akıntılar çöpü buraya topluyor!', 'bad'); }
     if (y === 2013) unlock('clean', '<b>Temizlik gemileri</b>: denizdeki büyük parçaları toplar. Halk bayılır. Ama mikroplastiğe dokunamaz.');
     if (y === 2015) toast('📊', 'Bilim insanları', 'Hesap çıktı: okyanusa her yıl <b>milyonlarca ton</b> plastik giriyor.', 'warn', { keep: true });
     if (y === 2018) {
@@ -613,12 +660,12 @@
       ], 'lobby');
     }
     if (y === 2019) toast('🇹🇷', 'Türkiye', 'Türkiye\'de poşetler ücretli oldu. Market kasalarında bez çanta dönemi.', 'good', { keep: true });
-    if (h.M > 15) once('m15', () => { if (!view.user) setView('shore'); setMicro(true, 7000); toast('🔬', 'Biyolog', 'Büyük parçalar güneşte ufalanıyor: <b>mikroplastik</b>. Avuçtaki suya bak.', 'warn'); });
+    if (h.M > 15) once('m15', () => { if (!view.user) setView('shore'); setTimeout(() => guide([{ key: 'lens', rect: () => [lensBox.x - lensBox.r, lensBox.y - lensBox.r, lensBox.r * 2, lensBox.r * 2], round: 999, text: '🔬 <b>Bir avuç deniz suyu</b>: büyük parçalar güneşte ufalanıp mikroplastik oluyor. Dokun, büyüt.' }]), 600); if (false) toast('🔬', 'Biyolog', 'Büyük parçalar güneşte ufalanıyor: <b>mikroplastik</b>. Avuçtaki suya bak.', 'warn'); });
     if (h.turtle < 0.8) once('t80', () => { pulseAt(() => [turtle.sx, turtle.sy]); toast('🐢', 'Sahil', 'Bir kaplumbağa poşeti deniz anası sanıp yuttu.', 'bad'); });
     if (y >= 2000 && Math.random() < 0.06) { ghost.on = 1; ghost.x = rnd(0.7, 0.92); once('ghost' + Math.floor(y / 6), () => toast('🕸️', 'Balıkçı', 'Fırtınada bir ağ koptu: artık <b>hayalet ağ</b>, kimse çekmeden avlıyor.', 'warn')); }
     if (game.sat < 25 && !game.replaced) once('warn-sat', () => toast('📢', 'Market zinciri', '"Vergi müşteriyi kaçırıyor!" Halkın desteği düşüyor.', 'warn'));
     if (game.sat <= 0 && !game.replaced && game.p.tax > 0.1 && gs.y >= game.lobbyUntil) lobby();
-    if (window.SceneUtils) {
+    if (window.SceneUtils && window.SceneUtils.advise) {
       const A = window.SceneUtils.advise, crisis = game.crises.some(c => y >= c && y < c + 3);
       if (crisis && game.used > game.budget + 0.5) A('Kriz: bütçe aşıldı, neyi keseceğini sen seç', 'bad');
       else if (game.storms.includes(y + 1)) A('Sel geliyor: atık toplamayı artır');
@@ -628,6 +675,7 @@
       else if (h.I > TARGET) A(`Hedef 12 Mt: şimdi ${f1(h.I)} Mt`);
       else A(`Hedefte: ${f1(h.I)} Mt; mikroplastik hâlâ birikiyor`, 'good');
     }
+    if (y % 10 === 0 && window.SceneUtils && window.SceneUtils.decade) window.SceneUtils.decade(y, ({ 1950: "Plastik mucizesi: hafif, ucuz, kırılmaz", 1960: "Tek kullanımlık hayat moda", 1970: "Plastik şişe ve poşet her yerde", 1980: "Market poşeti çağı", 1990: "Geri dönüşüm kutuları geliyor", 2000: "Dünya yılda 200 milyon tondan fazla plastik üretiyor", 2010: "Mikroplastik gündemde", 2020: "Poşet yasakları yayılıyor", 2030: null })[y]);
     if (gs.y > M.Y1 && game.state === 'play') endGame(); else if (gs.y > M.Y1) game.endAfter = true;
   }
   function lobby() {
@@ -747,6 +795,7 @@
     if (view.until && performance.now() > view.until && !view.user) setView('shore');
     if (mode !== 'game' && mode !== 'result' && view.want === 'map') setView('shore');
     view.k = lerp(view.k, view.want === 'map' ? 1 : 0, 1 - Math.pow(0.9, dt / 16));
+    if (window.SceneUtils && window.SceneUtils.fullView) window.SceneUtils.fullView(view.k > 0.5 && mode === 'game');
     if (mview.until && performance.now() > mview.until && !mview.user) setMicro(false);
     if (mode !== 'game' && mode !== 'sandbox') mview.want = 0;
     mview.k = lerp(mview.k, mview.want, 1 - Math.pow(0.9, dt / 16));
