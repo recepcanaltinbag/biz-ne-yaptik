@@ -11,7 +11,7 @@ Durum: ✅ hazır · 🔜 sırada · 📝 plan
 |---|---|---|
 | ✅ Serçelere Savaş | Çin, Dört Zararlı Kampanyası (1958) | Dokun, tencere çal; kota baskısı; serçe ↔ böcek ↔ tahıl |
 | ✅ Kurtarıcı Kurbağa | Avustralya, kamış kurbağası (1935) | Kurbağa sal, haritada istilanın yayılışını izle; karantina hatları çek |
-| 📝 24 Tavşanlık Felaket | Avustralya, 1859'da salınan tavşanlar | Üstel büyüme; çit ve hastalıkla (miksomatozis) kontrol, direnç gelişimi |
+| ✅ 24 Tavşanlık Felaket | Avustralya, 1859'da salınan tavşanlar | Üstel büyüme; çit ve hastalıkla (miksomatozis) kontrol, direnç gelişimi |
 | 📝 Gölün Yeni Patronu | Victoria Gölü, 1950'ler | Yırtıcı balığı ekle, yerli türlerin (çiklitler) kayboluşunu izle |
 | 📝 Ordu Emulara Yenildi | Batı Avustralya, Emu Savaşı (1932) | Asker ve mermi bütçesi; emular dağılır. Asıl çözüm (çit, tarım politikası) sonradan açılır |
 | 📝 Kaplumbağanın Yemeğini Kim Yedi? | Galápagos, keçiler (1959 → Isabela Projesi) | Birkaç keçi üstel çoğalır, bitki örtüsü ve kaplumbağalar azalır; geri toplama maliyeti |

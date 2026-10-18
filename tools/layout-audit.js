@@ -2,7 +2,7 @@
 // Kullanım: yerel sunucuda (python3 -m http.server 8790) ana sayfayı aç, bu dosyanın içeriğini tarayıcı konsoluna yapıştır
 // ya da bir otomasyon aracıyla çalıştır. Bölümlerin ?debug modunda window.__dbg.go(mod) sunması gerekir.
 (async () => {
-  const CHAPTERS = ['serce', 'kurbaga', 'aral', 'ddt', 'bakteri', 'plastik', 'guvercin', 'ozon'];
+  const CHAPTERS = ['serce', 'kurbaga', 'aral', 'ddt', 'bakteri', 'plastik', 'guvercin', 'ozon', 'tavsan'];
   const SIZES = [[1440, 900], [1024, 768], [375, 812], [360, 640]];
   const MODES = ['title', 'game', 'result', 'sandbox', 'facts', 'lessons'];
   const out = [];

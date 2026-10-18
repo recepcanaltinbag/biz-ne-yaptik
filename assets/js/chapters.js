@@ -6,7 +6,7 @@ window.SEASONS = [
       img: 'assets/img/cards/kill-bird-and-insect.jpg', pos: '50% 20%', credit: 'Kampanya afişi, kamu malı', src: 'File:Kill_bird_and_insect.jpg' },
     { year: '1935', title: 'Kurtarıcı Kurbağa', status: 'live', href: 'chapters/kurbaga/', text: 'Avustralya şeker kamışı böceğine karşı kurbağa getiriyor. Kurbağa böceği yemiyor, kıtayı ele geçiriyor.',
       img: 'assets/img/cards/cane-toad-bufo-marinus.jpg', credit: 'Charles J. Sharp, CC BY-SA 4.0', src: 'File:Cane_toad_(Bufo_marinus).jpg' },
-    { year: '1859', title: '24 Tavşanlık Felaket', status: 'soon', text: 'Bir çiftlik sahibi avlanmak için 24 tavşan salıyor. Yarım asır geçmeden yüz milyonlarca tavşan kıtanın otlarını kemiriyor.',
+    { year: '1859', title: '24 Tavşanlık Felaket', status: 'live', href: 'chapters/tavsan/', text: 'Bir çiftlik sahibi avlanmak için 24 tavşan salıyor. Yarım asır geçmeden yüz milyonlarca tavşan kıtanın otlarını kemiriyor.',
       img: 'assets/img/cards/csiro-scienceimage-2232-releasing-the-myxoma-virus-for-rabbi.jpg', credit: 'CSIRO Arşivi, CC BY 3.0', src: 'File:CSIRO_ScienceImage_2232_Releasing_the_Myxoma_Virus_for_Rabbits.jpg' },
     { year: '1954', title: 'Gölün Yeni Patronu', status: 'soon', text: 'Victoria Gölü\'ne iri ve lezzetli bir yırtıcı balık bırakılıyor. Göldeki yüzlerce yerli balık türünün çoğu ortadan kayboluyor.',
       img: 'assets/img/cards/fishing-on-lake-victoria-06.jpg', credit: 'Jöseph Ashaba, CC BY-SA 4.0', src: 'File:Fishing_on_lake_Victoria_06.jpg' },

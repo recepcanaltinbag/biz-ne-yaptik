@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>24 Tavşanlık Felaket</title>
+<meta name="description" content="1859–2000: avlanmak için salınan 24 tavşan Avustralya'yı nasıl kapladı? Çit, tuzak ve virüsle kontrol etmeyi dene; virüs ve tavşan birlikte evrilir.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/css/badges.css?v=261018114421">
+<link rel="stylesheet" href="../../assets/css/chapter.css?v=261018114421">
+<style>
+  .sl.locked span { color: var(--ink-soft); }
+  #m-rab { background: #9a7a5a; } #m-grass { background: #7ab060; } #m-native { background: #c08a4a; }
+  .budget { font-family: var(--hand); font-size: 1.05rem; display: flex; align-items: center; gap: 8px; }
+  .bbar { display: flex; height: 10px; width: 110px; border-radius: 99px; overflow: hidden; background: #e6e2d4; }
+  .bbar i { display: block; height: 100%; }
+  #b-trap { background: #9a6a3a; } #b-fence { background: #7a8a9a; } #b-vir { background: #8a5ac0; }
+</style>
+</head>
+<body class="dock">
+<script>if (/[?&]layout=klasik\b/.test(location.search)) document.body.classList.remove("dock");</script>
+<canvas id="world" aria-hidden="true"></canvas>
+
+<header class="bar">
+  <a class="bar-home" href="../../">← Biz Ne Yaptık?</a>
+  <button class="bar-btn" id="sound" aria-label="Sesi aç/kapat">🔊 <span>Ses</span></button>
+</header>
+
+<div class="slides">
+
+  <section class="slide" data-mode="title">
+    <div class="center-col"><div class="glass">
+      <div class="kicker">Biz Ne Yaptık? · Sezon 1 · Bölüm 3</div>
+      <h1 class="title">24 Tavşanlık Felaket</h1>
+      <p class="sub">1859–2000 · oynama süresi ~5 dakika</p>
+      <button class="hbtn big" data-next>Başla →</button>
+    </div></div>
+  </section>
+
+  <section class="slide" data-mode="game">
+    <div class="narr game-intro" id="g-intro">
+      <p>Sen Avustralya'nın tavşan kurulunun başkanısın. <b>Bütçeyi sen bölüştürürsün.</b></p>
+      <p class="try">👉 Önce izle: 24 tavşan ne kadar çabuk çoğalıyor?</p>
+    </div>
+    <div class="topbox">
+      <div class="yearbar" aria-live="polite"><div class="yb-year" id="yb-year">1859</div><div class="yb-sub" id="yb-sub">Biraz av, biraz memleket</div><div class="yb-track"><i id="yb-fill"></i></div><span class="yb-harvest" id="yb-harvest"></span><span class="yb-speed" id="yb-speed" role="group" aria-label="Hız"><button type="button" data-s="1" class="on">1×</button><button type="button" data-s="2">2×</button><button type="button" data-s="4">4×</button></span><button type="button" class="yb-view" id="g-view">🗺️ Harita</button></div>
+      <div id="toasts" aria-live="polite"></div>
+    </div>
+    <aside class="gpanel" aria-label="Av komiserliği masası">
+      <button class="gp-toggle" type="button" aria-expanded="false">⋯ Daha fazla</button>
+      <div class="gp-hud">
+      <div class="gp-top">
+        <div class="chip date" id="g-date">1859</div>
+        <div class="chip budget"><span>💰</span><span class="bbar"><i id="b-trap"></i><i id="b-fence"></i><i id="b-vir"></i></span><b id="g-budget">100 puan boşta</b></div>
+      </div>
+      <p class="goal gp-extra">🎯 <b>Hedef:</b> 2000'de tavşan <b>200 milyonun</b> altında, otlak sağlam ve yerli hayvanlar yaşıyor olsun.</p>
+      <div class="gp-meters">
+        <div class="mrow"><span>🐇<em> Tavşan</em></span><span class="track"><i id="m-rab"></i></span></div>
+        <div class="mrow"><span>🌾<em> Otlak</em></span><span class="track"><i id="m-grass"></i></span></div>
+        <div class="mrow"><span>🦘<em> Yerli hayvanlar</em></span><span class="track"><i id="m-native"></i></span></div>
+        <div class="mrow trust"><span>🧑‍🌾<em> Çiftçilerin desteği</em></span><span class="track"><i id="m-trust"></i></span></div>
+      </div>
+      </div>
+      <label class="sl big locked" id="w-trap"><span>🪤 Tuzak ve zehir <b id="o-trap">🔒 1883'te açılır</b></span><input type="range" id="g-trap" min="0" max="100" step="5" value="0" disabled></label>
+      <label class="sl big locked" id="w-fence"><span>🧱 Çit bakımı <b id="o-fence">🔒 çit yok</b></span><input type="range" id="g-fence" min="0" max="100" step="5" value="0" disabled></label>
+      <label class="sl big locked" id="w-vir"><span>🦠 Virüs programı <b id="o-vir">🔒 virüs yok</b></span><input type="range" id="g-vir" min="0" max="100" step="5" value="0" disabled></label>
+      <div class="sb-ctrl gp-extra">
+        <button class="hbtn sm" id="g-pause">❚❚ Durdur</button>
+        <button class="hbtn sm" id="g-speed">1×</button>
+      </div>
+    </aside>
+    <div class="harvest" id="harvest" hidden></div>
+    <div class="modal" id="modal" hidden></div>
+  </section>
+
+  <section class="slide scroll" data-mode="result">
+    <div class="result" id="result"></div>
+  </section>
+
+  <section class="slide" data-mode="sandbox">
+    <aside class="sb-panel">
+      <h2>Simülasyon laboratuvarı</h2>
+      <p class="small">1859'dan 2000'e kadar tavşanlar her yıl senin kurallarına göre çoğalır. Bütçe sınırı yok.</p>
+      <div class="presets">
+        <button class="pbtn" data-preset="history">Tarihteki gibi</button>
+        <button class="pbtn" data-preset="none">Hiç virüs olmasa</button>
+        <button class="pbtn" data-preset="trap">Yalnız zehir</button>
+        <button class="pbtn" data-preset="all">Erken çit ve dengeli</button>
+      </div>
+      <label class="sl"><span>🪤 Tuzak ve zehir <b id="o-pt"></b></span><input type="range" id="p-t" min="0" max="100" value="30"></label>
+      <label class="sl"><span>🦠 Virüs programı <b id="o-pv"></b></span><input type="range" id="p-v" min="0" max="100" value="30"></label>
+      <label class="sl"><span>🌧️ Yağış <b id="o-pr"></b></span><input type="range" id="p-r" min="40" max="120" value="100"></label>
+      <canvas id="sb-chart" class="sb-chart"></canvas>
+      <div class="sb-stats"><span id="sb-year">1859</span><span id="sb-harvest">Tavşan: 24</span></div>
+      <div class="sb-ctrl">
+        <button class="hbtn sm" id="sb-play">❚❚ Durdur</button>
+        <button class="hbtn sm" id="sb-speed">1×</button>
+        <button class="hbtn sm" id="sb-reset">↺ Sıfırla</button>
+      </div>
+      <button class="hbtn" data-next>Gerçekte ne oldu? →</button>
+    </aside>
+  </section>
+
+  <section class="slide scroll" data-mode="facts">
+    <article class="paper">
+      <h2>Gerçekte ne oldu?</h2>
+      <ul class="facts">
+        <li><b>1859</b> Thomas Austin, Victoria'daki çiftliğinde avlanmak için İngiltere'den getirttiği <b>iki düzine tavşanı</b> saldı. Tavşanlar yılda yaklaşık 100 km ilerleyerek kıtaya yayıldı: bilinen en hızlı memeli istilalarından biri.</li>
+        <li><b>1907</b> Batı Avustralya, tavşanları durdurmak için 1.800 km'den uzun bir çit bitirdi. Ama tavşanlar çit tamamlanmadan karşıya geçmişti. 1950'de salınan <b>miksomatozis</b> virüsü tavşanların %90'ından fazlasını öldürdü.</li>
+        <li><b>Bugün</b> Virüs zamanla yumuşadı, tavşanlar direnç kazandı ve geri döndü. 1995'te ikinci bir virüs (kalisivirüs) deneme adasından kaçtı, yine çok öldürdü. Avustralya'da bugün yüz milyonlarca tavşan yaşıyor.</li>
+      </ul>
+      <div class="callout"><b>Ama virüs tek başına bitirmedi.</b> Çok öldüren virüs soyu, tavşan çabuk öldüğü için kendini yayamadı; ılımlı soylar kazandı. Tavşanlar da direnç geliştirdi. Bu, gözümüzün önünde yaşanan bir <i>birlikte evrim</i> örneği. Zehir ve tuzak ise yerli hayvanları da öldürdü.</div>
+      <button class="hbtn" data-next>Peki ne öğrendik? →</button>
+    </article>
+  </section>
+
+  <section class="slide scroll" data-mode="lessons">
+    <article class="paper">
+      <h2>Ne öğrendik?</h2>
+      <div class="lessons"><div class="lcard"><h3>🐇 Üstel büyüme kandırır</h3><p>24 tavşan otuz yıl içinde yüz milyonlarca olur.</p></div><div class="lcard"><h3>🧱 Geç kalan çit boşa gider</h3><p>Cephe geçtikten sonra çekilen çit hiçbir şeyi durdurmaz.</p></div><div class="lcard"><h3>🧬 Canlılar karşılık verir</h3><p>Virüs ve tavşan birlikte evrilir; tek bir çözüm sonsuza kadar sürmez.</p></div></div>
+      <h2>Sen ne yapabilirsin?</h2>
+      <ul class="todo"><li>🐾 Evcil hayvanını, akvaryum balığını ya da bitkini asla doğaya salma.</li><li>🇹🇷 Türkiye'de de istilacı türler var: aslan balığı ve balon balığı Akdeniz'e Süveyş Kanalı'ndan geldi.</li><li>🔎 Bilmediğin bir canlı görürsen fotoğrafla, doğa uygulamalarına (ör. iNaturalist) bildir.</li></ul>
+      <details class="sources-fold"><summary>Kaynaklar ve model hakkında</summary><ul class="sources">
+        <li>F. Fenner, F. N. Ratcliffe, <i>Myxomatosis</i>, Cambridge University Press, 1965.</li>
+        <li>J. M. Alves ve ark., "A single introduction of wild rabbits triggered the biological invasion of Australia", <i>PNAS</i> 119 (2022).</li>
+        <li>P. J. Kerr ve ark., "Myxoma virus and the Leporipoxviruses: an evolutionary paradigm", <i>Viruses</i> 7 (2015).</li>
+        <li>National Museum of Australia, "Defining Moments: Rabbits introduced".</li>
+        <li>B. D. Cooke, <i>Australia's War Against Rabbits</i>, CSIRO Publishing, 2014.</li>
+      </ul><p class="small">Model yıllık bir nüfus dengesine dayanır: yayılan cephe, otlak, yırtıcılar, tuzak ve zehir, çit ve iki virüs. Virüsün öldürücülüğü ve tavşanların direnci birlikte değişir. Sayılar tarihî gidişe göre ayarlandı ve temsilidir.</p></details>
+      <div class="end-nav">
+        <a class="hbtn" href="../../#bolumler">← Tüm bölümler</a>
+        <button class="hbtn" data-goto="game">↺ Tekrar oyna</button>
+      </div>
+    </article>
+  </section>
+</div>
+
+<nav class="dots" id="dots" aria-label="Bölüm adımları"></nav>
+
+<script src="../../assets/js/stats.js?v=261018114421"></script>
+<script src="../../assets/js/mission.js?v=261018114421"></script>
+<script src="../../assets/js/scene-utils.js?v=261018114421"></script>
+<script src="../../assets/js/badges.js?v=261018114421"></script>
+<script src="../../assets/js/toon.js?v=261018114421"></script>
+<script src="model.js?v=261018114421"></script>
+<script src="tavsan.js?v=261018114421"></script>
+<script>/* gpToggle */document.querySelectorAll(".gp-toggle").forEach(b=>b.onclick=()=>{const p=b.closest(".gpanel");const o=p.classList.toggle("open");b.setAttribute("aria-expanded",o);b.textContent=o?"✕ Kapat":"⋯ Daha fazla";window.dispatchEvent(new Event("panel"));});</script>
+</body>
+</html>
