@@ -28,7 +28,8 @@
     if (st.v > 0) {
       const fresh = 0.35 * clamp(p.vir);
       st.v = st.v + T.va * (0.62 - st.v) + fresh * (0.97 - st.v);
-      st.prev = clamp(T.p0 + T.p1 * p.rain * (p.flea ? 1.25 : 1) + 0.25 * clamp(p.vir)) * smooth(0, T.dens, st.R);
+      // sivrisinek yağmurda, pire kuraklıkta da taşır; program yeni soylar salar
+      st.prev = clamp(0.45 + 0.35 * p.rain + (p.flea ? 0.12 + 0.35 * (1 - p.rain) : 0) + 0.2 * clamp(p.vir)) * smooth(0, T.dens, st.R);
       kV = st.prev * st.v * (1 - st.q) * 0.95;
       st.q = clamp(st.q + T.qk * kV * (0.75 - st.q)); // direnç bir yerde doyar: virüs öldürmeye devam eder ama eskisi kadar değil
     }
@@ -36,16 +37,17 @@
     let kV2 = 0;
     if (p.rhdv && st.v2 === 0) { st.v2 = 0.9; }
     if (st.v2 > 0) { st.prev2 = clamp(0.5 * (1.3 - 0.5 * p.rain) + 0.2 * clamp(p.vir)) * smooth(0, 70, st.R); kV2 = st.prev2 * st.v2 * (1 - st.q2) * 0.9; st.q2 = clamp(st.q2 + 0.12 * kV2 * (0.75 - st.q2)); }
-    const kT = 0.5 * clamp(p.trap) * (0.4 + 0.6 * smooth(0, 700, st.R)) * (p.rain < 0.7 ? 1.4 : 1); // tuzakçı, tavşan bolken çok yakalar; kuraklıkta tavşan su başında toplanır
-    const r = T.r;
+    const kT = 0.5 * clamp(p.trap) * (0.4 + 0.6 * smooth(0, 700, st.R)) * (p.rain < 0.7 ? 2.0 : p.rain > 1.2 ? 1.6 : 1); // tuzakçı, tavşan bolken çok yakalar; kuraklıkta tavşan su başında toplanır
+    const r = T.r * (p.rain > 1.2 ? 1.8 : 1); // yağışlı yılda tavşan patlaması
     const grow = r * st.R * Math.max(0, 1 - st.R / Math.max(1, K));
     // tilki ve yabani kedi: sabit bir sayı yer; tavşan azken payı büyür (yırtıcı çukuru)
     const kP = y >= 1871 ? T.pm / (st.R + T.ph) : 0;
     const kill = st.R * clamp(kT + kV + kV2 + kP, 0, 0.97);
     st.R = Math.max(0, st.R + grow - kill - (st.R > K ? 0.5 * (st.R - K) : 0));
     // yerli hayvanlar (bilbi, kanguru faresi...): tavşan otu ve yuvayı kapar; zehir ve tuzak onları da öldürür
-    st.N = clamp(st.N + 0.06 * (1 - st.N) * st.G - 0.05 * clamp(st.R / (K0 * 0.5)) * st.N - T.poison * clamp(p.trap) * st.N);
-    st.hist.push({ y, N: st.N, kP, A: st.A, R: st.R, G: st.G, K, v: st.v, q: st.q, v2: st.v2, q2: st.q2, kT, kV, kV2, cap, trapCatch: kT * st.R });
+    st.N = clamp(st.N + 0.06 * (1 - st.N) * st.G - (0.05 * clamp(st.R / (K0 * 0.5 * Math.max(0.05, st.A))) * st.A + T.poison * clamp(p.trap) * st.A) * st.N);
+    const Gtot = st.G * st.A + (1 - st.A); // tavşanın ulaşmadığı otlak sağlam
+    st.hist.push({ y, Gtot, N: st.N, kP, A: st.A, R: st.R, G: st.G, K, v: st.v, q: st.q, v2: st.v2, q2: st.q2, kT, kV, kV2, cap, trapCatch: kT * st.R });
     st.y++;
     return st;
   }

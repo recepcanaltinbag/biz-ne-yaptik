@@ -5,7 +5,7 @@
     title: '24 Tavşanlık Felaket · 1859',
     role: 'Avustralya\'nın tavşan kurulunun başkanısın.',
     control: 'Her yıl <b class="inl">100 puanlık bütçe</b>: 🪤 tuzak ve zehir, 🧱 çit bakımı, 🦠 virüs programı. Araçlar zamanla açılır; çitin ne zaman kurulacağına sen karar verirsin.',
-    goal: '2000\'de tavşan <b>200 milyonun</b> altında, otlak <b>%85</b> sağlam, yerli hayvanlar <b>yarıdan</b> fazla.',
+    goal: '2000\'de tavşan <b class="inl">200 milyonun</b> altında, otlak <b class="inl">%85</b> sağlam, yerli hayvanlar <b class="inl">%58</b> üstünde.',
     watch: 'Zehir yerli hayvanları da öldürür. Virüs ve tavşan birlikte evrilir: bugünkü çözüm yarın yetmeyebilir.',
   };
   const M = window.TavsanModel;
@@ -19,11 +19,11 @@
   const f1 = v => v.toFixed(1).replace('.', ',');
   const num = v => Math.round(v).toLocaleString('tr-TR');
   const TOTAL = M.Y1 - M.Y0 + 1;
-  const GOAL = { R: 200, G: 0.85, N: 0.5 };
+  const GOAL = { R: 200, G: 0.85, N: 0.58 };
   const HISTORY = M.run(TOTAL, M.histP);
   const COST = { trap: 1, fence: 1, vir: 1 };
   const rabText = R => R >= 1000 ? f1(R / 1000) + ' milyar' : R >= 1 ? num(R) + ' milyon' : R * 1e6 >= 1000 ? num(R * 1e6) : String(Math.max(0, Math.round(R * 1e6)));
-  const eraName = y => y < 1870 ? 'Biraz av, biraz memleket' : y < 1895 ? 'Gri halı yayılıyor' : y < 1950 ? 'Milyarlarca tavşan' : y < 1960 ? 'Virüs' : y < 1995 ? 'Tavşan karşılık veriyor' : 'İkinci virüs';
+  const eraName = (y, R) => y < 1870 ? 'Biraz av, biraz memleket' : y < 1895 ? 'Gri halı yayılıyor' : y < 1950 ? (R >= 1000 ? 'Milyarlarca tavşan' : 'Yüz milyonlarca tavşan') : y < 1960 ? 'Virüs' : y < 1995 ? 'Tavşan karşılık veriyor' : 'İkinci virüs';
 
   // =====================================================================
   // SES
@@ -169,8 +169,8 @@
     const tufts = Math.round(60 * vis.G);
     for (let i = 0; i < tufts; i++) { const x = ((i * 97) % 1000) / 1000 * x1, y = G.Y(((i * 61) % 100) / 100), h = 6 * U * vis.G; ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x - 2 * U, y - h); ctx.moveTo(x, y); ctx.lineTo(x + 2 * U, y - h * 1.1); ctx.stroke(); }
     // çiftlik evi ve Thomas Austin (ilk yıllarda)
-    ctx.fillStyle = '#c8a880'; ctx.fillRect(x1 * 0.04, gt - 34 * U, x1 * 0.1, 34 * U); ctx.fillStyle = '#8a4a3a'; ctx.beginPath(); ctx.moveTo(x1 * 0.03, gt - 34 * U); ctx.lineTo(x1 * 0.09, gt - 52 * U); ctx.lineTo(x1 * 0.15, gt - 34 * U); ctx.fill();
-    if (mode === 'game' && gs.y < 1872) { const ax = x1 * 0.2, ay = G.Y(0.2); austin.sx = ax; austin.sy = ay - 44 * U; person(ax, ay, U, { shirt: '#5a6a4a', hat: '#3a2a1a', gun: true }); } else austin.sx = undefined;
+    const hx = x1 * (mobile ? 0.04 : 0.26); ctx.fillStyle = '#c8a880'; ctx.fillRect(hx, gt - 34 * U, x1 * 0.1, 34 * U); ctx.fillStyle = '#8a4a3a'; ctx.beginPath(); ctx.moveTo(hx - x1 * 0.01, gt - 34 * U); ctx.lineTo(hx + x1 * 0.05, gt - 52 * U); ctx.lineTo(hx + x1 * 0.11, gt - 34 * U); ctx.fill();
+    if (mode === 'game' && gs.y < 1872) { const ax = x1 * (mobile ? 0.2 : 0.4), ay = G.Y(0.2); austin.sx = ax; austin.sy = ay - 44 * U; person(ax, ay, U, { shirt: '#5a6a4a', hat: '#3a2a1a', gun: true }); } else austin.sx = undefined;
     // çit (kurulduysa): arkada; bakım azsa delikli
     if (game.fenceY) {
       const fy = G.Y(0.02), holes = 1 - vis.fence;
@@ -237,11 +237,11 @@
     ctx.fillStyle = '#e8d8a8'; ctx.fill();
     ctx.save(); ctx.clip();
     const A = vis.A, r = (0.6 * A + 0.35 * smooth(0.75, 1, A)) * Wm;
-    const fenced = game.fenceY && curHist() && curHist().cap < 1;
+    const fenced = game.fenceY && game.fenceOk;
     ctx.fillStyle = 'rgba(140,110,80,.6)'; ctx.beginPath(); ctx.arc(X(GEE[0]), Y(GEE[1]), r, 0, 6.283); ctx.fill();
     if (fenced) { ctx.fillStyle = `rgba(232,216,168,${0.85 * vis.fence + 0.3})`; ctx.fillRect(X(0), Y(0), X(WAX) - X(0), Hm); }
     ctx.restore();
-    if (game.fenceY) { ctx.strokeStyle = '#4a4a4a'; ctx.lineWidth = 3 * U; ctx.setLineDash([6 * U, 3 * U]); ctx.beginPath(); ctx.moveTo(X(WAX), Y(0.14)); ctx.lineTo(X(WAX + 0.02), Y(0.72)); ctx.stroke(); ctx.setLineDash([]); tag(X(WAX + 0.02), Y(0.8), `🧱 Tavşan çiti${fenced ? '' : ' (geç kaldı)'}`, { fs: 12 }); }
+    if (game.fenceY) { ctx.strokeStyle = '#4a4a4a'; ctx.lineWidth = 3 * U; ctx.setLineDash([6 * U, 3 * U]); ctx.beginPath(); ctx.moveTo(X(WAX), Y(0.14)); ctx.lineTo(X(WAX + 0.02), Y(0.72)); ctx.stroke(); ctx.setLineDash([]); tag(X(WAX + 0.02), Y(0.8), `🧱 Tavşan çiti${!game.fenceDoneY ? ' (yapılıyor)' : fenced ? '' : ' (geç kaldı)'}`, { fs: 12 }); }
     ctx.fillStyle = '#c0503a'; ctx.beginPath(); ctx.arc(X(GEE[0]), Y(GEE[1]), 4 * U, 0, 6.283); ctx.fill();
     tag(X(GEE[0]), Y(GEE[1]) - 6 * U, '1859: Geelong yakınında 24 tavşan', { fs: 11 });
     tag(X(0.5), Y(1.0) + 6 * U, `🗺️ Tavşanların yayıldığı alan: %${Math.round(A * 100)} · dokun: çiftliğe dön`, { fs: 12 });
@@ -420,13 +420,15 @@
   const curHist = () => { const s = mode === 'sandbox' ? sb.st : gs; return s.hist.length ? s.hist[s.hist.length - 1] : null; };
 
   function makeDroughts() { const d = []; while (d.length < 6) { const y = 1872 + Math.floor(Math.random() * 126); if (d.every(x => Math.abs(x - y) > 6) && [1950, 1995, 1937, 1886, 1969].every(b => Math.abs(b - y) > 1)) d.push(y); } return d; }
+  function makeWets(dr) { const w = []; while (w.length < 5) { const y = 1885 + Math.floor(Math.random() * 112); if (w.every(x => Math.abs(x - y) > 5) && dr.every(x => Math.abs(x - y) > 2) && [1950, 1995, 1937, 1969].every(b => Math.abs(b - y) > 1)) w.push(y); } return w; }
   function resetGame() {
     gs = M.newState();
     Object.assign(game, {
       started: false, paused: false, state: 'play', frac: 0, fired: new Set(), hist: [], speed: 1, touched: false, reading: 0, story: false, endAfter: false,
       p: { trap: 0, fence: 0, vir: 0 }, unlocked: { trap: false, fence: false, vir: false }, moved: {}, used: 0, sat: 70,
-      droughts: makeDroughts(), fenceY: 0, fenceDone: 0, fenceA: 0, myxoY: 0, flea: 0, research: 0, replaced: false,
+      droughts: makeDroughts(), wets: [], fenceY: 0, fenceOk: false, fenceDoneY: 0, fenceDone: 0, fenceA: 0, myxoY: 0, flea: 0, research: 0, replaced: false,
     });
+    game.wets = makeWets(game.droughts);
     Object.values(SL).forEach(el => { el.value = 0; el.disabled = true; });
     $('w-trap').classList.add('locked'); $('w-fence').classList.add('locked'); $('w-vir').classList.add('locked');
     $('o-trap').textContent = "🔒 1883'te açılır"; $('o-fence').textContent = '🔒 çit yok'; $('o-vir').textContent = '🔒 virüs yok';
@@ -472,12 +474,13 @@
 
   const STORY = [
     ['🐇', '1859', 'Çiftlik sahibi Thomas Austin, avlanmak için İngiltere\'den <b>24 tavşan</b> getirtip saldı: "Birkaç tavşan ne zarar verir ki?"', '', { pause: true }],
-    ['🦊', 'Avustralya', 'Burada tavşanı yiyen yırtıcı da, onu tutan hastalık da yok. Bir dişi yılda <b>30\'dan fazla</b> yavru doğurabilir.', '', { pause: true }],
+    ['🦊', 'Avustralya', 'Burada tavşanı avlayan yırtıcı neredeyse yok, ona bulaşan hastalık da yok. Bir dişi yılda <b>30\'dan fazla</b> yavru doğurabilir.', '', { pause: true }],
   ];
   function enterGame() {
     game.paused = false; $('g-pause').textContent = '❚❚ Durdur';
     if (game.started) return;
     game.started = true; game.story = true; // görev kartı kapanana kadar zaman durur
+    Object.assign(vis, { R: 0.000024, G: 1, N: 1, A: 0.0005 });
     const show = i => {
       if (mode !== 'game') return;
       if (i >= STORY.length) { game.story = false; return; }
@@ -523,29 +526,31 @@
     comeOfficial('farm', 'Batı\'dan haber var.');
     const A = gs.A, far = A < 0.6;
     choice('Batı Avustralya hükümeti', 'Çit kuralım mı?', `"Tavşan cephesi ${far ? 'hâlâ uzakta' : '<b>sınıra yaklaştı</b>'}. Kıtayı boydan boya kesen bir çit kurarsak Batı\'yı koruyabiliriz. Yapımı <b>6 yıl</b> sürer; bitince bakım ister."`, [
-      { label: '🧱 Kuralım', sub: 'Hemen başlar, 6 yıl sürer', fn: () => { game.fenceY = y; clang(); toast('🧱', 'Çit ustaları', 'Çit yapımı başladı. Cephe bitmeden gelmezse Batı korunur.', ''); if (A < 0.6) award('tav-cit'); } },
+      { label: '🧱 Kuralım', sub: 'Hemen başlar, 6 yıl sürer', fn: () => { game.fenceY = y; clang(); toast('🧱', 'Çit ustaları', 'Çit yapımı başladı. Cephe bitmeden gelmezse Batı korunur.', ''); } },
       { label: '⏳ Bekleyelim', sub: 'Belki tavşan buraya gelmez', fn: () => {} },
     ], 'farm');
   }
 
   function yearTick() {
     const y = gs.y;
-    const rain = game.droughts.includes(y) ? 0.45 : 1;
+    const rain = game.droughts.includes(y) ? 0.45 : game.wets.includes(y) ? 1.35 : 1;
     const fenceBuilt = game.fenceY && y >= game.fenceY + 6 ? { y: game.fenceY + 6, A: game.fenceA } : 0;
     M.step(gs, { ...game.p, rain, fenceBuilt, myxo: game.myxoY && y >= game.myxoY ? 1 : 0, flea: game.flea && y >= game.flea ? 1 : 0, rhdv: y >= 1995 ? 1 : 0 });
     const h = gs.hist[gs.hist.length - 1];
     game.hist.push({ ...h, rain });
     // çiftçiler: otlak çıplaksa kızar
-    if (!game.replaced) game.sat = clamp(game.sat + 0.8 + (h.G - 0.8) * 12, 0, 100);
+    if (!game.replaced) game.sat = clamp(game.sat + 0.8 + (h.Gtot - 0.8) * 12, 0, 100);
     $('yb-harvest').textContent = `🐇 ${rabText(h.R)}`; $('yb-harvest').style.color = h.R < GOAL.R ? 'var(--green)' : h.R < 1000 ? 'var(--grain)' : 'var(--danger)';
     // çit tamamlanınca: cephe geçmiş mi?
-    if (game.fenceY && y === game.fenceY + 5) { game.fenceA = gs.A; game.unlocked.fence = true; SL.fence.disabled = false; $('w-fence').classList.remove('locked'); if (!SL.fence.value || SL.fence.value === '0') SL.fence.value = 30; readPolicy(); setView('map', 7000); if (gs.A < 1 - M.WA) milestone('🧱', 'Çit bitti', 'Çit tamamlandı ve <b>cephe henüz gelmedi</b>: Batı Avustralya korunuyor. Çit ancak bakımı kadar sağlam.', 'good', () => !game.moved.fence && coach(SL.fence, '👉 Kaydır: çit bakımı')); else milestone('🧱', 'Çit bitti', 'Çit tamamlandı, ama tavşanlar <b>çoktan karşıya geçmişti</b>. Geç kalan çit hiçbir şeyi durdurmaz.', 'bad'); }
+    if (game.fenceY && y === game.fenceY + 5) { game.fenceA = gs.A; game.fenceDoneY = y; game.unlocked.fence = true; SL.fence.disabled = false; $('w-fence').classList.remove('locked'); SL.fence.value = 0; readPolicy(); setView('map', 7000); game.fenceOk = gs.A < 1 - M.WA; if (game.fenceOk) award('tav-cit'); if (game.fenceOk) milestone('🧱', 'Çit bitti', 'Çit tamamlandı ve <b>cephe henüz gelmedi</b>: Batı Avustralya korunuyor. Çit ancak bakımı kadar sağlam.', 'good', () => !game.moved.fence && coach(SL.fence, '👉 Kaydır: çit bakımı')); else milestone('🧱', 'Çit bitti', 'Çit tamamlandı, ama tavşanlar <b>çoktan karşıya geçmişti</b>. Geç kalan çit hiçbir şeyi durdurmaz.', 'bad'); }
     // olaylar
-    if (y === 1866) toast('🔫', 'Thomas Austin', 'Çiftliğimde bu yıl binlerce tavşan vurduk. Ama hâlâ çoğalıyorlar!', '');
-    if (y === 1875) { setView('map', 6000); toast('🗺️', 'Gazete', 'Tavşanlar yılda yaklaşık <b>100 km</b> ilerliyor. Haritaya bak.', 'warn', { keep: true }); }
+    if (y === 1866) toast('🔫', 'Thomas Austin', 'Çiftliğimde bu yıl yüzlerce tavşan vurduk. Ama hâlâ çoğalıyorlar!', '');
+    if (y === 1875) { setView('map', 6000); toast('🗺️', 'Gazete', 'Tavşanlar yılda yaklaşık <b>100 km</b> ilerliyor.', 'warn'); }
     if (y === 1883) unlock('trap', '<b>Tavşan yasası</b>: çiftçiler tavşanla savaşmak zorunda. Tuzak ve zehirli havuç tavşanı azaltır, ama <b>yerli hayvanları da</b> öldürür.', '👉 Kaydır: tuzak ve zehir');
     if (y === 1886 || (y === 1893 && !game.fenceY) || (y === 1900 && !game.fenceY)) askFence(y);
     if (y === 1888) toast('🧪', 'Yeni Güney Galler', 'Tavşanı bitirecek bir yönteme <b>25.000 sterlin</b> ödül! Pasteur\'ün ekibi tavuk kolerasını denedi; işe yaramadı.', '');
+    if (y === 1925) toast('🧥', 'Liman', 'Tavşan kürkü ve dondurulmuş tavşan eti ihraç ediliyor. Tuzakçılar tavşanın bitmesini pek istemiyor!', '');
+    if (y === 1942) toast('🪖', 'Savaş', 'Tuzakçıların çoğu cephede: tavşanlar yine çoğalıyor.', 'warn');
     if (y === 1937) { comeOfficial('sci', 'Bir virüs var...'); choice('Bilim insanı', 'Virüs denemesi', '"Güney Amerika tavşanlarında <b>miksoma</b> diye bir virüs var; Avrupa tavşanını öldürüyor. Bir adada denemeye para ayıralım mı?"', [
       { label: '🔬 Deneyelim', sub: 'Virüs 1945\'te hazır olabilir', fn: () => { game.research = 1; toast('🏝️', 'Wardang Adası', 'Deneme başladı. Kuru iklimde virüs zor yayılıyor; bekleyeceğiz.', ''); } },
       { label: '⏳ Gerek yok', sub: 'Tuzak yeter', fn: () => {} },
@@ -557,30 +562,32 @@
       { label: '🪳 Getirelim', sub: 'Kuraklıkta da virüs yayılır', fn: () => { game.flea = 1969; award('tav-pire'); } },
       { label: '⏳ Gerek yok', sub: 'Yeni bir tür getirmek riskli', fn: () => {} },
     ], 'sci'); }
-    if (y === 1995) milestone('🦠', 'Wardang Adası', 'Denenen <b>kalisivirüs</b> adadan kaçtı! Rüzgârla ve sineklerle anakaraya yayılıyor. Tavşanlar yine kırılıyor.', 'warn');
-    if (game.droughts.includes(y + 1)) milestone('☀️', 'Hava tahmini', '<b>Gelecek yıl kuraklık</b>: ot kuruyacak, tavşanlar su başlarında toplanacak. Tuzak için fırsat; otlak için tehlike.', 'warn');
-    if (rain < 1) toast('🌪️', 'Kuraklık', 'Toz fırtınası: tavşanların çıplak bıraktığı toprağı rüzgâr uçuruyor.', 'bad');
-    if (h.N < 0.5) once('native', () => toast('🦘', 'Doğa bilimci', 'Bilbi ve kanguru fareleri kayboluyor: tavşan yuvalarını ve otlarını kaptı, zehirli havucu da onlar yedi.', 'bad', { keep: true }));
-    if (game.sat < 20 && !game.replaced) once('sat' + Math.floor(y / 15), () => toast('🧑‍🌾', 'Çiftçiler', 'Otlak kalmadı, koyunlar açlıktan ölüyor! Kurulun desteği düşüyor.', 'warn'));
+    if (y === 1995) milestone('🦠', 'Wedge Adası', 'Denenen <b>kalisivirüs</b> adadan kaçtı! Rüzgârla ve sineklerle anakaraya yayılıyor. Tavşanlar yine kırılıyor.', 'warn');
+    if (game.droughts.includes(y + 1)) { const t = '<b>Gelecek yıl kuraklık</b>: tavşanlar su başlarında toplanacak. Tuzağı o yıl artırırsan çok yakalarsın.'; if (!game.fired.has('dr1')) { game.fired.add('dr1'); milestone('☀️', 'Hava tahmini', t, 'warn'); } else toast('☀️', 'Hava tahmini', t, 'warn', { keep: true }); }
+    if (game.wets.includes(y + 1)) { const t = '<b>Gelecek yıl bol yağmur</b>: ot gürleşecek, tavşan patlaması bekleniyor. Tuzağı o yıl artır.'; if (!game.fired.has('wet1')) { game.fired.add('wet1'); milestone('🌧️', 'Hava tahmini', t, 'warn'); } else toast('🌧️', 'Hava tahmini', t, 'warn', { keep: true }); }
+    if (rain < 1) floats.push({ x: W * 0.55, y: geo().gt + 30 * U, text: '🌪️ Toz fırtınası: çıplak toprak uçuyor', life: 2.2, col: '#8a4a2a' });
+    if (rain > 1.2) floats.push({ x: W * 0.55, y: geo().gt + 30 * U, text: '🐇🐇 Tavşan patlaması!', life: 2.2, col: '#6a4a2a' });
+    if (h.N < 0.5) once('native', () => toast('🦘', 'Doğa bilimci', 'Bilbi ve sıçan kangurular kayboluyor: tavşan yuvalarını ve otlarını kaptı, zehirli havucu da onlar yedi.', 'bad', { keep: true }));
+    if (game.sat < 25 && !game.replaced) once('sat' + Math.floor(y / 15), () => milestone('🧑‍🌾', 'Çiftçiler', 'Otlak kalmadı, koyunlar açlıktan ölüyor! Destek sıfırlanırsa kurul dağıtılır.', 'bad'));
     if (game.sat <= 0 && !game.replaced) { game.replaced = true; toast('📜', 'Hükümet', 'Çiftçiler kurulu dağıttı: görevden alındın.', 'bad'); endGame(); return; }
-    if (y === M.Y1) { if (h.G >= 0.9) award('tav-otlak'); if (h.N >= 0.7) award('tav-bilbi'); if (h.R < GOAL.R && h.G >= GOAL.G && h.N >= GOAL.N) award('tav-hedef'); }
+    if (y === M.Y1) { if (h.Gtot >= 0.9) award('tav-otlak'); if (h.N >= 0.68) award('tav-bilbi'); if (h.R < GOAL.R && h.Gtot >= GOAL.G && h.N >= GOAL.N) award('tav-hedef'); }
     if (window.SceneUtils) {
       const A = window.SceneUtils.advise, dNext = game.droughts.includes(y + 1);
       if (y < 1883) A(`Henüz araç yok: 24 tavşanın nasıl çoğaldığını izle (${rabText(h.R)})`);
       else if (!game.fenceY && gs.A < 0.6 && y >= 1886) A('Çit için hâlâ vakit var: cephe Batı\'ya varmadan kur');
-      else if (h.N < 0.55 && game.p.trap > 0.4) A('Zehir yerli hayvanları da vuruyor: tuzağı biraz azalt', 'bad');
-      else if (h.G < 0.75) A('Otlak çıplak, çiftçiler kızgın: tavşanı azalt', 'bad');
-      else if (dNext) A('Kuraklık geliyor: tavşanlar su başında toplanacak, tuzak için fırsat');
+      else if (h.N < 0.62 && game.p.trap > 0.4) A('Zehir yerli hayvanları da vuruyor: tuzağı biraz azalt', 'bad');
+      else if (h.Gtot < 0.78) A('Otlak çıplak, çiftçiler kızgın: tavşanı azalt', 'bad');
+      else if (dNext || game.wets.includes(y + 1)) A(dNext ? 'Kuraklık geliyor: tuzağı bu yıl artır, çok yakalarsın' : 'Tavşan patlaması geliyor: tuzağı bu yıl artır');
       else if (h.v > 0 && h.q > 0.4 && game.p.vir < 0.3) A('Tavşanlar direnç kazandı: virüs programını artır', 'bad');
       else if (h.R >= GOAL.R) A(`Hedef 200 milyonun altı: şimdi ${rabText(h.R)}`);
-      else A(`Hedefte: ${rabText(h.R)} tavşan; otlağı ve yerlileri koru`, 'good');
+      else A(`Hedefte: ${rabText(h.R)} tavşan; zehri az tut, yerlileri koru`, 'good');
     }
     if (gs.y > M.Y1 && game.state === 'play') endGame(); else if (gs.y > M.Y1) game.endAfter = true;
   }
   function askVirus(y) {
     comeOfficial('sci', 'Virüs hazır.');
     choice('Bilim insanı', 'Miksomatozis', '"Virüs tavşan dışında hiçbir hayvana bulaşmıyor. Salarsak tavşanların çoğu ölür. Ama canlılar karşılık verir: virüs ve tavşan birlikte evrilir."', [
-      { label: '🦠 Salalım', sub: 'Virüs programı açılır', fn: () => { game.myxoY = y + 1; game.unlocked.vir = true; SL.vir.disabled = false; $('w-vir').classList.remove('locked'); SL.vir.value = 0; readPolicy(); } },
+      { label: '🦠 Salalım', sub: 'Virüs programı açılır', fn: () => { game.myxoY = y + 1; game.unlocked.vir = true; SL.vir.disabled = false; $('w-vir').classList.remove('locked'); SL.vir.value = 0; readPolicy(); setTimeout(() => coach(SL.vir, '👉 Kaydır: virüs programı'), 2500); } },
       { label: '⏳ Bekleyelim', sub: 'Bir kez daha düşünelim', fn: () => { if (y < 1950) toast('⏳', 'Kurul', 'Virüs bekleyecek. 1950\'de yeniden sorulacak.', ''); else toast('⏳', 'Kurul', 'Virüs salınmadı.', ''); } },
     ], 'sci');
   }
@@ -595,13 +602,14 @@
   }
   function renderResult() {
     if (!game.hist.length || (gs.y <= M.Y1 && !game.replaced)) { $('result').innerHTML = '<h2>Önce oyunu bitir</h2><button class="hbtn">← Oyuna dön</button>'; $('result').querySelector('button').onclick = () => goTo(slideOf('game')); return; }
-    const hs = game.hist, last = hs[hs.length - 1], hh = HISTORY.hist[hs.length - 1], R = last.R, G0 = last.G, N = last.N;
+    const hs = game.hist, last = hs[hs.length - 1], hh = HISTORY.hist[hs.length - 1], R = last.R, G0 = last.Gtot, N = last.N;
     const ok = !game.replaced && R < GOAL.R && G0 >= GOAL.G && N >= GOAL.N;
-    const score = Math.round(clamp(1 - Math.log10(1 + R) / 3.5) * 50 + G0 * 25 + N * 25);
+    const score = Math.round(100 * (0.4 * clamp(GOAL.R / Math.max(1, R)) + 0.3 * clamp((G0 - 0.6) / 0.35) + 0.3 * clamp((N - 0.3) / 0.35)));
     let title, text;
     if (game.replaced) { title = 'Görevden alındın'; text = 'Otlak çıplak kaldı, koyunlar öldü, çiftçiler kurulu dağıttı.'; }
     else if (ok) { title = 'Gri halı toplandı'; text = 'Tavşan azaldı, otlak yeşerdi, yerli hayvanlar yaşıyor. Tek bir çözüm değil, sırayla birkaç çözüm işe yaradı.'; }
-    else if (N < GOAL.N) { title = 'Zehirli zafer'; text = 'Tavşanla savaşırken yerli hayvanları da kaybettin. Zehir seçici değildir.'; }
+    else if (N < GOAL.N && hs.reduce((a, h) => a + h.kT, 0) / hs.length > 0.08) { title = 'Zehirli zafer'; text = 'Tavşanla savaşırken yerli hayvanları da kaybettin. Zehir seçici değildir.'; }
+    else if (N < GOAL.N) { title = 'Yerliler kayboldu'; text = 'Tavşanlar bilbi gibi yerli hayvanların otunu ve yuvasını kaptı. İstilacı tür yalnız otu değil, komşularını da yer.'; }
     else if (R >= 1000) { title = 'Tavşanların kıtası'; text = 'Tavşanlar kazandı: otlak kemirildi, toprak uçtu. Gerçekte de yalnız tuzak ve çit asla yetmedi.'; }
     else { title = 'Yarım zafer'; text = 'Tavşan azaldı ama hedefe inmedi. Virüs yumuşadı, tavşanlar direnç kazandı: canlılar karşılık verir.'; }
     const col = ok ? 'var(--green)' : 'var(--danger)';
@@ -612,7 +620,7 @@
       ${window.SceneUtils ? window.SceneUtils.bestLine('tavsan', score, 'kurul puanı', !game.replaced) : ''}
       <div class="rgrid">
         <div><div class="y">Tavşan (${game.replaced ? last.y : 2000})</div><div class="v" style="color:${R < GOAL.R ? 'var(--green)' : 'var(--danger)'}">${rabText(R)}</div><div class="h">tarihte: ${rabText(hh.R)}</div></div>
-        <div><div class="y">Otlak</div><div class="v" style="color:${G0 >= GOAL.G ? 'var(--green)' : 'var(--danger)'}">%${Math.round(G0 * 100)}</div><div class="h">tarihte: %${Math.round(hh.G * 100)}</div></div>
+        <div><div class="y">Otlak</div><div class="v" style="color:${G0 >= GOAL.G ? 'var(--green)' : 'var(--danger)'}">%${Math.round(G0 * 100)}</div><div class="h">tarihte: %${Math.round(hh.Gtot * 100)}</div></div>
         <div><div class="y">Yerli hayvanlar</div><div class="v" style="color:${N >= GOAL.N ? 'var(--green)' : 'var(--danger)'}">%${Math.round(N * 100)}</div><div class="h">tarihte: %${Math.round(hh.N * 100)}</div></div>
       </div>
       ${(window.Badges && window.Badges.session().length) ? `<div class="run-badges">${window.Badges.session().map(id => { const d = window.Badges.DEFS.find(x => x.id === id); return d ? `<span class="${d.hidden ? 'secret' : ''}">${d.icon} ${d.name}</span>` : ''; }).join('')}</div>` : ''}
@@ -625,7 +633,7 @@
   const rBar = R => clamp(Math.log10(1 + R * 1e6) / 9.5);
   const series = hist => [
     { data: hist.map(d => rBar(d.R)), color: '#9a7a5a', label: 'Tavşan', fmt: v => rabText((Math.pow(10, v * 9.5) - 1) / 1e6) },
-    { data: hist.map(d => d.G), color: '#7ab060', label: 'Otlak', fmt: v => '%' + Math.round(v * 100) },
+    { data: hist.map(d => d.Gtot), color: '#7ab060', label: 'Otlak', fmt: v => '%' + Math.round(v * 100) },
     { data: hist.map(d => d.N), color: '#c08a4a', label: 'Yerli hayvan', fmt: v => '%' + Math.round(v * 100) },
   ];
   function drawResultChart() { if (window.SceneUtils) window.SceneUtils.lineChart($('rchart'), [{ data: HISTORY.hist.map(d => rBar(d.R)), color: '#9aa59a', dash: true, label: 'Tarihte tavşan', fmt: v => rabText((Math.pow(10, v * 9.5) - 1) / 1e6) }, ...series(game.hist)], TOTAL, { y0: M.Y0, step: 20 }); }
@@ -668,7 +676,7 @@
       updateSbStats(); drawSbChart();
     }
   }
-  function updateSbStats() { const h = sb.st.hist[sb.st.hist.length - 1]; $('sb-year').textContent = String(h ? h.y : M.Y0); $('sb-harvest').textContent = h ? `Tavşan: ${rabText(h.R)} · otlak %${Math.round(h.G * 100)} · yerli %${Math.round(h.N * 100)}` : 'Tavşan: 24'; }
+  function updateSbStats() { const h = sb.st.hist[sb.st.hist.length - 1]; $('sb-year').textContent = String(h ? h.y : M.Y0); $('sb-harvest').textContent = h ? `Tavşan: ${rabText(h.R)} · otlak %${Math.round(h.Gtot * 100)} · yerli %${Math.round(h.N * 100)}` : 'Tavşan: 24'; }
   function drawSbChart() { if (window.SceneUtils) window.SceneUtils.lineChart($('sb-chart'), series(sb.st.hist), TOTAL, { y0: M.Y0, step: 20 }); }
 
   // =====================================================================
@@ -683,6 +691,7 @@
     const h = (mode === 'game' || mode === 'result' || mode === 'sandbox') ? curHist() : null;
     const pol = mode === 'sandbox' ? sb.p : game.p;
     if (h) Object.assign(target, { R: h.R, G: h.G, N: h.N, A: h.A, trap: pol.trap, fence: mode === 'game' ? game.p.fence : 0, kV: h.kV + h.kV2, v: h.v, q: h.q, rain: mode === 'game' ? (game.hist[game.hist.length - 1] || {}).rain || 1 : sb.p.rain });
+    else if (mode === 'game') Object.assign(target, { R: 0.000024, G: 1, N: 1, A: 0.0005, trap: 0, fence: 0, kV: 0, v: 0, q: 0, rain: 1 });
     else Object.assign(target, { R: 50, G: 0.9, N: 0.9, A: 0.3, trap: 0, fence: 0, kV: 0, v: 0, q: 0, rain: 1 });
     const k = 1 - Math.pow(0.93, dt / 16);
     for (const key of Object.keys(target)) vis[key] = key === 'R' ? Math.exp(lerp(Math.log(vis.R + 1e-7), Math.log(target.R + 1e-7), k * 0.5)) : lerp(vis[key], target[key], k * 0.5);
@@ -697,10 +706,10 @@
     if (mode === 'game') {
       const yy = String(Math.max(M.Y0, Math.min(gs.y - 1, M.Y1)));
       if ($('yb-year').textContent !== yy) { const el = $('yb-year'); el.textContent = yy; el.classList.remove('pulse'); void el.offsetWidth; el.classList.add('pulse'); }
-      $('yb-sub').textContent = eraName(Number(yy)); $('g-date').textContent = yy;
+      $('yb-sub').textContent = eraName(Number(yy), vis.R); $('g-date').textContent = yy;
       $('yb-fill').style.width = clamp((gs.hist.length + game.frac) / TOTAL) * 100 + '%';
       $('m-rab').style.width = rBar(vis.R) * 100 + '%';
-      $('m-grass').style.width = clamp(vis.G) * 100 + '%';
+      $('m-grass').style.width = clamp((curHist() || { Gtot: 1 }).Gtot) * 100 + '%';
       $('m-native').style.width = clamp(vis.N) * 100 + '%';
       $('m-trust').style.width = game.sat + '%';
       $('m-trust').parentElement.parentElement.classList.toggle('low', game.sat < 30);
