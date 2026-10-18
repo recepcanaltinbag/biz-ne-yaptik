@@ -556,6 +556,23 @@
     const cx = g.ox + 0.5 * g.Wm, cy = g.oy + 0.48 * g.Hm; return [cx - pr, cy - pr * 0.7, pr * 2, pr * 1.4];
   }
   const CINE = {
+    // açılış: mucize malzeme (kodla çizilir: fabrika, sayaç, kumsal)
+    intro: { id: 'pla-1950', year: '1950', title: 'Mucize malzeme', shots: [
+      { bg: '#e8e0cc', text: 'Hafif, ucuz, kırılmaz. Fabrikalar yeni bir mucize malzeme üretiyor: plastik.', draw: (g, t, W, H, k) => {
+        const s = Math.min(W, H) / 600; g.fillStyle = '#8a7a6a'; g.fillRect(W * 0.08, H * 0.35, W * 0.22, H * 0.45); g.fillRect(W * 0.12, H * 0.15, W * 0.04, H * 0.2);
+        for (let i = 0; i < 4; i++) { const ph = (t * 0.0006 + i * 0.25) % 1; g.fillStyle = `rgba(200,200,200,${0.6 * (1 - ph)})`; g.beginPath(); g.arc(W * 0.14, H * 0.15 - ph * H * 0.12, (10 + ph * 20) * s, 0, 6.28); g.fill(); }
+        g.fillStyle = '#5a5048'; g.fillRect(W * 0.3, H * 0.74, W * 0.66, 10 * s); const cols = ['#e05a4a', '#4a9ad8', '#f0c040', '#5ab06a', '#c070c0'];
+        for (let i = 0; i < 12; i++) { const x = W * 0.3 + ((t * 0.08 * s + i * 60 * s) % (W * 0.66)), c = cols[i % 5]; g.fillStyle = c; if (i % 3 === 0) { g.fillRect(x, H * 0.74 - 34 * s, 16 * s, 34 * s); g.fillRect(x + 4 * s, H * 0.74 - 42 * s, 8 * s, 8 * s); } else if (i % 3 === 1) { g.beginPath(); g.arc(x + 12 * s, H * 0.74 - 12 * s, 12 * s, 0, 6.28); g.fill(); } else { g.fillRect(x, H * 0.74 - 20 * s, 26 * s, 20 * s); } } } },
+      { bg: '#2a2620', text: 'Yılda 2 milyon ton ile başladı. 2015\'te 400 milyon tona yaklaştı; çoğu tek kullanımlık.', draw: (g, t, W, H, k) => {
+        window.Cinema.fx.counter(g, W, H, 2, 400, Math.min(1, k * 1.4), { y: H * 0.45, suffix: ' milyon ton' });
+        g.font = `${Math.min(W, H) * 0.045}px "Patrick Hand", sans-serif`; g.textAlign = 'center'; g.fillStyle = 'rgba(244,236,216,.75)'; g.fillText(Math.round(1950 + 65 * Math.min(1, k * 1.4)) + ' · yıllık üretim', W / 2, H * 0.62); } },
+      { bg: '#bcd8e4', text: 'Bugüne kadarki plastik atığın yalnız %9\'u geri dönüştü. Gerisi nereye gitti?', draw: (g, t, W, H, k) => {
+        const s = Math.min(W, H) / 600, sea = H * 0.5; g.fillStyle = '#4a8ab0'; g.fillRect(0, sea, W, H * 0.22); g.fillStyle = '#e4d4a8'; g.fillRect(0, sea + H * 0.22, W, H);
+        g.fillStyle = 'rgba(255,255,255,.5)'; for (let i = 0; i < 10; i++) g.fillRect(((i * 131 + t * 0.03) % (W + 40)) - 20, sea + H * 0.03 + (i % 4) * H * 0.045, 26 * s, 2);
+        const cols = ['#e05a4a', '#4a9ad8', '#f0c040', '#5ab06a', '#c070c0', '#f4f4f4'];
+        for (let i = 0; i < 70; i++) { const on = i / 70 < 0.15 + k; if (!on) continue; const x = ((i * 97.7) % 1) * W, y = i % 3 ? sea + H * 0.24 + ((i * 41) % 100) / 100 * H * 0.22 : sea + ((i * 29) % 100) / 100 * H * 0.2 + Math.sin(t * 0.002 + i) * 3; g.save(); g.translate(x, y); g.rotate(i); g.fillStyle = cols[i % 6]; if (i % 4 === 0) { g.fillRect(-6 * s, -14 * s, 12 * s, 28 * s); g.fillRect(-3 * s, -19 * s, 6 * s, 5 * s); } else if (i % 4 === 1) { g.beginPath(); g.arc(0, 0, 6 * s, 0, 6.28); g.fill(); } else g.fillRect(-9 * s, -4 * s, 18 * s, 8 * s); g.restore(); }
+        window.Cinema.fx.stamp(g, W, H, '%9', k, { y: H * 0.25, fs: Math.min(W, H) * 0.16, col: 'rgba(40,60,70,.85)' }); } },
+    ] },
     moore: { id: 'pla-1997', year: '1997', title: 'Kuzey Pasifik', credit: 'CaptainDarwin, CC BY-SA 4.0', shots: [
       { dur: 4800, bg: '#5a90b8', text: 'Kaptan Charles Moore, Hawaii\'den dönerken kestirmeden geçiyor. Karadan bin kilometre uzakta.', draw: (g, t, W, H, k) => {
         g.fillStyle = '#4a80a8'; g.fillRect(0, H * 0.55, W, H); g.strokeStyle = 'rgba(255,255,255,.35)'; g.lineWidth = 2; for (let i = 0; i < 16; i++) { const y = H * 0.6 + i * H * 0.025, x = (i * 113 + t * 0.03) % W; g.beginPath(); g.moveTo(x, y); g.lineTo(x + 30, y); g.stroke(); }
@@ -590,7 +607,7 @@
       toast(ic, from, text, tone, { ...opt, then: opt.pause ? () => show(i + 1) : undefined });
       if (!opt.pause) setTimeout(() => show(i + 1), 4500 / Math.max(1, FAST / 2));
     };
-    const start = () => { if (wasDone) game.story = false; setTimeout(() => histFilm(() => show(0)), 300); };
+    const start = () => { if (wasDone) game.story = false; setTimeout(() => cine(CINE.intro, () => histFilm(() => show(0))), 300); };
     start(); // görev kartı yok: hedef, tarih filmi bitince 'şimdi sen' kartında
   }
   // 📼 önce tarih: tarihteki ayarlarla hızlı film (ortak modül), sonra 'şimdi sen' kartı; tekrar oynayana gösterilmez

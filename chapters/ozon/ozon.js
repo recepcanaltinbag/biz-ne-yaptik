@@ -524,6 +524,25 @@
     window.Cinema.play({ skipIfSeen: wasDone, ...spec }, () => { game.reading = Math.max(0, game.reading - 1); if (then) then(); });
   }
   const CINE = {
+    // açılış: CFC ve 1974 uyarısı (kodla çizilir)
+    intro: { id: 'ozon-1974', year: '1974', title: 'Gökyüzünde görünmez kalkan', shots: [
+      { bg: '#cfe2ee', text: 'Buzdolabında, spreyde, köpükte CFC gazı var. Yanmıyor, zehirli değil: herkes zararsız sanıyor.', draw: (g, t, W, H, k) => {
+        const s = Math.min(W, H) / 600; g.fillStyle = '#9ab878'; g.fillRect(0, H * 0.82, W, H);
+        const cx = W * 0.3, cy = H * 0.74; g.fillStyle = '#c0503a'; g.fillRect(cx - 18 * s, cy - 70 * s, 36 * s, 80 * s); g.fillStyle = '#8a8a8a'; g.fillRect(cx - 8 * s, cy - 84 * s, 16 * s, 14 * s);
+        g.fillStyle = '#e8eef0'; g.fillRect(W * 0.62, H * 0.42, W * 0.12, H * 0.4); g.strokeStyle = '#9aa'; g.lineWidth = 2 * s; g.strokeRect(W * 0.62, H * 0.42, W * 0.12, H * 0.4); g.beginPath(); g.moveTo(W * 0.62, H * 0.56); g.lineTo(W * 0.74, H * 0.56); g.stroke();
+        for (let i = 0; i < 26; i++) { const ph = ((t * 0.00025 + i * 0.13) % 1), x = (i % 2 ? cx + 10 * s : W * 0.68) + Math.sin(ph * 9 + i) * 30 * s, y = (i % 2 ? cy - 84 * s : H * 0.42) - ph * H * 0.55; g.globalAlpha = 1 - ph; g.fillStyle = '#7a8a9a'; g.beginPath(); g.arc(x, y, (4 + 3 * ph) * s, 0, 6.28); g.fill(); }
+        g.globalAlpha = 1; } },
+      { bg: '#14203a', text: '1974: Molina ve Rowland hesapladı: bu gaz yıllarca yükselir, yukarıdaki ozon tabakasını yer.', draw: (g, t, W, H, k) => {
+        const s = Math.min(W, H) / 600, bandY = H * 0.16, n = 60; g.fillStyle = '#2a5a7a'; g.fillRect(0, H * 0.86, W, H);
+        for (let i = 0; i < n; i++) { const x = (i + 0.5) * W / n, gone = ((i * 37) % 100) / 100 < k * 0.7 && Math.abs(i - n / 2) < n * 0.3; g.fillStyle = gone ? 'rgba(120,180,220,.15)' : 'rgba(120,200,240,.75)'; g.fillRect(x - W / n / 2 + 1, bandY, W / n - 2, H * 0.07); }
+        g.font = `${18 * s}px "Patrick Hand", sans-serif`; g.textAlign = 'left'; g.fillStyle = 'rgba(200,230,250,.9)'; g.fillText('ozon tabakası', 16 * s, bandY - 10 * s);
+        for (let i = 0; i < 30; i++) { const ph = ((t * 0.00018 + i * 0.071) % 1), x = W * (0.2 + ((i * 53) % 60) / 100), y = H * 0.84 - ph * (H * 0.84 - bandY - H * 0.07); g.fillStyle = '#c8a050'; g.beginPath(); g.arc(x, y, 4 * s, 0, 6.28); g.fill(); } } },
+      { bg: '#1e2a40', text: 'Ozon, Güneş\'in zararlı ışınlarını (UV) tutan kalkan. Sanayi ise buna "bilim kurgu" diyor.', draw: (g, t, W, H, k) => {
+        const s = Math.min(W, H) / 600; g.fillStyle = '#f0c040'; g.beginPath(); g.arc(W * 0.5, 0, 70 * s, 0, 6.28); g.fill();
+        g.fillStyle = 'rgba(120,200,240,.6)'; g.fillRect(0, H * 0.3, W * 0.42, H * 0.06); g.fillRect(W * 0.58, H * 0.3, W * 0.42, H * 0.06);
+        g.strokeStyle = 'rgba(240,190,60,.85)'; g.lineWidth = 3 * s; for (let i = 0; i < 9; i++) { const x = W * (0.1 + i * 0.1), pass = x > W * 0.42 && x < W * 0.58, y1 = pass ? H * 0.95 : H * 0.3, ph = (t * 0.002 + i) % 1; g.setLineDash([12 * s, 10 * s]); g.lineDashOffset = -ph * 44 * s; g.beginPath(); g.moveTo(W * 0.5 + (x - W * 0.5) * 0.2, 60 * s); g.lineTo(x, y1); g.stroke(); }
+        g.setLineDash([]); g.fillStyle = '#9ab878'; g.fillRect(0, H * 0.9, W, H); } },
+    ] },
     hole: { id: 'ozon-1985', year: '1985', title: 'Halley İstasyonu, Antarktika', credit: 'NASA, kamu malı', shots: [
       { dur: 4600, bg: '#0e1a2e', text: 'Antarktika. İngiliz araştırmacılar 1957\'den beri her gün gökyüzündeki ozonu ölçüyor.', draw: (g, t, W, H, k) => {
         g.fillStyle = '#e8eef4'; g.fillRect(0, H * 0.68, W, H); g.fillStyle = '#c9d6e2'; g.beginPath(); g.moveTo(0, H * 0.7); for (let x = 0; x <= W; x += 40) g.lineTo(x, H * 0.68 + Math.sin(x * 0.02) * 8); g.lineTo(W, H); g.lineTo(0, H); g.fill();
@@ -574,7 +593,7 @@
       toast(ic, from, text, tone, { ...opt, then: opt.pause ? () => show(i + 1) : undefined });
       if (!opt.pause) setTimeout(() => show(i + 1), 4500 / Math.max(1, FAST / 2));
     };
-    const start = () => { if (wasDone) game.story = false; setTimeout(() => histFilm(() => show(0)), 300); };
+    const start = () => { if (wasDone) game.story = false; setTimeout(() => cine(CINE.intro, () => histFilm(() => show(0))), 300); };
     start(); // görev kartı yok: hedef, tarih filmi bitince 'şimdi sen' kartında
   }
   // 📼 önce tarih: tarihteki ayarlarla hızlı film (ortak modül), sonra 'şimdi sen' kartı; tekrar oynayana gösterilmez
