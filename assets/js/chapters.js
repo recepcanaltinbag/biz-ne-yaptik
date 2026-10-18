@@ -100,7 +100,10 @@ window.SEASONS = [
   root.innerHTML = window.SEASONS.map((s, i) => `
     <section class="season" id="sezon-${i + 1}">
       <header class="season-head"><span class="num">Sezon ${i + 1}</span><h2>${s.icon} ${esc(s.title)}</h2><p>${esc(s.desc)}</p></header>
-      <div class="grid">${s.chapters.map(c => {
+      ${(() => { const live = s.chapters.filter(c => c.status === 'live'), soon = s.chapters.filter(c => c.status !== 'live');
+        const lk = (soon.length ? `<div class="locked"><div class="locked-head">🔒 ${live.length ? 'Sırada' : 'Yakında açılacak'} · ${soon.length} bölüm</div><div class="locked-row">${soon.map(c => `<button type="button" class="ltile${c.status === 'hope' ? ' hope' : ''}" aria-expanded="false"><span class="lth"><img src="${c.img}" alt="" loading="lazy"${c.pos ? ` style="object-position:${c.pos}"` : ''}><i>${c.status === 'hope' ? '🌱' : '🔒'}</i></span><span class="lty">${esc(c.year)}</span><span class="ltt">${esc(c.title)}</span><span class="ltx">${esc(c.text)}</span></button>`).join('')}</div></div>` : '');
+        // oynanabilir bölümler büyük kart; yakında olanlar küçük kilitli kutucuk (dokununca kısa tanıtım açılır)
+        return (live.length ? `<div class="grid">${live.map(c => {
         const tag = c.status === 'live' ? `a class="card" href="${c.href}"` : 'div class="card soon"';
         const end = c.status === 'live' ? 'a' : 'div';
         return `<${tag}>
@@ -108,9 +111,14 @@ window.SEASONS = [
           <div class="body"><h3>${esc(c.title)}</h3><p>${esc(c.text)}</p>${c.status === 'live' && window.Badges && c.href ? (() => { const id = c.href.split('/')[1]; const [g, n] = window.Badges.count(id); const done = (() => { try { return !!localStorage.getItem('bny-bitti-' + id); } catch (e) { return false; } })();
           return (done ? '<span class="card-done">✓ Bitirdin</span>' : '') + (n ? `<span class="card-badges">🏅 ${g}/${n}</span>` : '') + `<span class="card-plays" data-count="bitti-${id}" data-label="🏁 {n} kişi bitirdi" hidden></span>`; })() : ''}</div>
         </${end}>`;
-      }).join('')}</div>
+      }).join('')}${lk}</div>` : lk); })()}
     </section>`).join('');
   if (window.Toon) window.Toon.apply(root);
+  // kilitli blok, oynanabilir kartların yanındaki boş sütunları doldurur (masaüstünde boşluk kalmasın)
+  const fitLocked = () => root.querySelectorAll('.grid > .locked').forEach(el => { const g = el.parentNode, cols = getComputedStyle(g).gridTemplateColumns.split(' ').length, n = g.querySelectorAll(':scope > .card').length % cols; el.style.gridColumn = n && cols > 1 ? `span ${cols - n}` : '1 / -1'; el.classList.toggle('side', !!n && cols > 1); });
+  fitLocked(); addEventListener('resize', fitLocked);
+  // kilitli kutucuk: dokununca tanıtım metni açılır (aynı anda bir tane)
+  root.addEventListener('click', e => { const t = e.target.closest('.ltile'); if (!t) return; const on = !t.classList.contains('open'); root.querySelectorAll('.ltile.open').forEach(x => { x.classList.remove('open'); x.setAttribute('aria-expanded', 'false'); }); if (on) { t.classList.add('open'); t.setAttribute('aria-expanded', 'true'); } });
   const credits = document.getElementById('credits');
   if (credits) credits.innerHTML = window.SEASONS.flatMap(s => s.chapters).map(c =>
     `<li>${esc(c.title)}: ${esc(c.credit)} · <a href="https://commons.wikimedia.org/wiki/${encodeURI(c.src)}" target="_blank" rel="noopener">Wikimedia Commons</a></li>`).join('');

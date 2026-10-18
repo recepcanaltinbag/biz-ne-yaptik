@@ -219,3 +219,25 @@ button.bp-season:hover { background: #e3ecd5; }
 .card-done { display: inline-block; margin: 6px 6px 0 0; font: .95rem var(--hand); background: #dfeccf; color: #3a6a3a; border-radius: 99px; padding: 1px 9px; }
 .nav-stats { font-size: 1.15rem; text-decoration: none; padding: 2px 4px; border-radius: 8px; }
 .nav-stats:hover { background: rgba(255,255,255,.7); }
+
+/* yakında olan bölümler: küçük kilitli kutucuklar (ana sayfayı büyük kartlarla doldurmasın) */
+.locked { margin-top: 14px; }
+.locked-head { font: 1.1rem var(--hand); color: var(--ink-soft); margin: 0 0 8px; }
+.locked-row { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; align-items: start; }
+.ltile { display: grid; grid-template-columns: 1fr; text-align: left; padding: 0; background: rgba(255,253,246,.75); border: 2px dashed rgba(43,58,46,.35); border-radius: 14px; overflow: hidden; cursor: pointer; color: var(--ink); font: inherit; transition: border-color .2s, background .2s; }
+.ltile:hover, .ltile.open { border-color: var(--ink); background: #fffdf6; }
+.lth { position: relative; display: block; height: 64px; overflow: hidden; background: #2b3a2e; }
+.lth img { width: 100%; height: 100%; object-fit: cover; filter: grayscale(1) contrast(.9) brightness(.75); opacity: .55; }
+.lth i { position: absolute; inset: 0; display: grid; place-items: center; font-style: normal; font-size: 1.4rem; }
+.lty { font: 600 .68rem var(--sans); letter-spacing: .12em; color: var(--ink-soft); padding: 6px 10px 0; }
+.ltt { font: 1.08rem/1.15 var(--hand); padding: 0 10px 8px; }
+.ltx { display: none; font-size: .86rem; color: var(--ink-soft); padding: 0 10px 10px; line-height: 1.35; }
+.ltile.open .ltx { display: block; }
+.ltile.hope .lth { background: #2e4a34; }
+@media (max-width: 760px) {
+  .locked-row { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: 6px; -webkit-overflow-scrolling: touch; }
+  .ltile { flex: 0 0 140px; scroll-snap-align: start; }
+  .ltile.open { flex-basis: 220px; }
+}
+.grid > .locked { margin-top: 0; align-self: start; }
+.grid > .locked.side .locked-row { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
