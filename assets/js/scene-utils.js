@@ -226,7 +226,7 @@ if (/[?&]e2e\b/.test(location.search)) {
     if (mw < 170) { top = Math.max(top, hud ? hud.bottom + 6 : top); left = innerWidth / 2; mw = innerWidth - 16; } // dar ekran: HUD'un altına
     tickEl.style.top = top + 'px'; tickEl.style.left = left + 'px'; tickEl.style.maxWidth = Math.max(140, mw) + 'px';
     const me = tickEl.getBoundingClientRect();
-    const solid = visR('.slide.active .adv:not([hidden]), .slide.active .coach-tip'), cover = visR('.slide.active #toasts .toast:not(.out), #modal:not([hidden]) .card, .spot, .cine, .milestone:not([hidden]), #harvest:not([hidden])');
+    const solid = visR('.slide.active .adv:not([hidden]), .slide.active .coach-tip, .slide.active .yb-speed, .slide.active .yb-view, .slide.active .yb-harvest'), cover = visR('.toast:not(.out), #modal:not([hidden]) .card, .spot, .cine, .milestone:not([hidden]), #harvest:not([hidden])');
     const bump = solid.filter(q => hitR(me, q));
     if (bump.length) { tickEl.style.top = (Math.max(...bump.map(q => q.bottom)) + 4) + 'px'; }
     const me2 = tickEl.getBoundingClientRect();
@@ -236,7 +236,7 @@ if (/[?&]e2e\b/.test(location.search)) {
     const yb = document.querySelector('.slide.active .yearbar'); if (!yb) return false;
     if (!tickEl) { tickEl = document.createElement('div'); tickEl.className = 'ticker'; tickEl.setAttribute('aria-live', 'polite'); document.body.appendChild(tickEl); }
     // yıl çubuğunun hemen altında, ortasına hizalı
-    tickPos(); clearInterval(tickI); tickI = setInterval(() => { if (tickEl.classList.contains('on')) tickPos(); else clearInterval(tickI); }, 150);
+    tickPos(); cancelAnimationFrame(tickI); const loop = () => { if (!tickEl.classList.contains('on')) return; tickPos(); tickI = requestAnimationFrame(loop); }; tickI = requestAnimationFrame(loop); // her karede: yeni açılan kart ya da kayan düğme ile bir an bile çakışmasın
     let plain = String(html).replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
     const first = plain.match(/^.*?[.!?](\s|$)/); if (first && first[0].length > 24) plain = first[0].trim();
     if (plain.length > 96) plain = plain.slice(0, 93).replace(/\s+\S*$/, '') + '…';

@@ -336,6 +336,7 @@
   const wasDone = (() => { try { return !!localStorage.getItem(DONE_KEY); } catch (e) { return false; } })();
   // tarih filminden sonra görev kartı: tarihte ne oldu + senin rolün, kontrolün, hedefin (oyuncu başlarken tek kart)
   function missionCard(ic, fr, tx, tone, o) {
+    if (window.__watch) { window.__watch = false; game.reading = 0; resetGame(); goTo(slideOf('facts')); return; } // ▶ izle modu: oyun yerine hikâyeye geç
     const m = document.getElementById('modal');
     if (!window.Mission || !m || typeof MISSION === 'undefined') return showToast(ic, fr, tx, tone, o);
     const hist = String(tx).split(/<b>Hedefin/)[0].trim().replace(/^Tarihte /, '').replace(/^./, c => c.toLocaleUpperCase('tr'));
@@ -347,6 +348,7 @@
   slides.forEach((_, i) => { const b = document.createElement('button'); b.setAttribute('aria-label', `Adım ${i + 1}`); b.onclick = () => { if (i <= maxSeen) goTo(i); }; dotsEl.appendChild(b); });
   const slideOf = m => slides.findIndex(x => x.dataset.mode === m);
   // başlık ekranından oynamadan doğrudan hikâyeye, derslere ya da laboratuvara git (yalnız olayı merak edenler için)
+  document.querySelectorAll('[data-watch]').forEach(b => { b.onclick = () => { if (typeof initAudio === 'function') initAudio(); window.__watch = true; resetGame(); goTo(slideOf('game')); }; });
   document.querySelectorAll('[data-jump]').forEach(b => { b.onclick = () => { const i = slideOf(b.dataset.jump); if (i >= 0) goTo(i); }; });
   function paintDots() { [...dotsEl.children].forEach((d, k) => { d.classList.toggle('on', k === cur); d.classList.toggle('seen', k <= maxSeen); d.disabled = k > maxSeen; }); }
   function replayNav() {
@@ -497,7 +499,7 @@
     if (!window.Cinema) { if (then) then(); return; }
     if (game.speed > 1) setSpeed(1);
     game.reading = (game.reading || 0) + 1;
-    window.Cinema.play({ skipIfSeen: wasDone, ...spec }, () => { game.reading = Math.max(0, game.reading - 1); if (then) then(); });
+    window.Cinema.play({ skipIfSeen: wasDone && !window.__watch, ...spec }, () => { game.reading = Math.max(0, game.reading - 1); if (then) then(); });
   }
   function guide(steps, then) {
     if (!window.SceneUtils || !window.SceneUtils.tour || wasDone) { if (then) then(); return; }
@@ -548,7 +550,7 @@
       toast(ic, from, text, tone, { ...opt, then: opt.pause ? () => show(i + 1) : undefined });
       if (!opt.pause) setTimeout(() => show(i + 1), 4500 / Math.max(1, FAST / 2));
     };
-    const start = () => { if (wasDone) game.story = false; setTimeout(() => cine(CINE.arrive, () => wasDone ? show(0) : startReplay(() => show(0))), 300); };
+    const start = () => { if (wasDone) game.story = false; setTimeout(() => cine(CINE.arrive, () => (wasDone && !window.__watch) ? show(0) : startReplay(() => show(0))), 300); };
     start(); // görev kartı yok: hedef, tarih filmi bitince 'şimdi sen' kartında
   }
   // 📼 önce tarih: tarihteki ayarlarla hızlı bir film; sonra geri sarılır ve oyuncuya bırakılır
@@ -563,7 +565,7 @@
     setView('scene');
   }
   function endReplay(skip) {
-    const r = game.replay; if (!r || r.phase === 'done') return;
+    const r = game.replay; if (!r || r.phase === 'done' || r.phase === 'rewind') return; // geri sarılırken yeni basış sarmayı baştan başlatmasın
     if (skip || r.phase === 'play') { r.phase = 'rewind'; r.from = r.i; r.t = 0; if (r.el) r.el.querySelector('span').innerHTML = '⏪ <b>Geri sarılıyor…</b>'; return; }
   }
   function replayTick(dt) {

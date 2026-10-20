@@ -355,6 +355,7 @@
   const wasDone = (() => { try { return !!localStorage.getItem(DONE_KEY); } catch (e) { return false; } })();
   // tarih filminden sonra görev kartı: tarihte ne oldu + senin rolün, kontrolün, hedefin (oyuncu başlarken tek kart)
   function missionCard(ic, fr, tx, tone, o) {
+    if (window.__watch) { window.__watch = false; game.reading = 0; resetGame(); goTo(slideOf('facts')); return; } // ▶ izle modu: oyun yerine hikâyeye geç
     const m = document.getElementById('modal');
     if (!window.Mission || !m || typeof MISSION === 'undefined') return showToast(ic, fr, tx, tone, o);
     const hist = String(tx).split(/<b>Hedefin/)[0].trim().replace(/^Tarihte /, '').replace(/^./, c => c.toLocaleUpperCase('tr'));
@@ -366,6 +367,7 @@
   slides.forEach((_, i) => { const b = document.createElement('button'); b.setAttribute('aria-label', `Adım ${i + 1}`); b.onclick = () => { if (i <= maxSeen) goTo(i); }; dotsEl.appendChild(b); });
   const slideOf = m => slides.findIndex(x => x.dataset.mode === m);
   // başlık ekranından oynamadan doğrudan hikâyeye, derslere ya da laboratuvara git (yalnız olayı merak edenler için)
+  document.querySelectorAll('[data-watch]').forEach(b => { b.onclick = () => { if (typeof initAudio === 'function') initAudio(); window.__watch = true; resetGame(); goTo(slideOf('game')); }; });
   document.querySelectorAll('[data-jump]').forEach(b => { b.onclick = () => { const i = slideOf(b.dataset.jump); if (i >= 0) goTo(i); }; });
   function paintDots() { [...dotsEl.children].forEach((d, k) => { d.classList.toggle('on', k === cur); d.classList.toggle('seen', k <= maxSeen); d.disabled = k > maxSeen; }); }
   function replayNav() {
@@ -523,7 +525,7 @@
     if (!window.Cinema) { if (then) then(); return; }
     if (game.speed > 1) setSpeed(1);
     game.reading = (game.reading || 0) + 1;
-    window.Cinema.play({ skipIfSeen: wasDone, ...spec }, () => { game.reading = Math.max(0, game.reading - 1); if (then) then(); });
+    window.Cinema.play({ skipIfSeen: wasDone && !window.__watch, ...spec }, () => { game.reading = Math.max(0, game.reading - 1); if (then) then(); });
   }
   const CINE = {
     // açılış: CFC ve 1974 uyarısı (kodla çizilir)
@@ -600,7 +602,7 @@
   // 📼 önce tarih: tarihteki ayarlarla hızlı film (ortak modül), sonra 'şimdi sen' kartı; tekrar oynayana gösterilmez
   let RPI = null;
   function histFilm(then) {
-    if (wasDone || !window.SceneUtils || !window.SceneUtils.replay) { game.story = false; return then(); }
+    if ((wasDone && !window.__watch) || !window.SceneUtils || !window.SceneUtils.replay) { game.story = false; return then(); }
     game.story = true;
     window.SceneUtils.replay({ n: HISTORY.hist.length, ms: 14000, yearAt: i => HISTORY.hist[i].y, news: { 1985: ["🧊", "Antarktika'da ozon deliği bulundu"], 1987: ["✍️", "Montreal Protokolü imzalandı"], 1990: ["💰", "Yoksul ülkeler için fon kuruldu"], 2009: ["🌍", "Bütün ülkeler onayladı"], 2018: ["🔎", "Kaçak CFC yakalandı"] }, onIndex: i => { RPI = i; if (typeof replayPol === 'function') replayPol(i); }, card: () => ['⏪', '1974 · şimdi sen', `Tarihte delik <b>${HREC}</b> civarında kapanacak. <b>Hedefin:</b> 2060'tan önce. Dünyayı daha erken anlaştırabilir misin?`], showCard: (ic, fr, tx, th) => missionCard(ic, fr, tx, '', { pause: true, then: () => {
       // kontroller: ilk kaydırıcı spot ışığıyla tanıtılır (görev kartının yerine)

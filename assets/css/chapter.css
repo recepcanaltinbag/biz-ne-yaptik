@@ -914,7 +914,7 @@ body.fullview .slide.active .gp-hud, body.fullview .slide.active .chain, body.fu
 @media (max-width: 760px) { .dock .slide[data-mode="game"] .gpanel .coach-tip { display: none; } } /* telefonda ipucu balonu yerine yalnız parlama; ne yapılacağını 💡 satırı söyler */
 @media (max-width: 760px) { .ticker { white-space: normal; } .ticker .tx { overflow: visible; } }
 .card.mission .mrole { margin: -4px 0 10px; color: var(--ink-soft); font-size: .98rem; }
-.ticker.mute { opacity: 0 !important; transition: opacity .15s; }
+.ticker.mute { opacity: 0 !important; visibility: hidden; transition: none !important; }
 
 /* başlık ekranı: oynamadan bak bağlantıları */
 .skip-links { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 6px 8px; margin-top: 14px; font: .95rem var(--hand); color: var(--ink-soft); }

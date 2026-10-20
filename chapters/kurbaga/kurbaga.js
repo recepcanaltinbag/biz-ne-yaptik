@@ -620,6 +620,7 @@
   const wasDone = (() => { try { return !!localStorage.getItem(DONE_KEY); } catch (e) { return false; } })();
   // tarih filminden sonra görev kartı: tarihte ne oldu + senin rolün, kontrolün, hedefin (oyuncu başlarken tek kart)
   function missionCard(ic, fr, tx, tone, o) {
+    if (window.__watch) { window.__watch = false; game.reading = 0; resetGame(); goTo(slideOf('facts')); return; } // ▶ izle modu: oyun yerine hikâyeye geç
     const m = document.getElementById('modal');
     if (!window.Mission || !m || typeof MISSION === 'undefined') return showToast(ic, fr, tx, tone, o);
     const hist = String(tx).split(/<b>Hedefin/)[0].trim().replace(/^Tarihte /, '').replace(/^./, c => c.toLocaleUpperCase('tr'));
@@ -629,6 +630,7 @@
   if (wasDone) maxSeen = slides.length - 1;
   const slideOf = m => slides.findIndex(x => x.dataset.mode === m);
   // başlık ekranından oynamadan doğrudan hikâyeye, derslere ya da laboratuvara git (yalnız olayı merak edenler için)
+  document.querySelectorAll('[data-watch]').forEach(b => { b.onclick = () => { if (typeof initAudio === 'function') initAudio(); window.__watch = true; resetGame(); goTo(slideOf('game')); }; });
   document.querySelectorAll('[data-jump]').forEach(b => { b.onclick = () => { const i = slideOf(b.dataset.jump); if (i >= 0) goTo(i); }; });
   const dotsEl = $('dots');
   slides.forEach((_, i) => { const b = document.createElement('button'); b.setAttribute('aria-label', `Adım ${i + 1}`); b.onclick = () => { if (i <= maxSeen) goTo(i); }; dotsEl.appendChild(b); });
@@ -816,7 +818,7 @@
     };
     };
     // 📼 önce tarih: kurbağalar 1935–2025 kıtaya yayılır (kayıttaki en batı / en güney noktadan); sonra 'şimdi sen' kartı
-    if (wasDone || !window.Cinema) return go();
+    if ((wasDone && !window.__watch) || !window.Cinema) return go();
     const Hh = HISTORY.hist, last = Hh[Hh.length - 1];
     const OZ = [[0.08, 0.42], [0.14, 0.3], [0.3, 0.2], [0.42, 0.1], [0.5, 0.13], [0.55, 0.05], [0.62, 0.15], [0.7, 0.08], [0.78, 0.02], [0.82, 0.2], [0.9, 0.35], [0.97, 0.5], [0.95, 0.68], [0.85, 0.85], [0.76, 0.9], [0.66, 0.82], [0.56, 0.74], [0.44, 0.7], [0.3, 0.74], [0.16, 0.78], [0.08, 0.68], [0.05, 0.55]];
     const lonX = lon => (lon - 113) / 41, latY = lat => (-10 - lat) / 34;

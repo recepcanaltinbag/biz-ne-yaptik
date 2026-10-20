@@ -24,7 +24,7 @@ Her yeni bölüm ve her elden geçirme **`AKIS.md`** (repo kökünde) şablonuna
 - Görev kartından sonra 10 sn sessiz (yalnız sahne), yazılar arası en az 13 sn. Sinema/görev kartının anlattığını tekrar eden kart koyma ("Senin işin" kartı yok).
 - Görev kartından sonra spot ışığı yok; yalnız kaydırıcı nabzı (coach).
 - Haber bandı hiçbir şeyin üstüne binmez: HUD'a değerse altına iner, kart / pencere / spot açıkken susar.
-- Başlık ekranında "Başla →" altında **Oynamadan bak:** bağlantıları olur (📜 Gerçekte ne oldu? · 💡 Ne öğrendik? · 🧪 Laboratuvar; `data-jump`). Kullanıcı: oynamadan olayı anlamak isteyen de çıkabilir.
+- Başlık ekranında "Başla →" altında **Oynamadan bak:** bağlantıları olur (▶ Hikâyeyi izle · 📜 Gerçekte ne oldu? · 💡 Ne öğrendik? · 🧪 Laboratuvar; `data-watch`, `data-jump`). **İzle modu** (`window.__watch`): açılış sineması + tarih filmi (bitirmiş oyuncuda da) → görev kartı yerine resimli hikâye; oyun sıfırlanır. Gerçek hızda ~40 sn. Kullanıcı: oynamadan olayı anlamak isteyen de çıkabilir.
 - Sonuç ekranında **"📜 Gerçekte ne oldu?"** düğmesi olur (kullanıcı isteği). Rozet bildirimi sonuç ekranında açılmaz; rozet sonuç kartındaki rozet satırına eklenir.
 - Oyuncunun açtığı bir şeyi kapatabilmesi de gerekir (kullanıcı: "antibiyotiği açıyoruz, kapatabilelim de"): geri alınabilir kararlar tercih et.
 
