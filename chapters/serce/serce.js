@@ -1037,6 +1037,8 @@
   }
   document.querySelectorAll('[data-next]').forEach(b => b.addEventListener('click', () => { initAudio(); goTo(cur + 1); }));
   const slideOf = m => slides.findIndex(x => x.dataset.mode === m);
+  // başlık ekranından oynamadan doğrudan hikâyeye, derslere ya da laboratuvara git (yalnız olayı merak edenler için)
+  document.querySelectorAll('[data-jump]').forEach(b => { b.onclick = () => { const i = slideOf(b.dataset.jump); if (i >= 0) goTo(i); }; });
   document.querySelectorAll('[data-goto]').forEach(b => b.addEventListener('click', () => { resetGame(); goTo(slideOf(b.dataset.goto)); }));
   window.addEventListener('keydown', e => {
     if (e.key === 'ArrowRight' && cur < maxSeen) goTo(cur + 1);

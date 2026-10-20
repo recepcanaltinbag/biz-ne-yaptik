@@ -628,6 +628,8 @@
   }
   if (wasDone) maxSeen = slides.length - 1;
   const slideOf = m => slides.findIndex(x => x.dataset.mode === m);
+  // başlık ekranından oynamadan doğrudan hikâyeye, derslere ya da laboratuvara git (yalnız olayı merak edenler için)
+  document.querySelectorAll('[data-jump]').forEach(b => { b.onclick = () => { const i = slideOf(b.dataset.jump); if (i >= 0) goTo(i); }; });
   const dotsEl = $('dots');
   slides.forEach((_, i) => { const b = document.createElement('button'); b.setAttribute('aria-label', `Adım ${i + 1}`); b.onclick = () => { if (i <= maxSeen) goTo(i); }; dotsEl.appendChild(b); });
   function paintDots() { [...dotsEl.children].forEach((d, k) => { d.classList.toggle('on', k === cur); d.classList.toggle('seen', k <= maxSeen); d.disabled = k > maxSeen; }); }
